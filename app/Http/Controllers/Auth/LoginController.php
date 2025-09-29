@@ -31,27 +31,36 @@ class LoginController extends Controller
         }
 
         // Update terakhir login
-        $user->update(['terakhir_login' => now()]);
+        $loginTime = now();
+        $updated = $user->update(['terakhir_login' => $loginTime]);
 
-        Auth::login($user, $request->boolean('remember'));
+        Log::info('Login time update', [
+            'user_id' => $user->id_pengguna,
+            'login_time' => $loginTime,
+            'update_success' => $updated,
+            'user_terakhir_login' => $user->fresh()->terakhir_login
+        ]);
 
-        return redirect()->intended(route('dashboard'));
+        // Set remember duration: 1 day default, 7 weeks if remember me
+        $remember = $request->boolean('remember');
+        Auth::login($user, $remember);
+
+        // Role-based redirect
+        $redirectRoute = match ($user->role) {
+            'admin' => '/admin',
+            'kasir' => '/kasir',
+            default => '/dashboard'
+        };
+
+        return redirect()->intended($redirectRoute);
     }
 
     public function destroy(Request $request)
     {
-        Log::info('Logout attempt', [
-            'user' => Auth::user()?->id_pengguna,
-            'session_id' => session()->getId(),
-            'csrf_token' => $request->header('X-CSRF-TOKEN'),
-        ]);
-
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        Log::info('Logout successful');
-
-        return redirect()->route('home');
+        return redirect()->route('login');
     }
 }

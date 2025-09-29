@@ -16,7 +16,7 @@ class User extends Authenticatable
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['id_pengguna', 'nama', 'email', 'telepon', 'password', 'role'];
+    protected $fillable = ['id_pengguna', 'nama', 'email', 'telepon', 'password', 'role', 'terakhir_login'];
     protected $hidden = ['password', 'remember_token'];
     protected $casts = ['terakhir_login' => 'datetime'];
 

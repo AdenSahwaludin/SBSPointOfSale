@@ -1,10 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Http\Controllers\Auth\LoginController;
 
-Route::get('/', fn() => inertia('Welcome'))->name('home');
+// Root redirect - jika user sudah login redirect ke dashboard sesuai role, jika belum ke login
+Route::get('/', function () {
+    if (Auth::check()) {
+        $user = Auth::user();
+        return redirect(match ($user->role) {
+            'admin' => '/admin',
+            'kasir' => '/kasir', 
+            default => '/dashboard'
+        });
+    }
+    return redirect()->route('login');
+})->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::inertia('/login', 'Auth/Login')->name('login');
@@ -12,7 +24,27 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    // Dashboard routes
     Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+
+    // Admin routes
+    Route::prefix('admin')->middleware('auth')->group(function () {
+        Route::inertia('/', 'Admin/Dashboard')->name('admin.dashboard');
+        Route::inertia('/users', 'Admin/Users')->name('admin.users');
+        Route::inertia('/products', 'Admin/Products')->name('admin.products');
+        Route::inertia('/reports', 'Admin/Reports')->name('admin.reports');
+        Route::inertia('/settings', 'Admin/Settings')->name('admin.settings');
+    });
+
+    // Kasir routes
+    Route::prefix('kasir')->middleware('auth')->group(function () {
+        Route::inertia('/', 'Kasir/Dashboard')->name('kasir.dashboard');
+        Route::inertia('/pos', 'Kasir/POS')->name('kasir.pos');
+        Route::inertia('/transactions', 'Kasir/Transactions')->name('kasir.transactions');
+        Route::inertia('/profile', 'Kasir/Profile')->name('kasir.profile');
+    });
+
+    // Logout
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::delete('/logout', [LoginController::class, 'destroy'])->name('logout.delete');
 });
