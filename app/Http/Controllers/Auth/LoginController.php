@@ -51,7 +51,7 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         Log::info('Logout successful');
-        
+
         return redirect()->route('home');
     }
 }
