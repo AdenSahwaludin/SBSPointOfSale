@@ -83,7 +83,7 @@ function setActiveTab(tab: string) {
 
         <Head title="Profile" />
 
-        <div class="mx-auto max-w-4xl">
+        <div class="mx-auto max-w-6xl">
             <!-- Profile Header -->
             <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex items-center space-x-6">

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
 
 interface MenuItem {
@@ -27,19 +27,23 @@ const expandedMenus = ref<Set<string>>(new Set());
 
 function logout() {
     if (window.confirm('Apakah Anda yakin ingin logout?')) {
-        router.post('/logout', {}, {
-            preserveScroll: true,
-            onStart: () => console.log('Starting logout...'),
-            onSuccess: () => {
-                console.log('Logout berhasil, redirecting...');
+        router.post(
+            '/logout',
+            {},
+            {
+                preserveScroll: true,
+                onStart: () => console.log('Starting logout...'),
+                onSuccess: () => {
+                    console.log('Logout berhasil, redirecting...');
+                },
+                onError: (errors: any) => {
+                    console.log('Logout error:', errors);
+                },
+                onFinish: () => {
+                    console.log('Logout finished');
+                },
             },
-            onError: (errors: any) => {
-                console.log('Logout error:', errors);
-            },
-            onFinish: () => {
-                console.log('Logout finished');
-            }
-        });
+        );
     }
 }
 
