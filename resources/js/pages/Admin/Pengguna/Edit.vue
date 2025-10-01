@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { useAdminMenuItems, setActiveMenuItem } from '@/composables/useAdminMenu';
 
 interface Pengguna {
     id_pengguna: string;
@@ -16,6 +17,10 @@ interface Props {
 
 const props = defineProps<Props>();
 
+// Menu items dengan active state
+const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pengguna');
+
+// Form management dengan data existing
 const form = useForm({
     nama: props.pengguna.nama,
     email: props.pengguna.email,
@@ -24,6 +29,7 @@ const form = useForm({
     role: props.pengguna.role,
 });
 
+// Submit form
 function submit() {
     form.patch(`/admin/pengguna/${props.pengguna.id_pengguna}`, {
         onSuccess: () => {
@@ -36,7 +42,7 @@ function submit() {
 <template>
     <Head title="Edit Pengguna - Admin" />
 
-    <BaseLayout :menuItems="[]" userRole="admin">
+    <BaseLayout :menuItems="adminMenuItems" userRole="admin">
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex items-center justify-between">

@@ -1,7 +1,12 @@
 <script lang="ts" setup>
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { useAdminMenuItems, setActiveMenuItem } from '@/composables/useAdminMenu';
 
+// Menu items dengan active state
+const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pengguna');
+
+// Form management
 const form = useForm({
     id_pengguna: '',
     nama: '',
@@ -12,6 +17,7 @@ const form = useForm({
     role: 'kasir',
 });
 
+// Submit form
 function submit() {
     form.post('/admin/pengguna', {
         onSuccess: () => {
@@ -24,7 +30,7 @@ function submit() {
 <template>
     <Head title="Tambah Pengguna - Admin" />
 
-    <BaseLayout :menuItems="[]" userRole="admin">
+    <BaseLayout :menuItems="adminMenuItems" userRole="admin">
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex items-center justify-between">

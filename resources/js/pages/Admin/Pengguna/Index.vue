@@ -21,6 +21,43 @@ const props = defineProps<Props>();
 const showDeleteModal = ref(false);
 const deleteTarget = ref<Pengguna | null>(null);
 
+const adminMenuItems = [
+    {
+        name: 'Dashboard',
+        href: '/admin',
+        icon: 'fas fa-tachometer-alt',
+        active: false,
+    },
+    {
+        name: 'Manajemen Data',
+        icon: 'fas fa-database',
+        children: [
+            { name: 'Pengguna', href: '/admin/pengguna', icon: 'fas fa-users', active: true },
+            { name: 'Produk', href: '/admin/products', icon: 'fas fa-boxes' },
+            { name: 'Kategori', href: '/admin/categories', icon: 'fas fa-tags' },
+        ],
+    },
+    {
+        name: 'Transaksi',
+        icon: 'fas fa-cash-register',
+        children: [
+            { name: 'Semua Transaksi', href: '/admin/transactions', icon: 'fas fa-receipt' },
+            { name: 'Laporan Harian', href: '/admin/reports/daily', icon: 'fas fa-calendar-day' },
+            { name: 'Laporan Bulanan', href: '/admin/reports/monthly', icon: 'fas fa-calendar-alt' },
+        ],
+    },
+    {
+        name: 'Laporan',
+        href: '/admin/reports',
+        icon: 'fas fa-chart-bar',
+    },
+    {
+        name: 'Pengaturan',
+        href: '/admin/settings',
+        icon: 'fas fa-cog',
+    },
+];
+
 function confirmDelete(pengguna: Pengguna) {
     deleteTarget.value = pengguna;
     showDeleteModal.value = true;
@@ -50,7 +87,7 @@ function formatDate(dateString?: string) {
 <template>
     <Head title="Manajemen Pengguna - Admin" />
 
-    <BaseLayout :menuItems="[]" userRole="admin">
+    <BaseLayout :menuItems="adminMenuItems" userRole="admin">
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex items-center justify-between">

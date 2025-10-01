@@ -19,6 +19,43 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const adminMenuItems = [
+    {
+        name: 'Dashboard',
+        href: '/admin',
+        icon: 'fas fa-tachometer-alt',
+        active: false,
+    },
+    {
+        name: 'Manajemen Data',
+        icon: 'fas fa-database',
+        children: [
+            { name: 'Pengguna', href: '/admin/pengguna', icon: 'fas fa-users', active: true },
+            { name: 'Produk', href: '/admin/products', icon: 'fas fa-boxes' },
+            { name: 'Kategori', href: '/admin/categories', icon: 'fas fa-tags' },
+        ],
+    },
+    {
+        name: 'Transaksi',
+        icon: 'fas fa-cash-register',
+        children: [
+            { name: 'Semua Transaksi', href: '/admin/transactions', icon: 'fas fa-receipt' },
+            { name: 'Laporan Harian', href: '/admin/reports/daily', icon: 'fas fa-calendar-day' },
+            { name: 'Laporan Bulanan', href: '/admin/reports/monthly', icon: 'fas fa-calendar-alt' },
+        ],
+    },
+    {
+        name: 'Laporan',
+        href: '/admin/reports',
+        icon: 'fas fa-chart-bar',
+    },
+    {
+        name: 'Pengaturan',
+        href: '/admin/settings',
+        icon: 'fas fa-cog',
+    },
+];
+
 function getRoleBadgeClass(role: string) {
     return role === 'admin' ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-green-100 text-green-800 border-green-200';
 }
@@ -32,7 +69,7 @@ function formatDate(dateString?: string) {
 <template>
     <Head title="Detail Pengguna - Admin" />
 
-    <BaseLayout :menuItems="[]" userRole="admin">
+    <BaseLayout :menuItems="adminMenuItems" userRole="admin">
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex items-center justify-between">

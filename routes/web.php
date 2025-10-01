@@ -38,7 +38,15 @@ Route::middleware('auth')->group(function () {
         Route::inertia('/settings', 'Admin/Settings')->name('admin.settings');
 
         // Manajemen Pengguna
-        Route::resource('pengguna', PenggunaController::class);
+        Route::resource('pengguna', PenggunaController::class)->names([
+            'index' => 'admin.pengguna.index',
+            'create' => 'admin.pengguna.create',
+            'store' => 'admin.pengguna.store',
+            'show' => 'admin.pengguna.show',
+            'edit' => 'admin.pengguna.edit',
+            'update' => 'admin.pengguna.update',
+            'destroy' => 'admin.pengguna.destroy',
+        ]);
     });
 
     // Kasir routes
