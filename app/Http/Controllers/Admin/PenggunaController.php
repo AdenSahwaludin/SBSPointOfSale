@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 
@@ -87,7 +88,7 @@ class PenggunaController extends Controller
   $pengguna = User::where('id_pengguna', $id)->firstOrFail();
 
   // Tidak bisa hapus diri sendiri
-  if ($pengguna->id_pengguna === auth()->user()->id_pengguna) {
+  if ($pengguna->id_pengguna === FacadesAuth::user()->id_pengguna) {
    return back()->with('error', 'Tidak dapat menghapus akun sendiri');
   }
 
