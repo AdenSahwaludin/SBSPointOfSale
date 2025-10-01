@@ -5,4 +5,211 @@
 
 @theme inline {
     --font-sans: Instrument Sans, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    /* Beautiful Emerald Color Palette for SBS */
+    --color-emerald-25: #f0fdf4;
+    --color-emerald-50: #ecfdf5;
+    --color-emerald-100: #d1fae5;
+    --color-emerald-200: #a7f3d0;
+    --color-emerald-300: #6ee7b7;
+    --color-emerald-400: #34d399;
+    --color-emerald-500: #10b981;
+    --color-emerald-600: #059669;
+    --color-emerald-700: #047857;
+    --color-emerald-800: #065f46;
+    --color-emerald-900: #064e3b;
+    --color-emerald-950: #022c22;
+    
+    /* Soft greenish white colors */
+    --color-white-soft: #fefffe;
+    --color-white-emerald: #fcfefd;
+    --color-gray-soft-50: #f8fdf9;
+    --color-gray-soft-100: #f1faf2;
+    --color-gray-soft-200: #e8f5ea;
+    --color-gray-soft-300: #d4edd6;
+    --color-gray-soft-400: #9ca8a0;
+    --color-gray-soft-500: #6b7c6f;
+    --color-gray-soft-600: #4a5a4e;
+    --color-gray-soft-700: #374239;
+    --color-gray-soft-800: #2d372f;
+    --color-gray-soft-900: #1e261f;
+}
+
+/* Root CSS Custom Properties untuk emerald theme */
+:root {
+    --emerald-primary: var(--color-emerald-600);
+    --emerald-secondary: var(--color-emerald-500);
+    --emerald-accent: var(--color-emerald-400);
+    --emerald-light: var(--color-emerald-100);
+    
+    /* Soft white colors */
+    --white-soft: var(--color-white-soft);
+    --white-emerald: var(--color-white-emerald);
+    
+    /* Beautiful emerald gradients */
+    --emerald-gradient-primary: linear-gradient(135deg, var(--color-emerald-600) 0%, var(--color-emerald-500) 100%);
+    --emerald-gradient-secondary: linear-gradient(135deg, var(--color-emerald-500) 0%, var(--color-emerald-400) 100%);
+    --emerald-gradient-accent: linear-gradient(135deg, var(--color-emerald-400) 0%, var(--color-emerald-300) 100%);
+    --emerald-gradient-hero: linear-gradient(135deg, var(--color-emerald-700) 0%, var(--color-emerald-500) 50%, var(--color-emerald-300) 100%);
+    --emerald-gradient-soft: linear-gradient(135deg, var(--color-emerald-50) 0%, var(--color-emerald-100) 100%);
+    --emerald-gradient-bg: linear-gradient(135deg, var(--color-gray-soft-50) 0%, var(--color-emerald-25) 100%);
+}
+
+/* Custom utility classes for emerald theme */
+.bg-emerald-gradient-primary {
+    background: var(--emerald-gradient-primary);
+}
+
+.bg-emerald-gradient-secondary {
+    background: var(--emerald-gradient-secondary);
+}
+
+.bg-emerald-gradient-accent {
+    background: var(--emerald-gradient-accent);
+}
+
+.bg-emerald-gradient-hero {
+    background: var(--emerald-gradient-hero);
+}
+
+.bg-emerald-gradient-soft {
+    background: var(--emerald-gradient-soft);
+}
+
+.bg-emerald-gradient-bg {
+    background: var(--emerald-gradient-bg);
+}
+
+/* Soft white background utilities */
+.bg-white-soft {
+    background-color: var(--white-soft);
+}
+
+.bg-white-emerald {
+    background-color: var(--white-emerald);
+}
+
+.bg-gray-soft-50 {
+    background-color: var(--color-gray-soft-50);
+}
+
+.bg-gray-soft-100 {
+    background-color: var(--color-gray-soft-100);
+}
+
+.bg-gray-soft-200 {
+    background-color: var(--color-gray-soft-200);
+}
+
+/* Text colors */
+.text-emerald-primary {
+    color: var(--emerald-primary);
+}
+
+.text-emerald-secondary {
+    color: var(--emerald-secondary);
+}
+
+.text-emerald-accent {
+    color: var(--emerald-accent);
+}
+
+.border-emerald-primary {
+    border-color: var(--emerald-primary);
+}
+
+/* Hover effects with emerald colors */
+.hover-emerald-primary:hover {
+    background-color: var(--emerald-primary);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.hover-emerald-secondary:hover {
+    background-color: var(--emerald-secondary);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+/* Beautiful shadow effects dengan emerald colors */
+.shadow-emerald-sm {
+    box-shadow: 0 1px 2px 0 rgba(5, 150, 105, 0.1);
+}
+
+.shadow-emerald {
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.1), 0 2px 4px -1px rgba(5, 150, 105, 0.06);
+}
+
+.shadow-emerald-lg {
+    box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.1), 0 4px 6px -2px rgba(5, 150, 105, 0.05);
+}
+
+.shadow-emerald-xl {
+    box-shadow: 0 20px 25px -5px rgba(5, 150, 105, 0.1), 0 10px 10px -5px rgba(5, 150, 105, 0.04);
+}
+
+/* Smooth animations for emerald components */
+.emerald-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emerald-hover-scale:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
+}
+
+.emerald-hover-glow:hover {
+    box-shadow: 0 0 20px rgba(5, 150, 105, 0.3);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Focus states with emerald */
+.focus-emerald:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.5);
+}
+
+/* Button variants */
+.btn-emerald-primary {
+    background: var(--emerald-gradient-primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-emerald-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.btn-emerald-secondary {
+    background-color: var(--color-emerald-100);
+    color: var(--color-emerald-700);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-emerald-secondary:hover {
+    background-color: var(--color-emerald-200);
+    transform: translateY(-1px);
+}
+
+/* Card styles with emerald accents */
+.card-emerald {
+    background: white;
+    border: 1px solid var(--color-emerald-100);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: var(--emerald-gradient-soft);
+    transition: all 0.3s ease;
+}
+
+.card-emerald:hover {
+    border-color: var(--color-emerald-200);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.1);
 }

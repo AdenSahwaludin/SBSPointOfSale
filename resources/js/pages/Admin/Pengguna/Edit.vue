@@ -47,12 +47,12 @@ function submit() {
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Edit Pengguna</h1>
-                    <p class="text-gray-600">Ubah data pengguna: {{ pengguna.nama }}</p>
+                    <h1 class="text-2xl font-bold text-emerald-800">Edit Pengguna</h1>
+                    <p class="text-emerald-600">Ubah data pengguna: {{ pengguna.nama }}</p>
                 </div>
                 <Link
                     href="/admin/pengguna"
-                    class="flex items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700"
+                    class="flex items-center gap-2 rounded-lg bg-gray-soft-100 px-4 py-2 text-emerald-700 transition-all hover:bg-gray-soft-200 hover:scale-105 emerald-transition"
                 >
                     <i class="fas fa-arrow-left"></i>
                     Kembali
@@ -60,7 +60,7 @@ function submit() {
             </div>
 
             <!-- Form -->
-            <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div class="rounded-lg border border-emerald-200 bg-white-emerald p-6 shadow-emerald">
                 <form @submit.prevent="submit" class="space-y-6">
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- ID Pengguna (Read Only) -->

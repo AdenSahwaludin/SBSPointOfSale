@@ -75,7 +75,9 @@ function deletePengguna() {
 }
 
 function getRoleBadgeClass(role: string) {
-    return role === 'admin' ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-green-100 text-green-800 border-green-200';
+    return role === 'admin' 
+        ? 'bg-emerald-100 text-emerald-700 border-emerald-200' 
+        : 'bg-blue-100 text-blue-700 border-blue-200';
 }
 
 function formatDate(dateString?: string) {
@@ -92,12 +94,12 @@ function formatDate(dateString?: string) {
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Manajemen Pengguna</h1>
-                    <p class="text-gray-600">Kelola data pengguna sistem</p>
+                    <h1 class="text-2xl font-bold text-emerald-800">Manajemen Pengguna</h1>
+                    <p class="text-emerald-600">Kelola data pengguna sistem</p>
                 </div>
                 <Link
                     href="/admin/pengguna/create"
-                    class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+                    class="btn-emerald-primary flex items-center gap-2 transition-all hover:scale-105 hover:shadow-emerald emerald-hover-glow"
                 >
                     <i class="fas fa-plus"></i>
                     Tambah Pengguna
@@ -105,36 +107,36 @@ function formatDate(dateString?: string) {
             </div>
 
             <!-- Table -->
-            <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+            <div class="card-emerald overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="border-b border-gray-200 bg-gray-50">
+                        <thead class="border-b border-emerald-200 bg-emerald-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Pengguna</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Kontak</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Role</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Terakhir Login</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">Aksi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Pengguna</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Kontak</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Role</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Terakhir Login</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-emerald-600 uppercase">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr v-for="user in pengguna" :key="user.id_pengguna" class="hover:bg-gray-50">
+                        <tbody class="divide-y divide-emerald-100 bg-white-emerald">
+                            <tr v-for="user in pengguna" :key="user.id_pengguna" class="hover:bg-emerald-25 transition-all duration-200 emerald-transition">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="h-10 w-10 flex-shrink-0">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                                                <i class="fas fa-user text-blue-600"></i>
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                                                <i class="fas fa-user text-emerald-600"></i>
                                             </div>
                                         </div>
                                         <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ user.nama }}</div>
-                                            <div class="text-sm text-gray-500">{{ user.id_pengguna }}</div>
+                                            <div class="text-sm font-medium text-emerald-800">{{ user.nama }}</div>
+                                            <div class="text-sm text-emerald-500">{{ user.id_pengguna }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ user.email }}</div>
-                                    <div class="text-sm text-gray-500">{{ user.telepon || '-' }}</div>
+                                    <div class="text-sm text-emerald-800">{{ user.email }}</div>
+                                    <div class="text-sm text-emerald-500">{{ user.telepon || '-' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
@@ -144,28 +146,28 @@ function formatDate(dateString?: string) {
                                         {{ user.role.toUpperCase() }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                                <td class="px-6 py-4 text-sm whitespace-nowrap text-emerald-600">
                                     {{ formatDate(user.terakhir_login) }}
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
                                     <div class="flex items-center justify-end gap-2">
                                         <Link
                                             :href="`/admin/pengguna/${user.id_pengguna}`"
-                                            class="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800"
+                                            class="rounded-lg p-2 text-emerald-600 transition-all hover:bg-emerald-50 hover:text-emerald-700 hover:scale-110 emerald-transition"
                                             title="Lihat Detail"
                                         >
                                             <i class="fas fa-eye"></i>
                                         </Link>
                                         <Link
                                             :href="`/admin/pengguna/${user.id_pengguna}/edit`"
-                                            class="rounded-lg p-2 text-yellow-600 transition-colors hover:bg-yellow-50 hover:text-yellow-800"
+                                            class="rounded-lg p-2 text-yellow-600 transition-all hover:bg-yellow-50 hover:text-yellow-700 hover:scale-110"
                                             title="Edit"
                                         >
                                             <i class="fas fa-edit"></i>
                                         </Link>
                                         <button
                                             @click="confirmDelete(user)"
-                                            class="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 hover:text-red-800"
+                                            class="rounded-lg p-2 text-red-600 transition-all hover:bg-red-50 hover:text-red-700 hover:scale-110"
                                             title="Hapus"
                                         >
                                             <i class="fas fa-trash"></i>
@@ -179,12 +181,12 @@ function formatDate(dateString?: string) {
 
                 <!-- Empty State -->
                 <div v-if="pengguna.length === 0" class="py-12 text-center">
-                    <i class="fas fa-users mb-4 text-4xl text-gray-300"></i>
-                    <h3 class="mb-2 text-lg font-medium text-gray-900">Belum ada pengguna</h3>
-                    <p class="mb-4 text-gray-500">Mulai dengan menambahkan pengguna pertama</p>
+                    <i class="fas fa-users mb-4 text-4xl text-emerald-300"></i>
+                    <h3 class="mb-2 text-lg font-medium text-emerald-800">Belum ada pengguna</h3>
+                    <p class="mb-4 text-emerald-600">Mulai dengan menambahkan pengguna pertama</p>
                     <Link
                         href="/admin/pengguna/create"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+                        class="btn-emerald-primary inline-flex items-center gap-2 transition-all hover:scale-105 hover:shadow-emerald emerald-transition"
                     >
                         <i class="fas fa-plus"></i>
                         Tambah Pengguna
@@ -194,33 +196,33 @@ function formatDate(dateString?: string) {
         </div>
 
         <!-- Delete Confirmation Modal -->
-        <div v-if="showDeleteModal" class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-            <div class="mx-4 max-w-md rounded-lg bg-white p-6">
+        <div v-if="showDeleteModal" class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-emerald-900">
+            <div class="mx-4 max-w-md rounded-lg bg-white-emerald p-6 shadow-emerald-xl">
                 <div class="mb-4 flex items-center gap-3">
                     <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
                         <i class="fas fa-exclamation-triangle text-red-600"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-medium text-gray-900">Konfirmasi Hapus</h3>
-                        <p class="text-sm text-gray-500">Apakah Anda yakin ingin menghapus pengguna ini?</p>
+                        <h3 class="text-lg font-medium text-emerald-800">Konfirmasi Hapus</h3>
+                        <p class="text-sm text-emerald-600">Apakah Anda yakin ingin menghapus pengguna ini?</p>
                     </div>
                 </div>
 
-                <div v-if="deleteTarget" class="mb-4 rounded-lg bg-gray-50 p-3">
+                <div v-if="deleteTarget" class="mb-4 rounded-lg bg-emerald-50 p-3 border border-emerald-100">
                     <div class="text-sm">
-                        <div class="font-medium text-gray-900">{{ deleteTarget.nama }}</div>
-                        <div class="text-gray-500">{{ deleteTarget.email }}</div>
+                        <div class="font-medium text-emerald-800">{{ deleteTarget.nama }}</div>
+                        <div class="text-emerald-600">{{ deleteTarget.email }}</div>
                     </div>
                 </div>
 
                 <div class="flex justify-end gap-3">
                     <button
                         @click="showDeleteModal = false"
-                        class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200"
+                        class="btn-emerald-secondary transition-all hover:scale-105 emerald-transition"
                     >
                         Batal
                     </button>
-                    <button @click="deletePengguna" class="rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700">
+                    <button @click="deletePengguna" class="rounded-lg bg-red-600 px-4 py-2 text-white transition-all hover:bg-red-700 hover:scale-105">
                         Hapus
                     </button>
                 </div>

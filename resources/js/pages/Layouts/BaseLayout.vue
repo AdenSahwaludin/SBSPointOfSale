@@ -79,7 +79,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div class="bg-emerald-gradient-bg min-h-screen">
         <Head :title="title || 'Dashboard'" />
 
         <!-- Sidebar -->
@@ -90,24 +90,24 @@ onMounted(() => {
                 'translate-x-0': isSidebarOpen || !isMobile,
                 '-translate-x-full': !isSidebarOpen && isMobile,
             }"
-            class="fixed inset-y-0 left-0 z-50 transform border-r border-gray-200/50 bg-white/95 shadow-2xl backdrop-blur-xl transition-all duration-500 ease-in-out"
+            class="shadow-emerald-xl fixed inset-y-0 left-0 z-50 transform border-r border-emerald-200/30 bg-white-emerald/95 backdrop-blur-xl transition-all duration-500 ease-in-out"
         >
             <!-- Logo Header -->
-            <div class="relative flex h-21 items-center justify-center overflow-hidden bg-emerald-500 text-white">
+            <div class="bg-emerald-gradient-primary shadow-emerald-lg relative flex h-21 items-center justify-center overflow-hidden text-white">
                 <div
                     v-if="isSidebarOpen"
                     class="flex translate-x-0 transform items-center space-x-3 opacity-100 transition-all duration-500 ease-in-out"
                 >
-                    <div class="h-16 w-16 transition-all duration-300">
+                    <div class="emerald-hover-scale h-16 w-16 transition-all duration-300">
                         <img
                             src="/assets/images/Logo_Cap_Daun_Kayu_Putih.png"
                             alt="Logo Sari Bumi Sakti"
                             class="h-16 w-16 object-contain drop-shadow-lg"
                         />
                     </div>
-                    <span class="text-lg font-bold text-nowrap transition-all duration-500 ease-in-out">SBS POS</span>
+                    <span class="text-lg font-bold text-nowrap drop-shadow-sm transition-all duration-500 ease-in-out">SBS POS</span>
                 </div>
-                <div v-else class="h-12 w-12 transition-all duration-300 ease-in-out">
+                <div v-else class="emerald-hover-scale h-12 w-12 transition-all duration-300 ease-in-out">
                     <img
                         src="/assets/images/Logo_Cap_Daun_Kayu_Putih.png"
                         alt="Logo Sari Bumi Sakti"
@@ -123,7 +123,7 @@ onMounted(() => {
                     <div v-if="item.children && item.children.length > 0">
                         <button
                             @click="toggleMenu(item.name)"
-                            class="group flex w-full items-center rounded-xl px-3 py-3 text-gray-700 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 hover:text-emerald-700"
+                            class="group emerald-transition flex w-full items-center rounded-xl px-3 py-3 text-emerald-700 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 hover:text-emerald-600"
                         >
                             <i :class="item.icon" class="mr-3 h-5 w-5 transition-all duration-300"></i>
                             <span
@@ -134,7 +134,7 @@ onMounted(() => {
                             <svg
                                 v-if="isSidebarOpen"
                                 :class="{ 'rotate-90': expandedMenus.has(item.name) }"
-                                class="h-4 w-4 transition-transform duration-300 ease-in-out"
+                                class="h-4 w-4 text-emerald-400 transition-transform duration-300 ease-in-out"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -158,8 +158,8 @@ onMounted(() => {
                                     :key="child.name"
                                     :href="child.href || '#'"
                                     @click="closeSidebarOnMobile"
-                                    class="flex items-center rounded-lg px-3 py-2 text-sm text-gray-600 transition-all duration-300 ease-in-out hover:translate-x-1 hover:bg-emerald-50 hover:text-emerald-700"
-                                    :class="{ 'bg-emerald-100 text-emerald-700': child.active }"
+                                    class="emerald-transition flex items-center rounded-lg px-3 py-2 text-sm text-emerald-600 transition-all duration-300 ease-in-out hover:translate-x-1 hover:bg-emerald-50 hover:text-emerald-700"
+                                    :class="{ 'shadow-emerald-sm border-l-4 border-emerald-400 bg-emerald-100 text-emerald-700': child.active }"
                                 >
                                     <i :class="child.icon" class="mr-2 h-4 w-4 transition-all duration-300"></i>
                                     {{ child.name }}
@@ -173,8 +173,8 @@ onMounted(() => {
                         v-else
                         :href="item.href || '#'"
                         @click="closeSidebarOnMobile"
-                        class="group flex items-center rounded-xl px-3 py-3 text-gray-700 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 hover:text-emerald-700"
-                        :class="{ 'bg-emerald-100 text-emerald-700': item.active }"
+                        class="group emerald-transition flex items-center rounded-xl px-3 py-3 text-emerald-700 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 hover:text-emerald-600"
+                        :class="{ 'shadow-emerald-sm border-l-4 border-emerald-400 bg-emerald-100 text-emerald-700': item.active }"
                     >
                         <i :class="item.icon" class="mr-3 h-5 w-5 transition-all duration-300"></i>
                         <span v-if="isSidebarOpen" class="translate-x-0 transform text-nowrap opacity-100 transition-all duration-500 ease-in-out">{{
@@ -194,7 +194,11 @@ onMounted(() => {
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
         >
-            <div v-if="isMobile && isSidebarOpen" @click="toggleSidebar" class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden"></div>
+            <div
+                v-if="isMobile && isSidebarOpen"
+                @click="toggleSidebar"
+                class="fixed inset-0 z-40 bg-emerald-900/50 backdrop-blur-sm lg:hidden"
+            ></div>
         </Transition>
 
         <!-- Main Content -->
@@ -207,13 +211,13 @@ onMounted(() => {
             class="transition-all duration-500 ease-in-out"
         >
             <!-- Top Navigation -->
-            <header class="sticky top-0 z-30 border-b border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm">
+            <header class="shadow-emerald sticky top-0 z-30 border-b border-emerald-200/30 bg-white-emerald/80 backdrop-blur-sm">
                 <div class="flex items-center justify-between px-6 py-4">
                     <!-- Left side -->
                     <div class="flex items-center space-x-4">
                         <button
                             @click="toggleSidebar"
-                            class="rounded-lg p-2 text-gray-600 transition-all duration-300 ease-in-out hover:scale-110 hover:bg-gray-100 active:scale-95"
+                            class="emerald-transition rounded-lg p-2 text-emerald-600 transition-all duration-300 ease-in-out hover:scale-110 hover:bg-emerald-50 active:scale-95"
                         >
                             <svg class="h-6 w-6 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -221,7 +225,7 @@ onMounted(() => {
                         </button>
 
                         <div>
-                            <h1 class="text-xl font-semibold text-gray-800 transition-all duration-300">
+                            <h1 class="text-xl font-semibold text-emerald-800 transition-all duration-300">
                                 <slot name="header">Dashboard</slot>
                             </h1>
                         </div>
@@ -231,20 +235,20 @@ onMounted(() => {
                     <div class="relative">
                         <button
                             @click="isProfileDropdownOpen = !isProfileDropdownOpen"
-                            class="flex items-center space-x-3 rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-gray-50 active:scale-95"
+                            class="emerald-transition flex items-center space-x-3 rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 active:scale-95"
                         >
                             <div
-                                class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-sm font-semibold text-white transition-all duration-300 hover:shadow-lg"
+                                class="bg-emerald-gradient-primary hover:shadow-emerald emerald-hover-glow flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white transition-all duration-300"
                             >
                                 {{ user?.nama?.charAt(0).toUpperCase() }}
                             </div>
                             <div class="hidden text-left sm:block">
-                                <p class="text-sm font-medium text-gray-700 transition-colors duration-300">{{ user?.nama }}</p>
-                                <p class="text-xs text-gray-500 capitalize transition-colors duration-300">{{ user?.role }}</p>
+                                <p class="text-sm font-medium text-emerald-700 transition-colors duration-300">{{ user?.nama }}</p>
+                                <p class="text-xs text-emerald-500 capitalize transition-colors duration-300">{{ user?.role }}</p>
                             </div>
                             <svg
                                 :class="{ 'rotate-180': isProfileDropdownOpen }"
-                                class="h-4 w-4 text-gray-400 transition-all duration-300 ease-in-out"
+                                class="h-4 w-4 text-emerald-400 transition-all duration-300 ease-in-out"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -264,12 +268,12 @@ onMounted(() => {
                         >
                             <div
                                 v-if="isProfileDropdownOpen"
-                                class="absolute right-0 z-50 mt-2 w-48 rounded-xl border border-gray-200 bg-white py-2 shadow-lg backdrop-blur-sm"
+                                class="shadow-emerald-lg absolute right-0 z-50 mt-2 w-48 rounded-xl border border-emerald-200 bg-white-emerald py-2 backdrop-blur-sm"
                             >
                                 <template v-if="userRole === 'kasir'">
                                     <Link
                                         href="/kasir/profile"
-                                        class="flex items-center px-4 py-2 text-sm text-gray-700 transition-all duration-200 hover:translate-x-1 hover:bg-gray-50"
+                                        class="emerald-transition flex items-center px-4 py-2 text-sm text-emerald-700 transition-all duration-200 hover:translate-x-1 hover:bg-emerald-50 hover:text-emerald-600"
                                         @click="isProfileDropdownOpen = false"
                                     >
                                         <i class="fas fa-user-edit mr-3 h-4 w-4 transition-all duration-200"></i>
@@ -277,7 +281,7 @@ onMounted(() => {
                                     </Link>
                                 </template>
 
-                                <hr class="my-2 border-gray-200" />
+                                <hr class="my-2 border-emerald-200" />
 
                                 <button
                                     @click="logout"
