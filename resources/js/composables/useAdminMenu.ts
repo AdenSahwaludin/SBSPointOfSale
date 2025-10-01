@@ -40,20 +40,20 @@ export function useAdminMenuItems() {
 
 // Set active menu item berdasarkan current path
 export function setActiveMenuItem(menuItems: any[], activePath: string) {
-    return menuItems.map(item => {
+    return menuItems.map((item) => {
         if (item.children) {
             const activeChild = item.children.find((child: any) => child.href === activePath);
             return {
                 ...item,
                 children: item.children.map((child: any) => ({
                     ...child,
-                    active: child.href === activePath
-                }))
+                    active: child.href === activePath,
+                })),
             };
         }
         return {
             ...item,
-            active: item.href === activePath
+            active: item.href === activePath,
         };
     });
 }

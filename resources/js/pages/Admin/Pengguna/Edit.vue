@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { useAdminMenuItems, setActiveMenuItem } from '@/composables/useAdminMenu';
 
 interface Pengguna {
     id_pengguna: string;
