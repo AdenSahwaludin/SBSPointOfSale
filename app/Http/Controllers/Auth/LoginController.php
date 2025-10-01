@@ -26,7 +26,7 @@ class LoginController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'login' => 'Kredensial yang diberikan tidak cocok dengan catatan kami.',
+                'login' => 'Password yang anda masukan salah.',
             ]);
         }
 

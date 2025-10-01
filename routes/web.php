@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\PenggunaController;
 
 // Root redirect - jika user sudah login redirect ke dashboard sesuai role, jika belum ke login
 Route::get('/', function () {
@@ -11,7 +13,7 @@ Route::get('/', function () {
         $user = Auth::user();
         return redirect(match ($user->role) {
             'admin' => '/admin',
-            'kasir' => '/kasir', 
+            'kasir' => '/kasir',
             default => '/dashboard'
         });
     }
@@ -34,6 +36,9 @@ Route::middleware('auth')->group(function () {
         Route::inertia('/products', 'Admin/Products')->name('admin.products');
         Route::inertia('/reports', 'Admin/Reports')->name('admin.reports');
         Route::inertia('/settings', 'Admin/Settings')->name('admin.settings');
+
+        // Manajemen Pengguna
+        Route::resource('pengguna', PenggunaController::class);
     });
 
     // Kasir routes
@@ -41,7 +46,9 @@ Route::middleware('auth')->group(function () {
         Route::inertia('/', 'Kasir/Dashboard')->name('kasir.dashboard');
         Route::inertia('/pos', 'Kasir/POS')->name('kasir.pos');
         Route::inertia('/transactions', 'Kasir/Transactions')->name('kasir.transactions');
-        Route::inertia('/profile', 'Kasir/Profile')->name('kasir.profile');
+        Route::get('/profile', [ProfileController::class, 'show'])->name('kasir.profile');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('kasir.profile.update');
+        Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('kasir.profile.password');
     });
 
     // Logout

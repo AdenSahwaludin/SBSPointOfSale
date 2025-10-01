@@ -92,19 +92,23 @@ onMounted(() => {
             class="fixed inset-y-0 left-0 z-50 border-r border-gray-200/50 bg-white/95 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-in-out"
         >
             <!-- Logo Header -->
-            <div class="relative flex h-16 items-center justify-center bg-gradient-to-r from-emerald-600 to-teal-700 text-white">
+            <div class="relative flex h-21 items-center justify-center bg-emerald-500 text-white">
                 <div v-if="isSidebarOpen" class="flex items-center space-x-3">
-                    <div class="h-8 w-8">
+                    <div class="h-16 w-16">
                         <img
                             src="/assets/images/Logo_Cap_Daun_Kayu_Putih.png"
                             alt="Logo Sari Bumi Sakti"
-                            class="h-8 w-8 object-contain drop-shadow-lg"
+                            class="h-16 w-16 object-contain drop-shadow-lg"
                         />
                     </div>
                     <span class="text-lg font-bold">SBS POS</span>
                 </div>
-                <div v-else class="h-8 w-8">
-                    <img src="/assets/images/Logo_Cap_Daun_Kayu_Putih.png" alt="Logo Sari Bumi Sakti" class="h-8 w-8 object-contain drop-shadow-lg" />
+                <div v-else class="h-12 w-12">
+                    <img
+                        src="/assets/images/Logo_Cap_Daun_Kayu_Putih.png"
+                        alt="Logo Sari Bumi Sakti"
+                        class="h-12 w-12 object-contain drop-shadow-lg"
+                    />
                 </div>
             </div>
 

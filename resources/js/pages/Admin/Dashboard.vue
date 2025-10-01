@@ -17,7 +17,7 @@ const adminMenuItems = [
         name: 'Manajemen Data',
         icon: 'fas fa-database',
         children: [
-            { name: 'Pengguna', href: '/admin/users', icon: 'fas fa-users' },
+            { name: 'Pengguna', href: '/admin/pengguna', icon: 'fas fa-users' },
             { name: 'Produk', href: '/admin/products', icon: 'fas fa-boxes' },
             { name: 'Kategori', href: '/admin/categories', icon: 'fas fa-tags' },
         ],
@@ -100,7 +100,7 @@ const topProducts = [
         <Head title="Admin Dashboard" />
 
         <!-- Welcome Section -->
-        <div class="mb-8 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white">
+        <div class="mb-8 rounded-2xl bg-emerald-500 p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="mb-2 text-2xl font-bold">Selamat datang, {{ user?.nama }}! 👋</h2>
@@ -228,15 +228,15 @@ const topProducts = [
                     </a>
 
                     <a
-                        href="/admin/users"
+                        href="/admin/pengguna"
                         class="group flex items-center rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 transition-all duration-200 hover:from-emerald-100 hover:to-emerald-200"
                     >
                         <div class="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-white">
                             <i class="fas fa-user-plus"></i>
                         </div>
                         <div>
-                            <p class="font-medium text-emerald-900">Tambah Kasir</p>
-                            <p class="text-sm text-emerald-700">User baru</p>
+                            <p class="font-medium text-emerald-900">Kelola Pengguna</p>
+                            <p class="text-sm text-emerald-700">Manajemen user</p>
                         </div>
                     </a>
 
