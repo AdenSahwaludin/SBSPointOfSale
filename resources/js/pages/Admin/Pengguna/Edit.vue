@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
+import BaseButton from '@/components/BaseButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface Pengguna {
     id_pengguna: string;
@@ -29,6 +31,10 @@ const form = useForm({
     role: props.pengguna.role,
 });
 
+// Reset password form
+const resetPasswordForm = useForm({});
+const showResetPasswordModal = ref(false);
+
 // Submit form
 function submit() {
     form.patch(`/admin/pengguna/${props.pengguna.id_pengguna}`, {
@@ -36,6 +42,27 @@ function submit() {
             // Redirect handled by controller
         },
     });
+}
+
+// Reset password function
+function resetPassword() {
+    resetPasswordForm.post(`/admin/pengguna/${props.pengguna.id_pengguna}/reset-password`, {
+        onSuccess: () => {
+            showResetPasswordModal.value = false;
+            alert('Password berhasil direset ke default');
+        },
+        onError: () => {
+            alert('Gagal mereset password');
+        }
+    });
+}
+
+function openResetPasswordModal() {
+    showResetPasswordModal.value = true;
+}
+
+function closeResetPasswordModal() {
+    showResetPasswordModal.value = false;
 }
 </script>
 
@@ -50,13 +77,25 @@ function submit() {
                     <h1 class="text-2xl font-bold text-emerald-800">Edit Pengguna</h1>
                     <p class="text-emerald-600">Ubah data pengguna: {{ pengguna.nama }}</p>
                 </div>
-                <Link
-                    href="/admin/pengguna"
-                    class="flex items-center gap-2 rounded-lg bg-gray-soft-100 px-4 py-2 text-emerald-700 transition-all hover:bg-gray-soft-200 hover:scale-105 emerald-transition"
-                >
-                    <i class="fas fa-arrow-left"></i>
-                    Kembali
-                </Link>
+                <div class="flex gap-3">
+                    <!-- Reset Password Button -->
+                    <BaseButton
+                        variant="warning"
+                        icon="fas fa-key"
+                        @click="openResetPasswordModal"
+                    >
+                        Reset Password
+                    </BaseButton>
+                    
+                    <!-- Back Button -->
+                    <Link
+                        href="/admin/pengguna"
+                        class="flex items-center gap-2 rounded-lg bg-emerald-100 border border-emerald-300 px-4 py-2 text-emerald-700 transition-all hover:bg-emerald-200 hover:scale-105 emerald-transition"
+                    >
+                        <i class="fas fa-arrow-left"></i>
+                        Kembali
+                    </Link>
+                </div>
             </div>
 
             <!-- Form -->
@@ -153,19 +192,65 @@ function submit() {
 
                     <!-- Submit Button -->
                     <div class="flex justify-end gap-3 border-t border-gray-200 pt-6">
-                        <Link href="/admin/pengguna" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200">
+                        <BaseButton
+                            variant="secondary"
+                            size="lg"
+                            @click="$inertia.visit('/admin/pengguna')"
+                        >
                             Batal
-                        </Link>
-                        <button
+                        </BaseButton>
+                        
+                        <BaseButton
                             type="submit"
+                            variant="primary"
+                            size="lg"
+                            :loading="form.processing"
                             :disabled="form.processing"
-                            class="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <span v-if="form.processing">Menyimpan...</span>
                             <span v-else>Simpan Perubahan</span>
-                        </button>
+                        </BaseButton>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Reset Password Modal -->
+        <div
+            v-if="showResetPasswordModal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            @click.self="closeResetPasswordModal"
+        >
+            <div class="w-full max-w-md rounded-lg bg-white-emerald p-6 shadow-emerald border border-emerald-200">
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold text-emerald-800">Reset Password</h3>
+                    <p class="text-emerald-600">
+                        Apakah Anda yakin ingin mereset password untuk pengguna "{{ pengguna.nama }}"?
+                    </p>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Password akan direset ke default: <code class="bg-gray-100 px-1 rounded">123456</code>
+                    </p>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <BaseButton
+                        variant="secondary"
+                        @click="closeResetPasswordModal"
+                    >
+                        Batal
+                    </BaseButton>
+                    
+                    <BaseButton
+                        variant="warning"
+                        icon="fas fa-key"
+                        :loading="resetPasswordForm.processing"
+                        :disabled="resetPasswordForm.processing"
+                        @click="resetPassword"
+                    >
+                        <span v-if="resetPasswordForm.processing">Mereset...</span>
+                        <span v-else>Reset Password</span>
+                    </BaseButton>
+                </div>
             </div>
         </div>
     </BaseLayout>

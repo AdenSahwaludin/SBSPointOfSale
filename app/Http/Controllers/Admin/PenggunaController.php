@@ -97,4 +97,21 @@ class PenggunaController extends Controller
   return redirect()->route('admin.pengguna.index')
    ->with('success', 'Pengguna berhasil dihapus');
  }
+
+ public function resetPassword($id)
+ {
+  $pengguna = User::where('id_pengguna', $id)->firstOrFail();
+
+  // Tidak bisa reset password diri sendiri
+  if ($pengguna->id_pengguna === FacadesAuth::user()->id_pengguna) {
+   return back()->with('error', 'Tidak dapat mereset password akun sendiri');
+  }
+
+  // Reset password ke default
+  $pengguna->update([
+   'password' => '123456' // Password default
+  ]);
+
+  return back()->with('success', 'Password berhasil direset ke default (123456)');
+ }
 }

@@ -46,13 +46,18 @@
     --white-soft: var(--color-white-soft);
     --white-emerald: var(--color-white-emerald);
     
-    /* Beautiful emerald gradients */
-    --emerald-gradient-primary: linear-gradient(135deg, var(--color-emerald-600) 0%, var(--color-emerald-500) 100%);
-    --emerald-gradient-secondary: linear-gradient(135deg, var(--color-emerald-500) 0%, var(--color-emerald-400) 100%);
-    --emerald-gradient-accent: linear-gradient(135deg, var(--color-emerald-400) 0%, var(--color-emerald-300) 100%);
-    --emerald-gradient-hero: linear-gradient(135deg, var(--color-emerald-700) 0%, var(--color-emerald-500) 50%, var(--color-emerald-300) 100%);
+    /* Beautiful emerald gradients - subtle differences */
+    --emerald-gradient-primary: linear-gradient(135deg, var(--color-emerald-500) 0%, var(--color-emerald-400) 100%);
+    --emerald-gradient-secondary: linear-gradient(135deg, var(--color-emerald-400) 0%, var(--color-emerald-300) 100%);
+    --emerald-gradient-accent: linear-gradient(135deg, var(--color-emerald-300) 0%, var(--color-emerald-200) 100%);
+    --emerald-gradient-hero: linear-gradient(135deg, var(--color-emerald-600) 0%, var(--color-emerald-500) 50%, var(--color-emerald-400) 100%);
     --emerald-gradient-soft: linear-gradient(135deg, var(--color-emerald-50) 0%, var(--color-emerald-100) 100%);
     --emerald-gradient-bg: linear-gradient(135deg, var(--color-gray-soft-50) 0%, var(--color-emerald-25) 100%);
+    
+    /* Even more subtle gradients */
+    --emerald-gradient-subtle-1: linear-gradient(135deg, var(--color-emerald-400) 0%, var(--color-emerald-400) 40%, var(--color-emerald-300) 100%);
+    --emerald-gradient-subtle-2: linear-gradient(135deg, var(--color-emerald-500) 0%, var(--color-emerald-500) 40%, var(--color-emerald-400) 100%);
+    --emerald-gradient-light: linear-gradient(135deg, var(--color-emerald-100) 0%, var(--color-emerald-100) 60%, var(--color-emerald-50) 100%);
 }
 
 /* Custom utility classes for emerald theme */
@@ -78,6 +83,18 @@
 
 .bg-emerald-gradient-bg {
     background: var(--emerald-gradient-bg);
+}
+
+.bg-emerald-gradient-subtle-1 {
+    background: var(--emerald-gradient-subtle-1);
+}
+
+.bg-emerald-gradient-subtle-2 {
+    background: var(--emerald-gradient-subtle-2);
+}
+
+.bg-emerald-gradient-light {
+    background: var(--emerald-gradient-light);
 }
 
 /* Soft white background utilities */

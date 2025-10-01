@@ -93,7 +93,7 @@ onMounted(() => {
             class="shadow-emerald-xl fixed inset-y-0 left-0 z-50 transform border-r border-emerald-200/30 bg-white-emerald/95 backdrop-blur-xl transition-all duration-500 ease-in-out"
         >
             <!-- Logo Header -->
-            <div class="bg-emerald-gradient-primary shadow-emerald-lg relative flex h-21 items-center justify-center overflow-hidden text-white">
+            <div class="bg-emerald-gradient-subtle-2 shadow-emerald-lg relative flex h-21 items-center justify-center overflow-hidden text-white">
                 <div
                     v-if="isSidebarOpen"
                     class="flex translate-x-0 transform items-center space-x-3 opacity-100 transition-all duration-500 ease-in-out"
@@ -123,7 +123,8 @@ onMounted(() => {
                     <div v-if="item.children && item.children.length > 0">
                         <button
                             @click="toggleMenu(item.name)"
-                            class="group emerald-transition flex w-full items-center rounded-xl px-3 py-3 text-emerald-700 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 hover:text-emerald-600"
+                            class="group emerald-transition flex w-full items-center rounded-xl px-3 py-3 text-nowrap text-emerald-700 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 hover:text-emerald-600"
+                            :class="{ 'shadow-emerald-sm border-l-4 border-emerald-400 bg-emerald-100 text-emerald-700': item.active }"
                         >
                             <i :class="item.icon" class="mr-3 h-5 w-5 transition-all duration-300"></i>
                             <span
@@ -238,7 +239,7 @@ onMounted(() => {
                             class="emerald-transition flex items-center space-x-3 rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 active:scale-95"
                         >
                             <div
-                                class="bg-emerald-gradient-primary hover:shadow-emerald emerald-hover-glow flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white transition-all duration-300"
+                                class="bg-emerald-gradient-subtle-1 hover:shadow-emerald emerald-hover-glow flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white transition-all duration-300"
                             >
                                 {{ user?.nama?.charAt(0).toUpperCase() }}
                             </div>

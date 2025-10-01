@@ -49,7 +49,7 @@ function formatDate(dateString?: string) {
                 <div class="flex gap-3">
                     <Link
                         :href="`/admin/pengguna/${pengguna.id_pengguna}/edit`"
-                        class="flex items-center gap-2 rounded-lg bg-emerald-gradient-secondary px-4 py-2 text-white transition-all hover:scale-105 hover:shadow-emerald emerald-transition emerald-hover-glow"
+                        class="flex items-center gap-2 rounded-lg bg-emerald-gradient-subtle-1 px-4 py-2 text-white transition-all hover:scale-105 hover:shadow-emerald emerald-transition emerald-hover-glow"
                     >
                         <i class="fas fa-edit"></i>
                         Edit
@@ -67,7 +67,7 @@ function formatDate(dateString?: string) {
             <!-- User Profile Card -->
             <div class="overflow-hidden rounded-lg border border-emerald-200 bg-white-emerald shadow-emerald">
                 <!-- Header Profile -->
-                <div class="bg-emerald-gradient-hero px-6 py-8">
+                <div class="bg-emerald-gradient-subtle-2 px-6 py-8">
                     <div class="flex items-center gap-6">
                         <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white-emerald shadow-emerald">
                             <i class="fas fa-user text-3xl text-emerald-600"></i>
@@ -171,7 +171,7 @@ function formatDate(dateString?: string) {
                 <div class="flex gap-3">
                     <Link
                         :href="`/admin/pengguna/${pengguna.id_pengguna}/edit`"
-                        class="flex items-center gap-2 rounded-lg bg-emerald-gradient-primary px-4 py-2 text-white transition-all hover:scale-105 hover:shadow-emerald emerald-transition emerald-hover-glow"
+                        class="flex items-center gap-2 rounded-lg bg-emerald-gradient-subtle-2 px-4 py-2 text-white transition-all hover:scale-105 hover:shadow-emerald emerald-transition emerald-hover-glow"
                     >
                         <i class="fas fa-edit"></i>
                         Edit Pengguna

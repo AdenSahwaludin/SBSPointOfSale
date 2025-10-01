@@ -113,7 +113,7 @@ const quickActions = [
         <Head title="Kasir Dashboard" />
 
         <!-- Welcome Section -->
-        <div class="mb-8 rounded-2xl bg-emerald-gradient-hero p-6 text-white shadow-emerald-xl">
+        <div class="mb-8 rounded-2xl bg-emerald-gradient-subtle-2 p-6 text-white shadow-emerald-xl">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="mb-2 text-2xl font-bold drop-shadow-sm">Selamat bekerja, {{ user?.nama }}! 🌿</h2>
@@ -151,9 +151,9 @@ const quickActions = [
             >
                 <div
                     :class="{
-                        'bg-emerald-gradient-primary': action.color === 'emerald',
-                        'bg-emerald-gradient-secondary': action.color === 'blue',
-                        'bg-emerald-gradient-accent': action.color === 'purple',
+                        'bg-emerald-gradient-subtle-1': action.color === 'emerald',
+                        'bg-emerald-gradient-subtle-2': action.color === 'blue',
+                        'bg-emerald-gradient-light': action.color === 'purple',
                     }"
                     class="rounded-2xl p-6 text-white shadow-emerald"
                 >
@@ -257,7 +257,7 @@ const quickActions = [
                             <span class="text-sm font-medium text-emerald-700">28/30</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-emerald-100">
-                            <div class="h-2 rounded-full bg-emerald-gradient-primary" style="width: 93%"></div>
+                            <div class="h-2 rounded-full bg-emerald-gradient-subtle-1" style="width: 93%"></div>
                         </div>
 
                         <div class="flex items-center justify-between">
@@ -265,7 +265,7 @@ const quickActions = [
                             <span class="text-sm font-medium text-emerald-700">Rp 1.25jt/1.5jt</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-emerald-100">
-                            <div class="h-2 rounded-full bg-emerald-gradient-secondary" style="width: 83%"></div>
+                            <div class="h-2 rounded-full bg-emerald-gradient-subtle-2" style="width: 83%"></div>
                         </div>
                     </div>
                 </div>

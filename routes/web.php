@@ -47,6 +47,10 @@ Route::middleware('auth')->group(function () {
             'update' => 'admin.pengguna.update',
             'destroy' => 'admin.pengguna.destroy',
         ]);
+        
+        // Reset password pengguna
+        Route::post('pengguna/{id}/reset-password', [PenggunaController::class, 'resetPassword'])
+            ->name('admin.pengguna.reset-password');
     });
 
     // Kasir routes
