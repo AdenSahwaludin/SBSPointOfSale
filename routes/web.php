@@ -57,11 +57,11 @@ Route::middleware('auth')->group(function () {
     // Kasir routes
     Route::prefix('kasir')->middleware('auth')->group(function () {
         Route::inertia('/', 'Kasir/Dashboard')->name('kasir.dashboard');
-        
+
         // Point of Sale
         Route::get('/pos', [POSController::class, 'index'])->name('kasir.pos');
         Route::post('/pos', [POSController::class, 'store'])->name('kasir.pos.store');
-        
+
         Route::inertia('/transactions', 'Kasir/Transactions')->name('kasir.transactions');
         Route::get('/profile', [ProfileController::class, 'show'])->name('kasir.profile');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('kasir.profile.update');

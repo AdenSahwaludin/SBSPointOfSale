@@ -55,14 +55,14 @@ const customerForm = useForm({
 
 // Computed properties
 const categories = computed(() => {
-    const cats = [...new Set(props.products.map(p => p.kategori).filter(Boolean))];
+    const cats = [...new Set(props.products.map((p) => p.kategori).filter(Boolean))];
     return cats;
 });
 
 const filteredProducts = computed(() => {
-    return props.products.filter(product => {
-        const matchesSearch = product.nama_produk.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                            product.barcode?.includes(searchQuery.value);
+    return props.products.filter((product) => {
+        const matchesSearch =
+            product.nama_produk.toLowerCase().includes(searchQuery.value.toLowerCase()) || product.barcode?.includes(searchQuery.value);
         const matchesCategory = !selectedCategory.value || product.kategori === selectedCategory.value;
         return matchesSearch && matchesCategory && product.status === 'aktif';
     });
@@ -93,8 +93,8 @@ const kembalian = computed(() => {
 
 // Methods
 function addToCart(product: Product) {
-    const existingItem = cart.value.find(item => item.id_produk === product.id_produk);
-    
+    const existingItem = cart.value.find((item) => item.id_produk === product.id_produk);
+
     if (existingItem) {
         if (existingItem.jumlah < product.stok) {
             existingItem.jumlah++;
@@ -120,8 +120,8 @@ function updateQuantity(index: number, quantity: number) {
         cart.value.splice(index, 1);
     } else {
         const item = cart.value[index];
-        const product = props.products.find(p => p.id_produk === item.id_produk);
-        
+        const product = props.products.find((p) => p.id_produk === item.id_produk);
+
         if (product && quantity <= product.stok) {
             item.jumlah = quantity;
             item.subtotal = item.harga * quantity;
@@ -158,43 +158,45 @@ function processPayment() {
         return;
     }
 
-    const items = cart.value.map(item => ({
+    const items = cart.value.map((item) => ({
         id_produk: item.id_produk,
         jumlah: item.jumlah,
     }));
 
-    customerForm.transform(data => ({
-        ...data,
-        items: items,
-    })).post('/kasir/pos', {
-        onSuccess: (page) => {
-            // Check if there's a response in the flash data
-            const flash = (page.props as any).flash;
-            if (flash && flash.response) {
-                const response = flash.response;
-                
-                if (response.snap_token) {
-                    snapToken.value = response.snap_token;
-                    showMidtransModal.value = true;
-                    closePaymentModal();
+    customerForm
+        .transform((data) => ({
+            ...data,
+            items: items,
+        }))
+        .post('/kasir/pos', {
+            onSuccess: (page) => {
+                // Check if there's a response in the flash data
+                const flash = (page.props as any).flash;
+                if (flash && flash.response) {
+                    const response = flash.response;
+
+                    if (response.snap_token) {
+                        snapToken.value = response.snap_token;
+                        showMidtransModal.value = true;
+                        closePaymentModal();
+                    } else {
+                        // Cash payment success
+                        success('Pembayaran berhasil!', `Kembalian: Rp ${response.kembalian?.toLocaleString('id-ID') || 0}`);
+                        clearCart();
+                        closePaymentModal();
+                    }
                 } else {
-                    // Cash payment success
-                    success('Pembayaran berhasil!', `Kembalian: Rp ${response.kembalian?.toLocaleString('id-ID') || 0}`);
+                    // Fallback success message
+                    success('Pembayaran berhasil!');
                     clearCart();
                     closePaymentModal();
                 }
-            } else {
-                // Fallback success message
-                success('Pembayaran berhasil!');
-                clearCart();
-                closePaymentModal();
-            }
-        },
-        onError: (errors) => {
-            console.error('Payment error:', errors);
-            error('Pembayaran gagal', 'Terjadi kesalahan saat memproses pembayaran');
-        },
-    });
+            },
+            onError: (errors) => {
+                console.error('Payment error:', errors);
+                error('Pembayaran gagal', 'Terjadi kesalahan saat memproses pembayaran');
+            },
+        });
 }
 
 function formatCurrency(amount: number): string {
@@ -206,17 +208,20 @@ function formatCurrency(amount: number): string {
 }
 
 // Watch for bayar input changes
-watch(() => customerForm.bayar, (newValue) => {
-    if (typeof newValue === 'string') {
-        const numericValue = (newValue as string).replace(/\D/g, '');
-        customerForm.bayar = parseInt(numericValue) || 0;
-    }
-});
+watch(
+    () => customerForm.bayar,
+    (newValue) => {
+        if (typeof newValue === 'string') {
+            const numericValue = (newValue as string).replace(/\D/g, '');
+            customerForm.bayar = parseInt(numericValue) || 0;
+        }
+    },
+);
 
 // Load Midtrans script
 function loadMidtransScript() {
     if (document.getElementById('midtrans-script')) return;
-    
+
     const script = document.createElement('script');
     script.id = 'midtrans-script';
     script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
@@ -226,29 +231,29 @@ function loadMidtransScript() {
 
 function openMidtransPayment() {
     if (!snapToken.value) return;
-    
+
     loadMidtransScript();
-    
+
     setTimeout(() => {
         // @ts-ignore
         window.snap.pay(snapToken.value, {
-            onSuccess: function(result: any) {
+            onSuccess: function (result: any) {
                 success('Pembayaran berhasil!', 'Transaksi telah selesai');
                 clearCart();
                 showMidtransModal.value = false;
                 snapToken.value = '';
             },
-            onPending: function(result: any) {
+            onPending: function (result: any) {
                 success('Pembayaran pending', 'Silakan cek status pembayaran');
                 showMidtransModal.value = false;
             },
-            onError: function(result: any) {
+            onError: function (result: any) {
                 error('Pembayaran gagal', 'Terjadi kesalahan dalam pembayaran');
                 showMidtransModal.value = false;
             },
-            onClose: function() {
+            onClose: function () {
                 showMidtransModal.value = false;
-            }
+            },
         });
     }, 1000);
 }
@@ -261,13 +266,13 @@ function handleKeyboard(event: KeyboardEvent) {
         const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
         searchInput?.focus();
     }
-    
+
     // F2 - Open payment modal
     if (event.key === 'F2') {
         event.preventDefault();
         openPaymentModal();
     }
-    
+
     // F3 - Clear cart
     if (event.key === 'F3') {
         event.preventDefault();
@@ -276,7 +281,7 @@ function handleKeyboard(event: KeyboardEvent) {
             success('Keranjang dikosongkan');
         }
     }
-    
+
     // Enter - Add first product to cart when searching
     if (event.key === 'Enter' && searchQuery.value && filteredProducts.value.length > 0) {
         addToCart(filteredProducts.value[0]);
@@ -296,9 +301,9 @@ onUnmounted(() => {
     <Head title="Point of Sale - Kasir" />
 
     <BaseLayout :menuItems="kasirMenuItems" userRole="kasir">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-120px)]">
+        <div class="grid h-[calc(100vh-120px)] grid-cols-1 gap-6 lg:grid-cols-3">
             <!-- Product List -->
-            <div class="lg:col-span-2 space-y-4">
+            <div class="space-y-4 lg:col-span-2">
                 <!-- Search and Filter -->
                 <div class="card-emerald p-4">
                     <div class="flex gap-4">
@@ -323,21 +328,21 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Products Grid -->
-                <div class="bg-white-emerald rounded-lg border border-emerald-200 p-4 overflow-y-auto" style="max-height: calc(100vh - 240px);">
-                    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div class="overflow-y-auto rounded-lg border border-emerald-200 bg-white-emerald p-4" style="max-height: calc(100vh - 240px)">
+                    <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                         <div
                             v-for="product in filteredProducts"
                             :key="product.id_produk"
-                            class="border border-emerald-200 rounded-lg p-3 hover:shadow-emerald transition-all cursor-pointer"
+                            class="hover:shadow-emerald cursor-pointer rounded-lg border border-emerald-200 p-3 transition-all"
                             @click="addToCart(product)"
                         >
                             <div class="text-center">
-                                <div class="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                    <i class="fas fa-box text-emerald-600 text-xl"></i>
+                                <div class="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-lg bg-emerald-100">
+                                    <i class="fas fa-box text-xl text-emerald-600"></i>
                                 </div>
-                                <h3 class="font-medium text-emerald-800 text-sm mb-1">{{ product.nama_produk }}</h3>
-                                <p class="text-emerald-600 font-bold">{{ formatCurrency(product.harga) }}</p>
-                                <p class="text-xs text-emerald-500 mt-1">Stok: {{ product.stok }}</p>
+                                <h3 class="mb-1 text-sm font-medium text-emerald-800">{{ product.nama_produk }}</h3>
+                                <p class="font-bold text-emerald-600">{{ formatCurrency(product.harga) }}</p>
+                                <p class="mt-1 text-xs text-emerald-500">Stok: {{ product.stok }}</p>
                             </div>
                         </div>
                     </div>
@@ -350,19 +355,17 @@ onUnmounted(() => {
                 <div class="card-emerald p-4">
                     <div class="flex items-center justify-between">
                         <h2 class="text-lg font-bold text-emerald-800">Keranjang</h2>
-                        <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-sm">
-                            {{ cartItemCount }} item
-                        </span>
+                        <span class="rounded-full bg-emerald-100 px-2 py-1 text-sm text-emerald-800"> {{ cartItemCount }} item </span>
                     </div>
                 </div>
 
                 <!-- Cart Items -->
-                <div class="bg-white-emerald rounded-lg border border-emerald-200 p-4 overflow-y-auto" style="max-height: 300px;">
-                    <div v-if="cart.length === 0" class="text-center py-8 text-emerald-600">
-                        <i class="fas fa-shopping-cart text-3xl mb-2"></i>
+                <div class="overflow-y-auto rounded-lg border border-emerald-200 bg-white-emerald p-4" style="max-height: 300px">
+                    <div v-if="cart.length === 0" class="py-8 text-center text-emerald-600">
+                        <i class="fas fa-shopping-cart mb-2 text-3xl"></i>
                         <p>Keranjang kosong</p>
                     </div>
-                    
+
                     <div v-else class="space-y-3">
                         <div
                             v-for="(item, index) in cart"
@@ -370,36 +373,21 @@ onUnmounted(() => {
                             class="flex items-center justify-between border-b border-emerald-100 pb-3"
                         >
                             <div class="flex-1">
-                                <h4 class="font-medium text-emerald-800 text-sm">{{ item.nama_produk }}</h4>
-                                <p class="text-emerald-600 text-sm">{{ formatCurrency(item.harga) }}</p>
+                                <h4 class="text-sm font-medium text-emerald-800">{{ item.nama_produk }}</h4>
+                                <p class="text-sm text-emerald-600">{{ formatCurrency(item.harga) }}</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <BaseButton
-                                    @click="updateQuantity(index, item.jumlah - 1)"
-                                    variant="outline"
-                                    size="xs"
-                                    icon="fas fa-minus"
-                                />
+                                <BaseButton @click="updateQuantity(index, item.jumlah - 1)" variant="outline" size="xs" icon="fas fa-minus" />
                                 <span class="w-8 text-center text-sm">{{ item.jumlah }}</span>
-                                <BaseButton
-                                    @click="updateQuantity(index, item.jumlah + 1)"
-                                    variant="outline"
-                                    size="xs"
-                                    icon="fas fa-plus"
-                                />
-                                <BaseButton
-                                    @click="removeFromCart(index)"
-                                    variant="danger"
-                                    size="xs"
-                                    icon="fas fa-trash"
-                                />
+                                <BaseButton @click="updateQuantity(index, item.jumlah + 1)" variant="outline" size="xs" icon="fas fa-plus" />
+                                <BaseButton @click="removeFromCart(index)" variant="danger" size="xs" icon="fas fa-trash" />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Cart Summary -->
-                <div class="card-emerald p-4 space-y-3">
+                <div class="card-emerald space-y-3 p-4">
                     <div class="flex justify-between">
                         <span class="text-emerald-700">Subtotal:</span>
                         <span class="font-medium">{{ formatCurrency(cartTotal) }}</span>
@@ -408,7 +396,7 @@ onUnmounted(() => {
                         <span class="text-emerald-700">Pajak (11%):</span>
                         <span class="font-medium">{{ formatCurrency(pajak) }}</span>
                     </div>
-                    <div class="border-t border-emerald-200 pt-3 flex justify-between text-lg font-bold">
+                    <div class="flex justify-between border-t border-emerald-200 pt-3 text-lg font-bold">
                         <span class="text-emerald-800">Total:</span>
                         <span class="text-emerald-800">{{ formatCurrency(grandTotal) }}</span>
                     </div>
@@ -426,22 +414,15 @@ onUnmounted(() => {
                     >
                         Bayar (F2)
                     </BaseButton>
-                    <BaseButton
-                        @click="clearCart"
-                        variant="secondary"
-                        size="lg"
-                        icon="fas fa-trash"
-                        class="w-full"
-                        :disabled="cart.length === 0"
-                    >
+                    <BaseButton @click="clearCart" variant="secondary" size="lg" icon="fas fa-trash" class="w-full" :disabled="cart.length === 0">
                         Kosongkan Keranjang (F3)
                     </BaseButton>
                 </div>
 
                 <!-- Keyboard Shortcuts Info -->
                 <div class="card-emerald p-3">
-                    <h4 class="text-xs font-semibold text-emerald-800 mb-2">Shortcut Keyboard:</h4>
-                    <div class="text-xs text-emerald-600 space-y-1">
+                    <h4 class="mb-2 text-xs font-semibold text-emerald-800">Shortcut Keyboard:</h4>
+                    <div class="space-y-1 text-xs text-emerald-600">
                         <div>F1 - Focus Pencarian</div>
                         <div>F2 - Bayar</div>
                         <div>F3 - Kosongkan Keranjang</div>
@@ -452,14 +433,14 @@ onUnmounted(() => {
         </div>
 
         <!-- Payment Modal -->
-        <div v-if="showPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white-emerald rounded-lg shadow-emerald-xl p-6 w-full max-w-md mx-4">
-                <h3 class="text-lg font-bold text-emerald-800 mb-4">Pembayaran</h3>
-                
+        <div v-if="showPaymentModal" class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+            <div class="shadow-emerald-xl mx-4 w-full max-w-md rounded-lg bg-white-emerald p-6">
+                <h3 class="mb-4 text-lg font-bold text-emerald-800">Pembayaran</h3>
+
                 <form @submit.prevent="processPayment" class="space-y-4">
                     <!-- Customer Info -->
                     <div>
-                        <label class="block text-sm font-medium text-emerald-700 mb-1">Nama Pelanggan</label>
+                        <label class="mb-1 block text-sm font-medium text-emerald-700">Nama Pelanggan</label>
                         <input
                             v-model="customerForm.nama_pelanggan"
                             type="text"
@@ -469,7 +450,7 @@ onUnmounted(() => {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-emerald-700 mb-1">Nomor HP</label>
+                        <label class="mb-1 block text-sm font-medium text-emerald-700">Nomor HP</label>
                         <input
                             v-model="customerForm.nomor_hp_pelanggan"
                             type="tel"
@@ -482,7 +463,7 @@ onUnmounted(() => {
 
                     <!-- Payment Method -->
                     <div>
-                        <label class="block text-sm font-medium text-emerald-700 mb-2">Metode Pembayaran</label>
+                        <label class="mb-2 block text-sm font-medium text-emerald-700">Metode Pembayaran</label>
                         <div class="space-y-2">
                             <label class="flex items-center">
                                 <input
@@ -507,7 +488,7 @@ onUnmounted(() => {
 
                     <!-- Cash Payment -->
                     <div v-if="customerForm.metode_pembayaran === 'tunai'">
-                        <label class="block text-sm font-medium text-emerald-700 mb-1">Jumlah Bayar</label>
+                        <label class="mb-1 block text-sm font-medium text-emerald-700">Jumlah Bayar</label>
                         <input
                             v-model="customerForm.bayar"
                             type="number"
@@ -519,9 +500,7 @@ onUnmounted(() => {
                             <span class="text-emerald-700">Kembalian: </span>
                             <span class="font-bold text-emerald-800">{{ formatCurrency(kembalian) }}</span>
                         </div>
-                        <div v-else class="mt-2 text-sm text-red-600">
-                            Jumlah bayar kurang: {{ formatCurrency(Math.abs(kembalian)) }}
-                        </div>
+                        <div v-else class="mt-2 text-sm text-red-600">Jumlah bayar kurang: {{ formatCurrency(Math.abs(kembalian)) }}</div>
                     </div>
 
                     <!-- Summary -->
@@ -534,13 +513,7 @@ onUnmounted(() => {
 
                     <!-- Buttons -->
                     <div class="flex gap-3 pt-4">
-                        <BaseButton
-                            @click="closePaymentModal"
-                            variant="secondary"
-                            class="flex-1"
-                        >
-                            Batal
-                        </BaseButton>
+                        <BaseButton @click="closePaymentModal" variant="secondary" class="flex-1"> Batal </BaseButton>
                         <BaseButton
                             type="submit"
                             variant="primary"
@@ -556,26 +529,14 @@ onUnmounted(() => {
         </div>
 
         <!-- Midtrans Modal -->
-        <div v-if="showMidtransModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white-emerald rounded-lg shadow-emerald-xl p-6 w-full max-w-md mx-4">
-                <h3 class="text-lg font-bold text-emerald-800 mb-4">Pembayaran Digital</h3>
-                <p class="text-emerald-600 mb-4">Klik tombol di bawah untuk melanjutkan pembayaran melalui Midtrans.</p>
-                
+        <div v-if="showMidtransModal" class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+            <div class="shadow-emerald-xl mx-4 w-full max-w-md rounded-lg bg-white-emerald p-6">
+                <h3 class="mb-4 text-lg font-bold text-emerald-800">Pembayaran Digital</h3>
+                <p class="mb-4 text-emerald-600">Klik tombol di bawah untuk melanjutkan pembayaran melalui Midtrans.</p>
+
                 <div class="flex gap-3">
-                    <BaseButton
-                        @click="showMidtransModal = false"
-                        variant="secondary"
-                        class="flex-1"
-                    >
-                        Batal
-                    </BaseButton>
-                    <BaseButton
-                        @click="openMidtransPayment"
-                        variant="primary"
-                        class="flex-1"
-                    >
-                        Bayar Sekarang
-                    </BaseButton>
+                    <BaseButton @click="showMidtransModal = false" variant="secondary" class="flex-1"> Batal </BaseButton>
+                    <BaseButton @click="openMidtransPayment" variant="primary" class="flex-1"> Bayar Sekarang </BaseButton>
                 </div>
             </div>
         </div>

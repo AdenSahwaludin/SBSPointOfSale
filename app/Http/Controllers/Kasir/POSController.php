@@ -27,7 +27,7 @@ class POSController extends Controller
     public function index()
     {
         $products = Product::active()->get();
-        
+
         return Inertia::render('Kasir/POS/Index', [
             'products' => $products
         ]);
@@ -48,7 +48,7 @@ class POSController extends Controller
         return DB::transaction(function () use ($validated) {
             // Generate transaction ID
             $transactionId = $this->generateTransactionId();
-            
+
             // Calculate totals
             $subtotal = 0;
             $totalItem = 0;
@@ -56,7 +56,7 @@ class POSController extends Controller
 
             foreach ($validated['items'] as $item) {
                 $product = Product::find($item['id_produk']);
-                
+
                 // Check stock
                 if ($product->stok < $item['jumlah']) {
                     throw new \Exception("Stok {$product->nama_produk} tidak mencukupi");
@@ -144,7 +144,7 @@ class POSController extends Controller
 
                 try {
                     $snapToken = Snap::getSnapToken($params);
-                    
+
                     return redirect()->back()->with('response', [
                         'success' => true,
                         'transaction_id' => $transactionId,
@@ -173,15 +173,15 @@ class POSController extends Controller
         $statusCode = $request->status_code;
         $grossAmount = $request->gross_amount;
         $serverKey = config('services.midtrans.server_key');
-        
+
         $hashed = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-        
+
         if ($hashed !== $request->signature_key) {
             return response()->json(['status' => 'error', 'message' => 'Invalid signature'], 403);
         }
 
         $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
-        
+
         if (!$transaction) {
             return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
         }
@@ -242,7 +242,7 @@ class POSController extends Controller
     {
         $lastTransaction = Transaction::orderBy('created_at', 'desc')->first();
         $lastNumber = 1;
-        
+
         if ($lastTransaction) {
             $lastId = $lastTransaction->id_transaksi;
             $lastNumber = intval(substr($lastId, 3)) + 1;

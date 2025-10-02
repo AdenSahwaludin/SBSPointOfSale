@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { useNotifications, type Notification } from '@/composables/useNotifications';
-import { computed } from 'vue';
+import { useNotifications } from '@/composables/useNotifications';
 
 const { notifications, removeNotification } = useNotifications();
 
@@ -36,15 +35,12 @@ const getBgClass = (type: string) => {
 </script>
 
 <template>
-    <div class="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+    <div class="fixed top-4 right-4 z-50 max-w-sm space-y-2">
         <transition-group name="notification" tag="div">
             <div
                 v-for="notification in notifications"
                 :key="notification.id"
-                :class="[
-                    'rounded-lg border p-4 shadow-lg',
-                    getBgClass(notification.type)
-                ]"
+                :class="['rounded-lg border p-4 shadow-lg', getBgClass(notification.type)]"
             >
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
@@ -61,7 +57,7 @@ const getBgClass = (type: string) => {
                     <div class="ml-4 flex-shrink-0">
                         <button
                             @click="removeNotification(notification.id)"
-                            class="inline-flex rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            class="inline-flex rounded-md text-gray-400 hover:text-gray-600 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         >
                             <i class="fas fa-times text-sm"></i>
                         </button>

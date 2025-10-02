@@ -1,5 +1,3 @@
-import { computed } from 'vue';
-
 export interface MenuItem {
     name: string;
     href?: string;
@@ -42,23 +40,23 @@ export function useKasirMenuItems(): MenuItem[] {
 }
 
 export function setActiveMenuItem(menuItems: MenuItem[], activeHref: string): MenuItem[] {
-    return menuItems.map(item => {
+    return menuItems.map((item) => {
         if (item.children) {
-            const updatedChildren = item.children.map(child => ({
+            const updatedChildren = item.children.map((child) => ({
                 ...child,
-                active: child.href === activeHref
+                active: child.href === activeHref,
             }));
-            
+
             return {
                 ...item,
                 children: updatedChildren,
-                active: updatedChildren.some(child => child.active)
+                active: updatedChildren.some((child) => child.active),
             };
         }
-        
+
         return {
             ...item,
-            active: item.href === activeHref
+            active: item.href === activeHref,
         };
     });
 }

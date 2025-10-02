@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import NotificationContainer from '@/components/NotificationContainer.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
-import NotificationContainer from '@/components/NotificationContainer.vue';
 
 interface MenuItem {
     name: string;
