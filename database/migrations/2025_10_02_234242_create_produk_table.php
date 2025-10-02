@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -31,14 +30,14 @@ return new class extends Migration
             $table->decimal('harga_tier_pack', 18, 2)->nullable();
             $table->smallInteger('id_kategori')->unsigned();
             $table->timestamps();
-            
+
             $table->index('nama');
             $table->index('id_kategori');
-            
+
             $table->foreign('id_kategori')->references('id_kategori')->on('kategori')
                 ->onUpdate('cascade')->onDelete('restrict');
         });
-        
+
         // Add check constraints
         DB::statement('ALTER TABLE produk ADD CONSTRAINT produk_id_chk CHECK (id_produk REGEXP "^[0-9]{13}$")');
         DB::statement('ALTER TABLE produk ADD CONSTRAINT produk_harga_chk CHECK (harga >= 0)');

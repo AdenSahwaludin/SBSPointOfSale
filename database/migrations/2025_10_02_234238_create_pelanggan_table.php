@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -22,10 +21,10 @@ return new class extends Migration
             $table->boolean('aktif')->default(true);
             $table->date('tanggal_daftar')->default(now());
             $table->timestamps();
-            
+
             $table->index('nama');
         });
-        
+
         // Add check constraint for id_pelanggan format
         DB::statement('ALTER TABLE pelanggan ADD CONSTRAINT pelanggan_id_chk CHECK (id_pelanggan REGEXP "^P[0-9]{3,6}$")');
     }

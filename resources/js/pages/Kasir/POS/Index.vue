@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
-import { useMidtrans } from '@/composables/useMidtrans';
 import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -34,9 +33,6 @@ const props = defineProps<Props>();
 
 // Notifications
 const { success, error } = useNotifications();
-
-// Midtrans integration
-const { createPayment, isLoading: isMidtransLoading } = useMidtrans();
 
 // Menu items dengan active state
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
@@ -157,13 +153,6 @@ function closePaymentModal() {
 }
 
 function processPayment() {
-    // Handle Midtrans payment
-    if (customerForm.metode_pembayaran === 'midtrans') {
-        processMidtransPayment();
-        return;
-    }
-
-    // Handle cash payment
     if (customerForm.metode_pembayaran === 'tunai' && kembalian.value < 0) {
         error('Jumlah bayar kurang', `Kurang Rp ${Math.abs(kembalian.value).toLocaleString('id-ID')}`);
         return;
@@ -208,54 +197,6 @@ function processPayment() {
                 error('Pembayaran gagal', 'Terjadi kesalahan saat memproses pembayaran');
             },
         });
-}
-
-// Handle Midtrans payment
-async function processMidtransPayment() {
-    if (!customerForm.nama_pelanggan || !customerForm.nomor_hp_pelanggan) {
-        error('Data pelanggan diperlukan', 'Mohon lengkapi nama dan nomor HP pelanggan');
-        return;
-    }
-
-    try {
-        const paymentData = {
-            amount: grandTotal.value,
-            customer: {
-                name: customerForm.nama_pelanggan,
-                email: `${customerForm.nama_pelanggan.toLowerCase().replace(/\s+/g, '')}@customer.pos`,
-                phone: customerForm.nomor_hp_pelanggan,
-            },
-            items: cart.value.map((item) => ({
-                id: item.id_produk,
-                price: item.harga,
-                quantity: item.jumlah,
-                name: item.nama_produk,
-            })),
-        };
-
-        await createPayment(paymentData, {
-            onSuccess: (result) => {
-                success('Pembayaran berhasil!', `Order ID: ${result.order_id}`);
-                clearCart();
-                closePaymentModal();
-            },
-            onPending: (result) => {
-                success('Pembayaran tertunda', 'Menunggu konfirmasi pembayaran');
-                clearCart();
-                closePaymentModal();
-            },
-            onError: (result) => {
-                error('Pembayaran gagal', result.finish_redirect_url ? 'Silakan coba lagi' : 'Terjadi kesalahan');
-            },
-            onClose: () => {
-                // User closed popup without completing payment
-                console.log('Payment popup closed');
-            },
-        });
-    } catch (err) {
-        console.error('Midtrans payment error:', err);
-        error('Gagal memproses pembayaran', 'Silakan coba lagi');
-    }
 }
 
 function formatCurrency(amount: number): string {
@@ -492,7 +433,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Payment Modal -->
-        <div v-if="showPaymentModal" class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
+        <div v-if="showPaymentModal" class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
             <div class="shadow-emerald-xl mx-4 w-full max-w-md rounded-lg bg-white-emerald p-6">
                 <h3 class="mb-4 text-lg font-bold text-emerald-800">Pembayaran</h3>
 

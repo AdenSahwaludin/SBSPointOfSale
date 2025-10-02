@@ -47,14 +47,14 @@ class Pelanggan extends Model
     public static function generateNextId(): string
     {
         $lastCustomer = self::orderBy('id_pelanggan', 'desc')->first();
-        
+
         if (!$lastCustomer) {
             return 'P001';
         }
 
-        $lastNumber = (int) substr($lastCustomer->id_pelanggan, 1);
+        $lastNumber = (int)substr($lastCustomer->id_pelanggan, 1);
         $nextNumber = $lastNumber + 1;
-        
+
         return 'P' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
     }
 

@@ -17,9 +17,23 @@ class Produk extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id_produk', 'nama', 'gambar', 'nomor_bpom', 'harga', 'biaya_produk',
-        'stok', 'batas_stok', 'unit', 'pack_unit', 'pack_size', 'harga_pack',
-        'qty_tier1', 'harga_tier1', 'harga_tier_qty', 'harga_tier_pack', 'id_kategori',
+        'id_produk',
+        'nama',
+        'gambar',
+        'nomor_bpom',
+        'harga',
+        'biaya_produk',
+        'stok',
+        'batas_stok',
+        'unit',
+        'pack_unit',
+        'pack_size',
+        'harga_pack',
+        'qty_tier1',
+        'harga_tier1',
+        'harga_tier_qty',
+        'harga_tier_pack',
+        'id_kategori',
     ];
 
     protected $casts = [
@@ -63,13 +77,6 @@ class Produk extends Model
 
     public function getFormattedPriceAttribute(): string
     {
-        return 'Rp ' . number_format((float) $this->harga, 0, ',', '.');
+        return 'Rp ' . number_format((float)$this->harga, 0, ',', '.');
     }
-}space App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class Produk extends Model
-{
-    //
 }
