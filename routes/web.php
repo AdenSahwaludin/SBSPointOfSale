@@ -71,6 +71,12 @@ Route::middleware('auth')->group(function () {
     // Midtrans callback
     Route::post('/midtrans/callback', [POSController::class, 'callback'])->name('midtrans.callback');
 
+    // Payment API routes (moved from api.php for easier CSRF handling)
+    Route::prefix('api/payments')->group(function () {
+        Route::post('/create', [\App\Http\Controllers\Api\PaymentsController::class, 'create'])
+            ->middleware('throttle:30,1');
+    });
+
     // Logout
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::delete('/logout', [LoginController::class, 'destroy'])->name('logout.delete');
