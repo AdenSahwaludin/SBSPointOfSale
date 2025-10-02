@@ -1,14 +1,20 @@
 <script lang="ts" setup>
+import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 
+// Props
+interface Props {
+    nextPrefix: string;
+}
+const props = defineProps<Props>();
 // Menu items dengan active state
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pengguna');
 
-// Form management
+// Form management (suffix only)
 const form = useForm({
-    id_pengguna: '',
+    suffix: '',
     nama: '',
     email: '',
     telepon: '',
@@ -25,6 +31,18 @@ function submit() {
         },
     });
 }
+
+// Handle phone input - only allow numbers
+function handlePhoneInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    // Remove any non-numeric characters
+    const numericValue = value.replace(/[^0-9]/g, '');
+    // Update the form value with only numbers
+    form.telepon = numericValue;
+    // Update the input field display
+    target.value = numericValue;
+}
 </script>
 
 <template>
@@ -38,13 +56,7 @@ function submit() {
                     <h1 class="text-2xl font-bold text-emerald-800">Tambah Pengguna</h1>
                     <p class="text-emerald-600">Buat akun pengguna baru</p>
                 </div>
-                <Link
-                    href="/admin/pengguna"
-                    class="btn-emerald-secondary flex items-center gap-2 transition-all hover:scale-105 emerald-transition"
-                >
-                    <i class="fas fa-arrow-left"></i>
-                    Kembali
-                </Link>
+                <BaseButton @click="$inertia.visit('/admin/pengguna')" variant="secondary" icon="fas fa-arrow-left"> Kembali </BaseButton>
             </div>
 
             <!-- Form -->
@@ -54,15 +66,21 @@ function submit() {
                         <!-- ID Pengguna -->
                         <div>
                             <label class="mb-2 block text-sm font-medium text-emerald-700"> ID Pengguna * </label>
-                            <input
-                                v-model="form.id_pengguna"
-                                type="text"
-                                class="w-full rounded-lg border border-emerald-200 px-3 py-2 focus-emerald transition-all emerald-transition"
-                                placeholder="Contoh: 003-USR"
-                                required
-                            />
-                            <div v-if="form.errors.id_pengguna" class="mt-1 text-sm text-red-600">
-                                {{ form.errors.id_pengguna }}
+                            <div class="flex items-center">
+                                <span class="mr-2 rounded border border-emerald-200 bg-emerald-50 px-3 py-2 font-mono">
+                                    {{ props.nextPrefix }}-
+                                </span>
+                                <input
+                                    v-model="form.suffix"
+                                    type="text"
+                                    maxlength="4"
+                                    class="flex-1 rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    placeholder="4 alfanumerik"
+                                    required
+                                />
+                            </div>
+                            <div v-if="form.errors.suffix" class="mt-1 text-sm text-red-600">
+                                {{ form.errors.suffix }}
                             </div>
                         </div>
 
@@ -71,7 +89,7 @@ function submit() {
                             <label class="mb-2 block text-sm font-medium text-emerald-700"> Role * </label>
                             <select
                                 v-model="form.role"
-                                class="w-full rounded-lg border border-emerald-200 px-3 py-2 focus-emerald transition-all emerald-transition"
+                                class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                 required
                             >
                                 <option value="kasir">Kasir</option>
@@ -88,7 +106,7 @@ function submit() {
                             <input
                                 v-model="form.nama"
                                 type="text"
-                                class="w-full rounded-lg border border-emerald-200 px-3 py-2 focus-emerald transition-all emerald-transition"
+                                class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                 placeholder="Nama lengkap"
                                 required
                             />
@@ -103,7 +121,7 @@ function submit() {
                             <input
                                 v-model="form.email"
                                 type="email"
-                                class="w-full rounded-lg border border-emerald-200 px-3 py-2 focus-emerald transition-all emerald-transition"
+                                class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                 placeholder="email@contoh.com"
                                 required
                             />
@@ -118,7 +136,10 @@ function submit() {
                             <input
                                 v-model="form.telepon"
                                 type="tel"
-                                class="w-full rounded-lg border border-emerald-200 px-3 py-2 focus-emerald transition-all emerald-transition"
+                                maxlength="15"
+                                pattern="[0-9]*"
+                                @input="handlePhoneInput"
+                                class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                 placeholder="08xxxxxxxxxx"
                             />
                             <div v-if="form.errors.telepon" class="mt-1 text-sm text-red-600">
@@ -132,7 +153,7 @@ function submit() {
                             <input
                                 v-model="form.password"
                                 type="password"
-                                class="w-full rounded-lg border border-emerald-200 px-3 py-2 focus-emerald transition-all emerald-transition"
+                                class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                 placeholder="Minimal 6 karakter"
                                 required
                             />
@@ -144,17 +165,11 @@ function submit() {
 
                     <!-- Submit Button -->
                     <div class="flex justify-end gap-3 border-t border-emerald-200 pt-6">
-                        <Link href="/admin/pengguna" class="btn-emerald-secondary transition-all hover:scale-105 emerald-transition">
-                            Batal
-                        </Link>
-                        <button
-                            type="submit"
-                            :disabled="form.processing"
-                            class="btn-emerald-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:scale-105 hover:shadow-emerald emerald-hover-glow"
-                        >
+                        <BaseButton @click="$inertia.visit('/admin/pengguna')" variant="secondary"> Batal </BaseButton>
+                        <BaseButton type="submit" variant="primary" :disabled="form.processing" :loading="form.processing">
                             <span v-if="form.processing">Menyimpan...</span>
                             <span v-else>Simpan Pengguna</span>
-                        </button>
+                        </BaseButton>
                     </div>
                 </form>
             </div>

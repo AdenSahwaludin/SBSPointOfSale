@@ -113,7 +113,7 @@ const quickActions = [
         <Head title="Kasir Dashboard" />
 
         <!-- Welcome Section -->
-        <div class="mb-8 rounded-2xl bg-emerald-gradient-subtle-2 p-6 text-white shadow-emerald-xl">
+        <div class="bg-emerald-gradient-subtle-2 shadow-emerald-xl mb-8 rounded-2xl p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="mb-2 text-2xl font-bold drop-shadow-sm">Selamat bekerja, {{ user?.nama }}! 🌿</h2>
@@ -147,7 +147,7 @@ const quickActions = [
                     'col-span-1 md:col-span-2': action.primary,
                     'col-span-1': !action.primary,
                 }"
-                class="block transform rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-emerald-xl emerald-transition emerald-hover-scale"
+                class="hover:shadow-emerald-xl emerald-transition emerald-hover-scale block transform rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1"
             >
                 <div
                     :class="{
@@ -155,7 +155,7 @@ const quickActions = [
                         'bg-emerald-gradient-subtle-2': action.color === 'blue',
                         'bg-emerald-gradient-light': action.color === 'purple',
                     }"
-                    class="rounded-2xl p-6 text-white shadow-emerald"
+                    class="shadow-emerald rounded-2xl p-6 text-white"
                 >
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
@@ -175,7 +175,7 @@ const quickActions = [
             <div
                 v-for="stat in todayStats"
                 :key="stat.title"
-                class="card-emerald transition-all duration-200 hover:shadow-emerald-lg hover:scale-105 emerald-transition"
+                class="card-emerald hover:shadow-emerald-lg emerald-transition transition-all duration-200 hover:scale-105"
             >
                 <div class="flex items-center justify-between">
                     <div class="flex-1">
@@ -215,7 +215,9 @@ const quickActions = [
                 <div class="border-b border-emerald-100 p-6">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-emerald-800">Transaksi Saya Hari Ini</h3>
-                        <a href="/kasir/transactions" class="text-sm font-medium text-emerald-600 hover:text-emerald-700 emerald-transition"> Lihat Semua </a>
+                        <a href="/kasir/transactions" class="emerald-transition text-sm font-medium text-emerald-600 hover:text-emerald-700">
+                            Lihat Semua
+                        </a>
                     </div>
                 </div>
                 <div class="p-6">
@@ -223,7 +225,7 @@ const quickActions = [
                         <div
                             v-for="transaction in myTransactions"
                             :key="transaction.id"
-                            class="flex items-center justify-between rounded-xl bg-emerald-50 p-4 transition-all hover:bg-emerald-100 hover:scale-105 emerald-transition"
+                            class="emerald-transition flex items-center justify-between rounded-xl bg-emerald-50 p-4 transition-all hover:scale-105 hover:bg-emerald-100"
                         >
                             <div class="flex items-center space-x-4">
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
@@ -257,7 +259,7 @@ const quickActions = [
                             <span class="text-sm font-medium text-emerald-700">28/30</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-emerald-100">
-                            <div class="h-2 rounded-full bg-emerald-gradient-subtle-1" style="width: 93%"></div>
+                            <div class="bg-emerald-gradient-subtle-1 h-2 rounded-full" style="width: 93%"></div>
                         </div>
 
                         <div class="flex items-center justify-between">
@@ -265,13 +267,13 @@ const quickActions = [
                             <span class="text-sm font-medium text-emerald-700">Rp 1.25jt/1.5jt</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-emerald-100">
-                            <div class="h-2 rounded-full bg-emerald-gradient-subtle-2" style="width: 83%"></div>
+                            <div class="bg-emerald-gradient-subtle-2 h-2 rounded-full" style="width: 83%"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Tips Card -->
-                <div class="rounded-xl border border-emerald-200 bg-emerald-gradient-soft p-6 shadow-emerald">
+                <div class="bg-emerald-gradient-soft shadow-emerald rounded-xl border border-emerald-200 p-6">
                     <div class="flex items-start space-x-3">
                         <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-200 text-emerald-700">
                             <i class="fas fa-lightbulb"></i>

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
+import NotificationContainer from '@/components/NotificationContainer.vue';
 
 interface MenuItem {
     name: string;
@@ -93,7 +94,9 @@ onMounted(() => {
             class="shadow-emerald-xl fixed inset-y-0 left-0 z-50 transform border-r border-emerald-200/30 bg-white-emerald/95 backdrop-blur-xl transition-all duration-500 ease-in-out"
         >
             <!-- Logo Header -->
-            <div class="bg-emerald-gradient-subtle-2 shadow-emerald-lg relative flex h-21 items-center justify-center overflow-hidden text-white">
+            <div
+                class="shadow-emerald-lg relative flex h-21 items-center justify-center overflow-hidden bg-gradient-to-b from-emerald-200 to-emerald-100 text-black"
+            >
                 <div
                     v-if="isSidebarOpen"
                     class="flex translate-x-0 transform items-center space-x-3 opacity-100 transition-all duration-500 ease-in-out"
@@ -303,6 +306,9 @@ onMounted(() => {
             </main>
         </div>
     </div>
+
+    <!-- Notification Container -->
+    <NotificationContainer />
 </template>
 
 <style scoped>

@@ -26,7 +26,7 @@ class LoginController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'login' => 'Password yang anda masukan salah.',
+                'login' => 'Email atau Password anda salah.',
             ]);
         }
 

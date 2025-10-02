@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\PenggunaController;
+use App\Http\Controllers\Kasir\POSController;
 
 // Root redirect - jika user sudah login redirect ke dashboard sesuai role, jika belum ke login
 Route::get('/', function () {
@@ -47,7 +48,7 @@ Route::middleware('auth')->group(function () {
             'update' => 'admin.pengguna.update',
             'destroy' => 'admin.pengguna.destroy',
         ]);
-        
+
         // Reset password pengguna
         Route::post('pengguna/{id}/reset-password', [PenggunaController::class, 'resetPassword'])
             ->name('admin.pengguna.reset-password');
@@ -56,12 +57,19 @@ Route::middleware('auth')->group(function () {
     // Kasir routes
     Route::prefix('kasir')->middleware('auth')->group(function () {
         Route::inertia('/', 'Kasir/Dashboard')->name('kasir.dashboard');
-        Route::inertia('/pos', 'Kasir/POS')->name('kasir.pos');
+        
+        // Point of Sale
+        Route::get('/pos', [POSController::class, 'index'])->name('kasir.pos');
+        Route::post('/pos', [POSController::class, 'store'])->name('kasir.pos.store');
+        
         Route::inertia('/transactions', 'Kasir/Transactions')->name('kasir.transactions');
         Route::get('/profile', [ProfileController::class, 'show'])->name('kasir.profile');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('kasir.profile.update');
         Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('kasir.profile.password');
     });
+
+    // Midtrans callback
+    Route::post('/midtrans/callback', [POSController::class, 'callback'])->name('midtrans.callback');
 
     // Logout
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');

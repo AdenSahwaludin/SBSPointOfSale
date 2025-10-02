@@ -42,9 +42,7 @@ export function useAdminMenuItems() {
 export function setActiveMenuItem(menuItems: any[], activePath: string) {
     return menuItems.map((item) => {
         if (item.children) {
-            const activeChild = item.children.find((child: any) => 
-                child.href === activePath || activePath.startsWith(child.href + '/')
-            );
+            const activeChild = item.children.find((child: any) => child.href === activePath || activePath.startsWith(child.href + '/'));
             return {
                 ...item,
                 active: !!activeChild, // Set parent as active if child is active

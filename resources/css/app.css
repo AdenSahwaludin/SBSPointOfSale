@@ -5,7 +5,7 @@
 
 @theme inline {
     --font-sans: Instrument Sans, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    
+
     /* Beautiful Emerald Color Palette for SBS */
     --color-emerald-25: #f0fdf4;
     --color-emerald-50: #ecfdf5;
@@ -19,7 +19,7 @@
     --color-emerald-800: #065f46;
     --color-emerald-900: #064e3b;
     --color-emerald-950: #022c22;
-    
+
     /* Soft greenish white colors */
     --color-white-soft: #fefffe;
     --color-white-emerald: #fcfefd;
@@ -41,11 +41,11 @@
     --emerald-secondary: var(--color-emerald-500);
     --emerald-accent: var(--color-emerald-400);
     --emerald-light: var(--color-emerald-100);
-    
+
     /* Soft white colors */
     --white-soft: var(--color-white-soft);
     --white-emerald: var(--color-white-emerald);
-    
+
     /* Beautiful emerald gradients - subtle differences */
     --emerald-gradient-primary: linear-gradient(135deg, var(--color-emerald-500) 0%, var(--color-emerald-400) 100%);
     --emerald-gradient-secondary: linear-gradient(135deg, var(--color-emerald-400) 0%, var(--color-emerald-300) 100%);
@@ -53,7 +53,7 @@
     --emerald-gradient-hero: linear-gradient(135deg, var(--color-emerald-600) 0%, var(--color-emerald-500) 50%, var(--color-emerald-400) 100%);
     --emerald-gradient-soft: linear-gradient(135deg, var(--color-emerald-50) 0%, var(--color-emerald-100) 100%);
     --emerald-gradient-bg: linear-gradient(135deg, var(--color-gray-soft-50) 0%, var(--color-emerald-25) 100%);
-    
+
     /* Even more subtle gradients */
     --emerald-gradient-subtle-1: linear-gradient(135deg, var(--color-emerald-400) 0%, var(--color-emerald-400) 40%, var(--color-emerald-300) 100%);
     --emerald-gradient-subtle-2: linear-gradient(135deg, var(--color-emerald-500) 0%, var(--color-emerald-500) 40%, var(--color-emerald-400) 100%);
@@ -154,15 +154,21 @@
 }
 
 .shadow-emerald {
-    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.1), 0 2px 4px -1px rgba(5, 150, 105, 0.06);
+    box-shadow:
+        0 4px 6px -1px rgba(5, 150, 105, 0.1),
+        0 2px 4px -1px rgba(5, 150, 105, 0.06);
 }
 
 .shadow-emerald-lg {
-    box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.1), 0 4px 6px -2px rgba(5, 150, 105, 0.05);
+    box-shadow:
+        0 10px 15px -3px rgba(5, 150, 105, 0.1),
+        0 4px 6px -2px rgba(5, 150, 105, 0.05);
 }
 
 .shadow-emerald-xl {
-    box-shadow: 0 20px 25px -5px rgba(5, 150, 105, 0.1), 0 10px 10px -5px rgba(5, 150, 105, 0.04);
+    box-shadow:
+        0 20px 25px -5px rgba(5, 150, 105, 0.1),
+        0 10px 10px -5px rgba(5, 150, 105, 0.04);
 }
 
 /* Smooth animations for emerald components */

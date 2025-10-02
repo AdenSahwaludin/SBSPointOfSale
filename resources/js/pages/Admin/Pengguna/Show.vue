@@ -1,7 +1,8 @@
 <script lang="ts" setup>
+import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 
 interface Pengguna {
     id_pengguna: string;
@@ -24,9 +25,7 @@ const props = defineProps<Props>();
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pengguna');
 
 function getRoleBadgeClass(role: string) {
-    return role === 'admin' 
-        ? 'bg-emerald-100 text-emerald-700 border-emerald-200' 
-        : 'bg-emerald-200 text-emerald-800 border-emerald-300';
+    return role === 'admin' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-emerald-200 text-emerald-800 border-emerald-300';
 }
 
 function formatDate(dateString?: string) {
@@ -47,29 +46,19 @@ function formatDate(dateString?: string) {
                     <p class="text-emerald-600">Informasi lengkap pengguna</p>
                 </div>
                 <div class="flex gap-3">
-                    <Link
-                        :href="`/admin/pengguna/${pengguna.id_pengguna}/edit`"
-                        class="flex items-center gap-2 rounded-lg bg-emerald-gradient-subtle-1 px-4 py-2 text-white transition-all hover:scale-105 hover:shadow-emerald emerald-transition emerald-hover-glow"
-                    >
-                        <i class="fas fa-edit"></i>
+                    <BaseButton @click="$inertia.visit(`/admin/pengguna/${pengguna.id_pengguna}/edit`)" variant="primary" icon="fas fa-edit">
                         Edit
-                    </Link>
-                    <Link
-                        href="/admin/pengguna"
-                        class="flex items-center gap-2 rounded-lg bg-gray-soft-100 px-4 py-2 text-emerald-700 transition-all hover:bg-gray-soft-200 hover:scale-105 emerald-transition"
-                    >
-                        <i class="fas fa-arrow-left"></i>
-                        Kembali
-                    </Link>
+                    </BaseButton>
+                    <BaseButton @click="$inertia.visit('/admin/pengguna')" variant="secondary" icon="fas fa-arrow-left"> Kembali </BaseButton>
                 </div>
             </div>
 
             <!-- User Profile Card -->
-            <div class="overflow-hidden rounded-lg border border-emerald-200 bg-white-emerald shadow-emerald">
+            <div class="shadow-emerald overflow-hidden rounded-lg border border-emerald-200 bg-white-emerald">
                 <!-- Header Profile -->
                 <div class="bg-emerald-gradient-subtle-2 px-6 py-8">
                     <div class="flex items-center gap-6">
-                        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white-emerald shadow-emerald">
+                        <div class="shadow-emerald flex h-20 w-20 items-center justify-center rounded-full bg-white-emerald">
                             <i class="fas fa-user text-3xl text-emerald-600"></i>
                         </div>
                         <div class="text-white">
@@ -77,7 +66,7 @@ function formatDate(dateString?: string) {
                             <p class="mb-2 text-emerald-100 drop-shadow-sm">{{ pengguna.id_pengguna }}</p>
                             <span
                                 :class="getRoleBadgeClass(pengguna.role)"
-                                class="inline-flex rounded-full border bg-white-emerald px-3 py-1 text-sm font-semibold shadow-emerald-sm"
+                                class="shadow-emerald-sm inline-flex rounded-full border bg-white-emerald px-3 py-1 text-sm font-semibold"
                             >
                                 {{ pengguna.role.toUpperCase() }}
                             </span>
@@ -86,7 +75,7 @@ function formatDate(dateString?: string) {
                 </div>
 
                 <!-- Profile Details -->
-                <div class="p-6 bg-white-emerald">
+                <div class="bg-white-emerald p-6">
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Contact Information -->
                         <div class="space-y-4">
@@ -166,26 +155,15 @@ function formatDate(dateString?: string) {
             </div>
 
             <!-- Action Buttons -->
-            <div class="rounded-lg border border-emerald-200 bg-white-emerald p-6 shadow-emerald">
+            <div class="shadow-emerald rounded-lg border border-emerald-200 bg-white-emerald p-6">
                 <h3 class="mb-4 text-lg font-semibold text-emerald-800">Aksi</h3>
                 <div class="flex gap-3">
-                    <Link
-                        :href="`/admin/pengguna/${pengguna.id_pengguna}/edit`"
-                        class="flex items-center gap-2 rounded-lg bg-emerald-gradient-subtle-2 px-4 py-2 text-white transition-all hover:scale-105 hover:shadow-emerald emerald-transition emerald-hover-glow"
-                    >
-                        <i class="fas fa-edit"></i>
+                    <BaseButton @click="$inertia.visit(`/admin/pengguna/${pengguna.id_pengguna}/edit`)" variant="primary" icon="fas fa-edit">
                         Edit Pengguna
-                    </Link>
+                    </BaseButton>
 
                     <!-- Reset Password (future feature) -->
-                    <button
-                        class="flex items-center gap-2 rounded-lg bg-gray-soft-200 px-4 py-2 text-gray-soft-600 transition-all cursor-not-allowed opacity-50"
-                        disabled
-                        title="Fitur akan datang"
-                    >
-                        <i class="fas fa-key"></i>
-                        Reset Password
-                    </button>
+                    <BaseButton variant="secondary" icon="fas fa-key" :disabled="true" title="Fitur akan datang"> Reset Password </BaseButton>
                 </div>
             </div>
         </div>

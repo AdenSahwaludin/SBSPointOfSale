@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import BaseButton from '@/components/BaseButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -53,7 +53,7 @@ function resetPassword() {
         },
         onError: () => {
             alert('Gagal mereset password');
-        }
+        },
     });
 }
 
@@ -63,6 +63,13 @@ function openResetPasswordModal() {
 
 function closeResetPasswordModal() {
     showResetPasswordModal.value = false;
+}
+
+// Handle phone input - only allow numbers
+function handlePhoneInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value.replace(/[^0-9]/g, '');
+    form.telepon = value;
 }
 </script>
 
@@ -79,18 +86,12 @@ function closeResetPasswordModal() {
                 </div>
                 <div class="flex gap-3">
                     <!-- Reset Password Button -->
-                    <BaseButton
-                        variant="warning"
-                        icon="fas fa-key"
-                        @click="openResetPasswordModal"
-                    >
-                        Reset Password
-                    </BaseButton>
-                    
+                    <BaseButton variant="warning" icon="fas fa-key" @click="openResetPasswordModal"> Reset Password </BaseButton>
+
                     <!-- Back Button -->
                     <Link
                         href="/admin/pengguna"
-                        class="flex items-center gap-2 rounded-lg bg-emerald-100 border border-emerald-300 px-4 py-2 text-emerald-700 transition-all hover:bg-emerald-200 hover:scale-105 emerald-transition"
+                        class="emerald-transition flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-100 px-4 py-2 text-emerald-700 transition-all hover:scale-105 hover:bg-emerald-200"
                     >
                         <i class="fas fa-arrow-left"></i>
                         Kembali
@@ -99,7 +100,7 @@ function closeResetPasswordModal() {
             </div>
 
             <!-- Form -->
-            <div class="rounded-lg border border-emerald-200 bg-white-emerald p-6 shadow-emerald">
+            <div class="shadow-emerald rounded-lg border border-emerald-200 bg-white-emerald p-6">
                 <form @submit.prevent="submit" class="space-y-6">
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- ID Pengguna (Read Only) -->
@@ -166,6 +167,9 @@ function closeResetPasswordModal() {
                             <input
                                 v-model="form.telepon"
                                 type="tel"
+                                maxlength="15"
+                                pattern="[0-9]*"
+                                @input="handlePhoneInput"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 placeholder="08xxxxxxxxxx"
                             />
@@ -192,21 +196,9 @@ function closeResetPasswordModal() {
 
                     <!-- Submit Button -->
                     <div class="flex justify-end gap-3 border-t border-gray-200 pt-6">
-                        <BaseButton
-                            variant="secondary"
-                            size="lg"
-                            @click="$inertia.visit('/admin/pengguna')"
-                        >
-                            Batal
-                        </BaseButton>
-                        
-                        <BaseButton
-                            type="submit"
-                            variant="primary"
-                            size="lg"
-                            :loading="form.processing"
-                            :disabled="form.processing"
-                        >
+                        <BaseButton variant="secondary" size="lg" @click="$inertia.visit('/admin/pengguna')"> Batal </BaseButton>
+
+                        <BaseButton type="submit" variant="primary" size="lg" :loading="form.processing" :disabled="form.processing">
                             <span v-if="form.processing">Menyimpan...</span>
                             <span v-else>Simpan Perubahan</span>
                         </BaseButton>
@@ -218,28 +210,19 @@ function closeResetPasswordModal() {
         <!-- Reset Password Modal -->
         <div
             v-if="showResetPasswordModal"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"
             @click.self="closeResetPasswordModal"
         >
-            <div class="w-full max-w-md rounded-lg bg-white-emerald p-6 shadow-emerald border border-emerald-200">
+            <div class="shadow-emerald w-full max-w-md rounded-lg border border-emerald-200 bg-white-emerald p-6">
                 <div class="mb-4">
                     <h3 class="text-lg font-semibold text-emerald-800">Reset Password</h3>
-                    <p class="text-emerald-600">
-                        Apakah Anda yakin ingin mereset password untuk pengguna "{{ pengguna.nama }}"?
-                    </p>
-                    <p class="mt-2 text-sm text-gray-600">
-                        Password akan direset ke default: <code class="bg-gray-100 px-1 rounded">123456</code>
-                    </p>
+                    <p class="text-emerald-600">Apakah Anda yakin ingin mereset password untuk pengguna "{{ pengguna.nama }}"?</p>
+                    <p class="mt-2 text-sm text-gray-600">Password akan direset ke default: <code class="rounded bg-gray-100 px-1">123456</code></p>
                 </div>
 
                 <div class="flex justify-end gap-3">
-                    <BaseButton
-                        variant="secondary"
-                        @click="closeResetPasswordModal"
-                    >
-                        Batal
-                    </BaseButton>
-                    
+                    <BaseButton variant="secondary" @click="closeResetPasswordModal"> Batal </BaseButton>
+
                     <BaseButton
                         variant="warning"
                         icon="fas fa-key"
