@@ -158,7 +158,7 @@ class TransaksiPOSController extends Controller
                 'metode' => $request->metode_bayar,
                 'jumlah' => $request->total,
                 'tanggal' => now(),
-                'keterangan' => $request->metode_bayar === 'TUNAI' 
+                'keterangan' => $request->metode_bayar === 'TUNAI'
                     ? 'Pembayaran tunai - Kembalian: Rp ' . number_format($request->jumlah_bayar - $request->total, 0, ',', '.')
                     : 'Pembayaran ' . $request->metode_bayar,
             ]);

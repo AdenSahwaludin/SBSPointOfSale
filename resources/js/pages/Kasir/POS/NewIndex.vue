@@ -253,39 +253,39 @@ function processTransaction() {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         },
-        body: JSON.stringify(requestData)
+        body: JSON.stringify(requestData),
     })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Response data:', data);
-        if (data.success) {
-            // Handle successful transaction
-            addNotification({
-                type: 'success',
-                title: 'Transaksi berhasil disimpan!',
-            });
-            clearCart();
-            resetForm();
-        } else {
+        .then((response) => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then((data) => {
+            console.log('Response data:', data);
+            if (data.success) {
+                // Handle successful transaction
+                addNotification({
+                    type: 'success',
+                    title: 'Transaksi berhasil disimpan!',
+                });
+                clearCart();
+                resetForm();
+            } else {
+                addNotification({
+                    type: 'error',
+                    title: data.message || 'Gagal menyimpan transaksi!',
+                });
+            }
+        })
+        .catch((error) => {
             addNotification({
                 type: 'error',
-                title: data.message || 'Gagal menyimpan transaksi!',
+                title: 'Gagal menyimpan transaksi!',
             });
-        }
-    })
-    .catch(error => {
-        addNotification({
-            type: 'error',
-            title: 'Gagal menyimpan transaksi!',
+            console.error('Transaction error:', error);
+        })
+        .finally(() => {
+            transactionForm.processing = false;
         });
-        console.error('Transaction error:', error);
-    })
-    .finally(() => {
-        transactionForm.processing = false;
-    });
 }
 
 function resetForm() {

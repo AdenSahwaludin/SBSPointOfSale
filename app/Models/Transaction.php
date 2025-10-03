@@ -48,9 +48,4 @@ class Transaction extends Model
     {
         return $this->belongsTo(User::class, 'id_kasir', 'id_pengguna');
     }
-
-    public function items()
-    {
-        return $this->hasMany(TransactionItem::class, 'id_transaksi', 'id_transaksi');
-    }
 }
