@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('kasir')->middleware('auth')->group(function () {
         Route::inertia('/', 'Kasir/Dashboard')->name('kasir.dashboard');
 
-        // Point of Sale (Updated untuk Produk Model)
+        // Point of Sale (Menggunakan Database Produk)
         Route::get('/pos', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'index'])->name('kasir.pos');
         Route::post('/pos', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'store'])->name('kasir.pos.store');
         Route::get('/pos/search-produk', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'searchProduk'])->name('kasir.pos.search-produk');
@@ -65,15 +65,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/pos/receipt/{nomorTransaksi}', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'getTransactionReceipt'])->name('kasir.pos.receipt');
         Route::get('/pos/today-transactions', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'getTodayTransactions'])->name('kasir.pos.today');
         Route::post('/pos/cancel/{nomorTransaksi}', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'cancelTransaction'])->name('kasir.pos.cancel');
-
-        // Point of Sale (New - Sesuai Database Schema)
-        Route::get('/pos-new', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'index'])->name('kasir.pos.new');
-        Route::post('/pos-new', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'store'])->name('kasir.pos.new.store');
-        Route::get('/pos-new/search-produk', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'searchProduk'])->name('kasir.pos.search-produk');
-        Route::get('/pos-new/produk/{barcode}', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'getProdukByBarcode'])->name('kasir.pos.produk');
-        Route::get('/pos-new/receipt/{nomorTransaksi}', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'getTransactionReceipt'])->name('kasir.pos.receipt');
-        Route::get('/pos-new/today-transactions', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'getTodayTransactions'])->name('kasir.pos.today');
-        Route::post('/pos-new/cancel/{nomorTransaksi}', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'cancelTransaction'])->name('kasir.pos.cancel');
 
         Route::inertia('/transactions', 'Kasir/Transactions')->name('kasir.transactions');
         Route::get('/profile', [ProfileController::class, 'show'])->name('kasir.profile');
