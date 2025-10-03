@@ -46,21 +46,21 @@ class Pembayaran extends Model
     public static function generateIdPembayaran(): string
     {
         $today = Carbon::now()->format('Ymd');
-        
+
         // Cari pembayaran terakhir hari ini
         $lastPayment = self::where('id_pembayaran', 'like', "PAY-{$today}-%")
             ->orderBy('id_pembayaran', 'desc')
             ->first();
-        
+
         $sequence = 1;
         if ($lastPayment) {
             // Extract sequence dari ID terakhir
             $parts = explode('-', $lastPayment->id_pembayaran);
             if (count($parts) >= 3) {
-                $sequence = (int) $parts[2] + 1;
+                $sequence = (int)$parts[2] + 1;
             }
         }
-        
+
         return sprintf('PAY-%s-%07d', $today, $sequence);
     }
 
@@ -69,6 +69,6 @@ class Pembayaran extends Model
      */
     public function getFormattedJumlahAttribute(): string
     {
-        return 'Rp ' . number_format((float) $this->jumlah, 0, ',', '.');
+        return 'Rp ' . number_format((float)$this->jumlah, 0, ',', '.');
     }
 }

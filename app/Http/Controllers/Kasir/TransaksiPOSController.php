@@ -24,7 +24,7 @@ class TransaksiPOSController extends Controller
     {
         return Inertia::render('Kasir/POS/NewIndex', [
             'produk' => Produk::with('kategori')->inStock()->get(),
-            'kategori' => Kategori::with('produk')->get(),
+            'kategori' => Kategori::all(),
             'pelanggan' => Pelanggan::active()->get(),
             'metodeBayar' => [
                 'TUNAI' => 'Tunai',
@@ -48,17 +48,15 @@ class TransaksiPOSController extends Controller
     public function searchProduk(Request $request)
     {
         $query = $request->get('q');
-        
+
         $produk = Produk::with('kategori')
             ->where(function ($q) use ($query) {
                 $q->where('id_produk', 'like', "%{$query}%")
-                  ->orWhere('nama', 'like', "%{$query}%");
+                    ->orWhere('nama', 'like', "%{$query}%");
             })
             ->inStock()
             ->limit(10)
-            ->get();
-
-        return response()->json($produk);
+            ->get();        return response()->json($produk);
     }
 
     /**
@@ -67,7 +65,7 @@ class TransaksiPOSController extends Controller
     public function getProdukByBarcode(Request $request)
     {
         $barcode = $request->get('barcode');
-        
+
         $produk = Produk::with('kategori')
             ->where('id_produk', $barcode)
             ->inStock()
@@ -123,42 +121,37 @@ class TransaksiPOSController extends Controller
                 'paid_at' => $request->metode_bayar === 'TUNAI' ? now() : null,
             ]);
 
-            // Create transaction details and update stock
             foreach ($request->items as $item) {
                 $produk = Produk::find($item['id_produk']);
-                
-                // Calculate quantity to reduce from stock
-                $qtyToReduce = $item['jumlah'];
-                if ($item['mode_qty'] === 'pack') {
-                    $qtyToReduce *= $produk->pack_size;
+
+                // Check stock
+                if ($produk->stok < $item['jumlah']) {
+                    throw new \Exception("Stok {$produk->nama} tidak mencukupi");
                 }
 
-                // Check stock availability
-                if ($produk->stok < $qtyToReduce) {
-                    throw new \Exception("Stok tidak cukup untuk produk {$produk->nama}");
-                }
+                $packSizeSnapshot = $item['mode_qty'] === 'pack' ? $produk->pack_size : 1;
 
-                // Create detail
                 TransaksiDetail::create([
                     'nomor_transaksi' => $nomorTransaksi,
-                    'id_produk' => $item['id_produk'],
+                    'id_produk' => $produk->id_produk,
                     'nama_produk' => $produk->nama,
                     'harga_satuan' => $item['harga_satuan'],
                     'jumlah' => $item['jumlah'],
                     'mode_qty' => $item['mode_qty'],
-                    'pack_size_snapshot' => $produk->pack_size,
-                    'diskon_item' => $item['diskon_item'] ?? 0,
-                    'subtotal' => $item['jumlah'] * $item['harga_satuan'] - ($item['diskon_item'] ?? 0),
+                    'pack_size_snapshot' => $packSizeSnapshot,
+                    'diskon_item' => 0,
+                    'subtotal' => $item['harga_satuan'] * $item['jumlah'],
                 ]);
 
-                // Update stock
-                $produk->decrement('stok', $qtyToReduce);
+                // Update stock - kalikan dengan pack_size jika mode_qty = pack
+                $stockDeduction = $item['mode_qty'] === 'pack' ? $item['jumlah'] * $packSizeSnapshot : $item['jumlah'];
+                $produk->decrement('stok', $stockDeduction);
             }
 
             // Create payment record if cash
             if ($request->metode_bayar === 'TUNAI') {
                 $idPembayaran = Pembayaran::generateIdPembayaran();
-                
+
                 Pembayaran::create([
                     'id_pembayaran' => $idPembayaran,
                     'id_transaksi' => $nomorTransaksi,
@@ -184,7 +177,7 @@ class TransaksiPOSController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menyimpan transaksi: ' . $e->getMessage()
@@ -233,7 +226,7 @@ class TransaksiPOSController extends Controller
             DB::beginTransaction();
 
             $transaksi = Transaksi::with('detail.produk')->find($nomorTransaksi);
-            
+
             if (!$transaksi) {
                 return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
             }
@@ -248,7 +241,7 @@ class TransaksiPOSController extends Controller
                 if ($detail->mode_qty === 'pack') {
                     $qtyToRestore *= $detail->pack_size_snapshot;
                 }
-                
+
                 $detail->produk->increment('stok', $qtyToRestore);
             }
 
@@ -266,7 +259,7 @@ class TransaksiPOSController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membatalkan transaksi: ' . $e->getMessage()

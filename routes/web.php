@@ -6,7 +6,6 @@ use Inertia\Inertia;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\PenggunaController;
-use App\Http\Controllers\Kasir\POSController;
 
 // Root redirect - jika user sudah login redirect ke dashboard sesuai role, jika belum ke login
 Route::get('/', function () {
@@ -58,9 +57,14 @@ Route::middleware('auth')->group(function () {
     Route::prefix('kasir')->middleware('auth')->group(function () {
         Route::inertia('/', 'Kasir/Dashboard')->name('kasir.dashboard');
 
-        // Point of Sale (Old)
-        Route::get('/pos', [POSController::class, 'index'])->name('kasir.pos');
-        Route::post('/pos', [POSController::class, 'store'])->name('kasir.pos.store');
+        // Point of Sale (Updated untuk Produk Model)
+        Route::get('/pos', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'index'])->name('kasir.pos');
+        Route::post('/pos', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'store'])->name('kasir.pos.store');
+        Route::get('/pos/search-produk', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'searchProduk'])->name('kasir.pos.search-produk');
+        Route::get('/pos/produk/{barcode}', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'getProdukByBarcode'])->name('kasir.pos.produk');
+        Route::get('/pos/receipt/{nomorTransaksi}', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'getTransactionReceipt'])->name('kasir.pos.receipt');
+        Route::get('/pos/today-transactions', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'getTodayTransactions'])->name('kasir.pos.today');
+        Route::post('/pos/cancel/{nomorTransaksi}', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'cancelTransaction'])->name('kasir.pos.cancel');
 
         // Point of Sale (New - Sesuai Database Schema)
         Route::get('/pos-new', [App\Http\Controllers\Kasir\TransaksiPOSController::class, 'index'])->name('kasir.pos.new');
@@ -76,9 +80,6 @@ Route::middleware('auth')->group(function () {
         Route::patch('/profile', [ProfileController::class, 'update'])->name('kasir.profile.update');
         Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('kasir.profile.password');
     });
-
-    // Midtrans callback
-    Route::post('/midtrans/callback', [POSController::class, 'callback'])->name('midtrans.callback');
 
     // Logout
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');

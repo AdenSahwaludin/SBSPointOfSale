@@ -88,21 +88,21 @@ class Transaksi extends Model
         $today = Carbon::now();
         $year = $today->format('Y');
         $month = $today->format('m');
-        
+
         // Cari transaksi terakhir hari ini
         $lastTransaction = self::where('nomor_transaksi', 'like', "INV-{$year}-{$month}-%")
             ->orderBy('nomor_transaksi', 'desc')
             ->first();
-        
+
         $sequence = 1;
         if ($lastTransaction) {
             // Extract sequence dari nomor transaksi terakhir
             $parts = explode('-', $lastTransaction->nomor_transaksi);
             if (count($parts) >= 4) {
-                $sequence = (int) $parts[3] + 1;
+                $sequence = (int)$parts[3] + 1;
             }
         }
-        
+
         return sprintf('INV-%s-%s-%03d-%s', $year, $month, $sequence, $idPelanggan);
     }
 
@@ -135,6 +135,6 @@ class Transaksi extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return 'Rp ' . number_format((float) $this->total, 0, ',', '.');
+        return 'Rp ' . number_format((float)$this->total, 0, ',', '.');
     }
 }
