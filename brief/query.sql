@@ -11,7 +11,7 @@ USE `sbs`;
 -- ======================================================================
 CREATE TABLE IF NOT EXISTS `kategori` (
   `id_kategori` SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nama`        VARCHAR(100)      NOT NULL,
+  `nama`        VARCHAR(50)      NOT NULL,
   `created_at`  TIMESTAMP         NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`  TIMESTAMP         NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `kategori_pkey` PRIMARY KEY (`id_kategori`),
@@ -66,33 +66,42 @@ CREATE INDEX `pengguna_nama_idx` ON `pengguna` (`nama`);
 -- id_produk: EAN-13 → CHAR(13) digit saja
 -- ======================================================================
 CREATE TABLE IF NOT EXISTS `produk` (
-  `id_produk`          CHAR(13)        NOT NULL,
-  `nama`               VARCHAR(100)    NOT NULL,
+  `id_produk`          CHAR(13)            NOT NULL,
+  `nama`               VARCHAR(100)        NOT NULL,
   `gambar`             VARCHAR(255),
   `nomor_bpom`         VARCHAR(50),
-  `harga`              DECIMAL(18,2)   NOT NULL CHECK (`harga` >= 0),
-  `biaya_produk`       DECIMAL(18,2)   NOT NULL DEFAULT 0 CHECK (`biaya_produk` >= 0),
-  `stok`               INT             NOT NULL DEFAULT 0,
-  `batas_stok`         INT             NOT NULL DEFAULT 0,
-  `unit`               VARCHAR(32)              DEFAULT 'pcs',
-  `pack_unit`          VARCHAR(32)              DEFAULT 'karton',
-  `pack_size`          INT             NOT NULL DEFAULT 1,
-  `harga_pack`         DECIMAL(18,2),
-  `qty_tier1`          INT,
-  `harga_tier1`        DECIMAL(18,2),
-  `harga_tier_qty`     INT,
-  `harga_tier_pack`    DECIMAL(18,2),
-  `created_at`         TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`         TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `id_kategori`        SMALLINT UNSIGNED NOT NULL,
-  CONSTRAINT `produk_pkey` PRIMARY KEY (`id_produk`),
-  CONSTRAINT `produk_id_chk` CHECK (`id_produk` REGEXP '^[0-9]{13}$'),
-  CONSTRAINT `produk_kategori_fk` FOREIGN KEY (`id_kategori`) REFERENCES `kategori`(`id_kategori`)
-    ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE INDEX `produk_nama_idx` ON `produk` (`nama`);
-CREATE INDEX `produk_kategori_idx` ON `produk` (`id_kategori`);
+  `harga`              DECIMAL(18,2)       NOT NULL CHECK (`harga` >= 0),
+  `biaya_produk`       DECIMAL(18,2)       NOT NULL DEFAULT 0 CHECK (`biaya_produk` >= 0),
+
+  `stok`               INT                 NOT NULL DEFAULT 0,
+  `batas_stok`         INT                 NOT NULL DEFAULT 0,
+
+  `satuan`             VARCHAR(32)                  DEFAULT 'pcs',
+  `satuan_pack`        VARCHAR(32)                  DEFAULT 'karton',
+  `isi_per_pack`       INT                 NOT NULL DEFAULT 1,
+  `harga_pack`         DECIMAL(18,2),
+
+  -- Bagian harga bertingkat / diskon
+  `min_beli_diskon`    INT,                -- minimal jumlah beli untuk diskon
+  `harga_diskon_unit`  DECIMAL(18,2),      -- harga per unit saat diskon
+  `harga_diskon_pack`  DECIMAL(18,2),      -- harga per pack saat diskon
+
+  `created_at`         TIMESTAMP NULL     DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`         TIMESTAMP NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  `id_kategori`        SMALLINT UNSIGNED  NOT NULL,
+
+  CONSTRAINT `produk_pkey`        PRIMARY KEY (`id_produk`),
+  CONSTRAINT `produk_id_chk`      CHECK (`id_produk` REGEXP '^[0-9]{13}$'),
+  CONSTRAINT `produk_kategori_fk` FOREIGN KEY (`id_kategori`) 
+      REFERENCES `kategori`(`id_kategori`)
+      ON UPDATE CASCADE ON DELETE RESTRICT,
+
+  INDEX `produk_nama_idx` (`nama`),
+  INDEX `produk_kategori_idx` (`id_kategori`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX `produk_stok_idx` ON `produk` (`stok`);
 
 -- ======================================================================
 -- 5) Transaksi Header

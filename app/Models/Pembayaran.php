@@ -23,16 +23,11 @@ class Pembayaran extends Model
         'jumlah',
         'tanggal',
         'keterangan',
-        'midtrans_transaction_id',
-        'midtrans_status',
-        'midtrans_payment_type',
-        'midtrans_response',
     ];
 
     protected $casts = [
         'jumlah' => 'decimal:2',
         'tanggal' => 'datetime',
-        'midtrans_response' => 'array',
     ];
 
     public function transaksi(): BelongsTo

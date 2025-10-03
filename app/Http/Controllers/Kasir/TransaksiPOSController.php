@@ -38,7 +38,7 @@ class TransaksiPOSController extends Controller
                 'DANA' => 'DANA',
                 'SHOPEEPAY' => 'ShopeePay',
                 'CREDIT_CARD' => 'Credit Card',
-            ]
+            ],
         ]);
     }
 
@@ -56,7 +56,8 @@ class TransaksiPOSController extends Controller
             })
             ->inStock()
             ->limit(10)
-            ->get();        return response()->json($produk);
+            ->get();
+        return response()->json($produk);
     }
 
     /**
@@ -148,19 +149,19 @@ class TransaksiPOSController extends Controller
                 $produk->decrement('stok', $stockDeduction);
             }
 
-            // Create payment record if cash
-            if ($request->metode_bayar === 'TUNAI') {
-                $idPembayaran = Pembayaran::generateIdPembayaran();
+            // Create payment record
+            $idPembayaran = Pembayaran::generateIdPembayaran();
 
-                Pembayaran::create([
-                    'id_pembayaran' => $idPembayaran,
-                    'id_transaksi' => $nomorTransaksi,
-                    'metode' => 'TUNAI',
-                    'jumlah' => $request->total,
-                    'tanggal' => now(),
-                    'keterangan' => 'Pembayaran tunai - Kembalian: Rp ' . number_format($request->jumlah_bayar - $request->total, 0, ',', '.'),
-                ]);
-            }
+            Pembayaran::create([
+                'id_pembayaran' => $idPembayaran,
+                'id_transaksi' => $nomorTransaksi,
+                'metode' => $request->metode_bayar,
+                'jumlah' => $request->total,
+                'tanggal' => now(),
+                'keterangan' => $request->metode_bayar === 'TUNAI' 
+                    ? 'Pembayaran tunai - Kembalian: Rp ' . number_format($request->jumlah_bayar - $request->total, 0, ',', '.')
+                    : 'Pembayaran ' . $request->metode_bayar,
+            ]);
 
             DB::commit();
 

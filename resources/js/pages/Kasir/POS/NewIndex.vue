@@ -220,6 +220,9 @@ function processTransaction() {
         return;
     }
 
+    // Debug: Log payment method
+    console.log('Payment method selected:', metodeBayar.value);
+
     // Update form data
     transactionForm.id_pelanggan = selectedPelanggan.value;
     transactionForm.items = cart.value;
@@ -230,25 +233,66 @@ function processTransaction() {
     transactionForm.total = total.value;
     transactionForm.jumlah_bayar = jumlahBayar.value;
 
-    transactionForm.post('/kasir/pos', {
-        onSuccess: (response) => {
+    const requestData = {
+        id_pelanggan: selectedPelanggan.value,
+        items: cart.value,
+        metode_bayar: metodeBayar.value,
+        subtotal: subtotal.value,
+        diskon: diskon.value,
+        pajak: pajak.value,
+        total: total.value,
+        jumlah_bayar: jumlahBayar.value,
+    };
+
+    console.log('Sending request data:', requestData);
+
+    // Use axios for better response handling
+    fetch('/kasir/pos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            // Handle successful transaction
             addNotification({
                 type: 'success',
                 title: 'Transaksi berhasil disimpan!',
             });
             clearCart();
-            // Reset form
-            selectedPelanggan.value = 'P001';
-            metodeBayar.value = 'TUNAI';
-            diskonGlobal.value = 0;
-        },
-        onError: (errors) => {
+            resetForm();
+        } else {
             addNotification({
                 type: 'error',
-                title: 'Gagal menyimpan transaksi!',
+                title: data.message || 'Gagal menyimpan transaksi!',
             });
-        },
+        }
+    })
+    .catch(error => {
+        addNotification({
+            type: 'error',
+            title: 'Gagal menyimpan transaksi!',
+        });
+        console.error('Transaction error:', error);
+    })
+    .finally(() => {
+        transactionForm.processing = false;
     });
+}
+
+function resetForm() {
+    selectedPelanggan.value = 'P001';
+    metodeBayar.value = 'TUNAI';
+    diskonGlobal.value = 0;
+    jumlahBayar.value = 0;
 }
 
 // Format currency

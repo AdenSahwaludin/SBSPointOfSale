@@ -40,6 +40,9 @@ return new class extends Migration {
             $table->string('midtrans_payment_type', 64)->nullable();
             $table->json('midtrans_response')->nullable();
 
+            // Laravel timestamps
+            $table->timestamps();
+
             $table->index('id_transaksi');
             $table->index('tanggal');
 
