@@ -1,4 +1,8 @@
-Saya pakai Bun. jadi selalu Bun jangan NPM dan install apapun pakai bun tetapi jika tidak ada di Bun pakai npm
+Saya pakai Bun. jadi selalu Bun jangan NPM dan install apapun pakai bun tetapi jika tidak ada di Bun pakai npm.
+
 Menulis syntax pakai best practice Laravel dan Vue
 Pakai semua best practice. 
-selalu pakai best practice dan kode yang singkat tetapi tetap jalan. pakai debug juga gapapa ketika ada error
+
+selalu pakai best practice dan kode yang singkat tetapi tetap jalan. 
+
+Gunakan prinsip clean code.
