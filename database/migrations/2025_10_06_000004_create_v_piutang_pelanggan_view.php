@@ -4,12 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        DB::statement("
+ /**
+  * Run the migrations.
+  */
+ public function up(): void
+ {
+  DB::statement("
             CREATE OR REPLACE VIEW v_piutang_pelanggan AS
             SELECT
                 k.id_pelanggan,
@@ -19,13 +19,13 @@ return new class extends Migration {
             WHERE k.status IN ('AKTIF','TUNDA') AND j.status IN ('DUE','LATE')
             GROUP BY k.id_pelanggan
         ");
-    }
+ }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        DB::statement("DROP VIEW IF EXISTS v_piutang_pelanggan");
-    }
+ /**
+  * Reverse the migrations.
+  */
+ public function down(): void
+ {
+  DB::statement("DROP VIEW IF EXISTS v_piutang_pelanggan");
+ }
 };
