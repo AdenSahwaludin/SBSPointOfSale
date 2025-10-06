@@ -111,15 +111,14 @@ CREATE TABLE transaksi (
   biaya_pengiriman  DECIMAL(18) NOT NULL DEFAULT 0,
   total             DECIMAL(18) NOT NULL DEFAULT 0,
   metode_bayar ENUM(
-    'TUNAI','QRIS','SHOPEEPAY', 
+    'TUNAI','QRIS','TRANSFER BCA', 'KREDIT'
   ) NOT NULL DEFAULT 'TUNAI',
   status_pembayaran ENUM(
   'MENUNGGU',
   'LUNAS',       
   'GAGAL',
   'BATAL',
-  'REFUND_SEBAGIAN',
-  'REFUND_PENUH'    
+  'REFUND'    
 )
 NOT NULL DEFAULT 'MENUNGGU',
   paid_at           TIMESTAMP NULL,
@@ -161,7 +160,6 @@ CREATE TABLE transaksi_detail (
   harga_satuan        DECIMAL(18) NOT NULL,
   jumlah              INT NOT NULL CHECK (jumlah > 0),
   mode_qty            ENUM('unit','pack') NOT NULL DEFAULT 'unit',
-  pack_size_snapshot  INT NOT NULL DEFAULT 1 CHECK (pack_size_snapshot > 0),
   diskon_item         DECIMAL(18) NOT NULL DEFAULT 0,
   subtotal            DECIMAL(18) NOT NULL,
   created_at          TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
@@ -194,7 +192,7 @@ CREATE TABLE kontrak_kredit (
   cicilan_bulanan   DECIMAL(12) NOT NULL CHECK (cicilan_bulanan >= 0),
   status            ENUM('AKTIF','LUNAS','TUNDA','GAGAL') NOT NULL DEFAULT 'AKTIF',
   score_snapshot    TINYINT UNSIGNED NOT NULL DEFAULT 50,
-  alasan_eligibilitas VARCHAR(200),
+  alasan_eligibilitas VARCHAR(200), --Dibuat otomatis oleh sistem
   created_at        TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at        TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT kontrak_pkey PRIMARY KEY (id_kontrak),
@@ -245,10 +243,7 @@ CREATE TABLE pembayaran (
   id_transaksi      VARCHAR(40) NOT NULL,
   id_angsuran       BIGINT UNSIGNED NULL,
   metode            ENUM(
-    'TUNAI','QRIS',
-    'VA_BCA','VA_BNI','VA_BRI','VA_PERMATA','VA_MANDIRI',
-    'GOPAY','OVO','DANA','LINKAJA','SHOPEEPAY',
-    'CREDIT_CARD','MANUAL_TRANSFER'
+     'TUNAI','QRIS','TRANSFER BCA' 
   ) NOT NULL,
   jumlah            DECIMAL(18) NOT NULL CHECK (jumlah > 0),
   tanggal           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

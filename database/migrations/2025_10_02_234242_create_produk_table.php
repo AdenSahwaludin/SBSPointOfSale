@@ -18,12 +18,12 @@ return new class extends Migration {
             $table->integer('stok')->default(0);
             $table->integer('batas_stok')->default(0);
             $table->string('satuan', 32)->default('pcs');
-            $table->string('satuan_per_pack', 32)->default('karton');
+            $table->string('satuan_pack', 32)->default('karton');
             $table->integer('isi_per_pack')->default(1);
-            $table->decimal('harga_per_pack', 18)->nullable();
+            $table->decimal('harga_pack', 18)->nullable();
             $table->integer('min_beli_diskon')->nullable();
-            $table->decimal('harga_diskon_per_unit', 18)->nullable();
-            $table->decimal('harga_diskon_per_pack', 18)->nullable();
+            $table->decimal('harga_diskon_unit', 18)->nullable();
+            $table->decimal('harga_diskon_pack', 18)->nullable();
             $table->unsignedSmallInteger('id_kategori');
             $table->timestamps();
             $table->index('nama');
@@ -47,6 +47,12 @@ return new class extends Migration {
         try {
             DB::statement("ALTER TABLE `produk` 
                 ADD CONSTRAINT `produk_biaya_chk` CHECK (`biaya_produk` >= 0)");
+        } catch (\Throwable $e) {
+        }
+
+        try {
+            DB::statement("ALTER TABLE `produk` 
+                ADD CONSTRAINT `produk_isi_per_pack_chk` CHECK (`isi_per_pack` > 0)");
         } catch (\Throwable $e) {
         }
     }

@@ -19,14 +19,17 @@ return new class extends Migration {
             $table->string('kota', 50)->nullable();
             $table->text('alamat')->nullable();
             $table->boolean('aktif')->default(true);
-            $table->date('tanggal_daftar')->default(now());
+            $table->unsignedTinyInteger('trust_score')->default(50);
+            $table->decimal('credit_limit', 12, 0)->default(0);
             $table->timestamps();
 
             $table->index('nama');
         });
 
-        // Add check constraint for id_pelanggan format
+        // Add check constraints
         DB::statement('ALTER TABLE pelanggan ADD CONSTRAINT pelanggan_id_chk CHECK (id_pelanggan REGEXP "^P[0-9]{3,6}$")');
+        DB::statement('ALTER TABLE pelanggan ADD CONSTRAINT pelanggan_trust_score_chk CHECK (trust_score BETWEEN 0 AND 100)');
+        DB::statement('ALTER TABLE pelanggan ADD CONSTRAINT pelanggan_credit_limit_chk CHECK (credit_limit >= 0)');
     }
 
     /**

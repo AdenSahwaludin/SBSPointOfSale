@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
             KategoriSeeder::class,
             PelangganSeeder::class,
             ProdukSeeder::class,
+            TransaksiSeeder::class,
+            KontrakKreditSeeder::class,
+            JadwalAngsuranSeeder::class,
         ]);
     }
 }

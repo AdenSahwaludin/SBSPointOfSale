@@ -10,7 +10,7 @@ class PenggunaSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            ['001-ADN', 'Aden Sahwaludin', 'admin@sbs.com', 'admin123', 'admin'],
+            ['001-ADEN', 'Aden Sahwaludin', 'admin@sbs.com', 'admin123', 'admin'],
             ['002-KSR', 'Kasir Sari Bumi', 'kasir@sbs.com', 'kasir123', 'kasir'],
         ];
 

@@ -23,12 +23,14 @@ class Pelanggan extends Model
         'kota',
         'alamat',
         'aktif',
-        'tanggal_daftar',
+        'trust_score',
+        'credit_limit',
     ];
 
     protected $casts = [
         'aktif' => 'boolean',
-        'tanggal_daftar' => 'date',
+        'trust_score' => 'integer',
+        'credit_limit' => 'decimal:0',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -39,6 +41,14 @@ class Pelanggan extends Model
     public function transaksi(): HasMany
     {
         return $this->hasMany(Transaksi::class, 'id_pelanggan', 'id_pelanggan');
+    }
+
+    /**
+     * Get the credit contracts for the customer
+     */
+    public function kontrakKredit(): HasMany
+    {
+        return $this->hasMany(KontrakKredit::class, 'id_pelanggan', 'id_pelanggan');
     }
 
     /**

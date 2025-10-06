@@ -14,16 +14,7 @@ class KategoriSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['nama' => 'Makanan Ringan'],
-            ['nama' => 'Minuman'],
-            ['nama' => 'Produk Susu'],
-            ['nama' => 'Roti & Kue'],
-            ['nama' => 'Bumbu & Rempah'],
-            ['nama' => 'Mie Instan'],
-            ['nama' => 'Beras & Tepung'],
-            ['nama' => 'Produk Kesehatan'],
-            ['nama' => 'Perawatan Tubuh'],
-            ['nama' => 'Kebutuhan Rumah'],
+            ['nama' => 'Minyak Akar Lawang'],
         ];
 
         foreach ($categories as $category) {

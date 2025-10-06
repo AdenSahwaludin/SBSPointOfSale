@@ -16,12 +16,12 @@ return new class extends Migration {
             $table->string('nomor_transaksi', 40);
             $table->char('id_produk', 13);
             $table->string('nama_produk', 255);
-            $table->decimal('harga_satuan', 18, 2);
+            $table->decimal('harga_satuan', 18, 0);
             $table->integer('jumlah');
             $table->enum('mode_qty', ['unit', 'pack'])->default('unit');
             $table->integer('pack_size_snapshot')->default(1);
-            $table->decimal('diskon_item', 18, 2)->default(0);
-            $table->decimal('subtotal', 18, 2);
+            $table->decimal('diskon_item', 18, 0)->default(0);
+            $table->decimal('subtotal', 18, 0);
             $table->timestamps();
 
             $table->index('nomor_transaksi');

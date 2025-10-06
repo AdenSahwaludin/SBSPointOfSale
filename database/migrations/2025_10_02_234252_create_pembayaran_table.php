@@ -14,6 +14,7 @@ return new class extends Migration {
         Schema::create('pembayaran', function (Blueprint $table) {
             $table->string('id_pembayaran', 32)->primary();
             $table->string('id_transaksi', 40);
+            $table->unsignedBigInteger('id_angsuran')->nullable();
             $table->enum('metode', [
                 'TUNAI',
                 'QRIS',
@@ -30,21 +31,14 @@ return new class extends Migration {
                 'CREDIT_CARD',
                 'MANUAL_TRANSFER'
             ]);
-            $table->decimal('jumlah', 18, 2);
+            $table->decimal('jumlah', 18, 0);
             $table->timestamp('tanggal')->useCurrent();
             $table->string('keterangan', 255)->nullable();
-
-            // Midtrans fields
-            $table->string('midtrans_transaction_id', 64)->nullable();
-            $table->string('midtrans_status', 64)->nullable();
-            $table->string('midtrans_payment_type', 64)->nullable();
-            $table->json('midtrans_response')->nullable();
-
-            // Laravel timestamps
             $table->timestamps();
 
             $table->index('id_transaksi');
             $table->index('tanggal');
+            $table->index('id_angsuran');
 
             $table->foreign('id_transaksi')->references('nomor_transaksi')->on('transaksi')
                 ->onUpdate('cascade')->onDelete('cascade');

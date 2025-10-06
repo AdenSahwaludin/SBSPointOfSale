@@ -31,21 +31,28 @@ class Transaksi extends Model
         'metode_bayar',
         'status_pembayaran',
         'paid_at',
-        'is_locked',
-        'locked_at',
+        'jenis_transaksi',
+        'dp',
+        'tenor_bulan',
+        'bunga_persen',
+        'cicilan_bulanan',
+        'ar_status',
+        'id_kontrak',
     ];
 
     protected $casts = [
         'tanggal' => 'datetime',
         'total_item' => 'integer',
-        'subtotal' => 'decimal:2',
-        'diskon' => 'decimal:2',
-        'pajak' => 'decimal:2',
-        'biaya_pengiriman' => 'decimal:2',
-        'total' => 'decimal:2',
+        'subtotal' => 'decimal:0',
+        'diskon' => 'decimal:0',
+        'pajak' => 'decimal:0',
+        'biaya_pengiriman' => 'decimal:0',
+        'total' => 'decimal:0',
+        'dp' => 'decimal:0',
+        'tenor_bulan' => 'integer',
+        'bunga_persen' => 'decimal:2',
+        'cicilan_bulanan' => 'decimal:0',
         'paid_at' => 'datetime',
-        'is_locked' => 'boolean',
-        'locked_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -68,6 +75,11 @@ class Transaksi extends Model
     public function pembayaran(): HasMany
     {
         return $this->hasMany(Pembayaran::class, 'id_transaksi', 'nomor_transaksi');
+    }
+
+    public function kontrakKredit(): BelongsTo
+    {
+        return $this->belongsTo(KontrakKredit::class, 'id_kontrak', 'id_kontrak');
     }
 
     /**
@@ -109,7 +121,15 @@ class Transaksi extends Model
      */
     public function scopePaid($query)
     {
-        return $query->where('status_pembayaran', 'PAID');
+        return $query->where('status_pembayaran', 'LUNAS');
+    }
+
+    /**
+     * Scope: Transaksi kredit
+     */
+    public function scopeKredit($query)
+    {
+        return $query->where('jenis_transaksi', 'KREDIT');
     }
 
     /**
@@ -117,7 +137,15 @@ class Transaksi extends Model
      */
     public function isPaid(): bool
     {
-        return $this->status_pembayaran === 'PAID';
+        return $this->status_pembayaran === 'LUNAS';
+    }
+
+    /**
+     * Check if transaction is credit
+     */
+    public function isKredit(): bool
+    {
+        return $this->jenis_transaksi === 'KREDIT';
     }
 
     /**

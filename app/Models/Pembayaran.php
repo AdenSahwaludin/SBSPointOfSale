@@ -19,6 +19,7 @@ class Pembayaran extends Model
     protected $fillable = [
         'id_pembayaran',
         'id_transaksi',
+        'id_angsuran',
         'metode',
         'jumlah',
         'tanggal',
@@ -26,13 +27,19 @@ class Pembayaran extends Model
     ];
 
     protected $casts = [
-        'jumlah' => 'decimal:2',
+        'id_angsuran' => 'integer',
+        'jumlah' => 'decimal:0',
         'tanggal' => 'datetime',
     ];
 
     public function transaksi(): BelongsTo
     {
         return $this->belongsTo(Transaksi::class, 'id_transaksi', 'nomor_transaksi');
+    }
+
+    public function jadwalAngsuran(): BelongsTo
+    {
+        return $this->belongsTo(JadwalAngsuran::class, 'id_angsuran', 'id_angsuran');
     }
 
     /**

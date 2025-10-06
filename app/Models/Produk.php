@@ -26,12 +26,12 @@ class Produk extends Model
         'stok',
         'batas_stok',
         'satuan',
-        'satuan_per_pack',
+        'satuan_pack',
         'isi_per_pack',
-        'harga_per_pack',
+        'harga_pack',
         'min_beli_diskon',
-        'harga_diskon_per_unit',
-        'harga_diskon_per_pack',
+        'harga_diskon_unit',
+        'harga_diskon_pack',
         'id_kategori',
     ];
 
@@ -41,10 +41,10 @@ class Produk extends Model
         'stok' => 'integer',
         'batas_stok' => 'integer',
         'isi_per_pack' => 'integer',
-        'harga_per_pack' => 'decimal:0',
+        'harga_pack' => 'decimal:0',
         'min_beli_diskon' => 'integer',
-        'harga_diskon_per_unit' => 'decimal:0',
-        'harga_diskon_per_pack' => 'decimal:0',
+        'harga_diskon_unit' => 'decimal:0',
+        'harga_diskon_pack' => 'decimal:0',
         'id_kategori' => 'integer',
     ];
 

@@ -15,7 +15,7 @@ class ProdukSeeder extends Seeder
     public function run(): void
     {
         // Cari ID kategori Minyak Akar Lawang
-        $idKategori = Kategori::where('nama', 'Minyak Akar Lawang')->value('id_kategori') ?? 1;
+        $idKategori = Kategori::where('nama', 'Minyak Akar Lawang')->value('id_kategori');
 
         // Tambahkan produk baru
         Produk::create([
@@ -28,12 +28,12 @@ class ProdukSeeder extends Seeder
             'stok' => 500,
             'batas_stok' => 48,
             'satuan' => 'pcs',
-            'satuan_per_pack' => 'karton',
+            'satuan_pack' => 'karton',
             'isi_per_pack' => 144,
-            'harga_per_pack' => 1440000,
+            'harga_pack' => 1440000,
             'min_beli_diskon' => 3,
-            'harga_diskon_per_unit' => 13500,
-            'harga_diskon_per_pack' => 1440000,
+            'harga_diskon_unit' => 13500,
+            'harga_diskon_pack' => 1440000,
             'id_kategori' => $idKategori,
         ]);
     }

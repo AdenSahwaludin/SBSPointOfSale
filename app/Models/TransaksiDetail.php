@@ -26,11 +26,11 @@ class TransaksiDetail extends Model
     ];
 
     protected $casts = [
-        'harga_satuan' => 'decimal:2',
+        'harga_satuan' => 'decimal:0',
         'jumlah' => 'integer',
         'pack_size_snapshot' => 'integer',
-        'diskon_item' => 'decimal:2',
-        'subtotal' => 'decimal:2',
+        'diskon_item' => 'decimal:0',
+        'subtotal' => 'decimal:0',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -59,8 +59,8 @@ class TransaksiDetail extends Model
     public function getUnitDescriptionAttribute(): string
     {
         if ($this->mode_qty === 'pack') {
-            return $this->pack_size_snapshot . ' ' . ($this->produk->unit ?? 'pcs') . '/pack';
+            return $this->pack_size_snapshot . ' ' . ($this->produk->satuan ?? 'pcs') . '/pack';
         }
-        return $this->produk->unit ?? 'pcs';
+        return $this->produk->satuan ?? 'pcs';
     }
 }

@@ -17,58 +17,46 @@ return new class extends Migration {
             $table->string('id_kasir', 8);
             $table->timestamp('tanggal')->useCurrent();
             $table->integer('total_item')->default(0);
-            $table->decimal('subtotal', 18, 2)->default(0);
-            $table->decimal('diskon', 18, 2)->default(0);
-            $table->decimal('pajak', 18, 2)->default(0);
-            $table->decimal('biaya_pengiriman', 18, 2)->default(0);
-            $table->decimal('total', 18, 2)->default(0);
+            $table->decimal('subtotal', 18, 0)->default(0);
+            $table->decimal('diskon', 18, 0)->default(0);
+            $table->decimal('pajak', 18, 0)->default(0);
+            $table->decimal('biaya_pengiriman', 18, 0)->default(0);
+            $table->decimal('total', 18, 0)->default(0);
 
             $table->enum('metode_bayar', [
                 'TUNAI',
                 'QRIS',
-                'VA_BCA',
-                'VA_BNI',
-                'VA_BRI',
-                'VA_PERMATA',
-                'VA_MANDIRI',
-                'GOPAY',
-                'OVO',
-                'DANA',
-                'LINKAJA',
-                'SHOPEEPAY',
-                'CREDIT_CARD',
-                'MANUAL_TRANSFER'
+                'TRANSFER BCA',
+                'KREDIT'
             ])->default('TUNAI');
 
             $table->enum('status_pembayaran', [
-                'PENDING',
-                'PAID',
-                'FAILED',
-                'VOID',
-                'EXPIRED',
-                'REFUND_PARTIAL',
-                'REFUNDED'
-            ])->default('PENDING');
+                'MENUNGGU',
+                'LUNAS',
+                'GAGAL',
+                'BATAL',
+                'REFUND_SEBAGIAN',
+                'REFUND_PENUH'
+            ])->default('MENUNGGU');
 
             $table->timestamp('paid_at')->nullable();
 
-            // Midtrans fields
-            $table->string('midtrans_order_id', 64)->nullable();
-            $table->string('midtrans_transaction_id', 64)->nullable();
-            $table->string('midtrans_status', 64)->nullable();
-            $table->string('midtrans_payment_type', 64)->nullable();
-            $table->json('midtrans_va_numbers')->nullable();
-            $table->decimal('midtrans_gross_amount', 18, 2)->nullable();
-            $table->json('midtrans_response')->nullable();
-
-            $table->boolean('is_locked')->default(false);
-            $table->timestamp('locked_at')->nullable();
+            // Cicilan Pintar fields
+            $table->enum('jenis_transaksi', ['TUNAI', 'KREDIT'])->default('TUNAI');
+            $table->decimal('dp', 12, 0)->default(0);
+            $table->unsignedTinyInteger('tenor_bulan')->nullable();
+            $table->decimal('bunga_persen', 5, 2)->default(0);
+            $table->decimal('cicilan_bulanan', 12, 0)->nullable();
+            $table->enum('ar_status', ['NA', 'AKTIF', 'LUNAS', 'GAGAL', 'BATAL'])->default('NA');
+            $table->unsignedBigInteger('id_kontrak')->nullable();
             $table->timestamps();
 
             $table->index('id_pelanggan');
             $table->index('id_kasir');
             $table->index('tanggal');
             $table->index('status_pembayaran');
+            $table->index('jenis_transaksi');
+            $table->index('ar_status');
 
             $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggan')
                 ->onUpdate('cascade')->onDelete('restrict');
@@ -76,8 +64,12 @@ return new class extends Migration {
                 ->onUpdate('cascade')->onDelete('restrict');
         });
 
-        // Add check constraint for nomor_transaksi format
+        // Add check constraints
         DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_no_chk CHECK (nomor_transaksi REGEXP "^INV-[0-9]{4}-[0-9]{2}-[0-9]{3}-P[0-9]{3,6}$")');
+        DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_dp_chk CHECK (dp >= 0)');
+        DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_tenor_chk CHECK (tenor_bulan IS NULL OR tenor_bulan BETWEEN 1 AND 24)');
+        DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_bunga_chk CHECK (bunga_persen >= 0)');
+        DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_cicilan_chk CHECK (cicilan_bulanan IS NULL OR cicilan_bulanan >= 0)');
     }
 
     /**
