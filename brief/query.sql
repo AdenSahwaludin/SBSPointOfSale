@@ -11,11 +11,12 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1) Master: KATEGORI
 -- =========================================================
 CREATE TABLE kategori (
-  id_kategori SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id_kategori VARCHAR(4) NOT NULL, -- PK = kode, contoh: 'HB', 'EL', 'SP01'
   nama        VARCHAR(50) NOT NULL,
   created_at  TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT kategori_pkey PRIMARY KEY (id_kategori),
+  CONSTRAINT kategori_id_chk CHECK (id_kategori REGEXP '^[A-Z0-9]{2,4}$'),
   CONSTRAINT kategori_nama_uq UNIQUE (nama)
 ) ENGINE=InnoDB;
 
@@ -65,26 +66,25 @@ CREATE INDEX pengguna_nama_idx ON pengguna (nama);
 -- 4) Master: PRODUK (EAN-13 sebagai PK)
 -- =========================================================
 CREATE TABLE produk (
-  id_produk        CHAR(13) NOT NULL,
-  nama             VARCHAR(100) NOT NULL,
-  gambar           VARCHAR(255),
-  nomor_bpom       VARCHAR(50),
-  harga            DECIMAL(18) NOT NULL CHECK (harga >= 0),
-  biaya_produk     DECIMAL(18) NOT NULL DEFAULT 0 CHECK (biaya_produk >= 0),
-  stok             INT NOT NULL DEFAULT 0,
-  batas_stok       INT NOT NULL DEFAULT 0,
-  satuan           VARCHAR(32) DEFAULT 'pcs',
-  satuan_pack      VARCHAR(32) DEFAULT 'karton',
-  isi_per_pack     INT NOT NULL DEFAULT 1 CHECK (isi_per_pack > 0),
-  harga_pack       DECIMAL(18),
-  min_beli_diskon  INT,
-  harga_diskon_unit DECIMAL(18),
-  harga_diskon_pack DECIMAL(18),
-  id_kategori      SMALLINT UNSIGNED NOT NULL,
-  created_at       TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at       TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  id_produk          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  sku                VARCHAR(32)  NOT NULL UNIQUE,
+  barcode            VARCHAR(32)  NULL UNIQUE,
+  nama               VARCHAR(100) NOT NULL,
+  id_kategori        VARCHAR(4)   NOT NULL,         -- FK ke kategori (kode)
+  harga              DECIMAL(18,2) NOT NULL CHECK (harga >= 0),
+  biaya_produk       DECIMAL(18,2) NOT NULL DEFAULT 0 CHECK (biaya_produk >= 0),
+  stok               INT NOT NULL DEFAULT 0,
+  batas_stok         INT NOT NULL DEFAULT 0,
+  satuan             VARCHAR(32) DEFAULT 'pcs',
+  satuan_pack        VARCHAR(32) DEFAULT 'karton',
+  isi_per_pack       INT NOT NULL DEFAULT 1 CHECK (isi_per_pack > 0),
+  harga_pack         DECIMAL(18,2),
+  min_beli_diskon    INT,
+  harga_diskon_unit  DECIMAL(18,2),
+  harga_diskon_pack  DECIMAL(18,2),
+  created_at         TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at         TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT produk_pkey PRIMARY KEY (id_produk),
-  CONSTRAINT produk_id_chk CHECK (id_produk REGEXP '^[0-9]{13}$'),
   CONSTRAINT produk_kategori_fk FOREIGN KEY (id_kategori)
     REFERENCES kategori(id_kategori)
     ON UPDATE CASCADE ON DELETE RESTRICT
@@ -111,14 +111,12 @@ CREATE TABLE transaksi (
   biaya_pengiriman  DECIMAL(18) NOT NULL DEFAULT 0,
   total             DECIMAL(18) NOT NULL DEFAULT 0,
   metode_bayar ENUM(
-    'TUNAI','QRIS','TRANSFER BCA', 'KREDIT'
+    'TUNAI','QRIS','TRANSFER BCA','KREDIT'
   ) NOT NULL DEFAULT 'TUNAI',
   status_pembayaran ENUM(
   'MENUNGGU',
-  'LUNAS',       
-  'GAGAL',
+  'LUNAS',
   'BATAL',
-  'REFUND'    
 )
 NOT NULL DEFAULT 'MENUNGGU',
   paid_at           TIMESTAMP NULL,
