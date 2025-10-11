@@ -14,7 +14,11 @@ class KategoriSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['nama' => 'Minyak Akar Lawang'],
+            ['id_kategori' => 'HB', 'nama' => 'Herbal'],
+            ['id_kategori' => 'EL', 'nama' => 'Essential Oil'],
+            ['id_kategori' => 'SP01', 'nama' => 'Spice Oil'],
+            ['id_kategori' => 'TH', 'nama' => 'Therapeutic Oil'],
+            ['id_kategori' => 'AR', 'nama' => 'Aromatherapy'],
         ];
 
         foreach ($categories as $category) {

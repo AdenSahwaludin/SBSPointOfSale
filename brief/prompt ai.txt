@@ -1,0 +1,60 @@
+# Prompt Halaman Kategori
+Tujuan: Membangun halaman “Manajemen Kategori” pada aplikasi SBS Point of Sale (Laravel + Vue 3 + Tailwind).
+
+Instruksi:
+
+1. Data API
+ • GET /api/kategori  
+   - Response: { id_kategori, nama, jumlah_produk (opsional), created_at, … }  
+ • POST /api/kategori  
+ • PUT /api/kategori/{id}  
+ • DELETE /api/kategori/{id}  
+ • Validasi bentuk data sesuai skema tabel kategori (lihat brief/query.sql).
+
+2. Layout & Tampilan
+ • Gunakan layout admin konsisten: header, breadcrumb, area konten utama.  
+ • Tampilkan tabel kategori dengan kolom: Kode, Nama, Total Produk, Tanggal Dibuat.  
+ • Fitur pencarian instan (client-side) dan filter berdasarkan huruf awal nama.  
+ • Tombol aksi: Tambah, Edit, Hapus—masing-masing memunculkan modal.  
+ • Konfirmasi sebelum hapus, notifikasi sukses/gagal setelah aksi.
+
+3. Form Tambah/Edit
+ • Field:
+   - Kode Kategori: 2–4 huruf/angka uppercase, unik.  
+   - Nama: max 50 karakter, wajib, unik.  
+   - Catatan: opsional.  
+ • Validasi real-time (front-end) sesuai aturan di atas.  
+ • Jika API mengembalikan error, tampilkan pesan error spesifik.
+
+4. Testing & Dokumentasi
+ • Tambahkan unit/component test (Vitest/Jest) untuk render tabel dan alur submit sukses.  
+ • Perbarui README (atau dokumen terkait) dengan petunjuk mengakses halaman.
+
+Gunakan TypeScript + Vue 3 Composition API + Tailwind. Hasil akhir siap di-merge.
+
+---
+
+# Prompt Perbaikan Migration
+Tujuan: Menyusun ulang atau memperbaiki migration Laravel agar 100% sesuai skema MySQL di `brief/query.sql`.
+
+Instruksi:
+
+1. Tabel & Kolom
+ • Cocokkan nama tabel, kolom, tipe data, default value, NOT NULL.  
+ • Terapkan constraint PK, UNIQUE, CHECK sesuai skema (`->check()` atau raw SQL jika perlu).
+
+2. Indeks & Foreign Key
+ • Gunakan nama indeks/foreign key eksplisit seperti di query.sql.  
+ • Pastikan cascade rules atau onDelete/onUpdate sesuai.
+
+3. View
+ • Buat migration yang memanggil DB::statement untuk membuat view `v_produk_stok_setara_pcs`.  
+ • Di down(), drop view sebelum tabel lain.
+
+4. down()
+ • Drop view, indeks, foreign key, lalu tabel—urutan berlawanan dengan up().
+
+5. Verifikasi
+ • Jalankan `php artisan migrate:fresh --pretend` dan pastikan SQL yang dihasilkan logis identik dengan query.sql.
+
+Hasil akhir: file migration Laravel bersih, rapi, lengkap, siap dijalankan tanpa error.

@@ -20,7 +20,6 @@ class TransaksiDetail extends Model
         'harga_satuan',
         'jumlah',
         'mode_qty',
-        'pack_size_snapshot',
         'diskon_item',
         'subtotal',
     ];
@@ -28,18 +27,23 @@ class TransaksiDetail extends Model
     protected $casts = [
         'harga_satuan' => 'decimal:0',
         'jumlah' => 'integer',
-        'pack_size_snapshot' => 'integer',
         'diskon_item' => 'decimal:0',
         'subtotal' => 'decimal:0',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
+    /**
+     * Get the transaction that owns the detail
+     */
     public function transaksi(): BelongsTo
     {
         return $this->belongsTo(Transaksi::class, 'nomor_transaksi', 'nomor_transaksi');
     }
 
+    /**
+     * Get the product that owns the detail
+     */
     public function produk(): BelongsTo
     {
         return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
@@ -54,13 +58,18 @@ class TransaksiDetail extends Model
     }
 
     /**
+     * Get formatted harga satuan
+     */
+    public function getFormattedHargaSatuanAttribute(): string
+    {
+        return 'Rp ' . number_format((float)$this->harga_satuan, 0, ',', '.');
+    }
+
+    /**
      * Get unit description based on mode_qty
      */
     public function getUnitDescriptionAttribute(): string
     {
-        if ($this->mode_qty === 'pack') {
-            return $this->pack_size_snapshot . ' ' . ($this->produk->satuan ?? 'pcs') . '/pack';
-        }
-        return $this->produk->satuan ?? 'pcs';
+        return $this->mode_qty === 'pack' ? 'pack' : 'unit';
     }
 }

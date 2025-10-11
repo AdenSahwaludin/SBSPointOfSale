@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
+use App\Http\Controllers\Admin\KategoriController;
 use Illuminate\Support\Facades\Route;
 
 // Admin routes (Admin role only)
@@ -50,9 +51,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
   ->name('produk.bulk-action');
 
  // ==========================================
- // MANAJEMEN KATEGORI (untuk masa depan)
+ // MANAJEMEN KATEGORI
  // ==========================================
- // Route::resource('kategori', KategoriController::class);
+ Route::resource('kategori', KategoriController::class);
+ Route::post('kategori/bulk-action', [KategoriController::class, 'bulkAction'])
+  ->name('kategori.bulk-action');
 
  // ==========================================
  // LAPORAN & ANALISIS (untuk masa depan)

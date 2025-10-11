@@ -13,68 +13,98 @@ class Produk extends Model
 
     protected $table = 'produk';
     protected $primaryKey = 'id_produk';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
-        'id_produk',
+        'sku',
+        'barcode',
+        'no_bpom',
         'nama',
-        'gambar',
-        'nomor_bpom',
-        'harga',
-        'biaya_produk',
-        'stok',
-        'batas_stok',
-        'satuan',
-        'satuan_pack',
-        'isi_per_pack',
-        'harga_pack',
-        'min_beli_diskon',
-        'harga_diskon_unit',
-        'harga_diskon_pack',
         'id_kategori',
+        'satuan',
+        'isi_per_pack',
+        'harga',
+        'stok',
     ];
 
     protected $casts = [
         'harga' => 'decimal:0',
-        'biaya_produk' => 'decimal:0',
         'stok' => 'integer',
-        'batas_stok' => 'integer',
         'isi_per_pack' => 'integer',
-        'harga_pack' => 'decimal:0',
-        'min_beli_diskon' => 'integer',
-        'harga_diskon_unit' => 'decimal:0',
-        'harga_diskon_pack' => 'decimal:0',
-        'id_kategori' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
+    /**
+     * Get the category that owns the product
+     */
     public function kategori(): BelongsTo
     {
         return $this->belongsTo(Kategori::class, 'id_kategori', 'id_kategori');
     }
 
+    /**
+     * Get the transaction details for the product
+     */
     public function transaksiDetail(): HasMany
     {
         return $this->hasMany(TransaksiDetail::class, 'id_produk', 'id_produk');
     }
 
-    public function scopeLowStock($query)
+    /**
+     * Get the stock conversions from this product (as source)
+     */
+    public function konversiFrom(): HasMany
     {
-        return $query->whereColumn('stok', '<=', 'batas_stok');
+        return $this->hasMany(KonversiStok::class, 'from_produk_id', 'id_produk');
     }
 
+    /**
+     * Get the stock conversions to this product (as target)
+     */
+    public function konversiTo(): HasMany
+    {
+        return $this->hasMany(KonversiStok::class, 'to_produk_id', 'id_produk');
+    }
+
+    /**
+     * Scope: Products with low stock
+     */
+    public function scopeLowStock($query)
+    {
+        return $query->where('stok', '<=', 10); // Assuming 10 is low stock threshold
+    }
+
+    /**
+     * Scope: Products in stock
+     */
     public function scopeInStock($query)
     {
         return $query->where('stok', '>', 0);
     }
 
+    /**
+     * Check if product has low stock
+     */
     public function isLowStock(): bool
     {
-        return $this->stok <= $this->batas_stok;
+        return $this->stok <= 10;
     }
 
+    /**
+     * Get formatted price
+     */
     public function getFormattedPriceAttribute(): string
     {
         return 'Rp ' . number_format((float)$this->harga, 0, ',', '.');
+    }
+
+    /**
+     * Get stock equivalent in pieces
+     */
+    public function getStokSetaraPcsAttribute(): int
+    {
+        return $this->satuan === 'karton' ? $this->stok * $this->isi_per_pack : $this->stok;
     }
 }

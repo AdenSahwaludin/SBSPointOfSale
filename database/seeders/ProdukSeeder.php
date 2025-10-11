@@ -14,27 +14,66 @@ class ProdukSeeder extends Seeder
      */
     public function run(): void
     {
-        // Cari ID kategori Minyak Akar Lawang
-        $idKategori = Kategori::where('nama', 'Minyak Akar Lawang')->value('id_kategori');
+        $products = [
+            [
+                'sku' => 'HB-MKP-60ML',
+                'barcode' => '8997000610060',
+                'no_bpom' => 'POM QD185616211',
+                'nama' => 'Minyak Kayu Putih 60ml',
+                'id_kategori' => 'HB',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 15000,
+                'stok' => 100,
+            ],
+            [
+                'sku' => 'HB-MKP-KRT144',
+                'barcode' => null,
+                'no_bpom' => 'POM QD185616211',
+                'nama' => 'Minyak Kayu Putih Karton 144pcs',
+                'id_kategori' => 'HB',
+                'satuan' => 'karton',
+                'isi_per_pack' => 144,
+                'harga' => 2000000,
+                'stok' => 5,
+            ],
+            [
+                'sku' => 'EL-EUC-30ML',
+                'barcode' => '8997000610061',
+                'no_bpom' => 'POM QD185616212',
+                'nama' => 'Minyak Eucalyptus 30ml',
+                'id_kategori' => 'EL',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 18000,
+                'stok' => 75,
+            ],
+            [
+                'sku' => 'SP01-SRH-100ML',
+                'barcode' => '8997000610062',
+                'no_bpom' => 'POM QD185616213',
+                'nama' => 'Minyak Sereh 100ml',
+                'id_kategori' => 'SP01',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 25000,
+                'stok' => 50,
+            ],
+            [
+                'sku' => 'TH-CNG-50ML',
+                'barcode' => '8997000610063',
+                'no_bpom' => 'POM QD185616214',
+                'nama' => 'Minyak Cengkeh 50ml',
+                'id_kategori' => 'TH',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 20000,
+                'stok' => 30,
+            ],
+        ];
 
-        // Tambahkan produk baru
-        Produk::create([
-            'id_produk' => '8997000610060',
-            'nama' => 'Minyak Akar Lawang Cap Daun 60 ml',
-            'gambar' => '/images/produk/minyak-akar-lawang-60ml.jpg',
-            'nomor_bpom' => 'POM QD185616211',
-            'harga' => 14000,
-            'biaya_produk' => 8500,
-            'stok' => 500,
-            'batas_stok' => 48,
-            'satuan' => 'pcs',
-            'satuan_pack' => 'karton',
-            'isi_per_pack' => 144,
-            'harga_pack' => 1440000,
-            'min_beli_diskon' => 3,
-            'harga_diskon_unit' => 13500,
-            'harga_diskon_pack' => 1440000,
-            'id_kategori' => $idKategori,
-        ]);
+        foreach ($products as $product) {
+            Produk::create($product);
+        }
     }
 }

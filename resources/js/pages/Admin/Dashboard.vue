@@ -18,8 +18,8 @@ const adminMenuItems = [
         icon: 'fas fa-database',
         children: [
             { name: 'Pengguna', href: '/admin/pengguna', icon: 'fas fa-users' },
-            { name: 'Produk', href: '/admin/products', icon: 'fas fa-boxes' },
-            { name: 'Kategori', href: '/admin/categories', icon: 'fas fa-tags' },
+            { name: 'Produk', href: '/admin/produk', icon: 'fas fa-boxes' },
+            { name: 'Kategori', href: '/admin/kategori', icon: 'fas fa-tags' },
         ],
     },
     {
@@ -183,7 +183,7 @@ const topProducts = [
                 <div class="border-b border-gray-100 p-6">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-900">Produk Terlaris</h3>
-                        <a href="/admin/products" class="text-sm font-medium text-emerald-600 hover:text-emerald-700"> Lihat Semua </a>
+                        <a href="/admin/produk" class="text-sm font-medium text-emerald-600 hover:text-emerald-700"> Lihat Semua </a>
                     </div>
                 </div>
                 <div class="p-6">
@@ -215,7 +215,7 @@ const topProducts = [
             <div class="p-6">
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <a
-                        href="/admin/products"
+                        href="/admin/produk"
                         class="group flex items-center rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 p-4 transition-all duration-200 hover:from-blue-100 hover:to-blue-200"
                     >
                         <div class="mr-4 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">

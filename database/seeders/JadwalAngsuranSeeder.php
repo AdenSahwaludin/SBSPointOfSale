@@ -18,15 +18,15 @@ class JadwalAngsuranSeeder extends Seeder
   $kontrak = KontrakKredit::where('nomor_kontrak', 'KRD-202510-0001')->first();
 
   if ($kontrak) {
-   // Create installment schedules for 12 months
+   // Create installment schedules based on contract tenor
    for ($i = 1; $i <= $kontrak->tenor_bulan; $i++) {
     $jatuhTempo = Carbon::parse($kontrak->mulai_kontrak)->addMonths($i);
 
     $status = 'DUE';
     $jumlahDibayar = 0;
 
-    // Mark first 2 installments as paid for demo
-    if ($i <= 2) {
+    // Mark first installment as paid for demo
+    if ($i <= 1) {
      $status = 'PAID';
      $jumlahDibayar = $kontrak->cicilan_bulanan;
     }
