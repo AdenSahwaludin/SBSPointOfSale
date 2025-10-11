@@ -95,7 +95,7 @@ onMounted(() => {
         >
             <!-- Logo Header -->
             <div
-                class="shadow-emerald-lg relative flex h-21 items-center justify-center overflow-hidden bg-gradient-to-b from-emerald-200 to-emerald-100 text-black"
+                class="shadow-emerald-lg relative flex h-21 items-center justify-center overflow-hidden bg-gradient-to-b from-emerald-200 to-emerald-100 text-[#006448]"
             >
                 <div
                     v-if="isSidebarOpen"

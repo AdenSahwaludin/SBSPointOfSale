@@ -6,3 +6,4 @@ Pakai semua best practice.
 selalu pakai best practice dan kode yang singkat tetapi tetap jalan. 
 
 Gunakan prinsip clean code.
+

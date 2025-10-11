@@ -1,0 +1,35 @@
+VARCHAR(32) dipakai biar cukup menampung kombinasi elemen SKU:
+[KODE_KATEGORI]-[NAMA]-[VARIAN/KEMASAN]
+[4]-
+Contohnya: HB-MKP120-KRT12 (17 karakter) atau EL-BLENDER-BOX24 (18 karakter).
+Batas 32 itu aman & fleksibel — cukup untuk nama panjang, varian warna/ukuran, atau suffix unik (-001).
+
+use Illuminate\Support\Str;
+use App\Models\Kategori;
+use App\Models\Produk;
+
+function generateSKU($namaProduk, $idKategori, $satuan, $isiPerPack = 1) {
+    // Ambil kode kategori dari tabel kategori
+    $kategori = Kategori::where('id_kategori', $idKategori)->value('id_kategori') ?? 'XX';
+    
+    // Buat token nama produk (3–6 huruf + angka volume jika ada)
+    $token = strtoupper(Str::of($namaProduk)
+        ->replace([' ', '_', '-'], '')
+        ->replaceMatches('/[^A-Z0-9]/i', '')
+        ->substr(0, 6));
+    
+    // Tentukan kemasan
+    $kemasan = $satuan === 'pcs' ? 'PCS' : 'KRT'.$isiPerPack;
+
+    // Gabungkan jadi SKU dasar
+    $skuBase = "{$kategori}-{$token}-{$kemasan}";
+    $sku = $skuBase;
+    $i = 1;
+
+    // Cek apakah SKU sudah ada di DB, jika ya tambah suffix -001 dst.
+    while (Produk::where('sku', $sku)->exists()) {
+        $sku = $skuBase . '-' . str_pad($i++, 3, '0', STR_PAD_LEFT);
+    }
+
+    return $sku;
+}
