@@ -96,7 +96,7 @@ class TransaksiPOSController extends Controller
             'diskon' => 'nullable|numeric|min:0',
             'pajak' => 'nullable|numeric|min:0',
             'total' => 'required|numeric|min:0',
-            'jumlah_bayar' => 'required_if:metode_bayar,TUNAI|nullable|numeric|min:0',
+            'jumlah_bayar' => 'required_if:metode_bayar,TUNAI|nullable|numeric|min:0|gte:total',
         ]);
 
         try {
@@ -104,6 +104,8 @@ class TransaksiPOSController extends Controller
 
             // Generate nomor transaksi
             $nomorTransaksi = Transaksi::generateNomorTransaksi($request->id_pelanggan);
+
+            $isCashPayment = $request->metode_bayar === 'TUNAI';
 
             // Create transaksi
             $transaksi = Transaksi::create([
@@ -118,19 +120,24 @@ class TransaksiPOSController extends Controller
                 'biaya_pengiriman' => 0,
                 'total' => $request->total,
                 'metode_bayar' => $request->metode_bayar,
-                'status_pembayaran' => $request->metode_bayar === 'TUNAI' ? 'PAID' : 'PENDING',
-                'paid_at' => $request->metode_bayar === 'TUNAI' ? now() : null,
+                'status_pembayaran' => $isCashPayment ? Transaksi::STATUS_LUNAS : Transaksi::STATUS_MENUNGGU,
+                'paid_at' => $isCashPayment ? now() : null,
             ]);
 
             foreach ($request->items as $item) {
                 $produk = Produk::find($item['id_produk']);
 
                 // Check stock
-                if ($produk->stok < $item['jumlah']) {
+                $packSize = max(1, (int)($produk->pack_size ?? 1));
+                $requestedStock = $item['mode_qty'] === 'pack'
+                    ? $item['jumlah'] * $packSize
+                    : $item['jumlah'];
+
+                if ($produk->stok < $requestedStock) {
                     throw new \Exception("Stok {$produk->nama} tidak mencukupi");
                 }
 
-                $packSizeSnapshot = $item['mode_qty'] === 'pack' ? $produk->pack_size : 1;
+                $packSizeSnapshot = $item['mode_qty'] === 'pack' ? $packSize : 1;
 
                 TransaksiDetail::create([
                     'nomor_transaksi' => $nomorTransaksi,
@@ -145,23 +152,23 @@ class TransaksiPOSController extends Controller
                 ]);
 
                 // Update stock - kalikan dengan pack_size jika mode_qty = pack
-                $stockDeduction = $item['mode_qty'] === 'pack' ? $item['jumlah'] * $packSizeSnapshot : $item['jumlah'];
+                $stockDeduction = $requestedStock;
                 $produk->decrement('stok', $stockDeduction);
             }
 
             // Create payment record
-            $idPembayaran = Pembayaran::generateIdPembayaran();
+            if ($isCashPayment) {
+                $idPembayaran = Pembayaran::generateIdPembayaran();
 
-            Pembayaran::create([
-                'id_pembayaran' => $idPembayaran,
-                'id_transaksi' => $nomorTransaksi,
-                'metode' => $request->metode_bayar,
-                'jumlah' => $request->total,
-                'tanggal' => now(),
-                'keterangan' => $request->metode_bayar === 'TUNAI'
-                    ? 'Pembayaran tunai - Kembalian: Rp ' . number_format($request->jumlah_bayar - $request->total, 0, ',', '.')
-                    : 'Pembayaran ' . $request->metode_bayar,
-            ]);
+                Pembayaran::create([
+                    'id_pembayaran' => $idPembayaran,
+                    'id_transaksi' => $nomorTransaksi,
+                    'metode' => $request->metode_bayar,
+                    'jumlah' => $request->total,
+                    'tanggal' => now(),
+                    'keterangan' => 'Pembayaran tunai - Kembalian: Rp ' . number_format($request->jumlah_bayar - $request->total, 0, ',', '.'),
+                ]);
+            }
 
             DB::commit();
 
@@ -232,7 +239,7 @@ class TransaksiPOSController extends Controller
                 return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
             }
 
-            if ($transaksi->status_pembayaran === 'PAID') {
+            if ($transaksi->status_pembayaran === Transaksi::STATUS_LUNAS) {
                 return response()->json(['message' => 'Transaksi yang sudah dibayar tidak dapat dibatalkan'], 400);
             }
 
@@ -248,7 +255,8 @@ class TransaksiPOSController extends Controller
 
             // Update status
             $transaksi->update([
-                'status_pembayaran' => 'VOID',
+                'status_pembayaran' => Transaksi::STATUS_BATAL,
+                'paid_at' => null,
             ]);
 
             DB::commit();
