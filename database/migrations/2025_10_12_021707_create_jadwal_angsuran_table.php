@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -22,7 +21,7 @@ return new class extends Migration
             $table->enum('status', ['DUE', 'PAID', 'LATE', 'VOID'])->default('DUE');
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
-            
+
             // Add unique constraint and indexes
             $table->unique(['id_kontrak', 'periode_ke']);
             $table->index(['jatuh_tempo', 'status']);

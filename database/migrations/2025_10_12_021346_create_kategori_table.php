@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,7 +15,7 @@ return new class extends Migration
             $table->string('id_kategori', 4)->primary();
             $table->string('nama', 50)->unique();
             $table->timestamps();
-            
+
             // Add index for nama
             $table->index('nama');
         });

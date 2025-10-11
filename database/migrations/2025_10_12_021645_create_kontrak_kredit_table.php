@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -27,7 +26,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('score_snapshot')->default(50);
             $table->string('alasan_eligibilitas', 200)->nullable();
             $table->timestamps();
-            
+
             // Add indexes
             $table->index('status');
             $table->index('mulai_kontrak');

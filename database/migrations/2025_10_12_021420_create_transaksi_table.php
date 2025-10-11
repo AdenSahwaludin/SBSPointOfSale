@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -26,7 +25,7 @@ return new class extends Migration
             $table->enum('metode_bayar', ['TUNAI', 'QRIS', 'TRANSFER BCA', 'KREDIT'])->default('TUNAI');
             $table->enum('status_pembayaran', ['MENUNGGU', 'LUNAS', 'BATAL'])->default('MENUNGGU');
             $table->timestamp('paid_at')->nullable();
-            
+
             // Cicilan Pintar fields
             $table->enum('jenis_transaksi', ['TUNAI', 'KREDIT'])->default('TUNAI');
             $table->decimal('dp', 12, 0)->default(0);
@@ -35,9 +34,9 @@ return new class extends Migration
             $table->decimal('cicilan_bulanan', 12, 0)->nullable();
             $table->enum('ar_status', ['NA', 'AKTIF', 'LUNAS', 'GAGAL', 'BATAL'])->default('NA');
             $table->unsignedBigInteger('id_kontrak')->nullable();
-            
+
             $table->timestamps();
-            
+
             // Add indexes
             $table->index('id_pelanggan');
             $table->index('id_kasir');

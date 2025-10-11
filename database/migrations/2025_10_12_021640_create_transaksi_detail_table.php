@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -23,7 +22,7 @@ return new class extends Migration
             $table->decimal('diskon_item', 18, 0)->default(0);
             $table->decimal('subtotal', 18, 0);
             $table->timestamps();
-            
+
             // Add indexes
             $table->index('nomor_transaksi');
             $table->index('id_produk');
