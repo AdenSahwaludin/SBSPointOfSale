@@ -21,6 +21,12 @@ const adminMenuItems = [
         active: route().current('admin.pengguna.*'),
     },
     {
+        icon: 'fa-tags',
+        label: 'Manajemen Kategori',
+        route: 'admin.kategori.index',
+        active: route().current('admin.kategori.*'),
+    },
+    {
         icon: 'fa-box',
         label: 'Manajemen Produk',
         route: 'admin.produk.index',
