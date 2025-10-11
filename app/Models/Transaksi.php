@@ -12,6 +12,13 @@ class Transaksi extends Model
 {
     use HasFactory;
 
+    public const STATUS_MENUNGGU = 'MENUNGGU';
+    public const STATUS_LUNAS = 'LUNAS';
+    public const STATUS_BATAL = 'BATAL';
+
+    public const JENIS_TUNAI = 'TUNAI';
+    public const JENIS_KREDIT = 'KREDIT';
+
     protected $table = 'transaksi';
     protected $primaryKey = 'nomor_transaksi';
     public $incrementing = false;
@@ -121,7 +128,7 @@ class Transaksi extends Model
      */
     public function scopePaid($query)
     {
-        return $query->where('status_pembayaran', 'LUNAS');
+        return $query->where('status_pembayaran', self::STATUS_LUNAS);
     }
 
     /**
@@ -129,7 +136,7 @@ class Transaksi extends Model
      */
     public function scopeKredit($query)
     {
-        return $query->where('jenis_transaksi', 'KREDIT');
+        return $query->where('jenis_transaksi', self::JENIS_KREDIT);
     }
 
     /**
@@ -137,7 +144,7 @@ class Transaksi extends Model
      */
     public function isPaid(): bool
     {
-        return $this->status_pembayaran === 'LUNAS';
+        return $this->status_pembayaran === self::STATUS_LUNAS;
     }
 
     /**
@@ -145,7 +152,7 @@ class Transaksi extends Model
      */
     public function isKredit(): bool
     {
-        return $this->jenis_transaksi === 'KREDIT';
+        return $this->jenis_transaksi === self::JENIS_KREDIT;
     }
 
     /**
