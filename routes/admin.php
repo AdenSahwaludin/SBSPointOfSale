@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\KategoriController;
+use App\Http\Controllers\Admin\PelangganController;
 use Illuminate\Support\Facades\Route;
 
 // Admin routes (Admin role only)
@@ -56,6 +57,19 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
  Route::resource('kategori', KategoriController::class);
  Route::post('kategori/bulk-action', [KategoriController::class, 'bulkAction'])
   ->name('kategori.bulk-action');
+
+ // ==========================================
+ // MANAJEMEN PELANGGAN
+ // ==========================================
+ Route::resource('pelanggan', PelangganController::class)->names([
+  'index' => 'pelanggan.index',
+  'create' => 'pelanggan.create',
+  'store' => 'pelanggan.store',
+  'show' => 'pelanggan.show',
+  'edit' => 'pelanggan.edit',
+  'update' => 'pelanggan.update',
+  'destroy' => 'pelanggan.destroy',
+ ]);
 
  // ==========================================
  // LAPORAN & ANALISIS (untuk masa depan)

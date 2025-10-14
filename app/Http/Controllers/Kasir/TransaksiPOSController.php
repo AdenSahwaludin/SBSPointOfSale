@@ -127,11 +127,11 @@ class TransaksiPOSController extends Controller
             foreach ($request->items as $item) {
                 $produk = Produk::find($item['id_produk']);
 
-                // Check stock
+                // Check stock - untuk mengurangi stok fisik
                 $packSize = max(1, (int)($produk->pack_size ?? 1));
                 $requestedStock = $item['mode_qty'] === 'pack'
-                    ? $item['jumlah'] * $packSize
-                    : $item['jumlah'];
+                    ? $item['jumlah'] * $packSize  // pack: qty × pack_size untuk stok fisik
+                    : $item['jumlah'];             // unit: qty langsung
 
                 if ($produk->stok < $requestedStock) {
                     throw new \Exception("Stok {$produk->nama} tidak mencukupi");
@@ -143,15 +143,16 @@ class TransaksiPOSController extends Controller
                     'nomor_transaksi' => $nomorTransaksi,
                     'id_produk' => $produk->id_produk,
                     'nama_produk' => $produk->nama,
-                    'harga_satuan' => $item['harga_satuan'],
+                    'harga_satuan' => $item['harga_satuan'], // sudah benar dari frontend
                     'jumlah' => $item['jumlah'],
                     'mode_qty' => $item['mode_qty'],
                     'pack_size_snapshot' => $packSizeSnapshot,
                     'diskon_item' => 0,
+                    // PENTING: subtotal = jumlah × harga_satuan (harga_satuan sudah termasuk konversi pack)
                     'subtotal' => $item['harga_satuan'] * $item['jumlah'],
                 ]);
 
-                // Update stock - kalikan dengan pack_size jika mode_qty = pack
+                // Update stock - kurangi stok fisik unit
                 $stockDeduction = $requestedStock;
                 $produk->decrement('stok', $stockDeduction);
             }

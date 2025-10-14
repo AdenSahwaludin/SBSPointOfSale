@@ -12,8 +12,9 @@ export function useAdminMenuItems() {
             icon: 'fas fa-database',
             children: [
                 { name: 'Pengguna', href: '/admin/pengguna', icon: 'fas fa-users' },
-                { name: 'Produk', href: '/admin/products', icon: 'fas fa-boxes' },
+                { name: 'Produk', href: '/admin/produk', icon: 'fas fa-boxes' },
                 { name: 'Kategori', href: '/admin/kategori', icon: 'fas fa-tags' },
+                { name: 'Pelanggan', href: '/admin/pelanggan', icon: 'fas fa-user-friends' },
             ],
         },
         {

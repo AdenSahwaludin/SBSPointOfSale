@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -13,14 +14,11 @@ interface Kategori {
 interface Produk {
     id_produk: string;
     nama: string;
-    harga: number;
+    harga: number;              // harga per unit/pieces
     stok: number;
-    unit: string;
-    pack_unit: string;
-    pack_size: number;
-    harga_pack?: number;
+    satuan: string;             // pcs, karton, pack
+    isi_per_pack: number;       // berapa pcs dalam 1 karton/pack
     kategori: Kategori;
-    formatted_price: string;
 }
 
 interface Pelanggan {
@@ -38,8 +36,8 @@ interface CartItem {
     mode_qty: 'unit' | 'pack';
     subtotal: number;
     stok: number;
-    unit: string;
-    pack_size: number;
+    satuan: string;
+    isi_per_pack: number;
     diskon_item?: number;
 }
 
@@ -61,7 +59,7 @@ const selectedPelanggan = ref<string>('P001'); // Default to 'Umum'
 const metodeBayar = ref<string>('TUNAI');
 const jumlahBayar = ref<number>(0);
 const diskonGlobal = ref<number>(0);
-const pajakRate = ref<number>(10); // 10%
+const pajakRate = ref<number>(0);
 
 // Form
 const transactionForm = useForm({
@@ -92,7 +90,18 @@ const filteredProduk = computed(() => {
 });
 
 const subtotal = computed(() => {
-    return cart.value.reduce((sum, item) => sum + item.subtotal, 0);
+    const result = cart.value.reduce((sum, item) => sum + item.subtotal, 0);
+    // Debug logging
+    console.log('Subtotal calculation:', {
+        cart_items: cart.value.map(item => ({
+            nama: item.nama,
+            harga_satuan: item.harga_satuan,
+            jumlah: item.jumlah,
+            subtotal: item.subtotal
+        })),
+        total_subtotal: result
+    });
+    return result;
 });
 
 const diskon = computed(() => {
@@ -122,14 +131,28 @@ const totalItems = computed(() => {
 function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
     const existingItemIndex = cart.value.findIndex((item) => item.id_produk === produk.id_produk && item.mode_qty === mode);
 
-    const hargaSatuan = mode === 'pack' ? produk.harga_pack || produk.harga * produk.pack_size : produk.harga;
+    // Fix: Hitung harga satuan sesuai database schema
+    // Database hanya punya field 'harga' dan 'isi_per_pack'
+    // Mode pack = harga per karton/pack (biasanya untuk grosir)
+    // Mode unit = harga per pieces
+    const hargaSatuan = produk.harga; // Selalu gunakan harga per unit/pieces
+    
+    // Debug logging
+    console.log('Adding to cart:', {
+        produk: produk.nama,
+        mode,
+        harga_produk: produk.harga,
+        harga_satuan: hargaSatuan,
+        isi_per_pack: produk.isi_per_pack
+    });
 
     if (existingItemIndex !== -1) {
         const item = cart.value[existingItemIndex];
-        const maxQty = mode === 'pack' ? Math.floor(produk.stok / produk.pack_size) : produk.stok;
+        const maxQty = mode === 'pack' ? Math.floor(produk.stok / produk.isi_per_pack) : produk.stok;
 
         if (item.jumlah < maxQty) {
             item.jumlah++;
+            // Fix: Subtotal = jumlah × harga_satuan (sudah benar)
             item.subtotal = item.jumlah * item.harga_satuan - (item.diskon_item || 0);
         } else {
             addNotification({
@@ -138,7 +161,7 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
             });
         }
     } else {
-        const maxQty = mode === 'pack' ? Math.floor(produk.stok / produk.pack_size) : produk.stok;
+        const maxQty = mode === 'pack' ? Math.floor(produk.stok / produk.isi_per_pack) : produk.stok;
 
         if (maxQty > 0) {
             cart.value.push({
@@ -147,10 +170,11 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
                 harga_satuan: hargaSatuan,
                 jumlah: 1,
                 mode_qty: mode,
+                // Fix: Subtotal = harga_satuan (sudah benar)
                 subtotal: hargaSatuan,
                 stok: produk.stok,
-                unit: produk.unit,
-                pack_size: produk.pack_size,
+                satuan: produk.satuan,
+                isi_per_pack: produk.isi_per_pack,
                 diskon_item: 0,
             });
         } else {
@@ -164,12 +188,13 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
 
 function updateQuantity(index: number, quantity: number) {
     const item = cart.value[index];
-    const maxQty = item.mode_qty === 'pack' ? Math.floor(item.stok / item.pack_size) : item.stok;
+    const maxQty = item.mode_qty === 'pack' ? Math.floor(item.stok / item.isi_per_pack) : item.stok;
 
     if (quantity <= 0) {
         removeFromCart(index);
     } else if (quantity <= maxQty) {
         item.jumlah = quantity;
+        // Fix: Subtotal = jumlah × harga_satuan (sudah benar)
         item.subtotal = item.jumlah * item.harga_satuan - (item.diskon_item || 0);
     } else {
         addNotification({
@@ -340,32 +365,7 @@ onMounted(() => {
     };
 });
 
-const kasirMenuItems = [
-    {
-        name: 'Dashboard',
-        href: '/kasir',
-        icon: 'fas fa-tachometer-alt',
-    },
-    {
-        name: 'Point of Sale',
-        href: '/kasir/pos',
-        icon: 'fas fa-cash-register',
-        active: true,
-    },
-    {
-        name: 'Transaksi',
-        icon: 'fas fa-receipt',
-        children: [
-            { name: 'Riwayat Transaksi', href: '/kasir/transactions', icon: 'fas fa-history' },
-            { name: 'Transaksi Hari Ini', href: '/kasir/transactions/today', icon: 'fas fa-calendar-day' },
-        ],
-    },
-    {
-        name: 'Profile',
-        href: '/kasir/profile',
-        icon: 'fas fa-user-circle',
-    },
-];
+const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
 </script>
 
 <template>
@@ -427,7 +427,7 @@ const kasirMenuItems = [
                                 <div class="mb-1 text-xs text-gray-500">{{ produk.id_produk }}</div>
                                 <h3 class="mb-2 line-clamp-2 font-medium text-gray-900">{{ produk.nama }}</h3>
                                 <p class="mb-2 text-lg font-bold text-emerald-600">{{ formatCurrency(produk.harga) }}</p>
-                                <p class="mb-2 text-xs text-gray-500">Stok: {{ produk.stok }} {{ produk.unit }}</p>
+                                <p class="mb-2 text-xs text-gray-500">Stok: {{ produk.stok }} {{ produk.satuan }}</p>
 
                                 <!-- Unit/Pack buttons -->
                                 <div class="flex gap-1">
@@ -438,7 +438,7 @@ const kasirMenuItems = [
                                         Unit
                                     </button>
                                     <button
-                                        v-if="produk.pack_size > 1"
+                                        v-if="produk.isi_per_pack > 1"
                                         @click.stop="addToCart(produk, 'pack')"
                                         class="flex-1 rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
                                     >
@@ -490,7 +490,7 @@ const kasirMenuItems = [
                             <div class="mb-2 flex items-center justify-between">
                                 <span class="text-xs text-gray-500">
                                     {{ formatCurrency(item.harga_satuan) }} / {{ item.mode_qty }}
-                                    <span v-if="item.mode_qty === 'pack'">({{ item.pack_size }} {{ item.unit }})</span>
+                                    <span v-if="item.mode_qty === 'pack'">({{ item.isi_per_pack }} {{ item.satuan }})</span>
                                 </span>
                             </div>
 
