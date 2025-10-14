@@ -128,7 +128,7 @@ class TransaksiPOSController extends Controller
                 $produk = Produk::find($item['id_produk']);
 
                 // Check stock - untuk mengurangi stok fisik
-                $packSize = max(1, (int)($produk->pack_size ?? 1));
+                $packSize = max(1, (int)($produk->isi_per_pack ?? 1));
                 $requestedStock = $item['mode_qty'] === 'pack'
                     ? $item['jumlah'] * $packSize  // pack: qty × pack_size untuk stok fisik
                     : $item['jumlah'];             // unit: qty langsung

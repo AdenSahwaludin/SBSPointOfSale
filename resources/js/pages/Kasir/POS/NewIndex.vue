@@ -39,6 +39,7 @@ interface CartItem {
     satuan: string;
     isi_per_pack: number;
     diskon_item?: number;
+    base_harga_unit?: number;
 }
 
 const props = defineProps<{
@@ -90,7 +91,7 @@ const filteredProduk = computed(() => {
 });
 
 const subtotal = computed(() => {
-    const result = cart.value.reduce((sum, item) => sum + item.subtotal, 0);
+    const result = cart.value.reduce((sum, item) => Number(sum) + Number(item.subtotal || 0), 0);
     // Debug logging
     console.log('Subtotal calculation:', {
         cart_items: cart.value.map(item => ({
@@ -128,14 +129,32 @@ const totalItems = computed(() => {
 });
 
 // Methods
+function toNumber(val: unknown): number {
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+        const cleaned = val.replace(/[^0-9-]/g, '');
+        return cleaned ? parseInt(cleaned, 10) : 0;
+    }
+    return 0;
+}
+
+function getEffectiveUnitPiecePrice(baseUnitPrice: number, qtyPieces: number): number {
+    // Aturan grosir dasar dari brief/Aturan_Penjualan.txt
+    if (qtyPieces >= 144) return 10000; // >= 1 karton
+    if (qtyPieces >= 3) return 13500;   // >= 3 pcs
+    return baseUnitPrice;               // harga normal
+}
+
 function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
     const existingItemIndex = cart.value.findIndex((item) => item.id_produk === produk.id_produk && item.mode_qty === mode);
 
-    // Fix: Hitung harga satuan sesuai database schema
-    // Database hanya punya field 'harga' dan 'isi_per_pack'
-    // Mode pack = harga per karton/pack (biasanya untuk grosir)
-    // Mode unit = harga per pieces
-    const hargaSatuan = produk.harga; // Selalu gunakan harga per unit/pieces
+    // Hitung harga efektif berdasar mode dan aturan grosir
+    const baseUnitPrice = toNumber(produk.harga);
+    const isiPerPack = Math.max(1, toNumber(produk.isi_per_pack));
+    const initialQty = 1;
+    const qtyPieces = mode === 'pack' ? initialQty * isiPerPack : initialQty;
+    const effectiveUnitPiecePrice = getEffectiveUnitPiecePrice(baseUnitPrice, qtyPieces);
+    const hargaSatuan = mode === 'pack' ? effectiveUnitPiecePrice * isiPerPack : effectiveUnitPiecePrice
     
     // Debug logging
     console.log('Adding to cart:', {
@@ -148,12 +167,16 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
 
     if (existingItemIndex !== -1) {
         const item = cart.value[existingItemIndex];
-        const maxQty = mode === 'pack' ? Math.floor(produk.stok / produk.isi_per_pack) : produk.stok;
+        const maxQty = mode === 'pack' ? Math.floor(produk.stok / isiPerPack) : produk.stok;
 
         if (item.jumlah < maxQty) {
-            item.jumlah++;
+            const newJumlah = item.jumlah + 1;
+            const totalPieces = mode === 'pack' ? newJumlah * isiPerPack : newJumlah;
+            const newUnitPiecePrice = getEffectiveUnitPiecePrice(item.base_harga_unit || baseUnitPrice, totalPieces);
+            item.harga_satuan = mode === 'pack' ? newUnitPiecePrice * isiPerPack : newUnitPiecePrice;
+            item.jumlah = newJumlah;
             // Fix: Subtotal = jumlah × harga_satuan (sudah benar)
-            item.subtotal = item.jumlah * item.harga_satuan - (item.diskon_item || 0);
+            item.subtotal = Number(item.jumlah) * Number(item.harga_satuan) - Number(item.diskon_item || 0);
         } else {
             addNotification({
                 type: 'warning',
@@ -161,7 +184,7 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
             });
         }
     } else {
-        const maxQty = mode === 'pack' ? Math.floor(produk.stok / produk.isi_per_pack) : produk.stok;
+        const maxQty = mode === 'pack' ? Math.floor(produk.stok / isiPerPack) : produk.stok;
 
         if (maxQty > 0) {
             cart.value.push({
@@ -171,10 +194,11 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
                 jumlah: 1,
                 mode_qty: mode,
                 // Fix: Subtotal = harga_satuan (sudah benar)
-                subtotal: hargaSatuan,
+                subtotal: Number(hargaSatuan),
                 stok: produk.stok,
                 satuan: produk.satuan,
-                isi_per_pack: produk.isi_per_pack,
+                isi_per_pack: isiPerPack,
+                base_harga_unit: baseUnitPrice,
                 diskon_item: 0,
             });
         } else {
@@ -188,7 +212,8 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
 
 function updateQuantity(index: number, quantity: number) {
     const item = cart.value[index];
-    const maxQty = item.mode_qty === 'pack' ? Math.floor(item.stok / item.isi_per_pack) : item.stok;
+    const isiPerPack = Math.max(1, toNumber(item.isi_per_pack));
+    const maxQty = item.mode_qty === 'pack' ? Math.floor(item.stok / isiPerPack) : item.stok;
 
     if (quantity <= 0) {
         removeFromCart(index);
@@ -621,3 +646,4 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
     overflow: hidden;
 }
 </style>
+
