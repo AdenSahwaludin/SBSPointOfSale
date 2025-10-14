@@ -12,7 +12,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
  // Quick access routes (for navigation)
  Route::inertia('/users', 'Admin/Users')->name('users');
- Route::inertia('/products', 'Admin/Products')->name('products');
+ Route::inertia('/produk', 'Admin/Produk')->name('produk');
  Route::inertia('/reports', 'Admin/Reports')->name('reports');
  Route::inertia('/settings', 'Admin/Settings')->name('settings');
 
