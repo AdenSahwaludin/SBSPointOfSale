@@ -76,6 +76,12 @@ function closeSidebarOnMobile() {
 onMounted(() => {
     checkMobile();
     window.addEventListener('resize', checkMobile);
+    // Automatically expand menus that have active children
+    props.menuItems.forEach((item) => {
+        if (item.children && item.children.some((child) => child.active)) {
+            expandedMenus.value.add(item.name);
+        }
+    });
 });
 </script>
 

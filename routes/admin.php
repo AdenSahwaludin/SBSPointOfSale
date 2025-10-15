@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\KonversiStokController;
 use Illuminate\Support\Facades\Route;
 
 // Admin routes (Admin role only)
@@ -70,6 +71,23 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
   'update' => 'pelanggan.update',
   'destroy' => 'pelanggan.destroy',
  ]);
+
+ // ==========================================
+ // MANAJEMEN KONVERSI STOK
+ // ==========================================
+ Route::resource('konversi-stok', KonversiStokController::class)->names([
+  'index' => 'konversi-stok.index',
+  'create' => 'konversi-stok.create',
+  'store' => 'konversi-stok.store',
+  'show' => 'konversi-stok.show',
+  'edit' => 'konversi-stok.edit',
+  'update' => 'konversi-stok.update',
+  'destroy' => 'konversi-stok.destroy',
+ ]);
+
+ // Bulk delete konversi stok
+ Route::post('konversi-stok/bulk-delete', [KonversiStokController::class, 'bulkDelete'])
+  ->name('konversi-stok.bulk-delete');
 
  // ==========================================
  // LAPORAN & ANALISIS (untuk masa depan)
