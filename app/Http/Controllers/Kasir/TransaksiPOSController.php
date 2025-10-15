@@ -29,6 +29,7 @@ class TransaksiPOSController extends Controller
                 ->map(function ($p) {
                     return [
                         'id_produk' => $p->id_produk,
+                        'barcode' => $p->barcode,
                         'nama' => $p->nama,
                         'harga' => $p->harga,
                         'harga_pack' => $p->harga_pack,
@@ -57,24 +58,97 @@ class TransaksiPOSController extends Controller
     }
 
     /**
-     * Search produk by barcode or name
+     * Search produk with advanced algorithm
+     * Features: Multi-field search, relevance scoring, fuzzy matching
      */
     public function searchProduk(Request $request)
     {
         $query = $request->get('q');
+        
+        if (empty($query)) {
+            return response()->json([]);
+        }
 
+        $searchTerm = strtolower(trim($query));
+        
+        // Ambil semua produk in stock
         $produk = Produk::with('kategori')
-            ->where(function ($q) use ($query) {
-                $q->where('id_produk', 'like', "%{$query}%")
-                    ->orWhere('nama', 'like', "%{$query}%")
-                    ->orWhere('barcode', 'like', "%{$query}%");
-            })
             ->inStock()
-            ->limit(10)
             ->get()
-            ->map(function ($p) {
+            ->map(function ($p) use ($searchTerm) {
+                $score = 0;
+                
+                // Field values untuk scoring
+                $nama = strtolower($p->nama);
+                $sku = strtolower($p->sku ?? $p->id_produk);
+                $barcode = strtolower($p->barcode ?? '');
+                $kategori = strtolower($p->kategori->nama ?? '');
+                
+                // 1. Exact match (highest priority)
+                if ($barcode === $searchTerm) {
+                    $score += 1000; // Barcode exact match
+                }
+                if ($sku === $searchTerm) {
+                    $score += 900; // SKU exact match
+                }
+                if ($nama === $searchTerm) {
+                    $score += 800; // Nama exact match
+                }
+                
+                // 2. Starts with (high priority)
+                if (str_starts_with($barcode, $searchTerm)) {
+                    $score += 700;
+                }
+                if (str_starts_with($sku, $searchTerm)) {
+                    $score += 600;
+                }
+                if (str_starts_with($nama, $searchTerm)) {
+                    $score += 500;
+                }
+                
+                // 3. Contains (medium priority)
+                if (str_contains($barcode, $searchTerm)) {
+                    $score += 400;
+                }
+                if (str_contains($sku, $searchTerm)) {
+                    $score += 300;
+                }
+                if (str_contains($nama, $searchTerm)) {
+                    $score += 200;
+                }
+                if (str_contains($kategori, $searchTerm)) {
+                    $score += 100;
+                }
+                
+                // 4. Word-by-word search (untuk query multi-kata)
+                $searchWords = explode(' ', $searchTerm);
+                foreach ($searchWords as $word) {
+                    if (strlen($word) > 2) { // Skip kata pendek
+                        if (str_contains($nama, $word)) {
+                            $score += 50;
+                        }
+                        if (str_contains($sku, $word)) {
+                            $score += 40;
+                        }
+                    }
+                }
+                
+                // 5. Fuzzy matching untuk typo tolerance
+                // Hitung similarity menggunakan levenshtein untuk nama
+                $nameWords = explode(' ', $nama);
+                foreach ($nameWords as $nameWord) {
+                    if (strlen($nameWord) > 3 && strlen($searchTerm) > 3) {
+                        $similarity = similar_text($searchTerm, $nameWord);
+                        if ($similarity > 2) {
+                            $score += $similarity * 10;
+                        }
+                    }
+                }
+                
                 return [
                     'id_produk' => $p->id_produk,
+                    'sku' => $p->sku ?? $p->id_produk,
+                    'barcode' => $p->barcode,
                     'nama' => $p->nama,
                     'harga' => $p->harga,
                     'harga_pack' => $p->harga_pack,
@@ -82,8 +156,20 @@ class TransaksiPOSController extends Controller
                     'satuan' => $p->satuan,
                     'isi_per_pack' => $p->isi_per_pack,
                     'kategori' => $p->kategori,
+                    '_score' => $score, // Internal scoring
                 ];
+            })
+            ->filter(function ($item) {
+                return $item['_score'] > 0; // Hanya ambil yang match
+            })
+            ->sortByDesc('_score') // Sort by relevance
+            ->take(10) // Limit hasil
+            ->values()
+            ->map(function ($item) {
+                unset($item['_score']); // Remove internal score dari response
+                return $item;
             });
+
         return response()->json($produk);
     }
 
@@ -105,6 +191,7 @@ class TransaksiPOSController extends Controller
 
         return response()->json([
             'id_produk' => $produk->id_produk,
+            'barcode' => $produk->barcode,
             'nama' => $produk->nama,
             'harga' => $produk->harga,
             'harga_pack' => $produk->harga_pack,
@@ -160,11 +247,11 @@ class TransaksiPOSController extends Controller
                 'paid_at' => $isCashPayment ? now() : null,
                 // 3️⃣ Field Cicilan Pintar (akan diaktifkan nanti)
                 'jenis_transaksi' => 'TUNAI', // default TUNAI untuk transaksi langsung
-                'dp' => null,
+                'dp' => 0,
                 'tenor_bulan' => null,
-                'bunga_persen' => null,
+                'bunga_persen' => 0,
                 'cicilan_bulanan' => null,
-                'ar_status' => null,
+                'ar_status' => 'NA',
                 'id_kontrak' => null,
             ]);
 

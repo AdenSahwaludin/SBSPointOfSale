@@ -18,7 +18,7 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
 
   // Product search and lookup
   Route::get('/search-produk', [TransaksiPOSController::class, 'searchProduk'])->name('search-produk');
-  Route::get('/produk/{barcode}', [TransaksiPOSController::class, 'getProdukByBarcode'])->name('produk');
+  Route::get('/produk', [TransaksiPOSController::class, 'getProdukByBarcode'])->name('produk');
 
   // Transaction management
   Route::get('/receipt/{nomorTransaksi}', [TransaksiPOSController::class, 'getTransactionReceipt'])->name('receipt');

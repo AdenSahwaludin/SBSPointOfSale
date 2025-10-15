@@ -13,6 +13,7 @@ interface Kategori {
 
 interface Produk {
     id_produk: string;
+    barcode?: string;
     nama: string;
     harga: number; // harga per unit/pieces
     harga_pack?: number; // harga grosir/pack (≥3 pcs atau kemasan besar)
@@ -63,6 +64,9 @@ const metodeBayar = ref<string>('TUNAI');
 const jumlahBayar = ref<number>(0);
 const diskonGlobal = ref<number>(0);
 const pajakRate = ref<number>(0);
+const searchResults = ref<Produk[]>([]); // Hasil search dari API
+const isSearching = ref(false); // Loading state
+const searchTimeout = ref<number | null>(null); // Debounce timer
 
 // Form
 const transactionForm = useForm({
@@ -78,15 +82,16 @@ const transactionForm = useForm({
 
 // Computed
 const filteredProduk = computed(() => {
+    // Jika ada search query, gunakan hasil dari API
+    if (searchQuery.value && searchResults.value.length > 0) {
+        return searchResults.value;
+    }
+    
+    // Jika tidak ada search, filter by kategori dari props.produk
     let filtered = props.produk;
 
     if (selectedKategori.value) {
         filtered = filtered.filter((p) => p.kategori.id_kategori === selectedKategori.value);
-    }
-
-    if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase();
-        filtered = filtered.filter((p) => p.nama.toLowerCase().includes(query) || p.id_produk.includes(query));
     }
 
     return filtered;
@@ -314,19 +319,68 @@ function clearCart() {
     jumlahBayar.value = 0;
 }
 
+// Live search dengan debounce
+function handleSearchInput() {
+    // Clear previous timeout
+    if (searchTimeout.value) {
+        clearTimeout(searchTimeout.value);
+    }
+    
+    // Reset jika query kosong
+    if (!searchQuery.value || searchQuery.value.length < 2) {
+        searchResults.value = [];
+        isSearching.value = false;
+        return;
+    }
+    
+    // Set loading state
+    isSearching.value = true;
+    
+    // Debounce 300ms
+    searchTimeout.value = window.setTimeout(() => {
+        performSearch();
+    }, 300);
+}
+
+async function performSearch() {
+    try {
+        const response = await fetch(`/kasir/pos/search?q=${encodeURIComponent(searchQuery.value)}`);
+        if (!response.ok) throw new Error('Search failed');
+        
+        const data = await response.json();
+        searchResults.value = data;
+    } catch (error) {
+        console.error('Search error:', error);
+        addNotification({
+            type: 'error',
+            title: 'Pencarian gagal!',
+        });
+        searchResults.value = [];
+    } finally {
+        isSearching.value = false;
+    }
+}
+
 function handleBarcodeInput() {
-    if (barcodeInput.value) {
-        const produk = props.produk.find((p) => p.id_produk === barcodeInput.value);
-        if (produk) {
+    if (!barcodeInput.value) return;
+
+    const code = barcodeInput.value.trim();
+    // Prefer server lookup by barcode to avoid mismatch with id_produk
+    fetch(`/kasir/pos/produk?barcode=${encodeURIComponent(code)}`)
+        .then((res) => {
+            if (!res.ok) throw new Error('Produk tidak ditemukan');
+            return res.json();
+        })
+        .then((produk) => {
             addToCart(produk);
             barcodeInput.value = '';
-        } else {
+        })
+        .catch(() => {
             addNotification({
                 type: 'error',
                 title: 'Produk dengan barcode tersebut tidak ditemukan!',
             });
-        }
-    }
+        });
 }
 
 function processTransaction() {
@@ -495,16 +549,29 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
 
                     <!-- Search and Filter -->
                     <div class="flex gap-4">
-                        <div class="flex-1">
+                        <div class="relative flex-1">
                             <input
                                 v-model="searchQuery"
+                                @input="handleSearchInput"
                                 type="text"
-                                placeholder="Cari produk..."
-                                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
+                                placeholder="Cari nama, SKU, atau barcode produk..."
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                             />
+                            <!-- Loading indicator -->
+                            <div v-if="isSearching" class="absolute right-3 top-1/2 -translate-y-1/2">
+                                <svg class="h-5 w-5 animate-spin text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                            <!-- Search icon -->
+                            <div v-else class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </div>
                         </div>
                         <select
                             v-model="selectedKategori"
+                            @change="searchQuery = ''; searchResults = []"
                             class="rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                         >
                             <option :value="null">Semua Kategori</option>
@@ -513,11 +580,33 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                             </option>
                         </select>
                     </div>
+                    
+                    <!-- Search info -->
+                    <div v-if="searchQuery && !isSearching" class="mt-3 text-sm text-gray-600">
+                        <span v-if="filteredProduk.length > 0">
+                            Ditemukan {{ filteredProduk.length }} produk untuk "<strong>{{ searchQuery }}</strong>"
+                        </span>
+                        <span v-else class="text-orange-600">
+                            Tidak ada produk ditemukan untuk "<strong>{{ searchQuery }}</strong>"
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Products Grid -->
                 <div class="flex-1 overflow-y-auto p-6">
-                    <div class="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
+                    <!-- Loading state -->
+                    <div v-if="isSearching" class="flex items-center justify-center py-12">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 animate-spin text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p class="mt-4 text-gray-600">Mencari produk...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Products grid -->
+                    <div v-else class="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
                         <div
                             v-for="produk in filteredProduk"
                             :key="produk.id_produk"
