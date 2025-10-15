@@ -86,7 +86,7 @@ const filteredProduk = computed(() => {
     if (searchQuery.value && searchResults.value.length > 0) {
         return searchResults.value;
     }
-    
+
     // Jika tidak ada search, filter by kategori dari props.produk
     let filtered = props.produk;
 
@@ -325,17 +325,17 @@ function handleSearchInput() {
     if (searchTimeout.value) {
         clearTimeout(searchTimeout.value);
     }
-    
+
     // Reset jika query kosong
     if (!searchQuery.value || searchQuery.value.length < 2) {
         searchResults.value = [];
         isSearching.value = false;
         return;
     }
-    
+
     // Set loading state
     isSearching.value = true;
-    
+
     // Debounce 300ms
     searchTimeout.value = window.setTimeout(() => {
         performSearch();
@@ -344,9 +344,9 @@ function handleSearchInput() {
 
 async function performSearch() {
     try {
-        const response = await fetch(`/kasir/pos/search?q=${encodeURIComponent(searchQuery.value)}`);
+        const response = await fetch(`/kasir/pos/search-produk?q=${encodeURIComponent(searchQuery.value)}`);
         if (!response.ok) throw new Error('Search failed');
-        
+
         const data = await response.json();
         searchResults.value = data;
     } catch (error) {
@@ -558,20 +558,27 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                 class="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                             />
                             <!-- Loading indicator -->
-                            <div v-if="isSearching" class="absolute right-3 top-1/2 -translate-y-1/2">
+                            <div v-if="isSearching" class="absolute top-1/2 right-3 -translate-y-1/2">
                                 <svg class="h-5 w-5 animate-spin text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
                                 </svg>
                             </div>
                             <!-- Search icon -->
-                            <div v-else class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <div v-else class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400">
                                 <i class="fas fa-search"></i>
                             </div>
                         </div>
                         <select
                             v-model="selectedKategori"
-                            @change="searchQuery = ''; searchResults = []"
+                            @change="
+                                searchQuery = '';
+                                searchResults = [];
+                            "
                             class="rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                         >
                             <option :value="null">Semua Kategori</option>
@@ -580,14 +587,16 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                             </option>
                         </select>
                     </div>
-                    
+
                     <!-- Search info -->
                     <div v-if="searchQuery && !isSearching" class="mt-3 text-sm text-gray-600">
                         <span v-if="filteredProduk.length > 0">
-                            Ditemukan {{ filteredProduk.length }} produk untuk "<strong>{{ searchQuery }}</strong>"
+                            Ditemukan {{ filteredProduk.length }} produk untuk "<strong>{{ searchQuery }}</strong
+                            >"
                         </span>
                         <span v-else class="text-orange-600">
-                            Tidak ada produk ditemukan untuk "<strong>{{ searchQuery }}</strong>"
+                            Tidak ada produk ditemukan untuk "<strong>{{ searchQuery }}</strong
+                            >"
                         </span>
                     </div>
                 </div>
@@ -597,14 +606,23 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     <!-- Loading state -->
                     <div v-if="isSearching" class="flex items-center justify-center py-12">
                         <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 animate-spin text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg
+                                class="mx-auto h-12 w-12 animate-spin text-emerald-500"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
                             </svg>
                             <p class="mt-4 text-gray-600">Mencari produk...</p>
                         </div>
                     </div>
-                    
+
                     <!-- Products grid -->
                     <div v-else class="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
                         <div

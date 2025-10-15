@@ -64,26 +64,26 @@ class TransaksiPOSController extends Controller
     public function searchProduk(Request $request)
     {
         $query = $request->get('q');
-        
+
         if (empty($query)) {
             return response()->json([]);
         }
 
         $searchTerm = strtolower(trim($query));
-        
+
         // Ambil semua produk in stock
         $produk = Produk::with('kategori')
             ->inStock()
             ->get()
             ->map(function ($p) use ($searchTerm) {
                 $score = 0;
-                
+
                 // Field values untuk scoring
                 $nama = strtolower($p->nama);
                 $sku = strtolower($p->sku ?? $p->id_produk);
                 $barcode = strtolower($p->barcode ?? '');
                 $kategori = strtolower($p->kategori->nama ?? '');
-                
+
                 // 1. Exact match (highest priority)
                 if ($barcode === $searchTerm) {
                     $score += 1000; // Barcode exact match
@@ -94,7 +94,7 @@ class TransaksiPOSController extends Controller
                 if ($nama === $searchTerm) {
                     $score += 800; // Nama exact match
                 }
-                
+
                 // 2. Starts with (high priority)
                 if (str_starts_with($barcode, $searchTerm)) {
                     $score += 700;
@@ -105,7 +105,7 @@ class TransaksiPOSController extends Controller
                 if (str_starts_with($nama, $searchTerm)) {
                     $score += 500;
                 }
-                
+
                 // 3. Contains (medium priority)
                 if (str_contains($barcode, $searchTerm)) {
                     $score += 400;
@@ -119,7 +119,7 @@ class TransaksiPOSController extends Controller
                 if (str_contains($kategori, $searchTerm)) {
                     $score += 100;
                 }
-                
+
                 // 4. Word-by-word search (untuk query multi-kata)
                 $searchWords = explode(' ', $searchTerm);
                 foreach ($searchWords as $word) {
@@ -132,7 +132,7 @@ class TransaksiPOSController extends Controller
                         }
                     }
                 }
-                
+
                 // 5. Fuzzy matching untuk typo tolerance
                 // Hitung similarity menggunakan levenshtein untuk nama
                 $nameWords = explode(' ', $nama);
@@ -144,7 +144,7 @@ class TransaksiPOSController extends Controller
                         }
                     }
                 }
-                
+
                 return [
                     'id_produk' => $p->id_produk,
                     'sku' => $p->sku ?? $p->id_produk,
