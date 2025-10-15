@@ -189,9 +189,19 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
 
     if (existingItemIndex !== -1) {
         const item = cart.value[existingItemIndex];
-        const maxQty = (produk.satuan === 'karton' || produk.satuan === 'pack' || mode === 'pack') 
-            ? Math.floor(produk.stok / isiPerPack) 
-            : produk.stok;
+        
+        // Hitung maxQty berdasarkan satuan produk
+        let maxQty: number;
+        if (produk.satuan === 'karton' || produk.satuan === 'pack') {
+            // Produk kemasan besar: stok langsung (sudah dalam unit karton/pack)
+            maxQty = produk.stok;
+        } else if (mode === 'pack') {
+            // Produk pcs mode pack: stok dibagi isi_per_pack
+            maxQty = Math.floor(produk.stok / isiPerPack);
+        } else {
+            // Produk pcs mode unit: stok langsung
+            maxQty = produk.stok;
+        }
 
         if (item.jumlah < maxQty) {
             const newJumlah = item.jumlah + 1;
@@ -216,9 +226,18 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
             });
         }
     } else {
-        const maxQty = (produk.satuan === 'karton' || produk.satuan === 'pack' || mode === 'pack') 
-            ? Math.floor(produk.stok / isiPerPack) 
-            : produk.stok;
+        // Hitung maxQty berdasarkan satuan produk
+        let maxQty: number;
+        if (produk.satuan === 'karton' || produk.satuan === 'pack') {
+            // Produk kemasan besar: stok langsung (sudah dalam unit karton/pack)
+            maxQty = produk.stok;
+        } else if (mode === 'pack') {
+            // Produk pcs mode pack: stok dibagi isi_per_pack
+            maxQty = Math.floor(produk.stok / isiPerPack);
+        } else {
+            // Produk pcs mode unit: stok langsung
+            maxQty = produk.stok;
+        }
 
         if (maxQty > 0) {
             cart.value.push({
@@ -247,9 +266,19 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
 function updateQuantity(index: number, quantity: number) {
     const item = cart.value[index];
     const isiPerPack = Math.max(1, toNumber(item.isi_per_pack));
-    const maxQty = (item.satuan === 'karton' || item.satuan === 'pack' || item.mode_qty === 'pack')
-        ? Math.floor(item.stok / isiPerPack) 
-        : item.stok;
+    
+    // Hitung maxQty berdasarkan satuan dan mode
+    let maxQty: number;
+    if (item.satuan === 'karton' || item.satuan === 'pack') {
+        // Produk kemasan besar: stok langsung
+        maxQty = item.stok;
+    } else if (item.mode_qty === 'pack') {
+        // Produk pcs mode pack: stok dibagi isi_per_pack
+        maxQty = Math.floor(item.stok / isiPerPack);
+    } else {
+        // Produk pcs mode unit: stok langsung
+        maxQty = item.stok;
+    }
 
     if (quantity <= 0) {
         removeFromCart(index);
@@ -503,19 +532,31 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
 
                                 <!-- Unit/Pack buttons -->
                                 <div class="flex gap-1">
+                                    <!-- Produk karton/pack: hanya 1 tombol -->
                                     <button
-                                        @click.stop="addToCart(produk, 'unit')"
-                                        class="flex-1 rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-200"
-                                    >
-                                        Unit
-                                    </button>
-                                    <button
-                                        v-if="produk.isi_per_pack > 1"
+                                        v-if="produk.satuan === 'karton' || produk.satuan === 'pack'"
                                         @click.stop="addToCart(produk, 'pack')"
                                         class="flex-1 rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
                                     >
-                                        Pack
+                                        Tambah {{ produk.satuan }}
                                     </button>
+                                    
+                                    <!-- Produk pcs: tombol unit dan pack (jika isi_per_pack > 1) -->
+                                    <template v-else>
+                                        <button
+                                            @click.stop="addToCart(produk, 'unit')"
+                                            class="flex-1 rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-200"
+                                        >
+                                            Unit
+                                        </button>
+                                        <button
+                                            v-if="produk.isi_per_pack > 1"
+                                            @click.stop="addToCart(produk, 'pack')"
+                                            class="flex-1 rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
+                                        >
+                                            Pack ({{ produk.isi_per_pack }})
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
                         </div>
