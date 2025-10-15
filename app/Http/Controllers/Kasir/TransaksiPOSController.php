@@ -159,7 +159,7 @@ class TransaksiPOSController extends Controller
                 'status_pembayaran' => $isCashPayment ? Transaksi::STATUS_LUNAS : Transaksi::STATUS_MENUNGGU,
                 'paid_at' => $isCashPayment ? now() : null,
                 // 3️⃣ Field Cicilan Pintar (akan diaktifkan nanti)
-                'jenis_transaksi' => 'LANGSUNG', // default LANGSUNG
+                'jenis_transaksi' => 'TUNAI', // default TUNAI untuk transaksi langsung
                 'dp' => null,
                 'tenor_bulan' => null,
                 'bunga_persen' => null,
