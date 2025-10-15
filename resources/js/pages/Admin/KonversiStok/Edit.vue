@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 interface Produk {
     id_produk: number;
@@ -27,7 +27,8 @@ interface KonversiStok {
 
 interface Props {
     konversi: KonversiStok;
-    produk: Produk[];
+    produkAsal: Produk[];
+    produkTujuan: Produk[];
 }
 
 const props = defineProps<Props>();
@@ -79,12 +80,31 @@ const form = useForm({
     keterangan: props.konversi.keterangan || '',
 });
 
+const searchFromProduk = ref('');
+const searchToProduk = ref('');
+
+const filteredProdukAsal = computed(() => {
+    if (!searchFromProduk.value) return props.produkAsal;
+    const search = searchFromProduk.value.toLowerCase();
+    return props.produkAsal.filter(
+        (p) => p.nama.toLowerCase().includes(search) || p.sku.toLowerCase().includes(search) || p.kategori?.toLowerCase().includes(search),
+    );
+});
+
+const filteredProdukTujuan = computed(() => {
+    if (!searchToProduk.value) return props.produkTujuan;
+    const search = searchToProduk.value.toLowerCase();
+    return props.produkTujuan.filter(
+        (p) => p.nama.toLowerCase().includes(search) || p.sku.toLowerCase().includes(search) || p.kategori?.toLowerCase().includes(search),
+    );
+});
+
 const selectedFromProduk = computed(() => {
-    return props.produk.find((p) => p.id_produk === form.from_produk_id);
+    return props.produkAsal.find((p) => p.id_produk === form.from_produk_id);
 });
 
 const selectedToProduk = computed(() => {
-    return props.produk.find((p) => p.id_produk === form.to_produk_id);
+    return props.produkTujuan.find((p) => p.id_produk === form.to_produk_id);
 });
 
 // Auto-calculate rasio when qty_from or qty_to changes
@@ -131,17 +151,25 @@ function submit() {
                 <!-- Produk Asal -->
                 <div>
                     <label for="from_produk_id" class="mb-2 block text-sm font-medium text-gray-700">
-                        Produk Asal <span class="text-red-500">*</span>
+                        Produk Asal (Non-PCS) <span class="text-red-500">*</span>
                     </label>
+                    <!-- Search Input -->
+                    <input
+                        v-model="searchFromProduk"
+                        type="text"
+                        placeholder="Cari produk asal (nama, SKU, kategori)..."
+                        class="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    />
                     <select
                         id="from_produk_id"
                         v-model="form.from_produk_id"
                         class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
                         :class="{ 'border-red-500': form.errors.from_produk_id }"
+                        size="8"
                         required
                     >
-                        <option :value="null">Pilih produk asal</option>
-                        <option v-for="item in produk" :key="item.id_produk" :value="item.id_produk">
+                        <option :value="null" disabled>Pilih produk asal</option>
+                        <option v-for="item in filteredProdukAsal" :key="item.id_produk" :value="item.id_produk">
                             {{ item.nama }} ({{ item.sku }}) - {{ item.satuan }} - Stok: {{ item.stok }}
                         </option>
                     </select>
@@ -159,22 +187,25 @@ function submit() {
                 <!-- Produk Tujuan -->
                 <div>
                     <label for="to_produk_id" class="mb-2 block text-sm font-medium text-gray-700">
-                        Produk Tujuan <span class="text-red-500">*</span>
+                        Produk Tujuan (PCS Only) <span class="text-red-500">*</span>
                     </label>
+                    <!-- Search Input -->
+                    <input
+                        v-model="searchToProduk"
+                        type="text"
+                        placeholder="Cari produk tujuan (nama, SKU, kategori)..."
+                        class="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    />
                     <select
                         id="to_produk_id"
                         v-model="form.to_produk_id"
                         class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
                         :class="{ 'border-red-500': form.errors.to_produk_id }"
+                        size="8"
                         required
                     >
-                        <option :value="null">Pilih produk tujuan</option>
-                        <option
-                            v-for="item in produk"
-                            :key="item.id_produk"
-                            :value="item.id_produk"
-                            :disabled="item.id_produk === form.from_produk_id"
-                        >
+                        <option :value="null" disabled>Pilih produk tujuan</option>
+                        <option v-for="item in filteredProdukTujuan" :key="item.id_produk" :value="item.id_produk">
                             {{ item.nama }} ({{ item.sku }}) - {{ item.satuan }} - Stok: {{ item.stok }}
                         </option>
                     </select>
@@ -200,7 +231,7 @@ function submit() {
                             v-model.number="form.qty_from"
                             type="number"
                             min="1"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                             :class="{ 'border-red-500': form.errors.qty_from }"
                             required
                         />
@@ -223,7 +254,7 @@ function submit() {
                             v-model.number="form.qty_to"
                             type="number"
                             min="1"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                             :class="{ 'border-red-500': form.errors.qty_to }"
                             required
                         />
@@ -270,7 +301,7 @@ function submit() {
                         v-model="form.keterangan"
                         rows="3"
                         maxlength="200"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                         placeholder="Contoh: Konversi dari karton ke pcs"
                     ></textarea>
                     <p class="mt-1 text-xs text-gray-500">Maksimal 200 karakter</p>

@@ -205,19 +205,16 @@ function formatDate(dateString: string) {
                             v-model="searchQuery"
                             type="text"
                             placeholder="Cari produk atau keterangan..."
-                            class="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                            class="w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                             @keyup.enter="handleSearch"
                         />
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <i class="fas fa-search absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"></i>
                     </div>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex gap-2">
-                    <button
-                        @click="handleSearch"
-                        class="rounded-lg bg-emerald-600 px-4 py-2 text-white transition-colors hover:bg-emerald-700"
-                    >
+                    <button @click="handleSearch" class="rounded-lg bg-emerald-600 px-4 py-2 text-white transition-colors hover:bg-emerald-700">
                         <i class="fas fa-search mr-2"></i>
                         Cari
                     </button>
@@ -248,7 +245,7 @@ function formatDate(dateString: string) {
                                 />
                             </th>
                             <th
-                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700"
+                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase"
                                 @click="sortBy('from_produk_id')"
                             >
                                 Produk Asal
@@ -258,9 +255,9 @@ function formatDate(dateString: string) {
                                     class="fas ml-1"
                                 ></i>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700">Konversi</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-700 uppercase">Konversi</th>
                             <th
-                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700"
+                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase"
                                 @click="sortBy('to_produk_id')"
                             >
                                 Produk Tujuan
@@ -270,9 +267,9 @@ function formatDate(dateString: string) {
                                     class="fas ml-1"
                                 ></i>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Keterangan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Keterangan</th>
                             <th
-                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700"
+                                class="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase"
                                 @click="sortBy('created_at')"
                             >
                                 Dibuat
@@ -282,7 +279,7 @@ function formatDate(dateString: string) {
                                     class="fas ml-1"
                                 ></i>
                             </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-700">Aksi</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-700 uppercase">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
@@ -310,9 +307,7 @@ function formatDate(dateString: string) {
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-center">
                                     <div class="rounded-lg bg-emerald-50 px-3 py-1 text-center">
-                                        <span class="font-semibold text-emerald-700"
-                                            >{{ item.qty_from }} {{ item.from_produk.satuan }}</span
-                                        >
+                                        <span class="font-semibold text-emerald-700">{{ item.qty_from }} {{ item.from_produk.satuan }}</span>
                                         <i class="fas fa-arrow-right mx-2 text-emerald-600"></i>
                                         <span class="font-semibold text-emerald-700">{{ item.qty_to }} {{ item.to_produk.satuan }}</span>
                                     </div>
@@ -356,8 +351,7 @@ function formatDate(dateString: string) {
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-700">
                         Menampilkan <span class="font-medium">{{ konversiStok.from }}</span> sampai
-                        <span class="font-medium">{{ konversiStok.to }}</span> dari
-                        <span class="font-medium">{{ konversiStok.total }}</span> hasil
+                        <span class="font-medium">{{ konversiStok.to }}</span> dari <span class="font-medium">{{ konversiStok.total }}</span> hasil
                     </div>
                     <div class="flex gap-1">
                         <template v-for="(link, index) in konversiStok.links" :key="index">
@@ -394,7 +388,7 @@ function formatDate(dateString: string) {
         >
             <div
                 v-if="showDeleteModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4"
                 @click.self="showDeleteModal = false"
             >
                 <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
