@@ -145,7 +145,7 @@ function getEffectiveUnitPiecePrice(produk: Produk, qtyPieces: number): number {
     if (produk.harga_pack && qtyPieces >= 3) {
         return toNumber(produk.harga_pack);
     }
-    
+
     // Fallback ke harga normal
     return toNumber(produk.harga);
 }
@@ -189,7 +189,7 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
 
     if (existingItemIndex !== -1) {
         const item = cart.value[existingItemIndex];
-        
+
         // Hitung maxQty berdasarkan satuan produk
         let maxQty: number;
         if (produk.satuan === 'karton' || produk.satuan === 'pack') {
@@ -206,17 +206,17 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
         if (item.jumlah < maxQty) {
             const newJumlah = item.jumlah + 1;
             const totalPieces = mode === 'pack' ? newJumlah * isiPerPack : newJumlah;
-            
+
             // Update harga satuan jika qty berubah threshold (contoh: 2→3 pcs dapat harga_pack)
             if (produk.satuan === 'pcs' && mode === 'unit') {
                 item.harga_satuan = getEffectiveUnitPiecePrice(produk, totalPieces);
             }
-            
+
             // Pastikan harga_pack tersimpan untuk recalculate
             if (!item.harga_pack && produk.harga_pack) {
                 item.harga_pack = toNumber(produk.harga_pack);
             }
-            
+
             item.jumlah = newJumlah;
             item.subtotal = Number(item.jumlah) * Number(item.harga_satuan) - Number(item.diskon_item || 0);
         } else {
@@ -266,7 +266,7 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
 function updateQuantity(index: number, quantity: number) {
     const item = cart.value[index];
     const isiPerPack = Math.max(1, toNumber(item.isi_per_pack));
-    
+
     // Hitung maxQty berdasarkan satuan dan mode
     let maxQty: number;
     if (item.satuan === 'karton' || item.satuan === 'pack') {
@@ -284,7 +284,7 @@ function updateQuantity(index: number, quantity: number) {
         removeFromCart(index);
     } else if (quantity <= maxQty) {
         item.jumlah = quantity;
-        
+
         // Recalculate harga_satuan jika produk pcs mode unit dan qty melewati threshold
         if (item.satuan === 'pcs' && item.mode_qty === 'unit') {
             const totalPieces = quantity;
@@ -295,7 +295,7 @@ function updateQuantity(index: number, quantity: number) {
                 item.harga_satuan = item.base_harga_unit || item.harga_satuan;
             }
         }
-        
+
         item.subtotal = item.jumlah * item.harga_satuan - (item.diskon_item || 0);
     } else {
         addNotification({
@@ -540,7 +540,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                     >
                                         Tambah {{ produk.satuan }}
                                     </button>
-                                    
+
                                     <!-- Produk pcs: tombol unit dan pack (jika isi_per_pack > 1) -->
                                     <template v-else>
                                         <button
