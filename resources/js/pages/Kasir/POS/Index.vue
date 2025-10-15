@@ -14,10 +14,11 @@ interface Kategori {
 interface Produk {
     id_produk: string;
     nama: string;
-    harga: number;              // harga per unit/pieces
+    harga: number; // harga per unit/pieces
+    harga_pack?: number; // harga grosir/pack (≥3 pcs atau kemasan besar)
     stok: number;
-    satuan: string;             // pcs, karton, pack
-    isi_per_pack: number;       // berapa pcs dalam 1 karton/pack
+    satuan: string; // pcs, karton, pack
+    isi_per_pack: number; // berapa pcs dalam 1 karton/pack
     kategori: Kategori;
 }
 
@@ -40,6 +41,7 @@ interface CartItem {
     isi_per_pack: number;
     diskon_item?: number;
     base_harga_unit?: number;
+    harga_pack?: number; // untuk recalculate saat qty berubah
 }
 
 const props = defineProps<{
@@ -94,13 +96,13 @@ const subtotal = computed(() => {
     const result = cart.value.reduce((sum, item) => Number(sum) + Number(item.subtotal || 0), 0);
     // Debug logging
     console.log('Subtotal calculation:', {
-        cart_items: cart.value.map(item => ({
+        cart_items: cart.value.map((item) => ({
             nama: item.nama,
             harga_satuan: item.harga_satuan,
             jumlah: item.jumlah,
-            subtotal: item.subtotal
+            subtotal: item.subtotal,
         })),
-        total_subtotal: result
+        total_subtotal: result,
     });
     return result;
 });
@@ -138,44 +140,74 @@ function toNumber(val: unknown): number {
     return 0;
 }
 
-function getEffectiveUnitPiecePrice(baseUnitPrice: number, qtyPieces: number): number {
-    // Aturan grosir dasar dari brief/Aturan_Penjualan.txt
-    if (qtyPieces >= 144) return 10000; // >= 1 karton
-    if (qtyPieces >= 3) return 13500;   // >= 3 pcs
-    return baseUnitPrice;               // harga normal
+function getEffectiveUnitPiecePrice(produk: Produk, qtyPieces: number): number {
+    // Jika produk punya harga_pack dan qty >= 3, gunakan harga_pack
+    if (produk.harga_pack && qtyPieces >= 3) {
+        return toNumber(produk.harga_pack);
+    }
+    
+    // Fallback ke harga normal
+    return toNumber(produk.harga);
 }
 
 function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
     const existingItemIndex = cart.value.findIndex((item) => item.id_produk === produk.id_produk && item.mode_qty === mode);
 
-    // Hitung harga efektif berdasar mode dan aturan grosir
-    const baseUnitPrice = toNumber(produk.harga);
+    // Untuk produk satuan karton/pack, paksa mode = 'pack'
+    if ((produk.satuan === 'karton' || produk.satuan === 'pack') && mode === 'unit') {
+        mode = 'pack';
+    }
+
     const isiPerPack = Math.max(1, toNumber(produk.isi_per_pack));
     const initialQty = 1;
     const qtyPieces = mode === 'pack' ? initialQty * isiPerPack : initialQty;
-    const effectiveUnitPiecePrice = getEffectiveUnitPiecePrice(baseUnitPrice, qtyPieces);
-    const hargaSatuan = mode === 'pack' ? effectiveUnitPiecePrice * isiPerPack : effectiveUnitPiecePrice
-    
+
+    // Tentukan harga satuan berdasarkan mode
+    let hargaSatuan: number;
+    if (produk.satuan === 'karton' || produk.satuan === 'pack') {
+        // Produk kemasan besar: langsung pakai harga produk (sudah harga per karton/pack)
+        hargaSatuan = toNumber(produk.harga);
+    } else if (mode === 'pack') {
+        // Mode pack untuk produk satuan pcs: pakai harga_pack jika ada, atau hitung dari harga × isi_per_pack
+        hargaSatuan = produk.harga_pack ? toNumber(produk.harga_pack) * isiPerPack : toNumber(produk.harga) * isiPerPack;
+    } else {
+        // Mode unit untuk produk pcs: cek apakah qty >= 3 untuk dapat harga_pack
+        hargaSatuan = getEffectiveUnitPiecePrice(produk, qtyPieces);
+    }
+
     // Debug logging
     console.log('Adding to cart:', {
         produk: produk.nama,
         mode,
+        satuan: produk.satuan,
         harga_produk: produk.harga,
+        harga_pack: produk.harga_pack,
         harga_satuan: hargaSatuan,
-        isi_per_pack: produk.isi_per_pack
+        isi_per_pack: produk.isi_per_pack,
+        qty_pieces: qtyPieces,
     });
 
     if (existingItemIndex !== -1) {
         const item = cart.value[existingItemIndex];
-        const maxQty = mode === 'pack' ? Math.floor(produk.stok / isiPerPack) : produk.stok;
+        const maxQty = (produk.satuan === 'karton' || produk.satuan === 'pack' || mode === 'pack') 
+            ? Math.floor(produk.stok / isiPerPack) 
+            : produk.stok;
 
         if (item.jumlah < maxQty) {
             const newJumlah = item.jumlah + 1;
             const totalPieces = mode === 'pack' ? newJumlah * isiPerPack : newJumlah;
-            const newUnitPiecePrice = getEffectiveUnitPiecePrice(item.base_harga_unit || baseUnitPrice, totalPieces);
-            item.harga_satuan = mode === 'pack' ? newUnitPiecePrice * isiPerPack : newUnitPiecePrice;
+            
+            // Update harga satuan jika qty berubah threshold (contoh: 2→3 pcs dapat harga_pack)
+            if (produk.satuan === 'pcs' && mode === 'unit') {
+                item.harga_satuan = getEffectiveUnitPiecePrice(produk, totalPieces);
+            }
+            
+            // Pastikan harga_pack tersimpan untuk recalculate
+            if (!item.harga_pack && produk.harga_pack) {
+                item.harga_pack = toNumber(produk.harga_pack);
+            }
+            
             item.jumlah = newJumlah;
-            // Fix: Subtotal = jumlah × harga_satuan (sudah benar)
             item.subtotal = Number(item.jumlah) * Number(item.harga_satuan) - Number(item.diskon_item || 0);
         } else {
             addNotification({
@@ -184,7 +216,9 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
             });
         }
     } else {
-        const maxQty = mode === 'pack' ? Math.floor(produk.stok / isiPerPack) : produk.stok;
+        const maxQty = (produk.satuan === 'karton' || produk.satuan === 'pack' || mode === 'pack') 
+            ? Math.floor(produk.stok / isiPerPack) 
+            : produk.stok;
 
         if (maxQty > 0) {
             cart.value.push({
@@ -193,12 +227,12 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
                 harga_satuan: hargaSatuan,
                 jumlah: 1,
                 mode_qty: mode,
-                // Fix: Subtotal = harga_satuan (sudah benar)
                 subtotal: Number(hargaSatuan),
                 stok: produk.stok,
                 satuan: produk.satuan,
                 isi_per_pack: isiPerPack,
-                base_harga_unit: baseUnitPrice,
+                base_harga_unit: toNumber(produk.harga),
+                harga_pack: produk.harga_pack ? toNumber(produk.harga_pack) : undefined,
                 diskon_item: 0,
             });
         } else {
@@ -213,13 +247,26 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
 function updateQuantity(index: number, quantity: number) {
     const item = cart.value[index];
     const isiPerPack = Math.max(1, toNumber(item.isi_per_pack));
-    const maxQty = item.mode_qty === 'pack' ? Math.floor(item.stok / isiPerPack) : item.stok;
+    const maxQty = (item.satuan === 'karton' || item.satuan === 'pack' || item.mode_qty === 'pack')
+        ? Math.floor(item.stok / isiPerPack) 
+        : item.stok;
 
     if (quantity <= 0) {
         removeFromCart(index);
     } else if (quantity <= maxQty) {
         item.jumlah = quantity;
-        // Fix: Subtotal = jumlah × harga_satuan (sudah benar)
+        
+        // Recalculate harga_satuan jika produk pcs mode unit dan qty melewati threshold
+        if (item.satuan === 'pcs' && item.mode_qty === 'unit') {
+            const totalPieces = quantity;
+            // Jika ada harga_pack dan qty >= 3, gunakan harga_pack
+            if (item.harga_pack && totalPieces >= 3) {
+                item.harga_satuan = item.harga_pack;
+            } else {
+                item.harga_satuan = item.base_harga_unit || item.harga_satuan;
+            }
+        }
+        
         item.subtotal = item.jumlah * item.harga_satuan - (item.diskon_item || 0);
     } else {
         addNotification({
@@ -452,7 +499,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                 <div class="mb-1 text-xs text-gray-500">{{ produk.id_produk }}</div>
                                 <h3 class="mb-2 line-clamp-2 font-medium text-gray-900">{{ produk.nama }}</h3>
                                 <p class="mb-2 text-lg font-bold text-emerald-600">{{ formatCurrency(produk.harga) }}</p>
-                                <p class="mb-2 text-xs text-gray-500">Stok: {{ produk.stok }} {{ produk.satuan }}</p>
+                                <p class="mb-4 text-sm text-gray-500">Stok: {{ produk.stok }} {{ produk.satuan }}</p>
 
                                 <!-- Unit/Pack buttons -->
                                 <div class="flex gap-1">
@@ -646,4 +693,3 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
     overflow: hidden;
 }
 </style>
-

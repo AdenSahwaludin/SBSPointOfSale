@@ -22,8 +22,22 @@ class TransaksiPOSController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Kasir/POS/NewIndex', [
-            'produk' => Produk::with('kategori')->inStock()->get(),
+        return Inertia::render('Kasir/POS/Index', [
+            'produk' => Produk::with('kategori')
+                ->inStock()
+                ->get()
+                ->map(function ($p) {
+                    return [
+                        'id_produk' => $p->id_produk,
+                        'nama' => $p->nama,
+                        'harga' => $p->harga,
+                        'harga_pack' => $p->harga_pack,
+                        'stok' => $p->stok,
+                        'satuan' => $p->satuan,
+                        'isi_per_pack' => $p->isi_per_pack,
+                        'kategori' => $p->kategori,
+                    ];
+                }),
             'kategori' => Kategori::all(),
             'pelanggan' => Pelanggan::active()->get(),
             'metodeBayar' => [
@@ -52,23 +66,36 @@ class TransaksiPOSController extends Controller
         $produk = Produk::with('kategori')
             ->where(function ($q) use ($query) {
                 $q->where('id_produk', 'like', "%{$query}%")
-                    ->orWhere('nama', 'like', "%{$query}%");
+                    ->orWhere('nama', 'like', "%{$query}%")
+                    ->orWhere('barcode', 'like', "%{$query}%");
             })
             ->inStock()
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'id_produk' => $p->id_produk,
+                    'nama' => $p->nama,
+                    'harga' => $p->harga,
+                    'harga_pack' => $p->harga_pack,
+                    'stok' => $p->stok,
+                    'satuan' => $p->satuan,
+                    'isi_per_pack' => $p->isi_per_pack,
+                    'kategori' => $p->kategori,
+                ];
+            });
         return response()->json($produk);
     }
 
     /**
-     * Get produk by barcode
+     * Get produk by barcode (2️⃣ Fix: gunakan kolom barcode, bukan id_produk)
      */
     public function getProdukByBarcode(Request $request)
     {
         $barcode = $request->get('barcode');
 
         $produk = Produk::with('kategori')
-            ->where('id_produk', $barcode)
+            ->where('barcode', $barcode) // Fix: gunakan kolom barcode
             ->inStock()
             ->first();
 
@@ -76,7 +103,16 @@ class TransaksiPOSController extends Controller
             return response()->json(['message' => 'Produk tidak ditemukan'], 404);
         }
 
-        return response()->json($produk);
+        return response()->json([
+            'id_produk' => $produk->id_produk,
+            'nama' => $produk->nama,
+            'harga' => $produk->harga,
+            'harga_pack' => $produk->harga_pack,
+            'stok' => $produk->stok,
+            'satuan' => $produk->satuan,
+            'isi_per_pack' => $produk->isi_per_pack,
+            'kategori' => $produk->kategori,
+        ]);
     }
 
     /**
@@ -107,7 +143,7 @@ class TransaksiPOSController extends Controller
 
             $isCashPayment = $request->metode_bayar === 'TUNAI';
 
-            // Create transaksi
+            // Create transaksi (3️⃣ Siapkan field Cicilan Pintar untuk implementasi nanti)
             $transaksi = Transaksi::create([
                 'nomor_transaksi' => $nomorTransaksi,
                 'id_pelanggan' => $request->id_pelanggan,
@@ -122,22 +158,31 @@ class TransaksiPOSController extends Controller
                 'metode_bayar' => $request->metode_bayar,
                 'status_pembayaran' => $isCashPayment ? Transaksi::STATUS_LUNAS : Transaksi::STATUS_MENUNGGU,
                 'paid_at' => $isCashPayment ? now() : null,
+                // 3️⃣ Field Cicilan Pintar (akan diaktifkan nanti)
+                'jenis_transaksi' => 'LANGSUNG', // default LANGSUNG
+                'dp' => null,
+                'tenor_bulan' => null,
+                'bunga_persen' => null,
+                'cicilan_bulanan' => null,
+                'ar_status' => null,
+                'id_kontrak' => null,
             ]);
 
             foreach ($request->items as $item) {
                 $produk = Produk::find($item['id_produk']);
 
-                // Check stock - untuk mengurangi stok fisik
-                $packSize = max(1, (int)($produk->isi_per_pack ?? 1));
+                // 4️⃣ Check stock SKU fisik untuk transaksi
+                $isiPerPack = max(1, (int)($produk->isi_per_pack ?? 1));
                 $requestedStock = $item['mode_qty'] === 'pack'
-                    ? $item['jumlah'] * $packSize  // pack: qty × pack_size untuk stok fisik
-                    : $item['jumlah'];             // unit: qty langsung
+                    ? $item['jumlah'] * $isiPerPack  // pack: qty × isi_per_pack untuk stok fisik
+                    : $item['jumlah'];                // unit: qty langsung
 
                 if ($produk->stok < $requestedStock) {
                     throw new \Exception("Stok {$produk->nama} tidak mencukupi");
                 }
 
-                $packSizeSnapshot = $item['mode_qty'] === 'pack' ? $packSize : 1;
+                // 1️⃣ Simpan isi_pack_saat_transaksi (snapshot untuk audit trail)
+                $isiPackSaatTransaksi = $item['mode_qty'] === 'pack' ? $isiPerPack : 1;
 
                 TransaksiDetail::create([
                     'nomor_transaksi' => $nomorTransaksi,
@@ -146,13 +191,13 @@ class TransaksiPOSController extends Controller
                     'harga_satuan' => $item['harga_satuan'], // sudah benar dari frontend
                     'jumlah' => $item['jumlah'],
                     'mode_qty' => $item['mode_qty'],
-                    'pack_size_snapshot' => $packSizeSnapshot,
+                    'isi_pack_saat_transaksi' => $isiPackSaatTransaksi, // 1️⃣ Ganti nama kolom
                     'diskon_item' => 0,
                     // PENTING: subtotal = jumlah × harga_satuan (harga_satuan sudah termasuk konversi pack)
                     'subtotal' => $item['harga_satuan'] * $item['jumlah'],
                 ]);
 
-                // Update stock - kurangi stok fisik unit
+                // 4️⃣ Update stock SKU fisik
                 $stockDeduction = $requestedStock;
                 $produk->decrement('stok', $stockDeduction);
             }
@@ -248,7 +293,8 @@ class TransaksiPOSController extends Controller
             foreach ($transaksi->detail as $detail) {
                 $qtyToRestore = $detail->jumlah;
                 if ($detail->mode_qty === 'pack') {
-                    $qtyToRestore *= $detail->pack_size_snapshot;
+                    // 1️⃣ Gunakan isi_pack_saat_transaksi untuk restore
+                    $qtyToRestore *= $detail->isi_pack_saat_transaksi;
                 }
 
                 $detail->produk->increment('stok', $qtyToRestore);

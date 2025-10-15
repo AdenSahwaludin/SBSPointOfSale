@@ -1,23 +1,52 @@
+----------------------------------------
+			  ATURAN PENJUALAN SBS           
+----------------------------------------
 
-Free Ongkos kirim Untuk area JABODETABEK minimal pembelian 3 karton
-1 karton = 144 botol 
-Minyak Gosok Akar Lawang Cap Daun 60 ml
-Ayurveda, Minyak Herbal dan Kosmetik
-Minyak Akar Lawang Cap Daun
-Kegunaan :
-Membantu meredakan nyeri akibat encok, keseleo, pegal pegal, nyeri otot pinggang, dan gejala masuk angin
-Aturan pakai :
-Gosokkan pada bagian yg sakit. Untuk mengurangi panas, tambahkan minyak kelapa secukupnya
-POM.QD.185616211
-Tutup, Segel, dan Label logo SBS
-Produksi : CV. Sari Bumi Sakti
-Jakarta - Indonesia
+1. Free Ongkos Kirim
+	- Area: JABODETABEK
+	- Minimal pembelian: 3 karton
 
-Harga Grosir
-Jumlah:
-3 atau lebih
-Rp 13.500 / Pieces
-144 atau lebih
-Rp 10.000 / Pieces
+2. Konversi Kemasan
+	- 1 karton = 144 botol
 
+3. Detail Produk (Contoh Satu Produk)
+	- Minyak Gosok Akar Lawang Cap Daun 60 mL
+	  * Kegunaan: Meredakan nyeri encok, keseleo, pegal, nyeri otot pinggang, masuk angin
+	  * Aturan pakai: Gosokkan pada bagian sakit; tambahkan minyak kelapa untuk mengurangi panas
+	  * BPOM: QD.185616211  |  Produksi: CV. Sari Bumi Sakti, Jakarta - Indonesia
+
+4. Aturan Harga Grosir
+	- ≥ 3 pcs  : Harga khusus per pcs
+	- ≥ 36 pcs : Harga grosir pack 275 mL
+	- ≥ 72 pcs : Harga grosir pack 140 mL
+	- ≥ 144 pcs: Harga grosir karton 60 mL
+
+5. Daftar Harga Produk
+A. Botol 60 mL (1 Karton = 144 pcs)
+--------------------------------------------------------------------------------
+| No | Produk                                              | Ecer      | ≥ 3 pcs     | ≥ 144 pcs   |
+|----|-----------------------------------------------------|-----------|-------------|-------------|
+| 1  | Minyak Gandarpura Cap Daun 60 mL                    | Rp 16.000 | Rp 15.500   | Rp 11.000   |
+| 2  | Minyak Sereh Cap Daun 60 mL                         | Rp 16.000 | Rp 15.500   | Rp 11.000   |
+| 3  | Minyak Akar Lawang Cap Daun 60 mL                   | Rp 14.000 | Rp 13.500   | Rp 10.000   |
+| 4  | Minyak Kayu Putih Cap Daun 60 mL                    | Rp 18.000 | Rp 17.800   | Rp 15.000   |
+--------------------------------------------------------------------------------
+
+B. Botol 140 mL (1 Pack = 72 pcs)
+--------------------------------------------------------------------------------
+| No | Produk                                              | Ecer      | ≥ 3 pcs     | ≥ 72 pcs    |
+|----|-----------------------------------------------------|-----------|-------------|-------------|
+| 5  | Minyak Gosok Urut Cap Laron 140 mL                  | Rp 35.000 | Rp 34.500   | Rp 25.000   |
+| 6  | Minyak Akar Lawang Cap Daun 140 mL                  | Rp 25.000 | Rp 24.500   | Rp 19.000   |
+| 7  | Minyak Kayu Putih Cap Daun 140 mL                   | Rp 36.000 | Rp 35.500   | Rp 30.000   |
+--------------------------------------------------------------------------------
+
+C. Botol 275 mL (1 Pack = 36 pcs)
+--------------------------------------------------------------------------------
+| No | Produk                                              | Ecer      | ≥ 3 pcs     | ≥ 36 pcs    |
+|----|-----------------------------------------------------|-----------|-------------|-------------|
+| 8  | Minyak Gosok Urut Cap Laron 275 mL                  | Rp 70.000 | Rp 69.000   | Rp 45.000   |
+| 9  | Minyak Akar Lawang Cap Daun 275 mL                  | Rp 50.000 | Rp 49.000   | Rp 38.000   |
+| 10 | Minyak Kayu Putih Cap Daun 275 mL                   | Rp 72.000 | Rp 71.000   | Rp 57.000   |
+--------------------------------------------------------------------------------
 Kode BPOM 15-18 digit

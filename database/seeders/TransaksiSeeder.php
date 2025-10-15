@@ -17,8 +17,8 @@ class TransaksiSeeder extends Seeder
  public function run(): void
  {
   // Get product IDs
-  $produk1 = Produk::where('sku', 'HB-MKP-60ML')->first();
-  $produk2 = Produk::where('sku', 'EL-EUC-30ML')->first();
+  $produk1 = Produk::where('sku', 'DA-GDP-60ML')->first();
+  $produk2 = Produk::where('sku', 'DA-ALK-60ML')->first();
 
   if (!$produk1 || !$produk2) {
    return; // Skip if products don't exist
@@ -31,11 +31,11 @@ class TransaksiSeeder extends Seeder
    'id_kasir' => '001-ADEN',
    'tanggal' => Carbon::now(),
    'total_item' => 2,
-   'subtotal' => 30000,
+   'subtotal' => 32000,
    'diskon' => 0,
    'pajak' => 0,
    'biaya_pengiriman' => 0,
-   'total' => 30000,
+   'total' => 32000,
    'metode_bayar' => 'TUNAI',
    'status_pembayaran' => 'LUNAS',
    'paid_at' => Carbon::now(),
@@ -57,7 +57,7 @@ class TransaksiSeeder extends Seeder
    'jumlah' => 2,
    'mode_qty' => 'unit',
    'diskon_item' => 0,
-   'subtotal' => 30000,
+   'subtotal' => 32000,
   ]);
 
   // Payment for cash transaction
@@ -66,7 +66,7 @@ class TransaksiSeeder extends Seeder
    'id_transaksi' => $transaksiTunai->nomor_transaksi,
    'id_angsuran' => null,
    'metode' => 'TUNAI',
-   'jumlah' => 30000,
+   'jumlah' => 32000,
    'tanggal' => Carbon::now(),
    'keterangan' => 'Pembayaran tunai',
   ]);
@@ -78,11 +78,11 @@ class TransaksiSeeder extends Seeder
    'id_kasir' => '001-ADEN',
    'tanggal' => Carbon::now(),
    'total_item' => 10,
-   'subtotal' => 180000,
+   'subtotal' => 140000,
    'diskon' => 0,
    'pajak' => 0,
    'biaya_pengiriman' => 0,
-   'total' => 180000,
+   'total' => 140000,
    'metode_bayar' => 'KREDIT',
    'status_pembayaran' => 'MENUNGGU',
    'paid_at' => null,
@@ -90,7 +90,7 @@ class TransaksiSeeder extends Seeder
    'dp' => 50000,
    'tenor_bulan' => 6,
    'bunga_persen' => 2,
-   'cicilan_bulanan' => 22000,
+   'cicilan_bulanan' => 16000,
    'ar_status' => 'AKTIF',
    'id_kontrak' => null, // Will be updated in KontrakKreditSeeder
   ]);
@@ -104,7 +104,7 @@ class TransaksiSeeder extends Seeder
    'jumlah' => 10,
    'mode_qty' => 'unit',
    'diskon_item' => 0,
-   'subtotal' => 180000,
+   'subtotal' => 140000,
   ]);
 
   // DP Payment for credit transaction

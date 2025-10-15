@@ -74,6 +74,7 @@ CREATE TABLE produk (
   id_kategori      VARCHAR(4)   NOT NULL,      -- FK ke kategori
   satuan           ENUM('pcs','karton','pack') NOT NULL DEFAULT 'pcs',
   isi_per_pack     INT NOT NULL DEFAULT 1 CHECK (isi_per_pack > 0), -- pcs=1; karton=isi
+  harga_pack       DECIMAL(18,0) NOT NULL CHECK (harga_pack >= 0),
   harga            DECIMAL(18,0) NOT NULL CHECK (harga >= 0),
   stok             INT NOT NULL DEFAULT 0,
   created_at       TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,

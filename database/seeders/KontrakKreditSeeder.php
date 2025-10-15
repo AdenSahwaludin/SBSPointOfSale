@@ -22,10 +22,10 @@ class KontrakKreditSeeder extends Seeder
       'nomor_transaksi' => 'INV-2025-10-002-P003', // Updated to match TransaksiSeeder
       'mulai_kontrak' => Carbon::now()->format('Y-m-d'),
       'tenor_bulan' => 6, // Updated to match TransaksiSeeder
-      'pokok_pinjaman' => 130000, // 180000 - 50000 (DP)
+      'pokok_pinjaman' => 90000, // 140000 - 50000 (DP)
       'dp' => 50000,
       'bunga_persen' => 2,
-      'cicilan_bulanan' => 22000,
+      'cicilan_bulanan' => 16000,
       'status' => 'AKTIF',
       'score_snapshot' => 80,
       'alasan_eligibilitas' => 'Trust score tinggi, riwayat pembayaran baik',

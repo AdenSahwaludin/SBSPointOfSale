@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->decimal('harga_satuan', 18, 0);
             $table->integer('jumlah');
             $table->enum('mode_qty', ['unit', 'pack'])->default('unit');
+            $table->integer('isi_pack_saat_transaksi')->default(1)->comment('1️⃣ Snapshot isi per pack saat transaksi untuk audit trail');
             $table->decimal('diskon_item', 18, 0)->default(0);
             $table->decimal('subtotal', 18, 0);
             $table->timestamps();

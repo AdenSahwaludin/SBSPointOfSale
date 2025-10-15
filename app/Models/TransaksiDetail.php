@@ -20,6 +20,7 @@ class TransaksiDetail extends Model
         'harga_satuan',
         'jumlah',
         'mode_qty',
+        'isi_pack_saat_transaksi', // 1️⃣ Tambahkan kolom baru
         'diskon_item',
         'subtotal',
     ];
@@ -27,6 +28,7 @@ class TransaksiDetail extends Model
     protected $casts = [
         'harga_satuan' => 'decimal:0',
         'jumlah' => 'integer',
+        'isi_pack_saat_transaksi' => 'integer', // 1️⃣ Cast sebagai integer
         'diskon_item' => 'decimal:0',
         'subtotal' => 'decimal:0',
         'created_at' => 'datetime',

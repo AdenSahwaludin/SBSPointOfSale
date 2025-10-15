@@ -25,11 +25,13 @@ class Produk extends Model
         'satuan',
         'isi_per_pack',
         'harga',
+        'harga_pack',
         'stok',
     ];
 
     protected $casts = [
         'harga' => 'decimal:0',
+        'harga_pack' => 'decimal:0',
         'stok' => 'integer',
         'isi_per_pack' => 'integer',
         'created_at' => 'datetime',

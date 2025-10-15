@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->enum('satuan', ['pcs', 'karton', 'pack'])->default('pcs');
             $table->integer('isi_per_pack')->default(1);
             $table->decimal('harga', 18, 0);
+            $table->decimal('harga_pack', 18, 0)->nullable()->comment('Harga per 3+ pcs atau pack/karton');
             $table->integer('stok')->default(0);
             $table->timestamps();
 
