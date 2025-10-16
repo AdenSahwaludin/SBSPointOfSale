@@ -212,7 +212,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Transaksi Hari Ini</h1>
                     <p class="mt-1 text-sm text-gray-600">
-                        Lihat semua transaksi yang dilakukan hari ini - {{ new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
+                        Lihat semua transaksi yang dilakukan hari ini -
+                        {{ new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
                     </p>
                 </div>
             </div>
@@ -396,14 +397,14 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                     <table class="w-full">
                         <thead class="border-b border-gray-200 bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Nomor Transaksi</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Waktu</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Pelanggan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Items</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Total</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Metode</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">Aksi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Nomor Transaksi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Waktu</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Pelanggan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Items</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Total</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Metode</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
@@ -417,30 +418,35 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                 </td>
                             </tr>
                             <tr v-for="transaksi in displayedTransaksi" :key="transaksi.nomor_transaksi" class="hover:bg-gray-50">
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ transaksi.nomor_transaksi }}</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ formatTime(transaksi.tanggal) }}</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ transaksi.pelanggan.nama }}</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ transaksi.total_item }} items</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-semibold text-emerald-600">{{ formatCurrency(transaksi.total) }}</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ transaksi.metode_bayar }}</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
-                                    <span :class="['inline-flex rounded-full px-2 py-1 text-xs font-semibold', getStatusBadgeClass(transaksi.status_pembayaran)]">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        :class="[
+                                            'inline-flex rounded-full px-2 py-1 text-xs font-semibold',
+                                            getStatusBadgeClass(transaksi.status_pembayaran),
+                                        ]"
+                                    >
                                         {{ transaksi.status_pembayaran }}
                                     </span>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm">
+                                <td class="px-6 py-4 text-sm whitespace-nowrap">
                                     <button @click="viewDetail(transaksi)" class="text-emerald-600 hover:text-emerald-900">
                                         <i class="fas fa-eye mr-1"></i>
                                         Detail
@@ -479,8 +485,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                 :class="[
                                     'rounded-lg px-3 py-1 text-sm',
                                     transaksi.prev_page_url
-                                        ? 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed',
+                                        ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                                        : 'cursor-not-allowed bg-gray-100 text-gray-400',
                                 ]"
                             >
                                 Previous
@@ -492,7 +498,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                 @click="goToPage(link.url)"
                                 :class="[
                                     'rounded-lg px-3 py-1 text-sm',
-                                    link.active ? 'bg-emerald-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300',
+                                    link.active ? 'bg-emerald-600 text-white' : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100',
                                 ]"
                                 v-html="link.label"
                             ></button>
@@ -503,8 +509,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                 :class="[
                                     'rounded-lg px-3 py-1 text-sm',
                                     transaksi.next_page_url
-                                        ? 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed',
+                                        ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                                        : 'cursor-not-allowed bg-gray-100 text-gray-400',
                                 ]"
                             >
                                 Next
@@ -519,7 +525,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         <Teleport to="body">
             <div
                 v-if="showDetailModal && selectedTransaksi"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4"
                 @click.self="closeDetailModal"
             >
                 <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white shadow-xl">
@@ -559,7 +565,10 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                 <div>
                                     <p class="text-sm font-medium text-gray-600">Status</p>
                                     <span
-                                        :class="['mt-1 inline-flex rounded-full px-3 py-1 text-sm font-semibold', getStatusBadgeClass(selectedTransaksi.status_pembayaran)]"
+                                        :class="[
+                                            'mt-1 inline-flex rounded-full px-3 py-1 text-sm font-semibold',
+                                            getStatusBadgeClass(selectedTransaksi.status_pembayaran),
+                                        ]"
                                     >
                                         {{ selectedTransaksi.status_pembayaran }}
                                     </span>
@@ -584,7 +593,9 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                                 <td class="px-4 py-3 text-sm text-gray-900">{{ item.nama_produk }}</td>
                                                 <td class="px-4 py-3 text-right text-sm text-gray-900">{{ formatCurrency(item.harga_satuan) }}</td>
                                                 <td class="px-4 py-3 text-center text-sm text-gray-900">{{ item.jumlah }} {{ item.mode_qty }}</td>
-                                                <td class="px-4 py-3 text-right text-sm font-semibold text-gray-900">{{ formatCurrency(item.subtotal) }}</td>
+                                                <td class="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                                                    {{ formatCurrency(item.subtotal) }}
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>

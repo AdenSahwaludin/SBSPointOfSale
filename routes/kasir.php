@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Kasir\TransaksiPOSController;
 use App\Http\Controllers\Kasir\TransaksiController;
+use App\Http\Controllers\Kasir\ProdukController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,14 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
   Route::get('/', [TransaksiController::class, 'index'])->name('index');
   Route::get('/today', [TransaksiController::class, 'today'])->name('today');
   Route::get('/{nomorTransaksi}', [TransaksiController::class, 'show'])->name('show');
+ });
+
+ // ==========================================
+ // PRODUCTS (View Only)
+ // ==========================================
+ Route::prefix('products')->name('products.')->group(function () {
+  Route::get('/', [ProdukController::class, 'index'])->name('index');
+  Route::get('/{id}', [ProdukController::class, 'show'])->name('show');
  });
 
  // ==========================================
