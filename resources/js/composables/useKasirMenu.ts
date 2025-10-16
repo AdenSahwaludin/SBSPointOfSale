@@ -16,10 +16,7 @@ export function useKasirMenuItems(): MenuItem[] {
         {
             name: 'Point of Sale',
             icon: 'fas fa-cash-register',
-            children: [
-                { name: 'POS Classic', href: '/kasir/pos', icon: 'fas fa-desktop' },
-                { name: 'POS New', href: '/kasir/pos-new', icon: 'fas fa-tablet-alt' },
-            ],
+            href: '/kasir/pos',
         },
         {
             name: 'Transaksi',

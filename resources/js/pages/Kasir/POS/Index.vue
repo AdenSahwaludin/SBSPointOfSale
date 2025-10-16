@@ -643,9 +643,9 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                     <button
                                         v-if="produk.satuan === 'karton' || produk.satuan === 'pack'"
                                         @click.stop="addToCart(produk, 'pack')"
-                                        class="flex-1 rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
+                                        class="flex-1 rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 capitalize hover:bg-blue-200"
                                     >
-                                        Tambah {{ produk.satuan }}
+                                        {{ produk.satuan }}
                                     </button>
 
                                     <!-- Produk pcs: tombol unit dan pack (jika isi_per_pack > 1) -->

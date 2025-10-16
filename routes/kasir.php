@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Kasir\TransaksiPOSController;
+use App\Http\Controllers\Kasir\TransaksiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,7 +30,11 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
  // ==========================================
  // TRANSACTION HISTORY
  // ==========================================
- Route::inertia('/transactions', 'Kasir/Transactions')->name('transactions');
+ Route::prefix('transactions')->name('transactions.')->group(function () {
+  Route::get('/', [TransaksiController::class, 'index'])->name('index');
+  Route::get('/today', [TransaksiController::class, 'today'])->name('today');
+  Route::get('/{nomorTransaksi}', [TransaksiController::class, 'show'])->name('show');
+ });
 
  // ==========================================
  // PROFILE MANAGEMENT (Kasir specific)
