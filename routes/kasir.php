@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Kasir\DashboardController;
 use App\Http\Controllers\Kasir\TransaksiPOSController;
 use App\Http\Controllers\Kasir\TransaksiController;
 use App\Http\Controllers\Kasir\ProdukController;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 // Kasir routes (Kasir role only)
 Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->group(function () {
  // Dashboard
- Route::inertia('/', 'Kasir/Dashboard')->name('dashboard');
+ Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
  // ==========================================
  // POINT OF SALE (POS) SYSTEM

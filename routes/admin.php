@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\KategoriController;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 // Admin routes (Admin role only)
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->group(function () {
  // Dashboard
- Route::inertia('/', 'Admin/Dashboard')->name('dashboard');
+ Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
  // Quick access routes (for navigation)
  Route::inertia('/users', 'Admin/Users')->name('users');
