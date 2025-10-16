@@ -646,9 +646,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                     <span
                                         :class="[
                                             'text-sm font-semibold',
-                                            produk.stok === 0 ? 'text-red-600' : 
-                                            (produk.satuan === 'pcs' && produk.stok < 10) || ((produk.satuan === 'karton' || produk.satuan === 'pack') && produk.stok < 5) ? 'text-orange-600' : 
-                                            'text-green-600',
+                                            produk.stok === 0
+                                                ? 'text-red-600'
+                                                : (produk.satuan === 'pcs' && produk.stok < 50) ||
+                                                    ((produk.satuan === 'karton' || produk.satuan === 'pack') && produk.stok < 5)
+                                                  ? 'text-orange-600'
+                                                  : 'text-green-600',
                                         ]"
                                     >
                                         {{ produk.stok }} {{ produk.satuan }}
@@ -757,6 +760,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                         <span class="text-sm text-gray-600">Diskon (%)</span>
                         <input
                             v-model.number="diskonGlobal"
+                            @input="diskonGlobal = Math.min(diskonGlobal, 100)"
                             type="number"
                             min="0"
                             max="100"
