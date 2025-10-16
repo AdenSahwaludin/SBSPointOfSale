@@ -98,15 +98,7 @@ function getPaymentMethodLabel(metode: string): string {
     const labels: Record<string, string> = {
         TUNAI: 'Tunai',
         QRIS: 'QRIS',
-        VA_BCA: 'VA BCA',
-        VA_BNI: 'VA BNI',
-        VA_BRI: 'VA BRI',
-        VA_MANDIRI: 'VA Mandiri',
-        GOPAY: 'GoPay',
-        OVO: 'OVO',
-        DANA: 'DANA',
-        SHOPEEPAY: 'ShopeePay',
-        CREDIT_CARD: 'Kartu Kredit',
+        TRANSFER_BCA: 'Transfer BCA',
         KREDIT: 'Kredit',
     };
     return labels[metode] || metode;

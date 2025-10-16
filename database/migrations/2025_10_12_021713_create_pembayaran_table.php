@@ -15,7 +15,20 @@ return new class extends Migration {
             $table->string('id_pembayaran', 32)->primary();
             $table->string('id_transaksi', 40);
             $table->unsignedBigInteger('id_angsuran')->nullable();
-            $table->enum('metode', ['TUNAI', 'QRIS', 'TRANSFER BCA']);
+            $table->enum('metode', allowed: [
+                'TUNAI',
+                'QRIS',
+                'VA_BCA',
+                'VA_BNI',
+                'VA_BRI',
+                'VA_MANDIRI',
+                'GOPAY',
+                'OVO',
+                'DANA',
+                'SHOPEEPAY',
+                'CREDIT_CARD',
+                'KREDIT'
+            ]);
             $table->decimal('jumlah', 18, 0);
             $table->timestamp('tanggal')->useCurrent();
             $table->string('keterangan', 255)->nullable();

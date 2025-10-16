@@ -44,15 +44,9 @@ class TransaksiPOSController extends Controller
             'metodeBayar' => [
                 'TUNAI' => 'Tunai',
                 'QRIS' => 'QRIS',
-                'VA_BCA' => 'VA BCA',
-                'VA_BNI' => 'VA BNI',
-                'VA_BRI' => 'VA BRI',
-                'VA_MANDIRI' => 'VA Mandiri',
-                'GOPAY' => 'GoPay',
-                'OVO' => 'OVO',
-                'DANA' => 'DANA',
-                'SHOPEEPAY' => 'ShopeePay',
-                'CREDIT_CARD' => 'Credit Card',
+                'TRANSFER BCA' => 'Transfer BCA',
+                'KREDIT' => 'Kredit',
+                
             ],
         ]);
     }

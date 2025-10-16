@@ -253,7 +253,7 @@ CREATE TABLE pembayaran (
   id_pembayaran     VARCHAR(32) NOT NULL,
   id_transaksi      VARCHAR(40) NOT NULL,
   id_angsuran       BIGINT UNSIGNED NULL,
-  metode            ENUM('TUNAI','QRIS','TRANSFER BCA') NOT NULL,
+  metode            ENUM('TUNAI','QRIS','TRANSFER BCA', 'KREDIT') NOT NULL,
   jumlah            DECIMAL(18,0) NOT NULL CHECK (jumlah > 0),
   tanggal           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   keterangan        VARCHAR(255),
