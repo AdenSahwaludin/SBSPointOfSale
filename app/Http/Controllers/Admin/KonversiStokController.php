@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\KonversiStok;
 use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
@@ -120,12 +121,38 @@ class KonversiStokController extends Controller
   ]);
 
   try {
+   // Get produk asal dan tujuan
+   $produkAsal = Produk::findOrFail($validated['from_produk_id']);
+   $produkTujuan = Produk::findOrFail($validated['to_produk_id']);
+
+   // Cek stok produk asal mencukupi
+   if ($produkAsal->stok < $validated['qty_from']) {
+    return redirect()
+     ->back()
+     ->withInput()
+     ->with('error', "Stok {$produkAsal->nama} tidak mencukupi. Stok tersedia: {$produkAsal->stok} {$produkAsal->satuan}");
+   }
+
+   // Start transaction
+   DB::beginTransaction();
+
+   // Create konversi record
    KonversiStok::create($validated);
+
+   // Update stok produk asal (kurangi)
+   $produkAsal->decrement('stok', $validated['qty_from']);
+
+   // Update stok produk tujuan (tambah)
+   $produkTujuan->increment('stok', $validated['qty_to']);
+
+   DB::commit();
 
    return redirect()
     ->route('admin.konversi-stok.index')
-    ->with('success', 'Konversi stok berhasil ditambahkan');
+    ->with('success', "Konversi stok berhasil! {$validated['qty_from']} {$produkAsal->satuan} {$produkAsal->nama} → {$validated['qty_to']} {$produkTujuan->satuan} {$produkTujuan->nama}");
   } catch (\Exception $e) {
+   DB::rollBack();
+
    return redirect()
     ->back()
     ->withInput()

@@ -38,6 +38,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
  // ==========================================
  // MANAJEMEN PRODUK
  // ==========================================
+ // Search produk (harus sebelum resource route)
+ Route::get('produk/search-produk', [ProdukController::class, 'searchProduk'])
+  ->name('produk.search-produk');
+
  Route::resource('produk', ProdukController::class)->names([
   'index' => 'produk.index',
   'create' => 'produk.create',

@@ -69,6 +69,8 @@ const form = useForm({
 
 const searchFromProduk = ref('');
 const searchToProduk = ref('');
+const showFromDropdown = ref(false);
+const showToDropdown = ref(false);
 
 const filteredProdukAsal = computed(() => {
     if (!searchFromProduk.value) return props.produkAsal;
@@ -93,6 +95,28 @@ const selectedFromProduk = computed(() => {
 const selectedToProduk = computed(() => {
     return props.produkTujuan.find((p) => p.id_produk === form.to_produk_id);
 });
+
+function selectFromProduk(produk: Produk) {
+    form.from_produk_id = produk.id_produk;
+    showFromDropdown.value = false;
+    searchFromProduk.value = '';
+}
+
+function selectToProduk(produk: Produk) {
+    form.to_produk_id = produk.id_produk;
+    showToDropdown.value = false;
+    searchToProduk.value = '';
+}
+
+function clearFromProduk() {
+    form.from_produk_id = null;
+    searchFromProduk.value = '';
+}
+
+function clearToProduk() {
+    form.to_produk_id = null;
+    searchToProduk.value = '';
+}
 
 // Auto-calculate rasio when qty_from or qty_to changes
 watch([() => form.qty_from, () => form.qty_to], () => {
@@ -152,35 +176,81 @@ function submit() {
                     <label for="from_produk_id" class="mb-2 block text-sm font-medium text-gray-700">
                         Produk Asal (Non-PCS) <span class="text-red-500">*</span>
                     </label>
-                    <!-- Search Input -->
-                    <input
-                        v-model="searchFromProduk"
-                        type="text"
-                        placeholder="Cari produk asal (nama, SKU, kategori)..."
-                        class="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                    />
-                    <select
-                        id="from_produk_id"
-                        v-model="form.from_produk_id"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                        :class="{ 'border-red-500': form.errors.from_produk_id }"
-                        size="8"
-                        required
+
+                    <!-- Selected Product Display -->
+                    <div
+                        v-if="selectedFromProduk"
+                        class="mb-2 flex items-center justify-between rounded-lg border-2 border-emerald-500 bg-emerald-50 p-3"
                     >
-                        <option :value="null" disabled>Pilih produk asal</option>
-                        <option v-for="item in filteredProdukAsal" :key="item.id_produk" :value="item.id_produk">
-                            {{ item.nama }} ({{ item.sku }}) - {{ item.satuan }} - Stok: {{ item.stok }}
-                        </option>
-                    </select>
-                    <p v-if="form.errors.from_produk_id" class="mt-1 text-sm text-red-500">{{ form.errors.from_produk_id }}</p>
-                    <div v-if="selectedFromProduk" class="mt-2 rounded-lg bg-blue-50 p-3">
-                        <p class="text-sm text-blue-800">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            <strong>{{ selectedFromProduk.nama }}</strong> - Satuan: {{ selectedFromProduk.satuan }}, Stok:
-                            {{ selectedFromProduk.stok }}
-                            <span v-if="selectedFromProduk.isi_per_pack">, Isi per pack: {{ selectedFromProduk.isi_per_pack }}</span>
-                        </p>
+                        <div class="flex-1">
+                            <p class="font-semibold text-emerald-900">{{ selectedFromProduk.nama }}</p>
+                            <p class="text-sm text-emerald-700">
+                                SKU: {{ selectedFromProduk.sku }} | {{ selectedFromProduk.satuan }} | Stok: {{ selectedFromProduk.stok }}
+                                <span v-if="selectedFromProduk.isi_per_pack" class="ml-2">| Per pack: {{ selectedFromProduk.isi_per_pack }}</span>
+                            </p>
+                        </div>
+                        <button @click="clearFromProduk" type="button" class="ml-3 text-emerald-600 hover:text-emerald-800">
+                            <i class="fas fa-times-circle text-xl"></i>
+                        </button>
                     </div>
+
+                    <!-- Search & Dropdown -->
+                    <div v-else class="relative">
+                        <div class="relative">
+                            <input
+                                v-model="searchFromProduk"
+                                @focus="showFromDropdown = true"
+                                @input="showFromDropdown = true"
+                                type="text"
+                                placeholder="Ketik untuk mencari produk asal (nama, SKU, kategori)..."
+                                class="w-full rounded-lg border border-gray-300 px-4 py-3 pr-10 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                                :class="{ 'border-red-500': form.errors.from_produk_id }"
+                            />
+                            <i class="fas fa-search absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"></i>
+                        </div>
+
+                        <!-- Dropdown List -->
+                        <Transition
+                            enter-active-class="transition duration-200 ease-out"
+                            enter-from-class="opacity-0 scale-95"
+                            enter-to-class="opacity-100 scale-100"
+                            leave-active-class="transition duration-150 ease-in"
+                            leave-from-class="opacity-100 scale-100"
+                            leave-to-class="opacity-0 scale-95"
+                        >
+                            <div
+                                v-if="showFromDropdown"
+                                class="absolute z-50 mt-2 max-h-80 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+                            >
+                                <div v-if="filteredProdukAsal.length === 0" class="p-4 text-center text-gray-500">
+                                    <i class="fas fa-inbox mb-2 text-3xl text-gray-300"></i>
+                                    <p>Tidak ada produk ditemukan</p>
+                                </div>
+                                <button
+                                    v-for="item in filteredProdukAsal"
+                                    :key="item.id_produk"
+                                    @click="selectFromProduk(item)"
+                                    type="button"
+                                    class="flex w-full items-center border-b border-gray-100 p-3 text-left transition-colors hover:bg-emerald-50"
+                                >
+                                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                                        <i class="fas fa-box text-xl"></i>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <p class="font-semibold text-gray-900">{{ item.nama }}</p>
+                                        <p class="text-sm text-gray-600">
+                                            <span class="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800">{{ item.sku }}</span>
+                                            <span class="ml-2 text-gray-500">{{ item.satuan }}</span>
+                                            <span class="ml-2 text-emerald-600">Stok: {{ item.stok }}</span>
+                                            <span v-if="item.isi_per_pack" class="ml-2 text-purple-600">Per pack: {{ item.isi_per_pack }}</span>
+                                        </p>
+                                    </div>
+                                    <i class="fas fa-chevron-right ml-2 text-gray-400"></i>
+                                </button>
+                            </div>
+                        </Transition>
+                    </div>
+                    <p v-if="form.errors.from_produk_id" class="mt-1 text-sm text-red-500">{{ form.errors.from_produk_id }}</p>
                 </div>
 
                 <!-- Produk Tujuan -->
@@ -188,34 +258,76 @@ function submit() {
                     <label for="to_produk_id" class="mb-2 block text-sm font-medium text-gray-700">
                         Produk Tujuan (PCS Only) <span class="text-red-500">*</span>
                     </label>
-                    <!-- Search Input -->
-                    <input
-                        v-model="searchToProduk"
-                        type="text"
-                        placeholder="Cari produk tujuan (nama, SKU, kategori)..."
-                        class="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                    />
-                    <select
-                        id="to_produk_id"
-                        v-model="form.to_produk_id"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                        :class="{ 'border-red-500': form.errors.to_produk_id }"
-                        size="8"
-                        required
-                    >
-                        <option :value="null" disabled>Pilih produk tujuan</option>
-                        <option v-for="item in filteredProdukTujuan" :key="item.id_produk" :value="item.id_produk">
-                            {{ item.nama }} ({{ item.sku }}) - {{ item.satuan }} - Stok: {{ item.stok }}
-                        </option>
-                    </select>
-                    <p v-if="form.errors.to_produk_id" class="mt-1 text-sm text-red-500">{{ form.errors.to_produk_id }}</p>
-                    <div v-if="selectedToProduk" class="mt-2 rounded-lg bg-blue-50 p-3">
-                        <p class="text-sm text-blue-800">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            <strong>{{ selectedToProduk.nama }}</strong> - Satuan: {{ selectedToProduk.satuan }}, Stok:
-                            {{ selectedToProduk.stok }}
-                        </p>
+
+                    <!-- Selected Product Display -->
+                    <div v-if="selectedToProduk" class="mb-2 flex items-center justify-between rounded-lg border-2 border-blue-500 bg-blue-50 p-3">
+                        <div class="flex-1">
+                            <p class="font-semibold text-blue-900">{{ selectedToProduk.nama }}</p>
+                            <p class="text-sm text-blue-700">
+                                SKU: {{ selectedToProduk.sku }} | {{ selectedToProduk.satuan }} | Stok: {{ selectedToProduk.stok }}
+                            </p>
+                        </div>
+                        <button @click="clearToProduk" type="button" class="ml-3 text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-times-circle text-xl"></i>
+                        </button>
                     </div>
+
+                    <!-- Search & Dropdown -->
+                    <div v-else class="relative">
+                        <div class="relative">
+                            <input
+                                v-model="searchToProduk"
+                                @focus="showToDropdown = true"
+                                @input="showToDropdown = true"
+                                type="text"
+                                placeholder="Ketik untuk mencari produk tujuan (nama, SKU, kategori)..."
+                                class="w-full rounded-lg border border-gray-300 px-4 py-3 pr-10 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                                :class="{ 'border-red-500': form.errors.to_produk_id }"
+                            />
+                            <i class="fas fa-search absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"></i>
+                        </div>
+
+                        <!-- Dropdown List -->
+                        <Transition
+                            enter-active-class="transition duration-200 ease-out"
+                            enter-from-class="opacity-0 scale-95"
+                            enter-to-class="opacity-100 scale-100"
+                            leave-active-class="transition duration-150 ease-in"
+                            leave-from-class="opacity-100 scale-100"
+                            leave-to-class="opacity-0 scale-95"
+                        >
+                            <div
+                                v-if="showToDropdown"
+                                class="absolute z-50 mt-2 max-h-80 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+                            >
+                                <div v-if="filteredProdukTujuan.length === 0" class="p-4 text-center text-gray-500">
+                                    <i class="fas fa-inbox mb-2 text-3xl text-gray-300"></i>
+                                    <p>Tidak ada produk ditemukan</p>
+                                </div>
+                                <button
+                                    v-for="item in filteredProdukTujuan"
+                                    :key="item.id_produk"
+                                    @click="selectToProduk(item)"
+                                    type="button"
+                                    class="flex w-full items-center border-b border-gray-100 p-3 text-left transition-colors hover:bg-blue-50"
+                                >
+                                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                                        <i class="fas fa-cube text-xl"></i>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <p class="font-semibold text-gray-900">{{ item.nama }}</p>
+                                        <p class="text-sm text-gray-600">
+                                            <span class="rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">{{ item.sku }}</span>
+                                            <span class="ml-2 text-gray-500">{{ item.satuan }}</span>
+                                            <span class="ml-2 text-blue-600">Stok: {{ item.stok }}</span>
+                                        </p>
+                                    </div>
+                                    <i class="fas fa-chevron-right ml-2 text-gray-400"></i>
+                                </button>
+                            </div>
+                        </Transition>
+                    </div>
+                    <p v-if="form.errors.to_produk_id" class="mt-1 text-sm text-red-500">{{ form.errors.to_produk_id }}</p>
                 </div>
 
                 <!-- Konversi Ratio -->
