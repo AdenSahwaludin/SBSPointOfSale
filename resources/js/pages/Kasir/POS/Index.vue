@@ -639,51 +639,34 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                 </div>
                                 <h3 class="mb-2 line-clamp-2 min-h-[2.5rem] font-semibold text-gray-900">{{ produk.nama }}</h3>
                                 <p class="mb-3 text-xl font-bold text-emerald-600">{{ formatCurrency(produk.harga) }}</p>
-                                
+
                                 <!-- Stock Info -->
                                 <div class="mb-3 flex items-center justify-center gap-2">
                                     <span class="text-sm text-gray-500">Stok:</span>
-                                    <span 
+                                    <span
                                         :class="[
-                                            'font-semibold text-sm',
-                                            produk.stok === 0 ? 'text-red-600' :
-                                            produk.stok <= 10 ? 'text-orange-600' :
-                                            'text-green-600'
+                                            'text-sm font-semibold',
+                                            produk.stok === 0 ? 'text-red-600' : produk.stok <= 10 ? 'text-orange-600' : 'text-green-600',
                                         ]"
                                     >
                                         {{ produk.stok }} {{ produk.satuan }}
                                     </span>
                                 </div>
 
-                                <!-- Unit/Pack buttons -->
-                                <div class="flex gap-2">
-                                    <!-- Produk karton/pack: hanya 1 tombol -->
-                                    <button
-                                        v-if="produk.satuan === 'karton' || produk.satuan === 'pack'"
-                                        @click.stop="addToCart(produk, 'pack')"
-                                        class="flex-1 rounded-lg bg-blue-500 px-3 py-2 text-sm font-medium text-white capitalize transition-colors hover:bg-blue-600"
-                                    >
-                                        <i class="fas fa-plus mr-1"></i>
-                                        {{ produk.satuan }}
-                                    </button>
-
-                                    <!-- Produk pcs: tombol unit dan pack (jika isi_per_pack > 1) -->
+                                <!-- Satuan Info -->
+                                <div class="flex items-center justify-center gap-2 text-xs text-gray-600">
+                                    <template v-if="produk.satuan === 'karton' || produk.satuan === 'pack'">
+                                        <i class="fas fa-box text-blue-500"></i>
+                                        <span class="capitalize">{{ produk.satuan }}</span>
+                                    </template>
                                     <template v-else>
-                                        <button
-                                            @click.stop="addToCart(produk, 'unit')"
-                                            class="flex-1 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
-                                        >
-                                            <i class="fas fa-plus mr-1"></i>
-                                            Unit
-                                        </button>
-                                        <button
-                                            v-if="produk.isi_per_pack > 1"
-                                            @click.stop="addToCart(produk, 'pack')"
-                                            class="flex-1 rounded-lg bg-blue-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
-                                        >
-                                            <i class="fas fa-box mr-1"></i>
-                                            × {{ produk.isi_per_pack }}
-                                        </button>
+                                        <i class="fas fa-cube text-emerald-500"></i>
+                                        <span>Unit (pcs)</span>
+                                        <span v-if="produk.isi_per_pack > 1" class="text-gray-400">•</span>
+                                        <template v-if="produk.isi_per_pack > 1">
+                                            <i class="fas fa-box text-blue-500"></i>
+                                            <span>Pack ({{ produk.isi_per_pack }} pcs)</span>
+                                        </template>
                                     </template>
                                 </div>
                             </div>
