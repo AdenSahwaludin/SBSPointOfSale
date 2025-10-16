@@ -628,23 +628,42 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                         <div
                             v-for="produk in filteredProduk"
                             :key="produk.id_produk"
-                            class="cursor-pointer rounded-xl border-2 border-transparent bg-gray-50 p-4 transition-colors hover:border-emerald-200 hover:bg-gray-100"
+                            class="cursor-pointer rounded-xl border-2 border-transparent bg-gray-50 p-4 transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md"
                             @click="addToCart(produk)"
                         >
                             <div class="text-center">
-                                <div class="mb-1 text-xs text-gray-500">{{ produk.id_produk }}</div>
-                                <h3 class="mb-2 line-clamp-2 font-medium text-gray-900">{{ produk.nama }}</h3>
-                                <p class="mb-2 text-lg font-bold text-emerald-600">{{ formatCurrency(produk.harga) }}</p>
-                                <p class="mb-4 text-sm text-gray-500">Stok: {{ produk.stok }} {{ produk.satuan }}</p>
+                                <div class="mb-2 flex items-center justify-center">
+                                    <span class="rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-600">
+                                        {{ produk.kategori.nama }}
+                                    </span>
+                                </div>
+                                <h3 class="mb-2 line-clamp-2 min-h-[2.5rem] font-semibold text-gray-900">{{ produk.nama }}</h3>
+                                <p class="mb-3 text-xl font-bold text-emerald-600">{{ formatCurrency(produk.harga) }}</p>
+                                
+                                <!-- Stock Info -->
+                                <div class="mb-3 flex items-center justify-center gap-2">
+                                    <span class="text-sm text-gray-500">Stok:</span>
+                                    <span 
+                                        :class="[
+                                            'font-semibold text-sm',
+                                            produk.stok === 0 ? 'text-red-600' :
+                                            produk.stok <= 10 ? 'text-orange-600' :
+                                            'text-green-600'
+                                        ]"
+                                    >
+                                        {{ produk.stok }} {{ produk.satuan }}
+                                    </span>
+                                </div>
 
                                 <!-- Unit/Pack buttons -->
-                                <div class="flex gap-1">
+                                <div class="flex gap-2">
                                     <!-- Produk karton/pack: hanya 1 tombol -->
                                     <button
                                         v-if="produk.satuan === 'karton' || produk.satuan === 'pack'"
                                         @click.stop="addToCart(produk, 'pack')"
-                                        class="flex-1 rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 capitalize hover:bg-blue-200"
+                                        class="flex-1 rounded-lg bg-blue-500 px-3 py-2 text-sm font-medium text-white capitalize transition-colors hover:bg-blue-600"
                                     >
+                                        <i class="fas fa-plus mr-1"></i>
                                         {{ produk.satuan }}
                                     </button>
 
@@ -652,16 +671,18 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                     <template v-else>
                                         <button
                                             @click.stop="addToCart(produk, 'unit')"
-                                            class="flex-1 rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-200"
+                                            class="flex-1 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
                                         >
+                                            <i class="fas fa-plus mr-1"></i>
                                             Unit
                                         </button>
                                         <button
                                             v-if="produk.isi_per_pack > 1"
                                             @click.stop="addToCart(produk, 'pack')"
-                                            class="flex-1 rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 hover:bg-blue-200"
+                                            class="flex-1 rounded-lg bg-blue-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
                                         >
-                                            Pack ({{ produk.isi_per_pack }})
+                                            <i class="fas fa-box mr-1"></i>
+                                            × {{ produk.isi_per_pack }}
                                         </button>
                                     </template>
                                 </div>
@@ -672,7 +693,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
             </div>
 
             <!-- Right Panel - Cart & Checkout -->
-            <div class="flex w-96 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <div class="flex w-[28rem] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                 <!-- Cart Header -->
                 <div class="border-b border-gray-100 p-6">
                     <h2 class="mb-4 text-xl font-bold text-gray-900">Keranjang Belanja</h2>
@@ -802,7 +823,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                             placeholder="0"
                         />
-                        <div v-if="kembalian > 0" class="mt-2 text-sm">
+                        <div v-if="kembalian >= 0" class="mt-2 text-sm">
                             <span class="text-gray-600">Kembalian: </span>
                             <span class="font-bold text-green-600">{{ formatCurrency(kembalian) }}</span>
                         </div>

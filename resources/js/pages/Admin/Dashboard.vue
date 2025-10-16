@@ -309,7 +309,11 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                             <p class="text-sm">Semua stok aman</p>
                         </div>
                         <div v-else class="space-y-3">
-                            <div v-for="product in lowStockProducts" :key="product.nama" class="flex items-center justify-between border-l-4 border-orange-500 bg-orange-50 p-3">
+                            <div
+                                v-for="product in lowStockProducts"
+                                :key="product.nama"
+                                class="flex items-center justify-between border-l-4 border-orange-500 bg-orange-50 p-3"
+                            >
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">{{ product.nama }}</p>
                                     <p class="text-xs text-gray-600">{{ product.kategori.nama }}</p>
@@ -349,7 +353,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                                 </div>
                                 <div class="text-right">
                                     <p class="text-sm font-semibold text-gray-900">{{ formatCurrency(trx.total) }}</p>
-                                    <span :class="['inline-block rounded-full px-2 py-0.5 text-xs font-medium', getStatusClass(trx.status_pembayaran)]">
+                                    <span
+                                        :class="['inline-block rounded-full px-2 py-0.5 text-xs font-medium', getStatusClass(trx.status_pembayaran)]"
+                                    >
                                         {{ trx.status_pembayaran }}
                                     </span>
                                 </div>
@@ -375,7 +381,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                                     <p class="text-xs text-gray-600">Jatuh tempo: {{ formatDate(payment.jatuh_tempo) }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-sm font-semibold text-gray-900">{{ formatCurrency(payment.jumlah_tagihan - payment.jumlah_dibayar) }}</p>
+                                    <p class="text-sm font-semibold text-gray-900">
+                                        {{ formatCurrency(payment.jumlah_tagihan - payment.jumlah_dibayar) }}
+                                    </p>
                                     <span :class="['inline-block rounded-full px-2 py-0.5 text-xs font-medium', getStatusClass(payment.status)]">
                                         {{ payment.status }}
                                     </span>
