@@ -416,9 +416,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                                 <option :value="60">60</option>
                                 <option :value="100">100</option>
                             </select>
-                            <span class="text-sm text-gray-700">
-                                Showing {{ produk.from }} to {{ produk.to }} of {{ produk.total }} entries
-                            </span>
+                            <span class="text-sm text-gray-700"> Showing {{ produk.from }} to {{ produk.to }} of {{ produk.total }} entries </span>
                         </div>
 
                         <div class="flex gap-1">
@@ -428,8 +426,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                                 :class="[
                                     'rounded-lg px-3 py-1 text-sm',
                                     produk.prev_page_url
-                                        ? 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed',
+                                        ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                                        : 'cursor-not-allowed bg-gray-100 text-gray-400',
                                 ]"
                             >
                                 Previous
@@ -441,7 +439,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                                 @click="goToPage(link.url)"
                                 :class="[
                                     'rounded-lg px-3 py-1 text-sm',
-                                    link.active ? 'bg-emerald-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300',
+                                    link.active ? 'bg-emerald-600 text-white' : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100',
                                 ]"
                                 v-html="link.label"
                             ></button>
@@ -452,8 +450,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                                 :class="[
                                     'rounded-lg px-3 py-1 text-sm',
                                     produk.next_page_url
-                                        ? 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed',
+                                        ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                                        : 'cursor-not-allowed bg-gray-100 text-gray-400',
                                 ]"
                             >
                                 Next
@@ -468,7 +466,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
         <Teleport to="body">
             <div
                 v-if="showDetailModal && selectedProduk"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4"
                 @click.self="closeDetailModal"
             >
                 <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-xl">
@@ -509,14 +507,19 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
 
                             <!-- Pricing Section -->
                             <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <h4 class="mb-3 text-sm font-semibold uppercase text-gray-700">Harga</h4>
+                                <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase">Harga</h4>
                                 <div class="space-y-2">
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-600">Harga per {{ selectedProduk.satuan }}</span>
                                         <span class="text-lg font-bold text-emerald-600">{{ formatCurrency(selectedProduk.harga) }}</span>
                                     </div>
-                                    <div v-if="selectedProduk.harga_pack && selectedProduk.isi_per_pack > 1" class="flex justify-between border-t pt-2">
-                                        <span class="text-sm text-gray-600">Harga Pack ({{ selectedProduk.isi_per_pack }} {{ selectedProduk.satuan }})</span>
+                                    <div
+                                        v-if="selectedProduk.harga_pack && selectedProduk.isi_per_pack > 1"
+                                        class="flex justify-between border-t pt-2"
+                                    >
+                                        <span class="text-sm text-gray-600"
+                                            >Harga Pack ({{ selectedProduk.isi_per_pack }} {{ selectedProduk.satuan }})</span
+                                        >
                                         <span class="text-lg font-bold text-blue-600">{{ formatCurrency(selectedProduk.harga_pack) }}</span>
                                     </div>
                                 </div>
@@ -524,13 +527,15 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
 
                             <!-- Stock Section -->
                             <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <h4 class="mb-3 text-sm font-semibold uppercase text-gray-700">Ketersediaan Stok</h4>
+                                <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase">Ketersediaan Stok</h4>
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-2xl font-bold text-gray-900">{{ selectedProduk.stok }} {{ selectedProduk.satuan }}</p>
                                         <p class="mt-1 text-sm text-gray-500">Stok tersedia</p>
                                     </div>
-                                    <span :class="['inline-flex rounded-full px-4 py-2 text-sm font-semibold', getStokBadgeClass(selectedProduk.stok)]">
+                                    <span
+                                        :class="['inline-flex rounded-full px-4 py-2 text-sm font-semibold', getStokBadgeClass(selectedProduk.stok)]"
+                                    >
                                         {{ getStokStatus(selectedProduk.stok) }}
                                     </span>
                                 </div>
@@ -538,7 +543,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
 
                             <!-- Description -->
                             <div v-if="selectedProduk.deskripsi">
-                                <h4 class="mb-2 text-sm font-semibold uppercase text-gray-700">Deskripsi</h4>
+                                <h4 class="mb-2 text-sm font-semibold text-gray-700 uppercase">Deskripsi</h4>
                                 <p class="text-sm text-gray-600">{{ selectedProduk.deskripsi }}</p>
                             </div>
                         </div>
