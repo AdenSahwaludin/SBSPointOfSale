@@ -795,7 +795,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                             v-model="metodeBayar"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                         >
-                            <option v-for="(label, value) in props.metodeBayar" :key="value" :value="value">
+                            <option v-for="(label, key) in props.metodeBayar" :key="key" :value="key">
                                 {{ label }}
                             </option>
                         </select>
