@@ -411,7 +411,7 @@ function processTransaction() {
     transactionForm.diskon = diskon.value;
     transactionForm.pajak = pajak.value;
     transactionForm.total = total.value;
-    transactionForm.jumlah_bayar = jumlahBayar.value;
+    transactionForm.jumlah_bayar = metodeBayar.value === 'TUNAI' ? jumlahBayar.value : (null as any);
 
     const requestData = {
         id_pelanggan: selectedPelanggan.value,
@@ -421,8 +421,8 @@ function processTransaction() {
         diskon: diskon.value,
         pajak: pajak.value,
         total: total.value,
-        jumlah_bayar: jumlahBayar.value,
-    };
+        ...(metodeBayar.value === 'TUNAI' ? { jumlah_bayar: jumlahBayar.value } : {}),
+    } as Record<string, any>;
 
     console.log('Sending request data:', requestData);
 

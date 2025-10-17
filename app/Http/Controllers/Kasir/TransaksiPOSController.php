@@ -208,12 +208,13 @@ class TransaksiPOSController extends Controller
             'items.*.jumlah' => 'required|integer|min:1',
             'items.*.mode_qty' => 'required|in:unit,pack',
             'items.*.harga_satuan' => 'required|numeric|min:0',
-            'metode_bayar' => 'required|string',
+            'metode_bayar' => 'required|in:TUNAI,QRIS,TRANSFER BCA,KREDIT',
             'subtotal' => 'required|numeric|min:0',
             'diskon' => 'nullable|numeric|min:0',
             'pajak' => 'nullable|numeric|min:0',
             'total' => 'required|numeric|min:0',
-            'jumlah_bayar' => 'required_if:metode_bayar,TUNAI|nullable|numeric|min:0|gte:total',
+            // Exclude from validation when non-cash to avoid gte:total failing on 0
+            'jumlah_bayar' => 'exclude_unless:metode_bayar,TUNAI|required_if:metode_bayar,TUNAI|nullable|numeric|min:0|gte:total',
         ]);
 
         try {
@@ -223,7 +224,7 @@ class TransaksiPOSController extends Controller
             $nomorTransaksi = Transaksi::generateNomorTransaksi($request->id_pelanggan);
 
             $isCashPayment = $request->metode_bayar === 'TUNAI';
-            
+
             // Untuk non-tunai, set jumlah_bayar = total (tidak ada kembalian)
             $jumlahBayar = $isCashPayment ? $request->jumlah_bayar : $request->total;
 
@@ -304,11 +305,11 @@ class TransaksiPOSController extends Controller
 
             // Create payment record
             $idPembayaran = Pembayaran::generateIdPembayaran();
-            
+
             if ($isCashPayment) {
                 // Pembayaran tunai - ada kembalian
                 $kembalian = $jumlahBayar - $request->total;
-                
+
                 Pembayaran::create([
                     'id_pembayaran' => $idPembayaran,
                     'id_transaksi' => $nomorTransaksi,
@@ -324,9 +325,9 @@ class TransaksiPOSController extends Controller
                     'TRANSFER BCA' => 'Transfer BCA',
                     'KREDIT' => 'Kredit',
                 ];
-                
+
                 $label = $metodeBayarLabels[$request->metode_bayar] ?? $request->metode_bayar;
-                
+
                 Pembayaran::create([
                     'id_pembayaran' => $idPembayaran,
                     'id_transaksi' => $nomorTransaksi,
