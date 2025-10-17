@@ -532,7 +532,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         <Teleport to="body">
             <div
                 v-if="showDetailModal && selectedTransaksi"
-                class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4"
+                class="bg-opacity-50 modal-bg fixed inset-0 z-50 flex items-center justify-center p-4"
                 @click.self="closeDetailModal"
             >
                 <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white shadow-xl">

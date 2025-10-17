@@ -46,7 +46,7 @@ class TransaksiPOSController extends Controller
                 'QRIS' => 'QRIS',
                 'TRANSFER BCA' => 'Transfer BCA',
                 'KREDIT' => 'Kredit',
-                
+
             ],
         ]);
     }
@@ -262,7 +262,7 @@ class TransaksiPOSController extends Controller
                         throw new \RuntimeException("Produk {$produk->nama} hanya bisa dijual per {$produk->satuan}");
                     }
 
-                    $deductUnits = (int) $item['jumlah']; // kurangi stok per karton/pack
+                    $deductUnits = (int)$item['jumlah']; // kurangi stok per karton/pack
 
                     if ($produk->stok < $deductUnits) {
                         throw new \RuntimeException("Stok {$produk->nama} tidak mencukupi");
@@ -271,7 +271,7 @@ class TransaksiPOSController extends Controller
                     $isiPackSaatTransaksi = $isiPerPack; // snapshot isi per kemasan saat transaksi
                 } else {
                     // Produk satuan pcs: jika mode pack, konversi ke pcs; jika unit, langsung pcs
-                    $deductUnits = (int) ($item['mode_qty'] === 'pack'
+                    $deductUnits = (int)($item['mode_qty'] === 'pack'
                         ? ((int)$item['jumlah']) * $isiPerPack
                         : (int)$item['jumlah']);
 
@@ -303,21 +303,24 @@ class TransaksiPOSController extends Controller
             $idPembayaran = Pembayaran::generateIdPembayaran();
             
             if ($isCashPayment) {
-                // Pembayaran tunai langsung lunas
+                // Pembayaran tunai - langsung lunas
+                $jumlahBayar = $request->jumlah_bayar ?? $request->total;
+                $kembalian = $jumlahBayar - $request->total;
+                
                 Pembayaran::create([
                     'id_pembayaran' => $idPembayaran,
                     'id_transaksi' => $nomorTransaksi,
                     'metode' => $request->metode_bayar,
                     'jumlah' => $request->total,
                     'tanggal' => now(),
-                    'keterangan' => 'Pembayaran tunai - Kembalian: Rp ' . number_format($request->jumlah_bayar - $request->total, 0, ',', '.'),
+                    'keterangan' => 'Pembayaran tunai - Kembalian: Rp ' . number_format($kembalian, 0, ',', '.'),
                 ]);
             } else {
-                // Pembayaran non-tunai (QRIS, TRANSFER BCA, KREDIT) - menunggu konfirmasi
+                // Pembayaran non-tunai (QRIS, TRANSFER BCA, KREDIT)
                 $metodeBayarLabels = [
                     'QRIS' => 'QRIS',
                     'TRANSFER BCA' => 'Transfer BCA',
-                    'KREDIT' => 'Kredit'
+                    'KREDIT' => 'Kredit',
                 ];
                 
                 $label = $metodeBayarLabels[$request->metode_bayar] ?? $request->metode_bayar;
@@ -328,7 +331,7 @@ class TransaksiPOSController extends Controller
                     'metode' => $request->metode_bayar,
                     'jumlah' => $request->total,
                     'tanggal' => now(),
-                    'keterangan' => 'Menunggu pembayaran via ' . $label,
+                    'keterangan' => 'Menunggu konfirmasi pembayaran via ' . $label,
                 ]);
             }
 
@@ -340,7 +343,7 @@ class TransaksiPOSController extends Controller
                 'data' => [
                     'nomor_transaksi' => $nomorTransaksi,
                     'total' => $request->total,
-                    'kembalian' => $request->metode_bayar === 'TUNAI' ? $request->jumlah_bayar - $request->total : 0,
+                    'kembalian' => $isCashPayment ? ($request->jumlah_bayar ?? $request->total) - $request->total : 0,
                     'metode_bayar' => $request->metode_bayar,
                 ]
             ]);
