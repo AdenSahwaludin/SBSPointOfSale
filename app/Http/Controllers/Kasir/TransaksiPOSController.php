@@ -223,6 +223,9 @@ class TransaksiPOSController extends Controller
             $nomorTransaksi = Transaksi::generateNomorTransaksi($request->id_pelanggan);
 
             $isCashPayment = $request->metode_bayar === 'TUNAI';
+            
+            // Untuk non-tunai, set jumlah_bayar = total (tidak ada kembalian)
+            $jumlahBayar = $isCashPayment ? $request->jumlah_bayar : $request->total;
 
             // Create transaksi (siapkan field Cicilan Pintar untuk implementasi nanti)
             $transaksi = Transaksi::create([
@@ -303,8 +306,7 @@ class TransaksiPOSController extends Controller
             $idPembayaran = Pembayaran::generateIdPembayaran();
             
             if ($isCashPayment) {
-                // Pembayaran tunai - langsung lunas
-                $jumlahBayar = $request->jumlah_bayar ?? $request->total;
+                // Pembayaran tunai - ada kembalian
                 $kembalian = $jumlahBayar - $request->total;
                 
                 Pembayaran::create([
@@ -343,7 +345,7 @@ class TransaksiPOSController extends Controller
                 'data' => [
                     'nomor_transaksi' => $nomorTransaksi,
                     'total' => $request->total,
-                    'kembalian' => $isCashPayment ? ($request->jumlah_bayar ?? $request->total) - $request->total : 0,
+                    'kembalian' => $isCashPayment ? ($jumlahBayar - $request->total) : 0,
                     'metode_bayar' => $request->metode_bayar,
                 ]
             ]);
