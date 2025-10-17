@@ -105,7 +105,7 @@ const displayedTransaksi = computed(() => props.transaksi.data);
 const statsTabsData = computed(() => [
   {
     id: 'total_transaksi',
-    label: 'Seruan',
+    label: 'Semua',
     value: props.stats.total_transaksi,
     icon: 'fas fa-receipt',
     activeClass: 'bg-blue-100 text-blue-700',
@@ -115,7 +115,7 @@ const statsTabsData = computed(() => [
   },
   {
     id: 'total_lunas',
-    label: 'Datam Lunas',
+    label: 'Lunas',
     value: props.stats.total_lunas,
     icon: 'fas fa-check-circle',
     activeClass: 'bg-green-100 text-green-700',
@@ -125,7 +125,7 @@ const statsTabsData = computed(() => [
   },
   {
     id: 'total_menunggu',
-    label: 'Dalam Lunas',
+    label: 'Belum Bayar',
     value: props.stats.total_menunggu,
     icon: 'fas fa-clock',
     activeClass: 'bg-yellow-100 text-yellow-700',
@@ -135,12 +135,12 @@ const statsTabsData = computed(() => [
   },
   {
     id: 'total_batal',
-    label: 'Semua',
+    label: 'Kredit',
     value: props.stats.total_batal,
-    icon: 'fas fa-times-circle',
-    activeClass: 'bg-red-100 text-red-700',
+    icon: 'fas fa-credit-card',
+    activeClass: 'bg-purple-100 text-purple-700',
     inactiveClass: 'bg-gray-100 text-gray-600',
-    iconActiveClass: 'bg-red-200 text-red-600',
+    iconActiveClass: 'bg-purple-200 text-purple-600',
     iconInactiveClass: 'bg-gray-200 text-gray-500',
   },
   {
@@ -403,11 +403,13 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                 </div>
             </div>
             <!-- Stats Cards Tab -->
-            <StatsCardTab
-                :stats="statsTabsData"
-                :active-tab="activeStatsTab"
-                @update:active-tab="activeStatsTab = $event"
-            />
+            <div class="flex justify-end">
+                <StatsCardTab
+                    :stats="statsTabsData"
+                    :active-tab="activeStatsTab"
+                    @update:active-tab="activeStatsTab = $event"
+                />
+            </div>
 
             <!-- Transactions Table -->
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
