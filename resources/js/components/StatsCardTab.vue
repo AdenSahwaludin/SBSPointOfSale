@@ -1,15 +1,13 @@
 <template>
     <div class="scrollbar-hide overflow-x-auto">
-        <div class="flex min-w-max flex-row gap-4 p-4">
+        <div class="flex min-w-max flex-row gap-4 rounded-2xl bg-white p-4">
             <button
                 v-for="stat in stats"
                 :key="stat.id"
                 :class="[
-                    'inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200',
-                    'whitespace-nowrap text-sm',
-                    activeTab === stat.id
-                        ? `${stat.activeClass} font-semibold shadow-sm`
-                        : `${stat.inactiveClass} font-medium hover:shadow-sm`,
+                    'inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200 hover:cursor-pointer',
+                    'text-sm whitespace-nowrap',
+                    activeTab === stat.id ? `${stat.activeClass} font-semibold` : `font-medium`,
                 ]"
                 @click="$emit('update:activeTab', stat.id)"
             >
@@ -19,7 +17,7 @@
                         activeTab === stat.id ? stat.iconActiveClass : stat.iconInactiveClass,
                     ]"
                 >
-                    <i :class="[stat.icon, 'text-xs']"></i>
+                    <i :class="[stat.icon, 'text-[1rem]']"></i>
                 </div>
                 <span class="font-semibold">{{ stat.value }}</span>
                 <span class="text-xs opacity-70">{{ stat.label }}</span>
@@ -35,7 +33,6 @@ interface Stat {
     value: string | number;
     icon: string;
     activeClass: string;
-    inactiveClass: string;
     iconActiveClass: string;
     iconInactiveClass: string;
 }

@@ -133,7 +133,7 @@ CREATE TABLE transaksi (
   biaya_pengiriman  DECIMAL(18,0) NOT NULL DEFAULT 0,
   total             DECIMAL(18,0) NOT NULL DEFAULT 0,
   metode_bayar      ENUM('TUNAI','QRIS','TRANSFER BCA','KREDIT') NOT NULL DEFAULT 'TUNAI',
-  status_pembayaran ENUM('MENUNGGU','LUNAS','BATAL') NOT NULL DEFAULT 'MENUNGGU',
+  status_pembayaran ENUM('MENUNGGU','LUNAS','BATAL','KREDIT') NOT NULL DEFAULT 'MENUNGGU',
   paid_at           TIMESTAMP NULL,
   -- Cicilan Pintar (jika metode_bayar='KREDIT')
   jenis_transaksi   ENUM('TUNAI','KREDIT') NOT NULL DEFAULT 'TUNAI',
