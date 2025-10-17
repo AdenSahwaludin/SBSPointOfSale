@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import ReceiptModal from '@/components/ReceiptModal.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
@@ -67,6 +68,10 @@ const pajakRate = ref<number>(0);
 const searchResults = ref<Produk[]>([]); // Hasil search dari API
 const isSearching = ref(false); // Loading state
 const searchTimeout = ref<number | null>(null); // Debounce timer
+
+// Receipt Modal
+const showReceiptModal = ref(false);
+const receiptData = ref<any>(null);
 
 // Form
 const transactionForm = useForm({
@@ -442,11 +447,32 @@ function processTransaction() {
         .then((data) => {
             console.log('Response data:', data);
             if (data.success) {
-                // Handle successful transaction
-                addNotification({
-                    type: 'success',
-                    title: 'Transaksi berhasil disimpan!',
-                });
+                // Prepare receipt data
+                receiptData.value = {
+                    nomor_transaksi: data.data.nomor_transaksi,
+                    tanggal: new Date().toISOString(),
+                    kasir: 'Kasir', // Could get from auth user
+                    pelanggan: props.pelanggan.find(p => p.id_pelanggan === selectedPelanggan.value)?.nama || 'Umum',
+                    items: cart.value.map(item => ({
+                        id: item.id_produk,
+                        nama: item.nama,
+                        jumlah: item.jumlah,
+                        harga_satuan: item.harga_satuan,
+                        subtotal: item.subtotal,
+                    })),
+                    subtotal: subtotal.value,
+                    diskon: diskon.value,
+                    pajak: pajak.value,
+                    total: total.value,
+                    metode_bayar: data.data.metode_bayar,
+                    jumlah_bayar: metodeBayar.value === 'TUNAI' ? jumlahBayar.value : total.value,
+                    kembalian: data.data.kembalian,
+                };
+
+                // Show receipt modal
+                showReceiptModal.value = true;
+
+                // Clear cart and reset form
                 clearCart();
                 resetForm();
             } else {
@@ -839,6 +865,14 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                 </div>
             </div>
         </div>
+
+        <!-- Receipt Modal -->
+        <ReceiptModal 
+            v-if="receiptData"
+            :show="showReceiptModal" 
+            :transaction="receiptData" 
+            @close="showReceiptModal = false" 
+        />
     </BaseLayout>
 </template>
 
