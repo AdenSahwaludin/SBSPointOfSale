@@ -1,0 +1,1 @@
+buatkan git add . dan push dengan commit sesuai standar industri

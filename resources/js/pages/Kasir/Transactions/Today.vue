@@ -187,6 +187,22 @@ function formatDate(dateString: string): string {
     });
 }
 
+function updateStatus(nomorTransaksi: string, newStatus: string) {
+    router.patch(
+        `/kasir/transactions/${nomorTransaksi}/status`,
+        {
+            status_pembayaran: newStatus,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('Status berhasil diperbarui');
+            },
+        },
+    );
+}
+
 function getStatusBadgeClass(status: string): string {
     switch (status) {
         case 'LUNAS':
@@ -437,14 +453,18 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                     <div class="text-sm text-gray-900">{{ transaksi.metode_bayar }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
+                                    <select
+                                        :value="transaksi.status_pembayaran"
+                                        @change="(e) => updateStatus(transaksi.nomor_transaksi, (e.target as HTMLSelectElement).value)"
                                         :class="[
-                                            'inline-flex rounded-full px-2 py-1 text-xs font-semibold',
+                                            'cursor-pointer rounded-full border-0 px-3 py-1 text-xs font-semibold focus:ring-2 focus:ring-offset-2',
                                             getStatusBadgeClass(transaksi.status_pembayaran),
                                         ]"
                                     >
-                                        {{ transaksi.status_pembayaran }}
-                                    </span>
+                                        <option value="LUNAS">LUNAS</option>
+                                        <option value="MENUNGGU">MENUNGGU</option>
+                                        <option value="BATAL">BATAL</option>
+                                    </select>
                                 </td>
                                 <td class="px-6 py-4 text-sm whitespace-nowrap">
                                     <button @click="viewDetail(transaksi)" class="text-emerald-600 hover:text-emerald-900">
@@ -635,3 +655,22 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         </Teleport>
     </BaseLayout>
 </template>
+
+<style scoped>
+select.bg-green-100 {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+select.bg-yellow-100 {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+select.bg-red-100 {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+select option {
+    background-color: white;
+    color: black;
+}
+</style>

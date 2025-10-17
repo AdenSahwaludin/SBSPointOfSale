@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import TransactionDetailModal from '@/components/TransactionDetailModal.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
@@ -175,6 +176,28 @@ function viewDetail(transaksi: Transaksi) {
 function closeDetailModal() {
     showDetailModal.value = false;
     selectedTransaksi.value = null;
+}
+
+function handlePrint(transaksi: Transaksi) {
+    console.log('Print transaksi:', transaksi.nomor_transaksi);
+    // TODO: Implement print functionality
+    window.print();
+}
+
+function updateStatus(nomorTransaksi: string, newStatus: string) {
+    router.patch(
+        `/kasir/transactions/${nomorTransaksi}/status`,
+        {
+            status_pembayaran: newStatus,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('Status berhasil diperbarui');
+            },
+        },
+    );
 }
 
 function formatCurrency(amount: number): string {
@@ -444,14 +467,18 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                     <div class="text-sm text-gray-900">{{ transaksi.metode_bayar }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
+                                    <select
+                                        :value="transaksi.status_pembayaran"
+                                        @change="(e) => updateStatus(transaksi.nomor_transaksi, (e.target as HTMLSelectElement).value)"
                                         :class="[
-                                            'inline-flex rounded-full px-2 py-1 text-xs font-semibold',
+                                            'cursor-pointer rounded-full border-0 px-3 py-1 text-xs font-semibold focus:ring-2 focus:ring-offset-2',
                                             getStatusBadgeClass(transaksi.status_pembayaran),
                                         ]"
                                     >
-                                        {{ transaksi.status_pembayaran }}
-                                    </span>
+                                        <option value="LUNAS">LUNAS</option>
+                                        <option value="MENUNGGU">MENUNGGU</option>
+                                        <option value="BATAL">BATAL</option>
+                                    </select>
                                 </td>
                                 <td class="px-6 py-4 text-sm whitespace-nowrap">
                                     <button @click="viewDetail(transaksi)" class="text-emerald-600 hover:text-emerald-900">
@@ -529,116 +556,31 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         </div>
 
         <!-- Detail Modal -->
-        <Teleport to="body">
-            <div
-                v-if="showDetailModal && selectedTransaksi"
-                class="bg-opacity-50 modal-bg fixed inset-0 z-50 flex items-center justify-center p-4"
-                @click.self="closeDetailModal"
-            >
-                <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white shadow-xl">
-                    <!-- Modal Header -->
-                    <div class="flex items-center justify-between border-b border-gray-200 p-6">
-                        <h3 class="text-xl font-bold text-gray-900">Detail Transaksi</h3>
-                        <button @click="closeDetailModal" class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
-
-                    <!-- Modal Body -->
-                    <div class="p-6">
-                        <div class="space-y-6">
-                            <!-- Transaction Info -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Nomor Transaksi</p>
-                                    <p class="mt-1 text-base font-semibold text-gray-900">{{ selectedTransaksi.nomor_transaksi }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Tanggal</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ formatDate(selectedTransaksi.tanggal) }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Pelanggan</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedTransaksi.pelanggan.nama }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Kasir</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedTransaksi.kasir.nama }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Metode Bayar</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedTransaksi.metode_bayar }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Status</p>
-                                    <span
-                                        :class="[
-                                            'mt-1 inline-flex rounded-full px-3 py-1 text-sm font-semibold',
-                                            getStatusBadgeClass(selectedTransaksi.status_pembayaran),
-                                        ]"
-                                    >
-                                        {{ selectedTransaksi.status_pembayaran }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Items -->
-                            <div>
-                                <h4 class="mb-3 text-lg font-semibold text-gray-900">Items</h4>
-                                <div class="overflow-hidden rounded-lg border border-gray-200">
-                                    <table class="w-full">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700">Produk</th>
-                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-700">Harga</th>
-                                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-700">Qty</th>
-                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-700">Subtotal</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-200">
-                                            <tr v-for="item in selectedTransaksi.detail" :key="item.id_detail">
-                                                <td class="px-4 py-3 text-sm text-gray-900">{{ item.nama_produk }}</td>
-                                                <td class="px-4 py-3 text-right text-sm text-gray-900">{{ formatCurrency(item.harga_satuan) }}</td>
-                                                <td class="px-4 py-3 text-center text-sm text-gray-900">{{ item.jumlah }} {{ item.mode_qty }}</td>
-                                                <td class="px-4 py-3 text-right text-sm font-semibold text-gray-900">
-                                                    {{ formatCurrency(item.subtotal) }}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Summary -->
-                            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <div class="space-y-2">
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Subtotal</span>
-                                        <span class="font-medium text-gray-900">{{ formatCurrency(selectedTransaksi.subtotal) }}</span>
-                                    </div>
-                                    <div v-if="selectedTransaksi.diskon > 0" class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Diskon</span>
-                                        <span class="font-medium text-red-600">-{{ formatCurrency(selectedTransaksi.diskon) }}</span>
-                                    </div>
-                                    <div v-if="selectedTransaksi.pajak > 0" class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Pajak</span>
-                                        <span class="font-medium text-gray-900">{{ formatCurrency(selectedTransaksi.pajak) }}</span>
-                                    </div>
-                                    <div class="flex justify-between border-t border-gray-300 pt-2 text-base">
-                                        <span class="font-semibold text-gray-900">Total</span>
-                                        <span class="font-bold text-emerald-600">{{ formatCurrency(selectedTransaksi.total) }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Modal Footer -->
-                    <div class="flex justify-end gap-2 border-t border-gray-200 p-6">
-                        <BaseButton @click="closeDetailModal" variant="outline"> Tutup </BaseButton>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
+        <TransactionDetailModal
+            :show="showDetailModal"
+            :transaksi="selectedTransaksi"
+            :show-print-button="false"
+            @close="closeDetailModal"
+            @print="handlePrint"
+        />
     </BaseLayout>
 </template>
+
+<style scoped>
+select.bg-green-100 {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+select.bg-yellow-100 {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+select.bg-red-100 {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+select option {
+    background-color: white;
+    color: black;
+}
+</style>

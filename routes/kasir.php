@@ -36,6 +36,7 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
   Route::get('/', [TransaksiController::class, 'index'])->name('index');
   Route::get('/today', [TransaksiController::class, 'today'])->name('today');
   Route::get('/{nomorTransaksi}', [TransaksiController::class, 'show'])->name('show');
+  Route::patch('/{nomorTransaksi}/status', [TransaksiController::class, 'updateStatus'])->name('update-status');
  });
 
  // ==========================================
