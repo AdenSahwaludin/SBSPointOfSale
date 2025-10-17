@@ -1,30 +1,28 @@
 <template>
-    <div class="scrollbar-hide w-full overflow-x-auto">
-        <div class="flex min-w-min flex-row gap-3 p-1">
+    <div class="scrollbar-hide overflow-x-auto">
+        <div class="flex min-w-max flex-row gap-4 p-4">
             <button
                 v-for="stat in stats"
                 :key="stat.id"
                 :class="[
-                    'flex items-center gap-3 rounded-full px-4 py-3 transition-all duration-200',
-                    'min-w-fit whitespace-nowrap shadow-sm',
+                    'inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200',
+                    'whitespace-nowrap text-sm',
                     activeTab === stat.id
-                        ? `${stat.activeClass} font-semibold shadow-md`
-                        : `${stat.inactiveClass} font-medium hover:-translate-y-0.5 hover:shadow-md`,
+                        ? `${stat.activeClass} font-semibold shadow-sm`
+                        : `${stat.inactiveClass} font-medium hover:shadow-sm`,
                 ]"
                 @click="$emit('update:activeTab', stat.id)"
             >
                 <div
                     :class="[
-                        'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full',
+                        'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full',
                         activeTab === stat.id ? stat.iconActiveClass : stat.iconInactiveClass,
                     ]"
                 >
-                    <i :class="[stat.icon, 'text-sm']"></i>
+                    <i :class="[stat.icon, 'text-xs']"></i>
                 </div>
-                <div class="flex flex-col items-start">
-                    <span class="text-xs opacity-75">{{ stat.label }}</span>
-                    <span class="text-base leading-tight font-bold">{{ stat.value }}</span>
-                </div>
+                <span class="font-semibold">{{ stat.value }}</span>
+                <span class="text-xs opacity-70">{{ stat.label }}</span>
             </button>
         </div>
     </div>

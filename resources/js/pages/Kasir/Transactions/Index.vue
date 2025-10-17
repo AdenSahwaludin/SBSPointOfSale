@@ -103,56 +103,56 @@ const activeStatsTab = ref('total_transaksi');
 const displayedTransaksi = computed(() => props.transaksi.data);
 
 const statsTabsData = computed(() => [
-  {
-    id: 'total_transaksi',
-    label: 'Semua',
-    value: props.stats.total_transaksi,
-    icon: 'fas fa-receipt',
-    activeClass: 'bg-blue-100 text-blue-700',
-    inactiveClass: 'bg-gray-100 text-gray-600',
-    iconActiveClass: 'bg-blue-200 text-blue-600',
-    iconInactiveClass: 'bg-gray-200 text-gray-500',
-  },
-  {
-    id: 'total_lunas',
-    label: 'Lunas',
-    value: props.stats.total_lunas,
-    icon: 'fas fa-check-circle',
-    activeClass: 'bg-green-100 text-green-700',
-    inactiveClass: 'bg-gray-100 text-gray-600',
-    iconActiveClass: 'bg-green-200 text-green-600',
-    iconInactiveClass: 'bg-gray-200 text-gray-500',
-  },
-  {
-    id: 'total_menunggu',
-    label: 'Belum Bayar',
-    value: props.stats.total_menunggu,
-    icon: 'fas fa-clock',
-    activeClass: 'bg-yellow-100 text-yellow-700',
-    inactiveClass: 'bg-gray-100 text-gray-600',
-    iconActiveClass: 'bg-yellow-200 text-yellow-600',
-    iconInactiveClass: 'bg-gray-200 text-gray-500',
-  },
-  {
-    id: 'total_batal',
-    label: 'Kredit',
-    value: props.stats.total_batal,
-    icon: 'fas fa-credit-card',
-    activeClass: 'bg-purple-100 text-purple-700',
-    inactiveClass: 'bg-gray-100 text-gray-600',
-    iconActiveClass: 'bg-purple-200 text-purple-600',
-    iconInactiveClass: 'bg-gray-200 text-gray-500',
-  },
-  {
-    id: 'total_nilai',
-    label: 'Semua',
-    value: formatCurrency(props.stats.total_nilai),
-    icon: 'fas fa-dollar-sign',
-    activeClass: 'bg-emerald-100 text-emerald-700',
-    inactiveClass: 'bg-gray-100 text-gray-600',
-    iconActiveClass: 'bg-emerald-200 text-emerald-600',
-    iconInactiveClass: 'bg-gray-200 text-gray-500',
-  },
+    {
+        id: 'total_transaksi',
+        label: 'Semua',
+        value: props.stats.total_transaksi,
+        icon: 'fas fa-receipt',
+        activeClass: 'bg-blue-50 text-blue-700',
+        inactiveClass: 'bg-gray-50 text-gray-600',
+        iconActiveClass: 'bg-blue-200 text-blue-600',
+        iconInactiveClass: 'bg-gray-200 text-gray-500',
+    },
+    {
+        id: 'total_lunas',
+        label: 'Lunas',
+        value: props.stats.total_lunas,
+        icon: 'fas fa-check-circle',
+        activeClass: 'bg-green-50 text-green-700',
+        inactiveClass: 'bg-gray-50 text-gray-600',
+        iconActiveClass: 'bg-green-200 text-green-600',
+        iconInactiveClass: 'bg-gray-200 text-gray-500',
+    },
+    {
+        id: 'total_menunggu',
+        label: 'Belum Bayar',
+        value: props.stats.total_menunggu,
+        icon: 'fas fa-clock',
+        activeClass: 'bg-yellow-50 text-yellow-700',
+        inactiveClass: 'bg-gray-50 text-gray-600',
+        iconActiveClass: 'bg-yellow-200 text-yellow-600',
+        iconInactiveClass: 'bg-gray-200 text-gray-500',
+    },
+    {
+        id: 'total_batal',
+        label: 'Batal',
+        value: props.stats.total_batal,
+        icon: 'fas fa-ban',
+        activeClass: 'bg-red-50 text-red-700',
+        inactiveClass: 'bg-gray-50 text-gray-600',
+        iconActiveClass: 'bg-red-200 text-red-600',
+        iconInactiveClass: 'bg-gray-200 text-gray-500',
+    },
+    {
+        id: 'total_nilai',
+        label: 'Total Nilai',
+        value: formatCurrency(props.stats.total_nilai),
+        icon: 'fas fa-dollar-sign',
+        activeClass: 'bg-emerald-50 text-emerald-700',
+        inactiveClass: 'bg-gray-50 text-gray-600',
+        iconActiveClass: 'bg-emerald-200 text-emerald-600',
+        iconInactiveClass: 'bg-gray-200 text-gray-500',
+    },
 ]);
 
 // Methods
@@ -404,11 +404,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
             </div>
             <!-- Stats Cards Tab -->
             <div class="flex justify-end">
-                <StatsCardTab
-                    :stats="statsTabsData"
-                    :active-tab="activeStatsTab"
-                    @update:active-tab="activeStatsTab = $event"
-                />
+                <StatsCardTab :stats="statsTabsData" :active-tab="activeStatsTab" @update:active-tab="activeStatsTab = $event" />
             </div>
 
             <!-- Transactions Table -->
