@@ -300,9 +300,10 @@ class TransaksiPOSController extends Controller
             }
 
             // Create payment record
+            $idPembayaran = Pembayaran::generateIdPembayaran();
+            
             if ($isCashPayment) {
-                $idPembayaran = Pembayaran::generateIdPembayaran();
-
+                // Pembayaran tunai langsung lunas
                 Pembayaran::create([
                     'id_pembayaran' => $idPembayaran,
                     'id_transaksi' => $nomorTransaksi,
@@ -310,6 +311,24 @@ class TransaksiPOSController extends Controller
                     'jumlah' => $request->total,
                     'tanggal' => now(),
                     'keterangan' => 'Pembayaran tunai - Kembalian: Rp ' . number_format($request->jumlah_bayar - $request->total, 0, ',', '.'),
+                ]);
+            } else {
+                // Pembayaran non-tunai (QRIS, TRANSFER BCA, KREDIT) - menunggu konfirmasi
+                $metodeBayarLabels = [
+                    'QRIS' => 'QRIS',
+                    'TRANSFER BCA' => 'Transfer BCA',
+                    'KREDIT' => 'Kredit'
+                ];
+                
+                $label = $metodeBayarLabels[$request->metode_bayar] ?? $request->metode_bayar;
+                
+                Pembayaran::create([
+                    'id_pembayaran' => $idPembayaran,
+                    'id_transaksi' => $nomorTransaksi,
+                    'metode' => $request->metode_bayar,
+                    'jumlah' => $request->total,
+                    'tanggal' => now(),
+                    'keterangan' => 'Menunggu pembayaran via ' . $label,
                 ]);
             }
 

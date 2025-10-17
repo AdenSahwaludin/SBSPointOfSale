@@ -112,10 +112,10 @@ class TransaksiSeeder extends Seeder
    'id_pembayaran' => 'PAY-' . Carbon::now()->format('Ymd') . '-0000002',
    'id_transaksi' => $transaksiKredit->nomor_transaksi,
    'id_angsuran' => null,
-   'metode' => 'VA_BCA',
+   'metode' => 'TRANSFER BCA',
    'jumlah' => 50000,
    'tanggal' => Carbon::now(),
-   'keterangan' => 'Pembayaran DP cicilan via VA BCA',
+   'keterangan' => 'Pembayaran DP cicilan via Transfer BCA',
   ]);
  }
 }

@@ -370,15 +370,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                                         <option value="all">Semua Metode</option>
                                         <option value="TUNAI">Tunai</option>
                                         <option value="QRIS">QRIS</option>
-                                        <option value="VA_BCA">VA BCA</option>
-                                        <option value="VA_BNI">VA BNI</option>
-                                        <option value="VA_BRI">VA BRI</option>
-                                        <option value="VA_MANDIRI">VA Mandiri</option>
-                                        <option value="GOPAY">GoPay</option>
-                                        <option value="OVO">OVO</option>
-                                        <option value="DANA">DANA</option>
-                                        <option value="SHOPEEPAY">ShopeePay</option>
-                                        <option value="CREDIT_CARD">Credit Card</option>
+                                        <option value="TRANSFER BCA">Transfer BCA</option>
                                         <option value="KREDIT">Kredit</option>
                                     </select>
                                 </div>
