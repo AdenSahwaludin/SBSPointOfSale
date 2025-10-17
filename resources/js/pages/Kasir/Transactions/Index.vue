@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import StatsCardTab from '@/components/StatsCardTab.vue';
 import TransactionDetailModal from '@/components/TransactionDetailModal.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
@@ -96,9 +97,63 @@ const endDate = ref(props.filters.end_date || '');
 const showFilters = ref(false);
 const selectedTransaksi = ref<Transaksi | null>(null);
 const showDetailModal = ref(false);
+const activeStatsTab = ref('total_transaksi');
 
 // Computed
 const displayedTransaksi = computed(() => props.transaksi.data);
+
+const statsTabsData = computed(() => [
+  {
+    id: 'total_transaksi',
+    label: 'Seruan',
+    value: props.stats.total_transaksi,
+    icon: 'fas fa-receipt',
+    activeClass: 'bg-blue-100 text-blue-700',
+    inactiveClass: 'bg-gray-100 text-gray-600',
+    iconActiveClass: 'bg-blue-200 text-blue-600',
+    iconInactiveClass: 'bg-gray-200 text-gray-500',
+  },
+  {
+    id: 'total_lunas',
+    label: 'Datam Lunas',
+    value: props.stats.total_lunas,
+    icon: 'fas fa-check-circle',
+    activeClass: 'bg-green-100 text-green-700',
+    inactiveClass: 'bg-gray-100 text-gray-600',
+    iconActiveClass: 'bg-green-200 text-green-600',
+    iconInactiveClass: 'bg-gray-200 text-gray-500',
+  },
+  {
+    id: 'total_menunggu',
+    label: 'Dalam Lunas',
+    value: props.stats.total_menunggu,
+    icon: 'fas fa-clock',
+    activeClass: 'bg-yellow-100 text-yellow-700',
+    inactiveClass: 'bg-gray-100 text-gray-600',
+    iconActiveClass: 'bg-yellow-200 text-yellow-600',
+    iconInactiveClass: 'bg-gray-200 text-gray-500',
+  },
+  {
+    id: 'total_batal',
+    label: 'Semua',
+    value: props.stats.total_batal,
+    icon: 'fas fa-times-circle',
+    activeClass: 'bg-red-100 text-red-700',
+    inactiveClass: 'bg-gray-100 text-gray-600',
+    iconActiveClass: 'bg-red-200 text-red-600',
+    iconInactiveClass: 'bg-gray-200 text-gray-500',
+  },
+  {
+    id: 'total_nilai',
+    label: 'Semua',
+    value: formatCurrency(props.stats.total_nilai),
+    icon: 'fas fa-dollar-sign',
+    activeClass: 'bg-emerald-100 text-emerald-700',
+    inactiveClass: 'bg-gray-100 text-gray-600',
+    iconActiveClass: 'bg-emerald-200 text-emerald-600',
+    iconInactiveClass: 'bg-gray-200 text-gray-500',
+  },
+]);
 
 // Methods
 function handleSearch() {
@@ -244,79 +299,6 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         </template>
 
         <div class="space-y-6">
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Total Transaksi</p>
-                                <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats.total_transaksi }}</p>
-                            </div>
-                            <div class="rounded-full bg-blue-100 p-3">
-                                <i class="fas fa-receipt text-2xl text-blue-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Lunas</p>
-                                <p class="mt-2 text-3xl font-bold text-green-600">{{ stats.total_lunas }}</p>
-                            </div>
-                            <div class="rounded-full bg-green-100 p-3">
-                                <i class="fas fa-check-circle text-2xl text-green-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Menunggu</p>
-                                <p class="mt-2 text-3xl font-bold text-yellow-600">{{ stats.total_menunggu }}</p>
-                            </div>
-                            <div class="rounded-full bg-yellow-100 p-3">
-                                <i class="fas fa-clock text-2xl text-yellow-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Batal</p>
-                                <p class="mt-2 text-3xl font-bold text-red-600">{{ stats.total_batal }}</p>
-                            </div>
-                            <div class="rounded-full bg-red-100 p-3">
-                                <i class="fas fa-times-circle text-2xl text-red-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Total Nilai</p>
-                                <p class="mt-2 text-xl font-bold text-emerald-600">{{ formatCurrency(stats.total_nilai) }}</p>
-                            </div>
-                            <div class="rounded-full bg-emerald-100 p-3">
-                                <i class="fas fa-dollar-sign text-2xl text-emerald-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Search and Filters -->
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
                 <div class="p-6">
@@ -420,6 +402,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                     </div>
                 </div>
             </div>
+            <!-- Stats Cards Tab -->
+            <StatsCardTab
+                :stats="statsTabsData"
+                :active-tab="activeStatsTab"
+                @update:active-tab="activeStatsTab = $event"
+            />
 
             <!-- Transactions Table -->
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
