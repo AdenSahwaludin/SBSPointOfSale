@@ -181,80 +181,56 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
 
         <div class="space-y-6">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Total Produk</p>
-                                <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats.total_produk }}</p>
-                            </div>
-                            <div class="rounded-full bg-blue-100 p-3">
-                                <i class="fas fa-boxes text-2xl text-blue-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Total Produk - Clickable -->
+                <button
+                    @click="
+                        selectedKategori = 'all';
+                        selectedStokStatus = 'all';
+                        searchQuery = '';
+                        performSearch();
+                    "
+                    class="rounded-lg border border-gray-200 bg-white px-6 py-4 text-left transition-all hover:border-emerald-300 hover:shadow-md focus:outline-none"
+                >
+                    <p class="text-sm text-gray-600">Total Produk</p>
+                    <p class="mt-2 text-2xl font-bold text-gray-900">{{ stats.total_produk }}</p>
+                </button>
 
-                <div
+                <!-- Stok Tersedia -->
+                <button
                     @click="
                         selectedStokStatus = 'tersedia';
                         performSearch();
                     "
-                    class="cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+                    class="rounded-lg border border-gray-200 bg-white px-6 py-4 text-left transition-all hover:border-green-300 hover:shadow-md focus:outline-none"
                 >
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Stok Tersedia</p>
-                                <p class="mt-2 text-3xl font-bold text-green-600">{{ stats.stok_tersedia }}</p>
-                            </div>
-                            <div class="rounded-full bg-green-100 p-3">
-                                <i class="fas fa-check-circle text-2xl text-green-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    <p class="text-sm text-gray-600">Stok Tersedia</p>
+                    <p class="mt-2 text-2xl font-bold text-green-600">{{ stats.stok_tersedia }}</p>
+                </button>
 
-                <div
+                <!-- Stok Rendah -->
+                <button
                     @click="
                         selectedStokStatus = 'rendah';
                         performSearch();
                     "
-                    class="cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+                    class="rounded-lg border border-gray-200 bg-white px-6 py-4 text-left transition-all hover:border-yellow-300 hover:shadow-md focus:outline-none"
                 >
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Stok Rendah</p>
-                                <p class="mt-2 text-3xl font-bold text-yellow-600">{{ stats.stok_rendah }}</p>
-                            </div>
-                            <div class="rounded-full bg-yellow-100 p-3">
-                                <i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    <p class="text-sm text-gray-600">Stok Rendah</p>
+                    <p class="mt-2 text-2xl font-bold text-yellow-600">{{ stats.stok_rendah }}</p>
+                </button>
 
-                <div
+                <!-- Stok Habis -->
+                <button
                     @click="
                         selectedStokStatus = 'habis';
                         performSearch();
                     "
-                    class="cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+                    class="rounded-lg border border-gray-200 bg-white px-6 py-4 text-left transition-all hover:border-red-300 hover:shadow-md focus:outline-none"
                 >
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Stok Habis</p>
-                                <p class="mt-2 text-3xl font-bold text-red-600">{{ stats.stok_habis }}</p>
-                            </div>
-                            <div class="rounded-full bg-red-100 p-3">
-                                <i class="fas fa-times-circle text-2xl text-red-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    <p class="text-sm text-gray-600">Stok Habis</p>
+                    <p class="mt-2 text-2xl font-bold text-red-600">{{ stats.stok_habis }}</p>
+                </button>
             </div>
 
             <!-- Search and Filters -->
@@ -358,11 +334,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         >
                             <div class="p-5">
                                 <!-- Product Header -->
-                                <div class="mb-3 flex items-start justify-between">
-                                    <div class="flex-1">
-                                        <p class="text-xs font-medium text-gray-500">{{ produk.id_produk }}</p>
-                                        <h3 class="mt-1 line-clamp-2 text-base font-semibold text-gray-900">{{ produk.nama }}</h3>
-                                    </div>
+                                <div class="mb-3">
+                                    <h3 class="line-clamp-2 text-base font-semibold text-gray-900">{{ produk.nama }}</h3>
                                 </div>
 
                                 <!-- Category & Barcode -->
