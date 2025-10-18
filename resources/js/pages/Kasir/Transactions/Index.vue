@@ -90,14 +90,21 @@ const props = defineProps<{
 // State
 const perPage = ref(props.transaksi.per_page);
 const searchQuery = ref(props.filters.search || '');
-const selectedStatus = ref(props.filters.status || 'all');
 const selectedMetodeBayar = ref(props.filters.metode_bayar || 'all');
-const startDate = ref(props.filters.start_date || '');
-const endDate = ref(props.filters.end_date || '');
+
+// Set default dates to 7 days ago if not provided
+const getDefault7DaysAgo = () => {
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return sevenDaysAgo.toISOString().split('T')[0];
+};
+
+const startDate = ref(props.filters.start_date || getDefault7DaysAgo());
+const endDate = ref(props.filters.end_date || new Date().toISOString().split('T')[0]);
 const showFilters = ref(false);
 const selectedTransaksi = ref<Transaksi | null>(null);
 const showDetailModal = ref(false);
-const activeStatsTab = ref('total_transaksi');
+const activeStatsTab = ref(props.filters.status || 'total_transaksi');
 
 // Computed
 const displayedTransaksi = computed(() => props.transaksi.data);
@@ -156,11 +163,19 @@ function handleSearch() {
 }
 
 function performSearch() {
+    const statusMap: Record<string, string | undefined> = {
+        'total_transaksi': undefined,
+        'total_lunas': 'LUNAS',
+        'total_menunggu': 'MENUNGGU',
+        'total_batal': 'BATAL',
+        'total_nilai': undefined,
+    };
+
     router.get(
         '/kasir/transactions',
         {
             search: searchQuery.value,
-            status: selectedStatus.value !== 'all' ? selectedStatus.value : undefined,
+            status: statusMap[activeStatsTab.value],
             metode_bayar: selectedMetodeBayar.value !== 'all' ? selectedMetodeBayar.value : undefined,
             start_date: startDate.value || undefined,
             end_date: endDate.value || undefined,
@@ -174,11 +189,19 @@ function performSearch() {
 }
 
 function changePerPage() {
+    const statusMap: Record<string, string | undefined> = {
+        'total_transaksi': undefined,
+        'total_lunas': 'LUNAS',
+        'total_menunggu': 'MENUNGGU',
+        'total_batal': 'BATAL',
+        'total_nilai': undefined,
+    };
+
     router.get(
         '/kasir/transactions',
         {
             search: searchQuery.value,
-            status: selectedStatus.value !== 'all' ? selectedStatus.value : undefined,
+            status: statusMap[activeStatsTab.value],
             metode_bayar: selectedMetodeBayar.value !== 'all' ? selectedMetodeBayar.value : undefined,
             start_date: startDate.value || undefined,
             end_date: endDate.value || undefined,
@@ -202,19 +225,19 @@ function clearSearch() {
 }
 
 function clearFilters() {
-    selectedStatus.value = 'all';
     selectedMetodeBayar.value = 'all';
-    startDate.value = '';
-    endDate.value = '';
+    startDate.value = getDefault7DaysAgo();
+    endDate.value = new Date().toISOString().split('T')[0];
+    activeStatsTab.value = 'total_transaksi';
     performSearch();
 }
 
 function clearAll() {
     searchQuery.value = '';
-    selectedStatus.value = 'all';
     selectedMetodeBayar.value = 'all';
-    startDate.value = '';
-    endDate.value = '';
+    startDate.value = getDefault7DaysAgo();
+    endDate.value = new Date().toISOString().split('T')[0];
+    activeStatsTab.value = 'total_transaksi';
     performSearch();
 }
 
@@ -332,21 +355,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
 
                         <!-- Advanced Filters -->
                         <div v-if="showFilters" class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Status</label>
-                                    <select
-                                        v-model="selectedStatus"
-                                        @change="performSearch"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
-                                    >
-                                        <option value="all">Semua Status</option>
-                                        <option value="LUNAS">Lunas</option>
-                                        <option value="MENUNGGU">Menunggu</option>
-                                        <option value="BATAL">Batal</option>
-                                    </select>
-                                </div>
-
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 <div>
                                     <label class="mb-2 block text-sm font-medium text-gray-700">Metode Bayar</label>
                                     <select

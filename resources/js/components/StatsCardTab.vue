@@ -1,13 +1,13 @@
 <template>
     <div class="scrollbar-hide overflow-x-auto">
-        <div class="flex min-w-max flex-row gap-4 rounded-2xl bg-white p-4">
+        <div class="flex min-w-max flex-row gap-4 rounded-2xl bg-white p-4 shadow-md">
             <button
                 v-for="stat in stats"
                 :key="stat.id"
                 :class="[
                     'inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200 hover:cursor-pointer',
                     'text-sm whitespace-nowrap',
-                    activeTab === stat.id ? `${stat.activeClass} font-semibold` : `font-medium`,
+                    activeTab === stat.id ? `${stat.activeClass} font-semibold shadow-sm` : `font-medium`,
                 ]"
                 @click="$emit('update:activeTab', stat.id)"
             >

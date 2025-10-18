@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import StatsCardTab from '@/components/StatsCardTab.vue';
+import TransactionDetailModal from '@/components/TransactionDetailModal.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
@@ -84,17 +86,72 @@ const props = defineProps<{
     filters: Filters;
 }>();
 
+// Helper functions
+function getDefault7DaysAgo(): string {
+    const date = new Date();
+    date.setDate(date.getDate() - 7);
+    return date.toISOString().split('T')[0];
+}
+
 // State
 const perPage = ref(props.transaksi.per_page);
 const searchQuery = ref(props.filters.search || '');
-const selectedStatus = ref(props.filters.status || 'all');
 const selectedMetodeBayar = ref(props.filters.metode_bayar || 'all');
 const showFilters = ref(false);
 const selectedTransaksi = ref<Transaksi | null>(null);
 const showDetailModal = ref(false);
+const activeStatsTab = ref(props.filters.status || 'total_transaksi');
 
 // Computed
 const displayedTransaksi = computed(() => props.transaksi.data);
+
+const statsTabsData = computed(() => [
+    {
+        id: 'total_transaksi',
+        label: 'Semua',
+        value: props.stats.total_transaksi,
+        icon: 'fas fa-receipt',
+        activeClass: 'bg-blue-50 text-blue-700',
+        iconActiveClass: 'text-blue-600',
+        iconInactiveClass: 'text-gray-400',
+    },
+    {
+        id: 'total_lunas',
+        label: 'Lunas',
+        value: props.stats.total_lunas,
+        icon: 'fas fa-check-circle',
+        activeClass: 'bg-green-50 text-green-700',
+        iconActiveClass: 'text-green-600',
+        iconInactiveClass: 'text-gray-400',
+    },
+    {
+        id: 'total_menunggu',
+        label: 'Belum Bayar',
+        value: props.stats.total_menunggu,
+        icon: 'fas fa-clock',
+        activeClass: 'bg-yellow-50 text-yellow-700',
+        iconActiveClass: 'text-yellow-600',
+        iconInactiveClass: 'text-gray-400',
+    },
+    {
+        id: 'total_batal',
+        label: 'Batal',
+        value: props.stats.total_batal,
+        icon: 'fas fa-times-circle',
+        activeClass: 'bg-red-50 text-red-700',
+        iconActiveClass: 'text-red-600',
+        iconInactiveClass: 'text-gray-400',
+    },
+    {
+        id: 'total_nilai',
+        label: 'Total Nilai',
+        value: 'Rp ' + new Intl.NumberFormat('id-ID').format(props.stats.total_nilai),
+        icon: 'fas fa-money-bill-wave',
+        activeClass: 'bg-emerald-50 text-emerald-700',
+        iconActiveClass: 'text-emerald-600',
+        iconInactiveClass: 'text-gray-400',
+    },
+]);
 
 // Methods
 function handleSearch() {
@@ -102,11 +159,19 @@ function handleSearch() {
 }
 
 function performSearch() {
+    const statusMap: Record<string, string | undefined> = {
+        'total_transaksi': undefined,
+        'total_lunas': 'LUNAS',
+        'total_menunggu': 'MENUNGGU',
+        'total_batal': 'BATAL',
+        'total_nilai': undefined,
+    };
+
     router.get(
         '/kasir/transactions/today',
         {
             search: searchQuery.value,
-            status: selectedStatus.value !== 'all' ? selectedStatus.value : undefined,
+            status: statusMap[activeStatsTab.value],
             metode_bayar: selectedMetodeBayar.value !== 'all' ? selectedMetodeBayar.value : undefined,
             per_page: perPage.value,
         },
@@ -118,11 +183,19 @@ function performSearch() {
 }
 
 function changePerPage() {
+    const statusMap: Record<string, string | undefined> = {
+        'total_transaksi': undefined,
+        'total_lunas': 'LUNAS',
+        'total_menunggu': 'MENUNGGU',
+        'total_batal': 'BATAL',
+        'total_nilai': undefined,
+    };
+
     router.get(
         '/kasir/transactions/today',
         {
             search: searchQuery.value,
-            status: selectedStatus.value !== 'all' ? selectedStatus.value : undefined,
+            status: statusMap[activeStatsTab.value],
             metode_bayar: selectedMetodeBayar.value !== 'all' ? selectedMetodeBayar.value : undefined,
             per_page: perPage.value,
             page: 1,
@@ -144,15 +217,15 @@ function clearSearch() {
 }
 
 function clearFilters() {
-    selectedStatus.value = 'all';
     selectedMetodeBayar.value = 'all';
+    activeStatsTab.value = 'total_transaksi';
     performSearch();
 }
 
 function clearAll() {
     searchQuery.value = '';
-    selectedStatus.value = 'all';
     selectedMetodeBayar.value = 'all';
+    activeStatsTab.value = 'total_transaksi';
     performSearch();
 }
 
@@ -236,92 +309,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         </template>
 
         <div class="space-y-6">
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-6">
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Total Transaksi</p>
-                                <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats.total_transaksi }}</p>
-                            </div>
-                            <div class="rounded-full bg-blue-100 p-3">
-                                <i class="fas fa-receipt text-2xl text-blue-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Lunas</p>
-                                <p class="mt-2 text-3xl font-bold text-green-600">{{ stats.total_lunas }}</p>
-                            </div>
-                            <div class="rounded-full bg-green-100 p-3">
-                                <i class="fas fa-check-circle text-2xl text-green-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Menunggu</p>
-                                <p class="mt-2 text-3xl font-bold text-yellow-600">{{ stats.total_menunggu }}</p>
-                            </div>
-                            <div class="rounded-full bg-yellow-100 p-3">
-                                <i class="fas fa-clock text-2xl text-yellow-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Batal</p>
-                                <p class="mt-2 text-3xl font-bold text-red-600">{{ stats.total_batal }}</p>
-                            </div>
-                            <div class="rounded-full bg-red-100 p-3">
-                                <i class="fas fa-times-circle text-2xl text-red-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Total Item</p>
-                                <p class="mt-2 text-3xl font-bold text-purple-600">{{ stats.total_item_terjual }}</p>
-                            </div>
-                            <div class="rounded-full bg-purple-100 p-3">
-                                <i class="fas fa-boxes text-2xl text-purple-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-600">Total Nilai</p>
-                                <p class="mt-2 text-xl font-bold text-emerald-600">{{ formatCurrency(stats.total_nilai) }}</p>
-                            </div>
-                            <div class="rounded-full bg-emerald-100 p-3">
-                                <i class="fas fa-dollar-sign text-2xl text-emerald-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Stats Cards Tab -->
+            <StatsCardTab :stats="statsTabsData" :active-tab="activeStatsTab" @update:active-tab="activeStatsTab = $event; performSearch()" />
 
             <!-- Search and Filters -->
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
@@ -361,21 +350,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
 
                         <!-- Advanced Filters -->
                         <div v-if="showFilters" class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Status</label>
-                                    <select
-                                        v-model="selectedStatus"
-                                        @change="performSearch"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
-                                    >
-                                        <option value="all">Semua Status</option>
-                                        <option value="LUNAS">Lunas</option>
-                                        <option value="MENUNGGU">Menunggu</option>
-                                        <option value="BATAL">Batal</option>
-                                    </select>
-                                </div>
-
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-1">
                                 <div>
                                     <label class="mb-2 block text-sm font-medium text-gray-700">Metode Bayar</label>
                                     <select
@@ -542,117 +517,11 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         </div>
 
         <!-- Detail Modal -->
-        <Teleport to="body">
-            <div
-                v-if="showDetailModal && selectedTransaksi"
-                class="bg-opacity-50 modal-bg fixed inset-0 z-50 flex items-center justify-center p-4"
-                @click.self="closeDetailModal"
-            >
-                <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white shadow-xl">
-                    <!-- Modal Header -->
-                    <div class="flex items-center justify-between border-b border-gray-200 p-6">
-                        <h3 class="text-xl font-bold text-gray-900">Detail Transaksi</h3>
-                        <button @click="closeDetailModal" class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
-
-                    <!-- Modal Body -->
-                    <div class="p-6">
-                        <div class="space-y-6">
-                            <!-- Transaction Info -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Nomor Transaksi</p>
-                                    <p class="mt-1 text-base font-semibold text-gray-900">{{ selectedTransaksi.nomor_transaksi }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Waktu</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ formatDate(selectedTransaksi.tanggal) }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Pelanggan</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedTransaksi.pelanggan.nama }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Kasir</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedTransaksi.kasir.nama }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Metode Bayar</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedTransaksi.metode_bayar }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Status</p>
-                                    <span
-                                        :class="[
-                                            'mt-1 inline-flex rounded-full px-3 py-1 text-sm font-semibold',
-                                            getStatusBadgeClass(selectedTransaksi.status_pembayaran),
-                                        ]"
-                                    >
-                                        {{ selectedTransaksi.status_pembayaran }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Items -->
-                            <div>
-                                <h4 class="mb-3 text-lg font-semibold text-gray-900">Items</h4>
-                                <div class="overflow-hidden rounded-lg border border-gray-200">
-                                    <table class="w-full">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700">Produk</th>
-                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-700">Harga</th>
-                                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-700">Qty</th>
-                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-700">Subtotal</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-200">
-                                            <tr v-for="item in selectedTransaksi.detail" :key="item.id_detail">
-                                                <td class="px-4 py-3 text-sm text-gray-900">{{ item.nama_produk }}</td>
-                                                <td class="px-4 py-3 text-right text-sm text-gray-900">{{ formatCurrency(item.harga_satuan) }}</td>
-                                                <td class="px-4 py-3 text-center text-sm text-gray-900">{{ item.jumlah }} {{ item.mode_qty }}</td>
-                                                <td class="px-4 py-3 text-right text-sm font-semibold text-gray-900">
-                                                    {{ formatCurrency(item.subtotal) }}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Summary -->
-                            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <div class="space-y-2">
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Subtotal</span>
-                                        <span class="font-medium text-gray-900">{{ formatCurrency(selectedTransaksi.subtotal) }}</span>
-                                    </div>
-                                    <div v-if="selectedTransaksi.diskon > 0" class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Diskon</span>
-                                        <span class="font-medium text-red-600">-{{ formatCurrency(selectedTransaksi.diskon) }}</span>
-                                    </div>
-                                    <div v-if="selectedTransaksi.pajak > 0" class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Pajak</span>
-                                        <span class="font-medium text-gray-900">{{ formatCurrency(selectedTransaksi.pajak) }}</span>
-                                    </div>
-                                    <div class="flex justify-between border-t border-gray-300 pt-2 text-base">
-                                        <span class="font-semibold text-gray-900">Total</span>
-                                        <span class="font-bold text-emerald-600">{{ formatCurrency(selectedTransaksi.total) }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Modal Footer -->
-                    <div class="flex justify-end gap-2 border-t border-gray-200 p-6">
-                        <BaseButton @click="closeDetailModal" variant="outline"> Tutup </BaseButton>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
+        <TransactionDetailModal
+            :show="showDetailModal"
+            :transaksi="selectedTransaksi"
+            @close="closeDetailModal"
+        />
     </BaseLayout>
 </template>
 
