@@ -215,6 +215,8 @@ class TransaksiPOSController extends Controller
             'total' => 'required|numeric|min:0',
             // Exclude from validation when non-cash to avoid gte:total failing on 0
             'jumlah_bayar' => 'exclude_unless:metode_bayar,TUNAI|required_if:metode_bayar,TUNAI|nullable|numeric|min:0|gte:total',
+            // For credit transactions, require DP
+            'dp' => 'required_if:metode_bayar,KREDIT|nullable|numeric|min:0|lt:total',
         ]);
 
         try {
@@ -224,6 +226,7 @@ class TransaksiPOSController extends Controller
             $nomorTransaksi = Transaksi::generateNomorTransaksi($request->id_pelanggan);
 
             $isCashPayment = $request->metode_bayar === 'TUNAI';
+            $isCredit = $request->metode_bayar === 'KREDIT';
 
             // Untuk non-tunai, set jumlah_bayar = total (tidak ada kembalian)
             $jumlahBayar = $isCashPayment ? $request->jumlah_bayar : $request->total;
@@ -241,15 +244,16 @@ class TransaksiPOSController extends Controller
                 'biaya_pengiriman' => 0,
                 'total' => $request->total,
                 'metode_bayar' => $request->metode_bayar,
-                'status_pembayaran' => $isCashPayment ? Transaksi::STATUS_LUNAS : Transaksi::STATUS_MENUNGGU,
-                'paid_at' => $isCashPayment ? now() : null,
-                // Field Cicilan Pintar (akan diaktifkan nanti)
-                'jenis_transaksi' => 'TUNAI',
-                'dp' => 0,
+                // Non-tunai selain kredit dianggap selesai (lunas)
+                'status_pembayaran' => $isCredit ? Transaksi::STATUS_MENUNGGU : Transaksi::STATUS_LUNAS,
+                'paid_at' => $isCredit ? null : now(),
+                // Jenis transaksi
+                'jenis_transaksi' => $isCredit ? Transaksi::JENIS_KREDIT : Transaksi::JENIS_TUNAI,
+                'dp' => $isCredit ? ($request->dp ?? 0) : 0,
                 'tenor_bulan' => null,
                 'bunga_persen' => 0,
                 'cicilan_bulanan' => null,
-                'ar_status' => 'NA',
+                'ar_status' => $isCredit ? 'OPEN' : 'NA',
                 'id_kontrak' => null,
             ]);
 
@@ -318,12 +322,24 @@ class TransaksiPOSController extends Controller
                     'tanggal' => now(),
                     'keterangan' => 'Pembayaran tunai - Kembalian: Rp ' . number_format($kembalian, 0, ',', '.'),
                 ]);
+            } elseif ($isCredit) {
+                // Kredit: catat DP (jika ada)
+                $dp = (float)($request->dp ?? 0);
+                if ($dp > 0) {
+                    Pembayaran::create([
+                        'id_pembayaran' => $idPembayaran,
+                        'id_transaksi' => $nomorTransaksi,
+                        'metode' => $request->metode_bayar,
+                        'jumlah' => $dp,
+                        'tanggal' => now(),
+                        'keterangan' => 'DP Kredit',
+                    ]);
+                }
             } else {
-                // Pembayaran non-tunai (QRIS, TRANSFER BCA, KREDIT)
+                // Pembayaran non-tunai (QRIS, TRANSFER BCA) dianggap lunas
                 $metodeBayarLabels = [
                     'QRIS' => 'QRIS',
                     'TRANSFER BCA' => 'Transfer BCA',
-                    'KREDIT' => 'Kredit',
                 ];
 
                 $label = $metodeBayarLabels[$request->metode_bayar] ?? $request->metode_bayar;
@@ -334,7 +350,7 @@ class TransaksiPOSController extends Controller
                     'metode' => $request->metode_bayar,
                     'jumlah' => $request->total,
                     'tanggal' => now(),
-                    'keterangan' => 'Menunggu konfirmasi pembayaran via ' . $label,
+                    'keterangan' => 'Pembayaran diterima via ' . $label,
                 ]);
             }
 

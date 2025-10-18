@@ -182,15 +182,23 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
         <div class="space-y-6">
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+                <div
+                    @click="
+                        selectedKategori = 'all';
+                        selectedStokStatus = 'all';
+                        searchQuery = '';
+                        performSearch();
+                    "
+                    class="cursor-pointer overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm transition-shadow hover:shadow-md"
+                >
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Total Produk</p>
+                                <p class="text-sm text-gray-600">Total Produk</p>
                                 <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats.total_produk }}</p>
                             </div>
-                            <div class="rounded-full bg-blue-100 p-3">
-                                <i class="fas fa-boxes text-2xl text-blue-600"></i>
+                            <div class="rounded-full bg-gray-200 p-3">
+                                <i class="fas fa-boxes text-2xl text-gray-600"></i>
                             </div>
                         </div>
                     </div>
@@ -258,8 +266,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
             </div>
 
             <!-- Search and Filters -->
-            <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                <div class="p-6">
+            <div class="overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm">
+                <div class="p-5">
                     <div class="space-y-4">
                         <!-- Search Bar -->
                         <div class="flex gap-4">
@@ -294,7 +302,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         </div>
 
                         <!-- Advanced Filters -->
-                        <div v-if="showFilters" class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div v-if="showFilters" class="rounded-lg border border-gray-300 bg-gray-50 p-4">
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <label class="mb-2 block text-sm font-medium text-gray-700">Kategori</label>
@@ -341,8 +349,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
             </div>
 
             <!-- Products Grid -->
-            <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                <div class="p-6">
+            <div class="overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm">
+                <div class="p-5">
                     <div v-if="displayedProduk.length === 0" class="flex flex-col items-center justify-center py-12">
                         <i class="fas fa-box-open mb-4 text-5xl text-gray-300"></i>
                         <p class="text-lg font-medium text-gray-900">Tidak ada produk ditemukan</p>
@@ -350,48 +358,33 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                     </div>
 
                     <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        <div
+                            <div
                             v-for="produk in displayedProduk"
                             :key="produk.id_produk"
                             @click="viewDetail(produk)"
-                            class="cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-gray-50 transition-all hover:border-emerald-300 hover:shadow-md"
+                            class="cursor-pointer overflow-hidden rounded-lg border border-gray-300 bg-white transition-all hover:shadow-md"
                         >
-                            <div class="p-5">
+                            <div class="p-4">
                                 <!-- Product Header -->
-                                <div class="mb-3 flex items-start justify-between">
-                                    <div class="flex-1">
-                                        <p class="text-xs font-medium text-gray-500">{{ produk.id_produk }}</p>
-                                        <h3 class="mt-1 line-clamp-2 text-base font-semibold text-gray-900">{{ produk.nama }}</h3>
-                                    </div>
-                                </div>
-
-                                <!-- Category & Barcode -->
-                                <div class="mb-3 space-y-1">
-                                    <div class="flex items-center text-xs text-gray-600">
-                                        <i class="fas fa-tag mr-2 text-gray-400"></i>
+                                <div class="mb-3">
+                                    <h3 class="line-clamp-2 text-sm font-semibold text-gray-900">{{ produk.nama }}</h3>
+                                </div>                                <!-- Category & Barcode -->
+                                <div class="mb-3 space-y-1 text-xs text-gray-500">
+                                    <div>
                                         <span>{{ produk.kategori.nama }}</span>
-                                    </div>
-                                    <div v-if="produk.barcode" class="flex items-center text-xs text-gray-600">
-                                        <i class="fas fa-barcode mr-2 text-gray-400"></i>
-                                        <span>{{ produk.barcode }}</span>
                                     </div>
                                 </div>
 
                                 <!-- Price -->
                                 <div class="mb-3">
-                                    <p class="text-lg font-bold text-emerald-600">{{ formatCurrency(produk.harga) }}</p>
-                                    <p class="text-xs text-gray-500">per {{ produk.satuan }}</p>
-                                    <p v-if="produk.harga_pack && produk.isi_per_pack > 1" class="mt-1 text-sm text-blue-600">
-                                        {{ formatCurrency(produk.harga_pack) }} / pack ({{ produk.isi_per_pack }} {{ produk.satuan }})
-                                    </p>
+                                    <p class="text-base font-bold text-emerald-600">{{ formatCurrency(produk.harga) }}</p>
+                                    <p class="text-xs text-gray-500">{{ produk.satuan }}</p>
                                 </div>
 
                                 <!-- Stock Status -->
                                 <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-700">Stok: {{ produk.stok }} {{ produk.satuan }}</p>
-                                    </div>
-                                    <span :class="['inline-flex rounded-full px-2 py-1 text-xs font-semibold', getStokBadgeClass(produk.stok)]">
+                                    <div class="text-xs text-gray-600">Stok: {{ produk.stok }}</div>
+                                    <span :class="['text-xs rounded px-2 py-1 font-medium', getStokBadgeClass(produk.stok)]">
                                         {{ getStokStatus(produk.stok) }}
                                     </span>
                                 </div>
@@ -401,7 +394,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="produk.last_page > 1" class="border-t border-gray-200 bg-gray-50 px-6 py-4">
+                <div v-if="produk.last_page > 1" class="border-t border-gray-300 bg-gray-50 px-5 py-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-gray-700">Items per page:</span>
@@ -466,21 +459,21 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
         <Teleport to="body">
             <div
                 v-if="showDetailModal && selectedProduk"
-                class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4"
+                class="bg-opacity-50 modal-bg fixed inset-0 z-50 flex items-center justify-center p-4"
                 @click.self="closeDetailModal"
             >
-                <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-xl">
+                <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg">
                     <!-- Modal Header -->
-                    <div class="flex items-center justify-between border-b border-gray-200 p-6">
-                        <h3 class="text-xl font-bold text-gray-900">Detail Produk</h3>
+                    <div class="flex items-center justify-between border-b border-gray-300 p-5">
+                        <h3 class="text-lg font-bold text-gray-900">Detail Produk</h3>
                         <button @click="closeDetailModal" class="text-gray-400 hover:text-gray-600">
                             <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
 
                     <!-- Modal Body -->
-                    <div class="p-6">
-                        <div class="space-y-6">
+                    <div class="p-5">
+                        <div class="space-y-5">
                             <!-- Product Info Grid -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -506,35 +499,35 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                             </div>
 
                             <!-- Pricing Section -->
-                            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase">Harga</h4>
+                            <div class="rounded-lg border border-gray-300 bg-gray-50 p-4">
+                                <h4 class="mb-3 text-xs font-semibold text-gray-700">HARGA</h4>
                                 <div class="space-y-2">
                                     <div class="flex justify-between">
-                                        <span class="text-sm text-gray-600">Harga per {{ selectedProduk.satuan }}</span>
-                                        <span class="text-lg font-bold text-emerald-600">{{ formatCurrency(selectedProduk.harga) }}</span>
+                                        <span class="text-sm text-gray-600">Per {{ selectedProduk.satuan }}</span>
+                                        <span class="text-base font-bold text-emerald-600">{{ formatCurrency(selectedProduk.harga) }}</span>
                                     </div>
                                     <div
                                         v-if="selectedProduk.harga_pack && selectedProduk.isi_per_pack > 1"
-                                        class="flex justify-between border-t pt-2"
+                                        class="flex justify-between border-t border-gray-300 pt-2"
                                     >
                                         <span class="text-sm text-gray-600"
-                                            >Harga Pack ({{ selectedProduk.isi_per_pack }} {{ selectedProduk.satuan }})</span
+                                            >Pack ({{ selectedProduk.isi_per_pack }} {{ selectedProduk.satuan }})</span
                                         >
-                                        <span class="text-lg font-bold text-blue-600">{{ formatCurrency(selectedProduk.harga_pack) }}</span>
+                                        <span class="text-base font-bold text-blue-600">{{ formatCurrency(selectedProduk.harga_pack) }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Stock Section -->
-                            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase">Ketersediaan Stok</h4>
+                            <div class="rounded-lg border border-gray-300 bg-gray-50 p-4">
+                                <h4 class="mb-3 text-xs font-semibold text-gray-700">STOK</h4>
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-2xl font-bold text-gray-900">{{ selectedProduk.stok }} {{ selectedProduk.satuan }}</p>
-                                        <p class="mt-1 text-sm text-gray-500">Stok tersedia</p>
+                                        <p class="text-2xl font-bold text-gray-900">{{ selectedProduk.stok }}</p>
+                                        <p class="mt-1 text-xs text-gray-500">{{ selectedProduk.satuan }}</p>
                                     </div>
                                     <span
-                                        :class="['inline-flex rounded-full px-4 py-2 text-sm font-semibold', getStokBadgeClass(selectedProduk.stok)]"
+                                        :class="['rounded px-3 py-2 text-xs font-semibold', getStokBadgeClass(selectedProduk.stok)]"
                                     >
                                         {{ getStokStatus(selectedProduk.stok) }}
                                     </span>
@@ -550,7 +543,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                     </div>
 
                     <!-- Modal Footer -->
-                    <div class="flex justify-end gap-2 border-t border-gray-200 p-6">
+                    <div class="flex justify-end gap-2 border-t border-gray-300 p-5">
                         <BaseButton @click="closeDetailModal" variant="outline"> Tutup </BaseButton>
                     </div>
                 </div>

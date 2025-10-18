@@ -63,6 +63,7 @@ const cart = ref<CartItem[]>([]);
 const selectedPelanggan = ref<string>('P001'); // Default to 'Umum'
 const metodeBayar = ref<string>('TUNAI');
 const jumlahBayar = ref<number>(0);
+const dpBayar = ref<number>(0); // DP untuk kredit
 const diskonGlobal = ref<number>(0);
 const pajakRate = ref<number>(0);
 const searchResults = ref<Produk[]>([]); // Hasil search dari API
@@ -83,6 +84,7 @@ const transactionForm = useForm({
     pajak: 0,
     total: 0,
     jumlah_bayar: 0,
+    dp: 0,
 });
 
 // Computed
@@ -405,6 +407,18 @@ function processTransaction() {
         return;
     }
 
+    // Validate kredit DP
+    if (metodeBayar.value === 'KREDIT') {
+        if (dpBayar.value <= 0) {
+            addNotification({ type: 'warning', title: 'DP kredit harus lebih dari 0' });
+            return;
+        }
+        if (dpBayar.value >= total.value) {
+            addNotification({ type: 'warning', title: 'DP tidak boleh sama/lebih besar dari total' });
+            return;
+        }
+    }
+
     // Prepare transaction data for confirmation
     const selectedPelangganObj = props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value);
 
@@ -417,6 +431,7 @@ function processTransaction() {
         pajak: pajak.value,
         total: total.value,
         jumlah_bayar: metodeBayar.value === 'TUNAI' ? jumlahBayar.value : undefined,
+        dp: metodeBayar.value === 'KREDIT' ? dpBayar.value : undefined,
     };
 
     // Show confirmation modal
@@ -435,6 +450,7 @@ function handleConfirmTransaction() {
         pajak: pendingTransaction.value.pajak,
         total: pendingTransaction.value.total,
         ...(pendingTransaction.value.metode_bayar === 'TUNAI' ? { jumlah_bayar: pendingTransaction.value.jumlah_bayar } : {}),
+        ...(pendingTransaction.value.metode_bayar === 'KREDIT' ? { dp: pendingTransaction.value.dp ?? 0 } : {}),
     } as Record<string, any>;
 
     fetch('/kasir/pos', {
@@ -580,7 +596,7 @@ function generateReceiptHTML(transaction: any): string {
         })
         .join('');
 
-    const kembalian = transaction.metode_bayar === 'TUNAI' ? (Number(transaction.jumlah_bayar || 0) - Number(transaction.total || 0)) : 0;
+    const kembalian = transaction.metode_bayar === 'TUNAI' ? Number(transaction.jumlah_bayar || 0) - Number(transaction.total || 0) : 0;
 
     return `
         <!DOCTYPE html>
@@ -699,17 +715,35 @@ function generateReceiptHTML(transaction: any): string {
                     <td class="value">Rp ${Number(transaction.total || 0).toLocaleString('id-ID')}</td>
                 </tr>
                 ${
+                    transaction.metode_bayar === 'KREDIT'
+                        ? `
+                <tr>
+                    <td class="label">DP:</td>
+                    <td class="value">Rp ${Number(transaction.dp || 0).toLocaleString('id-ID')}</td>
+                </tr>
+                <tr>
+                    <td class="label">Sisa:</td>
+                    <td class="value">Rp ${Math.max(0, Number(transaction.total || 0) - Number(transaction.dp || 0)).toLocaleString('id-ID')}</td>
+                </tr>
+                `
+                        : ''
+                }
+                ${
                     transaction.metode_bayar === 'TUNAI'
                         ? `
                 <tr>
                     <td class="label">Dibayar:</td>
                     <td class="value">Rp ${Number(transaction.jumlah_bayar || 0).toLocaleString('id-ID')}</td>
                 </tr>
-                ${kembalian > 0 ? `
+                ${
+                    kembalian > 0
+                        ? `
                 <tr class="total">
                     <td class="label">Kembalian:</td>
                     <td class="value">Rp ${Number(kembalian).toLocaleString('id-ID')}</td>
-                </tr>` : ''}
+                </tr>`
+                        : ''
+                }
                 `
                         : ''
                 }
@@ -730,6 +764,7 @@ function resetForm() {
     metodeBayar.value = 'TUNAI';
     diskonGlobal.value = 0;
     jumlahBayar.value = 0;
+    dpBayar.value = 0;
 }
 
 // Format currency
@@ -1072,6 +1107,24 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                         <div v-if="kembalian >= 0" class="mt-2 text-sm">
                             <span class="text-gray-600">Kembalian: </span>
                             <span class="font-bold text-green-600">{{ formatCurrency(kembalian) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Credit (Kredit) DP Input -->
+                    <div v-if="metodeBayar === 'KREDIT'" class="space-y-2">
+                        <label class="mb-2 block text-sm font-medium text-gray-700">DP (Uang Muka)</label>
+                        <input
+                            v-model.number="dpBayar"
+                            type="number"
+                            min="0"
+                            :max="Math.max(0, Number(total) - 1)"
+                            step="1000"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
+                            placeholder="0"
+                        />
+                        <div class="text-sm">
+                            <span class="text-gray-600">Sisa Tagihan: </span>
+                            <span class="font-bold text-red-600">{{ formatCurrency(Math.max(0, Number(total) - Number(dpBayar || 0))) }}</span>
                         </div>
                     </div>
 
