@@ -12,6 +12,7 @@ interface Kategori {
 
 interface Produk {
     id_produk: string;
+    sku?: string;
     barcode?: string;
     nama: string;
     harga: number;
@@ -344,9 +345,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                             <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
                             
                             <div class="relative p-5">
-                                <!-- Product Header -->
-                                <div class="mb-4">
-                                    <h3 class="line-clamp-2 text-sm font-bold text-gray-900">{{ produk.nama }}</h3>
+                                <!-- Product Header with SKU -->
+                                <div class="mb-3 flex items-start justify-between gap-2">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ produk.sku || produk.id_produk }}</p>
+                                        <h3 class="mt-1 line-clamp-2 text-sm font-bold text-gray-900">{{ produk.nama }}</h3>
+                                    </div>
                                 </div>
 
                                 <!-- Category & Barcode -->
@@ -484,8 +488,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                             <!-- Product Info Grid -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p class="text-sm font-medium text-gray-600">SKU / ID Produk</p>
-                                    <p class="mt-1 text-base font-semibold text-gray-900">{{ selectedProduk.id_produk }}</p>
+                                    <p class="text-sm font-medium text-gray-600">SKU</p>
+                                    <p class="mt-1 text-base font-semibold text-gray-900">{{ selectedProduk.sku || selectedProduk.id_produk }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium text-gray-600">Barcode</p>
