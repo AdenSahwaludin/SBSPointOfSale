@@ -518,6 +518,7 @@ function handlePrintReceipt() {
         pajak: pendingTransaction.value.pajak,
         total: pendingTransaction.value.total,
         ...(pendingTransaction.value.metode_bayar === 'TUNAI' ? { jumlah_bayar: pendingTransaction.value.jumlah_bayar } : {}),
+        ...(pendingTransaction.value.metode_bayar === 'KREDIT' ? { dp: pendingTransaction.value.dp ?? 0 } : {}),
     } as Record<string, any>;
 
     fetch('/kasir/pos', {

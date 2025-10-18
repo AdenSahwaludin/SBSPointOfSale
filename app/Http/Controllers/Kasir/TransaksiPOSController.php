@@ -10,6 +10,7 @@ use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use App\Models\Pembayaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -201,7 +202,7 @@ class TransaksiPOSController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'id_pelanggan' => 'required|exists:pelanggan,id_pelanggan',
             'items' => 'required|array|min:1',
             'items.*.id_produk' => 'required|exists:produk,id_produk',
@@ -218,6 +219,14 @@ class TransaksiPOSController extends Controller
             // For credit transactions, require DP
             'dp' => 'required_if:metode_bayar,KREDIT|nullable|numeric|min:0|lt:total',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         try {
             DB::beginTransaction();
@@ -253,7 +262,7 @@ class TransaksiPOSController extends Controller
                 'tenor_bulan' => null,
                 'bunga_persen' => 0,
                 'cicilan_bulanan' => null,
-                'ar_status' => $isCredit ? 'OPEN' : 'NA',
+                'ar_status' => $isCredit ? 'AKTIF' : 'NA',
                 'id_kontrak' => null,
             ]);
 
