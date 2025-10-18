@@ -106,20 +106,8 @@ const activeStatsTab = ref(props.filters.status || 'total_transaksi');
 const displayedTransaksi = computed(() => props.transaksi.data);
 
 const filteredTotalNilai = computed(() => {
-    if (activeStatsTab.value === 'total_transaksi' || activeStatsTab.value === 'total_nilai') {
-        return props.stats.total_nilai;
-    }
-
-    const statusMap: Record<string, string> = {
-        total_lunas: 'LUNAS',
-        total_menunggu: 'MENUNGGU',
-        total_batal: 'BATAL',
-    };
-
-    const filterStatus = statusMap[activeStatsTab.value];
-    return displayedTransaksi.value
-        .filter((t) => t.status_pembayaran === filterStatus)
-        .reduce((sum, t) => sum + t.total, 0);
+    // Hitung total nilai hanya dari tabel yang ditampilkan
+    return displayedTransaksi.value.reduce((sum, t) => sum + t.total, 0);
 });
 
 const statsTabsData = computed(() => [
