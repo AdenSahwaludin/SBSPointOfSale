@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import TransactionConfirmationModal from '@/components/TransactionConfirmationModal.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
@@ -67,6 +68,10 @@ const pajakRate = ref<number>(0);
 const searchResults = ref<Produk[]>([]); // Hasil search dari API
 const isSearching = ref(false); // Loading state
 const searchTimeout = ref<number | null>(null); // Debounce timer
+
+// Modal confirmation
+const showConfirmationModal = ref(false);
+const pendingTransaction = ref<any>(null);
 
 // Form
 const transactionForm = useForm({
@@ -400,33 +405,38 @@ function processTransaction() {
         return;
     }
 
-    // Debug: Log payment method
-    console.log('Payment method selected:', metodeBayar.value);
-
-    // Update form data
-    transactionForm.id_pelanggan = selectedPelanggan.value;
-    transactionForm.items = cart.value;
-    transactionForm.metode_bayar = metodeBayar.value;
-    transactionForm.subtotal = subtotal.value;
-    transactionForm.diskon = diskon.value;
-    transactionForm.pajak = pajak.value;
-    transactionForm.total = total.value;
-    transactionForm.jumlah_bayar = metodeBayar.value === 'TUNAI' ? jumlahBayar.value : (null as any);
-
-    const requestData = {
-        id_pelanggan: selectedPelanggan.value,
-        items: cart.value,
+    // Prepare transaction data for confirmation
+    const selectedPelangganObj = props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value);
+    
+    pendingTransaction.value = {
+        pelanggan_nama: selectedPelangganObj?.nama || 'Umum',
         metode_bayar: metodeBayar.value,
+        items: cart.value,
         subtotal: subtotal.value,
         diskon: diskon.value,
         pajak: pajak.value,
         total: total.value,
-        ...(metodeBayar.value === 'TUNAI' ? { jumlah_bayar: jumlahBayar.value } : {}),
+        jumlah_bayar: metodeBayar.value === 'TUNAI' ? jumlahBayar.value : undefined,
+    };
+
+    // Show confirmation modal
+    showConfirmationModal.value = true;
+}
+
+function handleConfirmTransaction() {
+    if (!pendingTransaction.value) return;
+
+    const requestData = {
+        id_pelanggan: selectedPelanggan.value,
+        items: pendingTransaction.value.items,
+        metode_bayar: pendingTransaction.value.metode_bayar,
+        subtotal: pendingTransaction.value.subtotal,
+        diskon: pendingTransaction.value.diskon,
+        pajak: pendingTransaction.value.pajak,
+        total: pendingTransaction.value.total,
+        ...(pendingTransaction.value.metode_bayar === 'TUNAI' ? { jumlah_bayar: pendingTransaction.value.jumlah_bayar } : {}),
     } as Record<string, any>;
 
-    console.log('Sending request data:', requestData);
-
-    // Use axios for better response handling
     fetch('/kasir/pos', {
         method: 'POST',
         headers: {
@@ -436,17 +446,19 @@ function processTransaction() {
         body: JSON.stringify(requestData),
     })
         .then((response) => {
-            console.log('Response status:', response.status);
+            if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         })
         .then((data) => {
-            console.log('Response data:', data);
             if (data.success) {
-                // Handle successful transaction
                 addNotification({
                     type: 'success',
                     title: 'Transaksi berhasil disimpan!',
                 });
+                
+                // Close modal and clear data
+                showConfirmationModal.value = false;
+                pendingTransaction.value = null;
                 clearCart();
                 resetForm();
             } else {
@@ -462,10 +474,188 @@ function processTransaction() {
                 title: 'Gagal menyimpan transaksi!',
             });
             console.error('Transaction error:', error);
-        })
-        .finally(() => {
-            transactionForm.processing = false;
         });
+}
+
+function handleCancelTransaction() {
+    showConfirmationModal.value = false;
+    pendingTransaction.value = null;
+    addNotification({
+        type: 'info',
+        title: 'Transaksi dibatalkan',
+    });
+}
+
+function handlePrintReceipt() {
+    if (!pendingTransaction.value) return;
+
+    // Prepare receipt data for printing
+    const receiptWindow = window.open('', '_blank');
+    if (!receiptWindow) {
+        addNotification({
+            type: 'warning',
+            title: 'Popup blocker mencegah pencetakan',
+        });
+        return;
+    }
+
+    const receiptHTML = generateReceiptHTML(pendingTransaction.value);
+    receiptWindow.document.write(receiptHTML);
+    receiptWindow.document.close();
+    
+    // Auto print after content loads
+    receiptWindow.onload = () => {
+        receiptWindow.print();
+    };
+}
+
+function generateReceiptHTML(transaction: any): string {
+    const itemsHTML = transaction.items
+        .map((item: any) => {
+            const subtotal = item.harga_jual * item.quantity;
+            return `
+                <tr>
+                    <td style="padding: 4px 0; text-align: left;">${item.nama}</td>
+                    <td style="padding: 4px 0; text-align: right;">${item.quantity}</td>
+                    <td style="padding: 4px 0; text-align: right;">Rp ${item.harga_jual.toLocaleString('id-ID')}</td>
+                    <td style="padding: 4px 0; text-align: right;">Rp ${subtotal.toLocaleString('id-ID')}</td>
+                </tr>
+            `;
+        })
+        .join('');
+
+    const kembalian = transaction.metode_bayar === 'TUNAI' 
+        ? (transaction.jumlah_bayar || 0) - transaction.total 
+        : 0;
+
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Struk Transaksi</title>
+            <style>
+                body {
+                    font-family: 'Courier New', monospace;
+                    max-width: 300px;
+                    margin: 0;
+                    padding: 10px;
+                    line-height: 1.4;
+                }
+                .header {
+                    text-align: center;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                }
+                .divider {
+                    border-bottom: 1px dashed #000;
+                    margin: 5px 0;
+                }
+                table {
+                    width: 100%;
+                    margin: 10px 0;
+                }
+                td {
+                    padding: 2px 0;
+                    font-size: 12px;
+                }
+                .label {
+                    text-align: left;
+                    width: 40%;
+                }
+                .value {
+                    text-align: right;
+                    width: 60%;
+                }
+                .total {
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+                .footer {
+                    text-align: center;
+                    font-size: 11px;
+                    margin-top: 10px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                === STRUK TRANSAKSI ===
+            </div>
+            <div class="divider"></div>
+            
+            <table>
+                <tr>
+                    <td class="label">Pelanggan:</td>
+                    <td class="value">${transaction.pelanggan_nama}</td>
+                </tr>
+                <tr>
+                    <td class="label">Tanggal:</td>
+                    <td class="value">${new Date().toLocaleString('id-ID')}</td>
+                </tr>
+                <tr>
+                    <td class="label">Metode:</td>
+                    <td class="value">${transaction.metode_bayar}</td>
+                </tr>
+            </table>
+            
+            <div class="divider"></div>
+            <strong>DETAIL BARANG</strong>
+            <div class="divider"></div>
+            
+            <table>
+                <tr style="border-bottom: 1px solid #000;">
+                    <th style="text-align: left; padding: 4px 0;">Produk</th>
+                    <th style="text-align: right; padding: 4px 0;">Qty</th>
+                    <th style="text-align: right; padding: 4px 0;">Harga</th>
+                    <th style="text-align: right; padding: 4px 0;">Total</th>
+                </tr>
+                ${itemsHTML}
+            </table>
+            
+            <div class="divider"></div>
+            
+            <table>
+                <tr>
+                    <td class="label">Subtotal:</td>
+                    <td class="value">Rp ${transaction.subtotal.toLocaleString('id-ID')}</td>
+                </tr>
+                ${transaction.diskon > 0 ? `
+                <tr>
+                    <td class="label">Diskon:</td>
+                    <td class="value" style="color: green;">-Rp ${transaction.diskon.toLocaleString('id-ID')}</td>
+                </tr>
+                ` : ''}
+                ${transaction.pajak > 0 ? `
+                <tr>
+                    <td class="label">Pajak:</td>
+                    <td class="value">Rp ${transaction.pajak.toLocaleString('id-ID')}</td>
+                </tr>
+                ` : ''}
+                <tr class="total">
+                    <td class="label">TOTAL:</td>
+                    <td class="value">Rp ${transaction.total.toLocaleString('id-ID')}</td>
+                </tr>
+                ${transaction.metode_bayar === 'TUNAI' ? `
+                <tr>
+                    <td class="label">Dibayar:</td>
+                    <td class="value">Rp ${(transaction.jumlah_bayar || 0).toLocaleString('id-ID')}</td>
+                </tr>
+                <tr class="total">
+                    <td class="label">Kembalian:</td>
+                    <td class="value">Rp ${kembalian.toLocaleString('id-ID')}</td>
+                </tr>
+                ` : ''}
+            </table>
+            
+            <div class="divider"></div>
+            <div class="footer">
+                Terima kasih atas pembelian Anda
+                <br>Semoga puas dengan layanan kami
+            </div>
+        </body>
+        </html>
+    `;
 }
 
 function resetForm() {
@@ -839,6 +1029,15 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                 </div>
             </div>
         </div>
+
+        <!-- Transaction Confirmation Modal -->
+        <TransactionConfirmationModal
+            :show="showConfirmationModal"
+            :transaction="pendingTransaction"
+            @confirm="handleConfirmTransaction"
+            @cancel="handleCancelTransaction"
+            @print="handlePrintReceipt"
+        />
     </BaseLayout>
 </template>
 
