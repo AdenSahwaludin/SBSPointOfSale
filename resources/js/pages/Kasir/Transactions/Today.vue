@@ -3,9 +3,9 @@ import BaseButton from '@/components/BaseButton.vue';
 import StatsCardTab from '@/components/StatsCardTab.vue';
 import TransactionDetailModal from '@/components/TransactionDetailModal.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
+import { useTransactionsList } from '@/composables/useTransactionsList';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
 
 interface Pelanggan {
     id_pelanggan: string;
@@ -86,167 +86,34 @@ const props = defineProps<{
     filters: Filters;
 }>();
 
-// Helper functions
-function getDefault7DaysAgo(): string {
-    const date = new Date();
-    date.setDate(date.getDate() - 7);
-    return date.toISOString().split('T')[0];
-}
+const {
+    // state
+    perPage,
+    searchQuery,
+    selectedMetodeBayar,
+    showFilters,
+    selectedTransaksi,
+    showDetailModal,
+    activeStatsTab,
+    // computed
+    displayedTransaksi,
+    filteredTotalNilai,
+    statsTabsData,
+    formatCurrency,
+    // methods
+    handleSearch,
+    performSearch,
+    changePerPage,
+    goToPage,
+    clearSearch,
+    clearFilters,
+    clearAll,
+    viewDetail,
+    closeDetailModal,
+    getStatusBadgeClass,
+} = useTransactionsList<Transaksi>(props, { baseUrl: '/kasir/transactions/today', withDateRange: false });
 
-// State
-const perPage = ref(props.transaksi.per_page);
-const searchQuery = ref(props.filters.search || '');
-const selectedMetodeBayar = ref(props.filters.metode_bayar || 'all');
-const showFilters = ref(false);
-const selectedTransaksi = ref<Transaksi | null>(null);
-const showDetailModal = ref(false);
-const activeStatsTab = ref(props.filters.status || 'total_transaksi');
-
-// Computed
-const displayedTransaksi = computed(() => props.transaksi.data);
-
-const filteredTotalNilai = computed(() => {
-    // Hitung total nilai hanya dari tabel yang ditampilkan
-    return displayedTransaksi.value.reduce((sum, t) => sum + t.total, 0);
-});
-
-const statsTabsData = computed(() => [
-    {
-        id: 'total_transaksi',
-        label: 'Semua',
-        value: props.stats.total_transaksi,
-        icon: 'fas fa-receipt',
-        activeClass: 'bg-blue-50 text-blue-700',
-        iconActiveClass: 'text-blue-600',
-        iconInactiveClass: 'text-gray-400',
-    },
-    {
-        id: 'total_lunas',
-        label: 'Lunas',
-        value: props.stats.total_lunas,
-        icon: 'fas fa-check-circle',
-        activeClass: 'bg-green-50 text-green-700',
-        iconActiveClass: 'text-green-600',
-        iconInactiveClass: 'text-gray-400',
-    },
-    {
-        id: 'total_menunggu',
-        label: 'Belum Bayar',
-        value: props.stats.total_menunggu,
-        icon: 'fas fa-clock',
-        activeClass: 'bg-yellow-50 text-yellow-700',
-        iconActiveClass: 'text-yellow-600',
-        iconInactiveClass: 'text-gray-400',
-    },
-    {
-        id: 'total_batal',
-        label: 'Batal',
-        value: props.stats.total_batal,
-        icon: 'fas fa-times-circle',
-        activeClass: 'bg-red-50 text-red-700',
-        iconActiveClass: 'text-red-600',
-        iconInactiveClass: 'text-gray-400',
-    },
-    {
-        id: 'total_nilai',
-        label: 'Total Nilai',
-        value: 'Rp ' + new Intl.NumberFormat('id-ID').format(filteredTotalNilai.value),
-        icon: 'fas fa-money-bill-wave',
-        activeClass: 'bg-emerald-50 text-emerald-700',
-        iconActiveClass: 'text-emerald-600',
-        iconInactiveClass: 'text-gray-400',
-    },
-]);
-
-// Methods
-function handleSearch() {
-    performSearch();
-}
-
-function performSearch() {
-    const statusMap: Record<string, string | undefined> = {
-        total_transaksi: undefined,
-        total_lunas: 'LUNAS',
-        total_menunggu: 'MENUNGGU',
-        total_batal: 'BATAL',
-        total_nilai: undefined,
-    };
-
-    router.get(
-        '/kasir/transactions/today',
-        {
-            search: searchQuery.value,
-            status: statusMap[activeStatsTab.value],
-            metode_bayar: selectedMetodeBayar.value !== 'all' ? selectedMetodeBayar.value : undefined,
-            per_page: perPage.value,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-        },
-    );
-}
-
-function changePerPage() {
-    const statusMap: Record<string, string | undefined> = {
-        total_transaksi: undefined,
-        total_lunas: 'LUNAS',
-        total_menunggu: 'MENUNGGU',
-        total_batal: 'BATAL',
-        total_nilai: undefined,
-    };
-
-    router.get(
-        '/kasir/transactions/today',
-        {
-            search: searchQuery.value,
-            status: statusMap[activeStatsTab.value],
-            metode_bayar: selectedMetodeBayar.value !== 'all' ? selectedMetodeBayar.value : undefined,
-            per_page: perPage.value,
-            page: 1,
-        },
-        {
-            preserveState: true,
-        },
-    );
-}
-
-function goToPage(url: string | null) {
-    if (!url) return;
-    router.get(url, {}, { preserveState: true, preserveScroll: true });
-}
-
-function clearSearch() {
-    searchQuery.value = '';
-    performSearch();
-}
-
-function clearFilters() {
-    selectedMetodeBayar.value = 'all';
-    activeStatsTab.value = 'total_transaksi';
-    performSearch();
-}
-
-function clearAll() {
-    searchQuery.value = '';
-    selectedMetodeBayar.value = 'all';
-    activeStatsTab.value = 'total_transaksi';
-    performSearch();
-}
-
-function viewDetail(transaksi: Transaksi) {
-    selectedTransaksi.value = transaksi;
-    showDetailModal.value = true;
-}
-
-function closeDetailModal() {
-    showDetailModal.value = false;
-    selectedTransaksi.value = null;
-}
-
-function formatCurrency(amount: number): string {
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
-}
+// Additional helper functions not covered by composable
 
 function formatTime(dateString: string): string {
     return new Date(dateString).toLocaleTimeString('id-ID', {
@@ -281,18 +148,7 @@ function updateStatus(nomorTransaksi: string, newStatus: string) {
     );
 }
 
-function getStatusBadgeClass(status: string): string {
-    switch (status) {
-        case 'LUNAS':
-            return 'bg-green-100 text-green-800';
-        case 'MENUNGGU':
-            return 'bg-yellow-100 text-yellow-800';
-        case 'BATAL':
-            return 'bg-red-100 text-red-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-}
+// getStatusBadgeClass provided by composable
 
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactions/today');
 </script>
@@ -314,17 +170,6 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         </template>
 
         <div class="space-y-6">
-            <!-- Stats Cards Tab -->
-            <StatsCardTab
-                :stats="statsTabsData"
-                :active-tab="activeStatsTab"
-                @update:active-tab="
-                    activeStatsTab = $event;
-                    performSearch();
-                "
-            />
-
-            <!-- Search and Filters -->
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
                 <div class="p-6">
                     <div class="space-y-4">
@@ -393,6 +238,19 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
                     </div>
                 </div>
             </div>
+            <!-- Stats Cards Tab -->
+            <div class="flex justify-end">
+                <StatsCardTab
+                    :stats="statsTabsData"
+                    :active-tab="activeStatsTab"
+                    @update:activeTab="
+                        activeStatsTab = $event;
+                        performSearch();
+                    "
+                />
+            </div>
+
+            <!-- Search and Filters -->
 
             <!-- Transactions Table -->
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
