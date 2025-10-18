@@ -109,6 +109,23 @@ const activeStatsTab = ref(props.filters.status || 'total_transaksi');
 // Computed
 const displayedTransaksi = computed(() => props.transaksi.data);
 
+const filteredTotalNilai = computed(() => {
+    if (activeStatsTab.value === 'total_transaksi' || activeStatsTab.value === 'total_nilai') {
+        return props.stats.total_nilai;
+    }
+
+    const statusMap: Record<string, string> = {
+        total_lunas: 'LUNAS',
+        total_menunggu: 'MENUNGGU',
+        total_batal: 'BATAL',
+    };
+
+    const filterStatus = statusMap[activeStatsTab.value];
+    return displayedTransaksi.value
+        .filter((t) => t.status_pembayaran === filterStatus)
+        .reduce((sum, t) => sum + t.total, 0);
+});
+
 const statsTabsData = computed(() => [
     {
         id: 'total_transaksi',
@@ -149,7 +166,7 @@ const statsTabsData = computed(() => [
     {
         id: 'total_nilai',
         label: 'Total Nilai',
-        value: formatCurrency(props.stats.total_nilai),
+        value: formatCurrency(filteredTotalNilai.value),
         icon: 'fas fa-dollar-sign',
         activeClass: 'bg-emerald-50 text-emerald-700',
         iconActiveClass: 'text-emerald-600',
@@ -164,11 +181,11 @@ function handleSearch() {
 
 function performSearch() {
     const statusMap: Record<string, string | undefined> = {
-        'total_transaksi': undefined,
-        'total_lunas': 'LUNAS',
-        'total_menunggu': 'MENUNGGU',
-        'total_batal': 'BATAL',
-        'total_nilai': undefined,
+        total_transaksi: undefined,
+        total_lunas: 'LUNAS',
+        total_menunggu: 'MENUNGGU',
+        total_batal: 'BATAL',
+        total_nilai: undefined,
     };
 
     router.get(
@@ -190,11 +207,11 @@ function performSearch() {
 
 function changePerPage() {
     const statusMap: Record<string, string | undefined> = {
-        'total_transaksi': undefined,
-        'total_lunas': 'LUNAS',
-        'total_menunggu': 'MENUNGGU',
-        'total_batal': 'BATAL',
-        'total_nilai': undefined,
+        total_transaksi: undefined,
+        total_lunas: 'LUNAS',
+        total_menunggu: 'MENUNGGU',
+        total_batal: 'BATAL',
+        total_nilai: undefined,
     };
 
     router.get(

@@ -1,15 +1,17 @@
 <template>
-    <div class="scrollbar-hide overflow-x-auto">
-        <div class="flex min-w-max flex-row gap-4 rounded-2xl bg-white p-4 shadow-md">
+    <div class="scrollbar-hide overflow-x-auto rounded-2xl shadow-md">
+        <div class="flex min-w-max flex-row gap-4 bg-white p-4">
             <button
                 v-for="stat in stats"
                 :key="stat.id"
+                :disabled="stat.id === 'total_nilai'"
                 :class="[
-                    'inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200 hover:cursor-pointer',
+                    'inline-flex items-center gap-3 rounded-lg px-4 py-2 transition-all duration-200',
+                    stat.id === 'total_nilai' ? 'cursor-default' : 'hover:cursor-pointer',
                     'text-sm whitespace-nowrap',
-                    activeTab === stat.id ? `${stat.activeClass} font-semibold shadow-sm` : `font-medium`,
+                    activeTab === stat.id ? `${stat.activeClass} font-semibold shadow-sm` : 'font-semibold',
                 ]"
-                @click="$emit('update:activeTab', stat.id)"
+                @click="stat.id !== 'total_nilai' && $emit('update:activeTab', stat.id)"
             >
                 <div
                     :class="[
@@ -19,8 +21,17 @@
                 >
                     <i :class="[stat.icon, 'text-[1rem]']"></i>
                 </div>
-                <span class="font-semibold">{{ stat.value }}</span>
-                <span class="text-xs opacity-70">{{ stat.label }}</span>
+                <span class="font-semibold">{{ stat.label }}</span>
+                <span
+                    :class="[
+                        'rounded-full px-2 py-1 text-xs font-semibold',
+                        activeTab === stat.id && stat.id !== 'total_nilai'
+                            ? 'bg-gray-200 text-gray-900'
+                            : 'bg-transparent text-gray-600',
+                    ]"
+                >
+                    {{ stat.value }}
+                </span>
             </button>
         </div>
     </div>

@@ -105,6 +105,23 @@ const activeStatsTab = ref(props.filters.status || 'total_transaksi');
 // Computed
 const displayedTransaksi = computed(() => props.transaksi.data);
 
+const filteredTotalNilai = computed(() => {
+    if (activeStatsTab.value === 'total_transaksi' || activeStatsTab.value === 'total_nilai') {
+        return props.stats.total_nilai;
+    }
+
+    const statusMap: Record<string, string> = {
+        total_lunas: 'LUNAS',
+        total_menunggu: 'MENUNGGU',
+        total_batal: 'BATAL',
+    };
+
+    const filterStatus = statusMap[activeStatsTab.value];
+    return displayedTransaksi.value
+        .filter((t) => t.status_pembayaran === filterStatus)
+        .reduce((sum, t) => sum + t.total, 0);
+});
+
 const statsTabsData = computed(() => [
     {
         id: 'total_transaksi',
@@ -145,7 +162,7 @@ const statsTabsData = computed(() => [
     {
         id: 'total_nilai',
         label: 'Total Nilai',
-        value: 'Rp ' + new Intl.NumberFormat('id-ID').format(props.stats.total_nilai),
+        value: 'Rp ' + new Intl.NumberFormat('id-ID').format(filteredTotalNilai.value),
         icon: 'fas fa-money-bill-wave',
         activeClass: 'bg-emerald-50 text-emerald-700',
         iconActiveClass: 'text-emerald-600',
@@ -160,11 +177,11 @@ function handleSearch() {
 
 function performSearch() {
     const statusMap: Record<string, string | undefined> = {
-        'total_transaksi': undefined,
-        'total_lunas': 'LUNAS',
-        'total_menunggu': 'MENUNGGU',
-        'total_batal': 'BATAL',
-        'total_nilai': undefined,
+        total_transaksi: undefined,
+        total_lunas: 'LUNAS',
+        total_menunggu: 'MENUNGGU',
+        total_batal: 'BATAL',
+        total_nilai: undefined,
     };
 
     router.get(
@@ -184,11 +201,11 @@ function performSearch() {
 
 function changePerPage() {
     const statusMap: Record<string, string | undefined> = {
-        'total_transaksi': undefined,
-        'total_lunas': 'LUNAS',
-        'total_menunggu': 'MENUNGGU',
-        'total_batal': 'BATAL',
-        'total_nilai': undefined,
+        total_transaksi: undefined,
+        total_lunas: 'LUNAS',
+        total_menunggu: 'MENUNGGU',
+        total_batal: 'BATAL',
+        total_nilai: undefined,
     };
 
     router.get(
@@ -310,7 +327,14 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
 
         <div class="space-y-6">
             <!-- Stats Cards Tab -->
-            <StatsCardTab :stats="statsTabsData" :active-tab="activeStatsTab" @update:active-tab="activeStatsTab = $event; performSearch()" />
+            <StatsCardTab
+                :stats="statsTabsData"
+                :active-tab="activeStatsTab"
+                @update:active-tab="
+                    activeStatsTab = $event;
+                    performSearch();
+                "
+            />
 
             <!-- Search and Filters -->
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
@@ -517,11 +541,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
         </div>
 
         <!-- Detail Modal -->
-        <TransactionDetailModal
-            :show="showDetailModal"
-            :transaksi="selectedTransaksi"
-            @close="closeDetailModal"
-        />
+        <TransactionDetailModal :show="showDetailModal" :transaksi="selectedTransaksi" @close="closeDetailModal" />
     </BaseLayout>
 </template>
 
