@@ -425,7 +425,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/transactio
             </div>
             <!-- Stats Cards Tab -->
             <div class="flex justify-end">
-                <StatsCardTab :stats="statsTabsData" :active-tab="activeStatsTab" @update:active-tab="activeStatsTab = $event" />
+                <StatsCardTab :stats="statsTabsData" :active-tab="activeStatsTab" @update:active-tab="activeStatsTab = $event; performSearch()" />
             </div>
 
             <!-- Transactions Table -->

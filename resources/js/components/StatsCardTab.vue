@@ -26,7 +26,7 @@
                     :class="[
                         'rounded-full px-2 py-1 text-xs font-semibold',
                         activeTab === stat.id && stat.id !== 'total_nilai'
-                            ? 'bg-gray-200 text-gray-900'
+                            ? getValueBackgroundClass(stat.activeClass)
                             : 'bg-transparent text-gray-600',
                     ]"
                 >
@@ -60,6 +60,18 @@ withDefaults(defineProps<Props>(), {
 defineEmits<{
     'update:activeTab': [value: string];
 }>();
+
+function getValueBackgroundClass(activeClass: string): string {
+    const colorMap: Record<string, string> = {
+        'bg-blue-50 text-blue-700': 'bg-blue-200 text-blue-900',
+        'bg-green-50 text-green-700': 'bg-green-200 text-green-900',
+        'bg-yellow-50 text-yellow-700': 'bg-yellow-200 text-yellow-900',
+        'bg-red-50 text-red-700': 'bg-red-200 text-red-900',
+        'bg-emerald-50 text-emerald-700': 'bg-emerald-200 text-emerald-900',
+    };
+
+    return colorMap[activeClass] || 'bg-gray-200 text-gray-900';
+}
 </script>
 
 <style scoped>
