@@ -190,11 +190,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         searchQuery = '';
                         performSearch();
                     "
-                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-5 text-left transition-all hover:shadow-xl focus:outline-none"
+                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 px-6 py-5 text-left transition-all focus:outline-none"
                 >
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-blue-400/20 to-transparent transition-transform group-hover:scale-150"></div>
-                    <p class="relative text-sm font-medium text-slate-400">Total Produk</p>
-                    <p class="relative mt-2 text-3xl font-bold text-white">{{ stats.total_produk }}</p>
+                    <div class="absolute inset-0 border border-blue-200/50"></div>
+                    <p class="relative text-sm font-medium text-blue-700">Total Produk</p>
+                    <p class="relative mt-2 text-3xl font-bold text-blue-900">{{ stats.total_produk }}</p>
                 </button>
 
                 <!-- Stok Tersedia -->
@@ -203,7 +204,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         selectedStokStatus = 'tersedia';
                         performSearch();
                     "
-                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 px-6 py-5 text-left transition-all hover:shadow-xl focus:outline-none"
+                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 px-6 py-5 text-left transition-all focus:outline-none"
                 >
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-400/20 to-transparent transition-transform group-hover:scale-150"></div>
                     <div class="absolute inset-0 border border-emerald-200/50"></div>
@@ -217,7 +218,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         selectedStokStatus = 'rendah';
                         performSearch();
                     "
-                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 px-6 py-5 text-left transition-all hover:shadow-xl focus:outline-none"
+                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 px-6 py-5 text-left transition-all focus:outline-none"
                 >
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-amber-400/20 to-transparent transition-transform group-hover:scale-150"></div>
                     <div class="absolute inset-0 border border-amber-200/50"></div>
@@ -231,7 +232,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         selectedStokStatus = 'habis';
                         performSearch();
                     "
-                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-50 to-red-50 px-6 py-5 text-left transition-all hover:shadow-xl focus:outline-none"
+                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-50 to-red-50 px-6 py-5 text-left transition-all focus:outline-none"
                 >
                     <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-rose-400/20 to-transparent transition-transform group-hover:scale-150"></div>
                     <div class="absolute inset-0 border border-rose-200/50"></div>
