@@ -333,46 +333,51 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         <p class="mt-1 text-sm text-gray-500">Coba ubah filter atau kata kunci pencarian</p>
                     </div>
 
-                    <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div v-else class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         <div
                             v-for="produk in displayedProduk"
                             :key="produk.id_produk"
                             @click="viewDetail(produk)"
-                            class="cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-gray-50 transition-all hover:border-emerald-300 hover:shadow-md"
+                            class="group relative cursor-pointer overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:border-emerald-400 hover:shadow-lg"
                         >
-                            <div class="p-5">
+                            <!-- Gradient overlay on hover -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
+                            
+                            <div class="relative p-5">
                                 <!-- Product Header -->
-                                <div class="mb-3">
-                                    <h3 class="line-clamp-2 text-base font-semibold text-gray-900">{{ produk.nama }}</h3>
+                                <div class="mb-4">
+                                    <h3 class="line-clamp-2 text-sm font-bold text-gray-900">{{ produk.nama }}</h3>
                                 </div>
 
                                 <!-- Category & Barcode -->
-                                <div class="mb-3 space-y-1">
+                                <div class="mb-4 space-y-2 border-b border-gray-100 pb-3">
                                     <div class="flex items-center text-xs text-gray-600">
-                                        <i class="fas fa-tag mr-2 text-gray-400"></i>
-                                        <span>{{ produk.kategori.nama }}</span>
+                                        <i class="fas fa-tag mr-2 w-4 text-emerald-500"></i>
+                                        <span class="font-medium">{{ produk.kategori.nama }}</span>
                                     </div>
                                     <div v-if="produk.barcode" class="flex items-center text-xs text-gray-600">
-                                        <i class="fas fa-barcode mr-2 text-gray-400"></i>
-                                        <span>{{ produk.barcode }}</span>
+                                        <i class="fas fa-barcode mr-2 w-4 text-blue-500"></i>
+                                        <span class="font-mono text-xs">{{ produk.barcode }}</span>
                                     </div>
                                 </div>
 
-                                <!-- Price -->
-                                <div class="mb-3">
-                                    <p class="text-lg font-bold text-emerald-600">{{ formatCurrency(produk.harga) }}</p>
-                                    <p class="text-xs text-gray-500">per {{ produk.satuan }}</p>
-                                    <p v-if="produk.harga_pack && produk.isi_per_pack > 1" class="mt-1 text-sm text-blue-600">
-                                        {{ formatCurrency(produk.harga_pack) }} / pack ({{ produk.isi_per_pack }} {{ produk.satuan }})
+                                <!-- Price Section -->
+                                <div class="mb-4 rounded-lg bg-gradient-to-br from-emerald-50 to-green-50 p-3">
+                                    <p class="text-xl font-bold text-emerald-700">{{ formatCurrency(produk.harga) }}</p>
+                                    <p class="text-xs text-emerald-600">per {{ produk.satuan }}</p>
+                                    <p v-if="produk.harga_pack && produk.isi_per_pack > 1" class="mt-2 text-xs text-blue-700">
+                                        <span class="font-semibold">{{ formatCurrency(produk.harga_pack) }}</span> / pack
+                                        <span class="text-blue-600">({{ produk.isi_per_pack }} {{ produk.satuan }})</span>
                                     </p>
                                 </div>
 
                                 <!-- Stock Status -->
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-gray-700">Stok: {{ produk.stok }} {{ produk.satuan }}</p>
+                                        <p class="text-xs text-gray-500">Stok</p>
+                                        <p class="text-base font-bold text-gray-900">{{ produk.stok }}</p>
                                     </div>
-                                    <span :class="['inline-flex rounded-full px-2 py-1 text-xs font-semibold', getStokBadgeClass(produk.stok)]">
+                                    <span :class="['inline-flex rounded-full px-3 py-1 text-xs font-bold', getStokBadgeClass(produk.stok)]">
                                         {{ getStokStatus(produk.stok) }}
                                     </span>
                                 </div>
