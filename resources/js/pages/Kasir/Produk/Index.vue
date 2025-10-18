@@ -193,7 +193,9 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                     "
                     class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 px-6 py-5 text-left transition-all focus:outline-none"
                 >
-                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-blue-400/20 to-transparent transition-transform group-hover:scale-150"></div>
+                    <div
+                        class="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-gradient-to-br from-blue-400/20 to-transparent transition-transform group-hover:scale-150"
+                    ></div>
                     <div class="absolute inset-0 border border-blue-200/50"></div>
                     <p class="relative text-sm font-medium text-blue-700">Total Produk</p>
                     <p class="relative mt-2 text-3xl font-bold text-blue-900">{{ stats.total_produk }}</p>
@@ -207,7 +209,9 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                     "
                     class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 px-6 py-5 text-left transition-all focus:outline-none"
                 >
-                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-400/20 to-transparent transition-transform group-hover:scale-150"></div>
+                    <div
+                        class="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-400/20 to-transparent transition-transform group-hover:scale-150"
+                    ></div>
                     <div class="absolute inset-0 border border-emerald-200/50"></div>
                     <p class="relative text-sm font-medium text-emerald-700">Stok Tersedia</p>
                     <p class="relative mt-2 text-3xl font-bold text-emerald-900">{{ stats.stok_tersedia }}</p>
@@ -221,7 +225,9 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                     "
                     class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 px-6 py-5 text-left transition-all focus:outline-none"
                 >
-                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-amber-400/20 to-transparent transition-transform group-hover:scale-150"></div>
+                    <div
+                        class="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-gradient-to-br from-amber-400/20 to-transparent transition-transform group-hover:scale-150"
+                    ></div>
                     <div class="absolute inset-0 border border-amber-200/50"></div>
                     <p class="relative text-sm font-medium text-amber-700">Stok Rendah</p>
                     <p class="relative mt-2 text-3xl font-bold text-amber-900">{{ stats.stok_rendah }}</p>
@@ -235,7 +241,9 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                     "
                     class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-50 to-red-50 px-6 py-5 text-left transition-all focus:outline-none"
                 >
-                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-rose-400/20 to-transparent transition-transform group-hover:scale-150"></div>
+                    <div
+                        class="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-gradient-to-br from-rose-400/20 to-transparent transition-transform group-hover:scale-150"
+                    ></div>
                     <div class="absolute inset-0 border border-rose-200/50"></div>
                     <p class="relative text-sm font-medium text-rose-700">Stok Habis</p>
                     <p class="relative mt-2 text-3xl font-bold text-rose-900">{{ stats.stok_habis }}</p>
@@ -342,13 +350,17 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                             class="group relative cursor-pointer overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:border-emerald-400 hover:shadow-lg"
                         >
                             <!-- Gradient overlay on hover -->
-                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
-                            
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                            ></div>
+
                             <div class="relative p-5">
                                 <!-- Product Header with SKU -->
                                 <div class="mb-3 flex items-start justify-between gap-2">
                                     <div class="flex-1">
-                                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ produk.sku || produk.id_produk }}</p>
+                                        <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                                            {{ produk.sku || produk.id_produk }}
+                                        </p>
                                         <h3 class="mt-1 line-clamp-2 text-sm font-bold text-gray-900">{{ produk.nama }}</h3>
                                     </div>
                                 </div>
@@ -408,7 +420,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                                 <option :value="100">100 per halaman</option>
                             </select>
                             <span class="text-sm text-gray-600">
-                                <span class="font-semibold">{{ produk.from }}</span> - <span class="font-semibold">{{ produk.to }}</span> dari 
+                                <span class="font-semibold">{{ produk.from }}</span> - <span class="font-semibold">{{ produk.to }}</span> dari
                                 <span class="font-semibold text-emerald-600">{{ produk.total }}</span>
                             </span>
                         </div>
@@ -473,89 +485,102 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                 class="bg-opacity-50 modal-bg fixed inset-0 z-50 flex items-center justify-center p-4"
                 @click.self="closeDetailModal"
             >
-                <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-xl">
+                <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
                     <!-- Modal Header -->
-                    <div class="flex items-center justify-between border-b border-gray-200 p-6">
+                    <div class="sticky top-0 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-5">
                         <h3 class="text-xl font-bold text-gray-900">Detail Produk</h3>
-                        <button @click="closeDetailModal" class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times text-xl"></i>
+                        <button @click="closeDetailModal" class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
+                            <i class="fas fa-times text-lg"></i>
                         </button>
                     </div>
 
                     <!-- Modal Body -->
-                    <div class="p-6">
-                        <div class="space-y-6">
-                            <!-- Product Info Grid -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">SKU</p>
-                                    <p class="mt-1 text-base font-semibold text-gray-900">{{ selectedProduk.sku || selectedProduk.id_produk }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Barcode</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedProduk.barcode || '-' }}</p>
-                                </div>
-                                <div class="col-span-2">
-                                    <p class="text-sm font-medium text-gray-600">Nama Produk</p>
-                                    <p class="mt-1 text-lg font-bold text-gray-900">{{ selectedProduk.nama }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Kategori</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedProduk.kategori.nama }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Satuan</p>
-                                    <p class="mt-1 text-base text-gray-900">{{ selectedProduk.satuan }}</p>
-                                </div>
+                    <div class="space-y-5 p-6">
+                        <!-- SKU & Barcode Row -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                                <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">SKU</p>
+                                <p class="mt-2 text-lg font-bold text-gray-900">{{ selectedProduk.sku || selectedProduk.id_produk }}</p>
                             </div>
-
-                            <!-- Pricing Section -->
-                            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase">Harga</h4>
-                                <div class="space-y-2">
-                                    <div class="flex justify-between">
-                                        <span class="text-sm text-gray-600">Harga per {{ selectedProduk.satuan }}</span>
-                                        <span class="text-lg font-bold text-emerald-600">{{ formatCurrency(selectedProduk.harga) }}</span>
-                                    </div>
-                                    <div
-                                        v-if="selectedProduk.harga_pack && selectedProduk.isi_per_pack > 1"
-                                        class="flex justify-between border-t pt-2"
-                                    >
-                                        <span class="text-sm text-gray-600"
-                                            >Harga Pack ({{ selectedProduk.isi_per_pack }} {{ selectedProduk.satuan }})</span
-                                        >
-                                        <span class="text-lg font-bold text-blue-600">{{ formatCurrency(selectedProduk.harga_pack) }}</span>
-                                    </div>
-                                </div>
+                            <div class="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                                <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">Barcode</p>
+                                <p class="mt-2 font-mono text-sm text-gray-900">{{ selectedProduk.barcode || '-' }}</p>
                             </div>
+                        </div>
 
-                            <!-- Stock Section -->
-                            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <h4 class="mb-3 text-sm font-semibold text-gray-700 uppercase">Ketersediaan Stok</h4>
+                        <!-- Product Name -->
+                        <div class="rounded-lg border border-emerald-100 bg-emerald-50 p-4">
+                            <p class="text-xs font-semibold text-emerald-700 uppercase">Nama Produk</p>
+                            <p class="mt-2 text-xl font-bold text-emerald-900">{{ selectedProduk.nama }}</p>
+                        </div>
+
+                        <!-- Category & Satuan -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="rounded-lg border border-gray-100 p-4">
+                                <p class="text-xs font-semibold text-gray-600 uppercase">Kategori</p>
+                                <p class="mt-2 text-base font-semibold text-gray-900">{{ selectedProduk.kategori.nama }}</p>
+                            </div>
+                            <div class="rounded-lg border border-gray-100 p-4">
+                                <p class="text-xs font-semibold text-gray-600 uppercase">Satuan</p>
+                                <p class="mt-2 text-base font-semibold text-gray-900">{{ selectedProduk.satuan }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Pricing Section -->
+                        <div class="space-y-3 rounded-lg border border-emerald-100 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+                            <p class="text-xs font-semibold text-emerald-700 uppercase">Harga</p>
+                            <div class="space-y-2">
                                 <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-2xl font-bold text-gray-900">{{ selectedProduk.stok }} {{ selectedProduk.satuan }}</p>
-                                        <p class="mt-1 text-sm text-gray-500">Stok tersedia</p>
+                                    <span class="text-sm text-emerald-700">Per {{ selectedProduk.satuan }}</span>
+                                    <span class="text-2xl font-bold text-emerald-700">{{ formatCurrency(selectedProduk.harga) }}</span>
+                                </div>
+                                <div
+                                    v-if="selectedProduk.harga_pack && selectedProduk.isi_per_pack > 1"
+                                    class="border-t border-emerald-200 pt-2"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-emerald-700">Pack ({{ selectedProduk.isi_per_pack }} {{ selectedProduk.satuan }})</span>
+                                        <span class="text-lg font-bold text-blue-700">{{ formatCurrency(selectedProduk.harga_pack) }}</span>
                                     </div>
-                                    <span
-                                        :class="['inline-flex rounded-full px-4 py-2 text-sm font-semibold', getStokBadgeClass(selectedProduk.stok)]"
-                                    >
-                                        {{ getStokStatus(selectedProduk.stok) }}
-                                    </span>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Description -->
-                            <div v-if="selectedProduk.deskripsi">
-                                <h4 class="mb-2 text-sm font-semibold text-gray-700 uppercase">Deskripsi</h4>
-                                <p class="text-sm text-gray-600">{{ selectedProduk.deskripsi }}</p>
+                        <!-- Stock Section -->
+                        <div class="rounded-lg border border-gray-100 p-4">
+                            <p class="text-xs font-semibold text-gray-600 uppercase">Ketersediaan Stok</p>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div>
+                                    <p class="text-3xl font-bold text-gray-900">{{ selectedProduk.stok }}</p>
+                                    <p class="text-xs text-gray-500">{{ selectedProduk.satuan }} tersedia</p>
+                                </div>
+                                <span :class="['inline-flex rounded-full px-4 py-2 text-sm font-bold', getStokBadgeClass(selectedProduk.stok)]">
+                                    {{ getStokStatus(selectedProduk.stok) }}
+                                </span>
                             </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div v-if="selectedProduk.deskripsi" class="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                            <p class="text-xs font-semibold text-gray-600 uppercase">Deskripsi</p>
+                            <p class="mt-2 text-sm leading-relaxed text-gray-700">{{ selectedProduk.deskripsi }}</p>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
+                            <p class="text-xs text-blue-700">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <span class="font-medium">Klik pada produk di grid untuk melihat detail lengkap</span>
+                            </p>
                         </div>
                     </div>
 
                     <!-- Modal Footer -->
-                    <div class="flex justify-end gap-2 border-t border-gray-200 p-6">
-                        <BaseButton @click="closeDetailModal" variant="outline"> Tutup </BaseButton>
+                    <div class="border-t border-gray-100 bg-gray-50 px-6 py-4">
+                        <BaseButton @click="closeDetailModal" variant="primary" class="w-full">
+                            <i class="fas fa-check mr-2"></i>
+                            Tutup
+                        </BaseButton>
                     </div>
                 </div>
             </div>
