@@ -181,7 +181,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
 
         <div class="space-y-6">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 <!-- Total Produk - Clickable -->
                 <button
                     @click="
@@ -190,10 +190,11 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         searchQuery = '';
                         performSearch();
                     "
-                    class="rounded-lg border border-gray-200 bg-white px-6 py-4 text-left transition-all hover:border-emerald-300 hover:shadow-md focus:outline-none"
+                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-5 text-left transition-all hover:shadow-xl focus:outline-none"
                 >
-                    <p class="text-sm text-gray-600">Total Produk</p>
-                    <p class="mt-2 text-2xl font-bold text-gray-900">{{ stats.total_produk }}</p>
+                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-blue-400/20 to-transparent transition-transform group-hover:scale-150"></div>
+                    <p class="relative text-sm font-medium text-slate-400">Total Produk</p>
+                    <p class="relative mt-2 text-3xl font-bold text-white">{{ stats.total_produk }}</p>
                 </button>
 
                 <!-- Stok Tersedia -->
@@ -202,10 +203,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         selectedStokStatus = 'tersedia';
                         performSearch();
                     "
-                    class="rounded-lg border border-gray-200 bg-white px-6 py-4 text-left transition-all hover:border-green-300 hover:shadow-md focus:outline-none"
+                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 px-6 py-5 text-left transition-all hover:shadow-xl focus:outline-none"
                 >
-                    <p class="text-sm text-gray-600">Stok Tersedia</p>
-                    <p class="mt-2 text-2xl font-bold text-green-600">{{ stats.stok_tersedia }}</p>
+                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-400/20 to-transparent transition-transform group-hover:scale-150"></div>
+                    <div class="absolute inset-0 border border-emerald-200/50"></div>
+                    <p class="relative text-sm font-medium text-emerald-700">Stok Tersedia</p>
+                    <p class="relative mt-2 text-3xl font-bold text-emerald-900">{{ stats.stok_tersedia }}</p>
                 </button>
 
                 <!-- Stok Rendah -->
@@ -214,10 +217,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         selectedStokStatus = 'rendah';
                         performSearch();
                     "
-                    class="rounded-lg border border-gray-200 bg-white px-6 py-4 text-left transition-all hover:border-yellow-300 hover:shadow-md focus:outline-none"
+                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 px-6 py-5 text-left transition-all hover:shadow-xl focus:outline-none"
                 >
-                    <p class="text-sm text-gray-600">Stok Rendah</p>
-                    <p class="mt-2 text-2xl font-bold text-yellow-600">{{ stats.stok_rendah }}</p>
+                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-amber-400/20 to-transparent transition-transform group-hover:scale-150"></div>
+                    <div class="absolute inset-0 border border-amber-200/50"></div>
+                    <p class="relative text-sm font-medium text-amber-700">Stok Rendah</p>
+                    <p class="relative mt-2 text-3xl font-bold text-amber-900">{{ stats.stok_rendah }}</p>
                 </button>
 
                 <!-- Stok Habis -->
@@ -226,10 +231,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                         selectedStokStatus = 'habis';
                         performSearch();
                     "
-                    class="rounded-lg border border-gray-200 bg-white px-6 py-4 text-left transition-all hover:border-red-300 hover:shadow-md focus:outline-none"
+                    class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-50 to-red-50 px-6 py-5 text-left transition-all hover:shadow-xl focus:outline-none"
                 >
-                    <p class="text-sm text-gray-600">Stok Habis</p>
-                    <p class="mt-2 text-2xl font-bold text-red-600">{{ stats.stok_habis }}</p>
+                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-rose-400/20 to-transparent transition-transform group-hover:scale-150"></div>
+                    <div class="absolute inset-0 border border-rose-200/50"></div>
+                    <p class="relative text-sm font-medium text-rose-700">Stok Habis</p>
+                    <p class="relative mt-2 text-3xl font-bold text-rose-900">{{ stats.stok_habis }}</p>
                 </button>
             </div>
 
