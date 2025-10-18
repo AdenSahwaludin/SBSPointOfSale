@@ -387,60 +387,74 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="produk.last_page > 1" class="border-t border-gray-200 bg-gray-50 px-6 py-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-gray-700">Items per page:</span>
+                <div v-if="produk.last_page > 1" class="border-t border-gray-200 bg-gradient-to-r from-white to-gray-50 px-6 py-5">
+                    <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                        <!-- Items per page selector -->
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-medium text-gray-700">Tampilkan:</span>
                             <select
                                 v-model="perPage"
                                 @change="changePerPage"
-                                class="rounded-lg border border-gray-300 px-3 py-1 text-sm focus:border-transparent focus:ring-2 focus:ring-emerald-500"
+                                class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:border-emerald-400 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                             >
-                                <option :value="12">12</option>
-                                <option :value="20">20</option>
-                                <option :value="40">40</option>
-                                <option :value="60">60</option>
-                                <option :value="100">100</option>
+                                <option :value="12">12 per halaman</option>
+                                <option :value="20">20 per halaman</option>
+                                <option :value="40">40 per halaman</option>
+                                <option :value="60">60 per halaman</option>
+                                <option :value="100">100 per halaman</option>
                             </select>
-                            <span class="text-sm text-gray-700"> Showing {{ produk.from }} to {{ produk.to }} of {{ produk.total }} entries </span>
+                            <span class="text-sm text-gray-600">
+                                <span class="font-semibold">{{ produk.from }}</span> - <span class="font-semibold">{{ produk.to }}</span> dari 
+                                <span class="font-semibold text-emerald-600">{{ produk.total }}</span>
+                            </span>
                         </div>
 
-                        <div class="flex gap-1">
+                        <!-- Page info and pagination buttons -->
+                        <div class="flex items-center gap-2">
+                            <!-- Previous Button -->
                             <button
                                 @click="goToPage(produk.prev_page_url)"
                                 :disabled="!produk.prev_page_url"
                                 :class="[
-                                    'rounded-lg px-3 py-1 text-sm',
+                                    'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all',
                                     produk.prev_page_url
-                                        ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
-                                        : 'cursor-not-allowed bg-gray-100 text-gray-400',
+                                        ? 'border border-gray-300 bg-white text-gray-700 hover:border-emerald-400 hover:text-emerald-600'
+                                        : 'cursor-not-allowed border border-gray-200 bg-gray-50 text-gray-400',
                                 ]"
                             >
-                                Previous
+                                <i class="fas fa-chevron-left"></i>
+                                <span class="hidden sm:inline">Sebelumnya</span>
                             </button>
 
-                            <button
-                                v-for="(link, index) in produk.links.slice(1, -1)"
-                                :key="index"
-                                @click="goToPage(link.url)"
-                                :class="[
-                                    'rounded-lg px-3 py-1 text-sm',
-                                    link.active ? 'bg-emerald-600 text-white' : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100',
-                                ]"
-                                v-html="link.label"
-                            ></button>
+                            <!-- Page Numbers -->
+                            <div class="flex items-center gap-1">
+                                <button
+                                    v-for="(link, index) in produk.links.slice(1, -1)"
+                                    :key="index"
+                                    @click="goToPage(link.url)"
+                                    :class="[
+                                        'rounded-lg px-3 py-2 text-sm font-medium transition-all',
+                                        link.active
+                                            ? 'bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-md'
+                                            : 'border border-gray-300 bg-white text-gray-700 hover:border-emerald-400 hover:text-emerald-600',
+                                    ]"
+                                    v-html="link.label"
+                                ></button>
+                            </div>
 
+                            <!-- Next Button -->
                             <button
                                 @click="goToPage(produk.next_page_url)"
                                 :disabled="!produk.next_page_url"
                                 :class="[
-                                    'rounded-lg px-3 py-1 text-sm',
+                                    'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all',
                                     produk.next_page_url
-                                        ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
-                                        : 'cursor-not-allowed bg-gray-100 text-gray-400',
+                                        ? 'border border-gray-300 bg-white text-gray-700 hover:border-emerald-400 hover:text-emerald-600'
+                                        : 'cursor-not-allowed border border-gray-200 bg-gray-50 text-gray-400',
                                 ]"
                             >
-                                Next
+                                <span class="hidden sm:inline">Selanjutnya</span>
+                                <i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
                     </div>
