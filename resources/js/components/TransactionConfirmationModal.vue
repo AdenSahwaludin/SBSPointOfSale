@@ -1,10 +1,6 @@
 <template>
     <Teleport to="body">
-        <div
-            v-if="show"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-            @click.self="$emit('cancel')"
-        >
+        <div v-if="show" class="modal-bg fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="$emit('cancel')">
             <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-xl">
                 <!-- Header -->
                 <div class="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white p-6">
@@ -88,7 +84,10 @@
                             <span class="text-gray-900">Total Bayar</span>
                             <span class="text-emerald-600">{{ formatCurrency(transaction.total) }}</span>
                         </div>
-                        <div v-if="transaction.metode_bayar === 'TUNAI' && transaction.jumlah_bayar" class="flex justify-between border-t border-gray-300 pt-3 text-sm">
+                        <div
+                            v-if="transaction.metode_bayar === 'TUNAI' && transaction.jumlah_bayar"
+                            class="flex justify-between border-t border-gray-300 pt-3 text-sm"
+                        >
                             <span class="text-gray-600">Jumlah Bayar</span>
                             <span class="font-medium text-gray-900">{{ formatCurrency(transaction.jumlah_bayar) }}</span>
                         </div>

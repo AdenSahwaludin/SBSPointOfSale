@@ -407,7 +407,7 @@ function processTransaction() {
 
     // Prepare transaction data for confirmation
     const selectedPelangganObj = props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value);
-    
+
     pendingTransaction.value = {
         pelanggan_nama: selectedPelangganObj?.nama || 'Umum',
         metode_bayar: metodeBayar.value,
@@ -455,7 +455,7 @@ function handleConfirmTransaction() {
                     type: 'success',
                     title: 'Transaksi berhasil disimpan!',
                 });
-                
+
                 // Close modal and clear data
                 showConfirmationModal.value = false;
                 pendingTransaction.value = null;
@@ -489,44 +489,98 @@ function handleCancelTransaction() {
 function handlePrintReceipt() {
     if (!pendingTransaction.value) return;
 
-    // Prepare receipt data for printing
-    const receiptWindow = window.open('', '_blank');
-    if (!receiptWindow) {
-        addNotification({
-            type: 'warning',
-            title: 'Popup blocker mencegah pencetakan',
-        });
-        return;
-    }
+    // Store transaction data for receipt before clearing
+    const transactionForReceipt = { ...pendingTransaction.value };
 
-    const receiptHTML = generateReceiptHTML(pendingTransaction.value);
-    receiptWindow.document.write(receiptHTML);
-    receiptWindow.document.close();
-    
-    // Auto print after content loads
-    receiptWindow.onload = () => {
-        receiptWindow.print();
-    };
+    // First, submit the transaction like handleConfirmTransaction
+    const requestData = {
+        id_pelanggan: selectedPelanggan.value,
+        items: pendingTransaction.value.items,
+        metode_bayar: pendingTransaction.value.metode_bayar,
+        subtotal: pendingTransaction.value.subtotal,
+        diskon: pendingTransaction.value.diskon,
+        pajak: pendingTransaction.value.pajak,
+        total: pendingTransaction.value.total,
+        ...(pendingTransaction.value.metode_bayar === 'TUNAI' ? { jumlah_bayar: pendingTransaction.value.jumlah_bayar } : {}),
+    } as Record<string, any>;
+
+    fetch('/kasir/pos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+        body: JSON.stringify(requestData),
+    })
+        .then((response) => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then((data) => {
+            if (data.success) {
+                addNotification({
+                    type: 'success',
+                    title: 'Transaksi berhasil disimpan!',
+                });
+
+                // Close modal and clear data
+                showConfirmationModal.value = false;
+                pendingTransaction.value = null;
+                clearCart();
+                resetForm();
+
+                // Then open receipt for printing
+                const receiptWindow = window.open('', '_blank');
+                if (!receiptWindow) {
+                    addNotification({
+                        type: 'warning',
+                        title: 'Popup blocker mencegah pencetakan',
+                    });
+                    return;
+                }
+
+                const receiptHTML = generateReceiptHTML(transactionForReceipt);
+                receiptWindow.document.write(receiptHTML);
+                receiptWindow.document.close();
+
+                // Auto print after content loads
+                receiptWindow.onload = () => {
+                    receiptWindow.print();
+                };
+            } else {
+                addNotification({
+                    type: 'error',
+                    title: data.message || 'Gagal menyimpan transaksi!',
+                });
+            }
+        })
+        .catch((error) => {
+            addNotification({
+                type: 'error',
+                title: 'Gagal menyimpan transaksi!',
+            });
+            console.error('Transaction error:', error);
+        });
 }
 
 function generateReceiptHTML(transaction: any): string {
     const itemsHTML = transaction.items
         .map((item: any) => {
-            const subtotal = item.harga_jual * item.quantity;
+            const qty = Number(item.jumlah || item.quantity || 0);
+            const unitPrice = Number(item.harga_satuan || item.harga_jual || 0);
+            const subtotal = Number(item.subtotal != null ? item.subtotal : unitPrice * qty);
             return `
                 <tr>
                     <td style="padding: 4px 0; text-align: left;">${item.nama}</td>
-                    <td style="padding: 4px 0; text-align: right;">${item.quantity}</td>
-                    <td style="padding: 4px 0; text-align: right;">Rp ${item.harga_jual.toLocaleString('id-ID')}</td>
+                    <td style="padding: 4px 0; text-align: right;">${qty}</td>
+                    <td style="padding: 4px 0; text-align: right;">Rp ${unitPrice.toLocaleString('id-ID')}</td>
                     <td style="padding: 4px 0; text-align: right;">Rp ${subtotal.toLocaleString('id-ID')}</td>
                 </tr>
             `;
         })
         .join('');
 
-    const kembalian = transaction.metode_bayar === 'TUNAI' 
-        ? (transaction.jumlah_bayar || 0) - transaction.total 
-        : 0;
+    const kembalian = transaction.metode_bayar === 'TUNAI' ? (Number(transaction.jumlah_bayar || 0) - Number(transaction.total || 0)) : 0;
 
     return `
         <!DOCTYPE html>
@@ -618,34 +672,47 @@ function generateReceiptHTML(transaction: any): string {
             <table>
                 <tr>
                     <td class="label">Subtotal:</td>
-                    <td class="value">Rp ${transaction.subtotal.toLocaleString('id-ID')}</td>
+                    <td class="value">Rp ${Number(transaction.subtotal || 0).toLocaleString('id-ID')}</td>
                 </tr>
-                ${transaction.diskon > 0 ? `
+                ${
+                    Number(transaction.diskon || 0) > 0
+                        ? `
                 <tr>
                     <td class="label">Diskon:</td>
-                    <td class="value" style="color: green;">-Rp ${transaction.diskon.toLocaleString('id-ID')}</td>
+                    <td class="value" style="color: green;">-Rp ${Number(transaction.diskon).toLocaleString('id-ID')}</td>
                 </tr>
-                ` : ''}
-                ${transaction.pajak > 0 ? `
+                `
+                        : ''
+                }
+                ${
+                    Number(transaction.pajak || 0) > 0
+                        ? `
                 <tr>
                     <td class="label">Pajak:</td>
-                    <td class="value">Rp ${transaction.pajak.toLocaleString('id-ID')}</td>
+                    <td class="value">Rp ${Number(transaction.pajak).toLocaleString('id-ID')}</td>
                 </tr>
-                ` : ''}
+                `
+                        : ''
+                }
                 <tr class="total">
                     <td class="label">TOTAL:</td>
-                    <td class="value">Rp ${transaction.total.toLocaleString('id-ID')}</td>
+                    <td class="value">Rp ${Number(transaction.total || 0).toLocaleString('id-ID')}</td>
                 </tr>
-                ${transaction.metode_bayar === 'TUNAI' ? `
+                ${
+                    transaction.metode_bayar === 'TUNAI'
+                        ? `
                 <tr>
                     <td class="label">Dibayar:</td>
-                    <td class="value">Rp ${(transaction.jumlah_bayar || 0).toLocaleString('id-ID')}</td>
+                    <td class="value">Rp ${Number(transaction.jumlah_bayar || 0).toLocaleString('id-ID')}</td>
                 </tr>
+                ${kembalian > 0 ? `
                 <tr class="total">
                     <td class="label">Kembalian:</td>
-                    <td class="value">Rp ${kembalian.toLocaleString('id-ID')}</td>
-                </tr>
-                ` : ''}
+                    <td class="value">Rp ${Number(kembalian).toLocaleString('id-ID')}</td>
+                </tr>` : ''}
+                `
+                        : ''
+                }
             </table>
             
             <div class="divider"></div>
