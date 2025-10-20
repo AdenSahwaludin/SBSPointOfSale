@@ -159,8 +159,21 @@ class TransaksiController extends Controller
     ]);
 
     $transaksi = Transaksi::findOrFail($nomorTransaksi);
+    $previousStatus = $transaksi->status_pembayaran;
     $transaksi->status_pembayaran = $request->status_pembayaran;
     $transaksi->save(); // updated_at akan otomatis terupdate
+
+    // Jika transaksi kredit dilunasi (dari non-LUNAS ke LUNAS), kembalikan kredit limit sesuai outstanding
+    if ($transaksi->jenis_transaksi === Transaksi::JENIS_KREDIT && $previousStatus !== Transaksi::STATUS_LUNAS && $transaksi->status_pembayaran === Transaksi::STATUS_LUNAS) {
+      $outstanding = max(0, (float)$transaksi->total - (float)$transaksi->dp);
+      if ($outstanding > 0) {
+        $pelanggan = \App\Models\Pelanggan::find($transaksi->id_pelanggan);
+        if ($pelanggan) {
+          $pelanggan->credit_limit = ((float)$pelanggan->credit_limit) + $outstanding;
+          $pelanggan->save();
+        }
+      }
+    }
 
     return back()->with('success', 'Status transaksi berhasil diperbarui');
   }

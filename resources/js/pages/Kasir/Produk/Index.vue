@@ -4,6 +4,7 @@ import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 
 interface Kategori {
     id_kategori: number;
@@ -99,6 +100,24 @@ function performSearch() {
     );
 }
 
+// Debounced search action for better UX
+const { onInput: onProdukSearchInput } = useDebouncedSearch({
+    wait: 300,
+    minLength: 1,
+    search: async () => {
+        router.get(
+            '/kasir/products',
+            {
+                search: searchQuery.value,
+                kategori: selectedKategori.value !== 'all' ? selectedKategori.value : undefined,
+                stok_status: selectedStokStatus.value !== 'all' ? selectedStokStatus.value : undefined,
+                per_page: perPage.value,
+            },
+            { preserveState: true, preserveScroll: true },
+        );
+    },
+});
+
 function changePerPage() {
     router.get(
         '/kasir/products',
@@ -150,6 +169,42 @@ function closeDetailModal() {
 
 function formatCurrency(amount: number): string {
     return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+}
+
+// Safely compute per-satuan price
+function getPackPrice(p: Produk): number {
+    const hargaPack = Number(p.harga_pack || 0);
+    if (hargaPack > 0) return hargaPack;
+    const unit = String(p.satuan || '').toLowerCase();
+    // Jika satuan besar (karton/pack) dan harga diisi di `harga`, anggap itu harga per pack
+    if ((unit === 'karton' || unit === 'pack') && p.harga) return Number(p.harga);
+    return 0;
+}
+
+function getPerUnitPrice(p: Produk): number {
+    const unit = String(p.satuan || '').toLowerCase();
+    const isi = Number(p.isi_per_pack || 0);
+    const harga = Number(p.harga || 0);
+    // Jika satuan besar, turunkan harga per-satuan dari harga pack
+    if ((unit === 'karton' || unit === 'pack') && isi > 0) {
+        const packPrice = getPackPrice(p);
+        return packPrice > 0 ? Math.round(packPrice / isi) : 0;
+    }
+    // Selain itu, anggap `harga` adalah per-satuan
+    if (harga > 0) return harga;
+    // Fallback: jika ada harga pack + isi, turunkan
+    if (isi > 0) {
+        const packPrice = getPackPrice(p);
+        if (packPrice > 0) return Math.round(packPrice / isi);
+    }
+    return 0;
+}
+
+function hasPack(p: Produk): boolean {
+    const unit = String(p.satuan || '').toLowerCase();
+    const isi = Number(p.isi_per_pack || 0);
+    const packPrice = getPackPrice(p);
+    return Boolean(isi > 1 && packPrice > 0 && (unit === 'karton' || unit === 'pack' || p.harga_pack));
 }
 
 function getStokBadgeClass(stok: number): string {
@@ -259,6 +314,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                             <div class="relative flex-1">
                                 <input
                                     v-model="searchQuery"
+                                    @input="onProdukSearchInput()"
                                     @keyup.enter="handleSearch"
                                     type="text"
                                     placeholder="Cari nama, SKU, atau barcode produk..."
@@ -379,12 +435,18 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
 
                                 <!-- Price Section -->
                                 <div class="mb-4 rounded-lg bg-gradient-to-br from-emerald-50 to-green-50 p-3">
-                                    <p class="text-xl font-bold text-emerald-700">{{ formatCurrency(produk.harga) }}</p>
-                                    <p class="text-xs text-emerald-600">per {{ produk.satuan }}</p>
-                                    <p v-if="produk.harga_pack && produk.isi_per_pack > 1" class="mt-2 text-xs text-blue-700">
-                                        <span class="font-semibold">{{ formatCurrency(produk.harga_pack) }}</span> / pack
-                                        <span class="text-blue-600">({{ produk.isi_per_pack }} {{ produk.satuan }})</span>
-                                    </p>
+                                    <div v-if="hasPack(produk)">
+                                        <p class="text-xl font-bold text-emerald-700">{{ formatCurrency(getPackPrice(produk)) }}</p>
+                                        <p class="text-xs text-emerald-600">per pack ({{ produk.isi_per_pack }} satuan)</p>
+                                        <p class="mt-2 text-xs text-blue-700">
+                                            <span class="font-semibold">{{ formatCurrency(getPerUnitPrice(produk)) }}</span>
+                                            <span class="text-blue-600">per satuan</span>
+                                        </p>
+                                    </div>
+                                    <div v-else>
+                                        <p class="text-xl font-bold text-emerald-700">{{ formatCurrency(getPerUnitPrice(produk)) }}</p>
+                                        <p class="text-xs text-emerald-600">per satuan</p>
+                                    </div>
                                 </div>
 
                                 <!-- Stock Status -->
@@ -529,16 +591,17 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                             <div class="rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
                                 <p class="text-xs font-semibold text-emerald-700 uppercase">Harga</p>
                                 <div class="mt-3 space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm text-emerald-700">Per Satuan</span>
-                                        <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(selectedProduk.harga) }}</span>
-                                    </div>
-                                    <div
-                                        v-if="selectedProduk.harga_pack && selectedProduk.isi_per_pack > 1"
-                                        class="flex items-center justify-between border-t border-emerald-200 pt-2"
-                                    >
+                                    <div v-if="hasPack(selectedProduk)" class="flex items-center justify-between">
                                         <span class="text-sm text-emerald-700">Per Pack ({{ selectedProduk.isi_per_pack }})</span>
-                                        <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(selectedProduk.harga_pack) }}</span>
+                                        <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(getPackPrice(selectedProduk)) }}</span>
+                                    </div>
+                                    <div v-if="hasPack(selectedProduk)" class="flex items-center justify-between border-t border-emerald-200 pt-2">
+                                        <span class="text-sm text-emerald-700">Per Satuan</span>
+                                        <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(getPerUnitPrice(selectedProduk)) }}</span>
+                                    </div>
+                                    <div v-else class="flex items-center justify-between">
+                                        <span class="text-sm text-emerald-700">Per Satuan</span>
+                                        <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(getPerUnitPrice(selectedProduk)) }}</span>
                                     </div>
                                 </div>
                             </div>

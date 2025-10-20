@@ -72,6 +72,7 @@ class TransaksiPOSController extends Controller
             ->get()
             ->map(function ($p) use ($searchTerm) {
                 $score = 0;
+                $matched = false;
 
                 // Field values untuk scoring
                 $nama = strtolower($p->nama);
@@ -82,60 +83,69 @@ class TransaksiPOSController extends Controller
                 // 1. Exact match (highest priority)
                 if ($barcode === $searchTerm) {
                     $score += 1000; // Barcode exact match
+                    $matched = true;
                 }
                 if ($sku === $searchTerm) {
                     $score += 900; // SKU exact match
+                    $matched = true;
                 }
                 if ($nama === $searchTerm) {
                     $score += 800; // Nama exact match
+                    $matched = true;
                 }
 
                 // 2. Starts with (high priority)
                 if (str_starts_with($barcode, $searchTerm)) {
                     $score += 700;
+                    $matched = true;
                 }
                 if (str_starts_with($sku, $searchTerm)) {
                     $score += 600;
+                    $matched = true;
                 }
                 if (str_starts_with($nama, $searchTerm)) {
                     $score += 500;
+                    $matched = true;
                 }
 
                 // 3. Contains (medium priority)
                 if (str_contains($barcode, $searchTerm)) {
                     $score += 400;
+                    $matched = true;
                 }
                 if (str_contains($sku, $searchTerm)) {
                     $score += 300;
+                    $matched = true;
                 }
                 if (str_contains($nama, $searchTerm)) {
                     $score += 200;
+                    $matched = true;
                 }
                 if (str_contains($kategori, $searchTerm)) {
-                    $score += 100;
+                    $score += 50; // kategori menambah skor tapi tidak memicu match
                 }
 
                 // 4. Word-by-word search (untuk query multi-kata)
-                $searchWords = explode(' ', $searchTerm);
+                $searchWords = array_filter(explode(' ', $searchTerm));
                 foreach ($searchWords as $word) {
                     if (strlen($word) > 2) { // Skip kata pendek
-                        if (str_contains($nama, $word)) {
-                            $score += 50;
-                        }
-                        if (str_contains($sku, $word)) {
-                            $score += 40;
-                        }
+                        if (str_contains($nama, $word)) { $score += 60; $matched = true; }
+                        if (str_contains($sku, $word)) { $score += 40; $matched = true; }
                     }
                 }
 
-                // 5. Fuzzy matching untuk typo tolerance
-                // Hitung similarity menggunakan levenshtein untuk nama
-                $nameWords = explode(' ', $nama);
-                foreach ($nameWords as $nameWord) {
-                    if (strlen($nameWord) > 3 && strlen($searchTerm) > 3) {
-                        $similarity = similar_text($searchTerm, $nameWord);
-                        if ($similarity > 2) {
-                            $score += $similarity * 10;
+                // 5. Fuzzy matching kuat (aktif hanya jika belum match)
+                if (!$matched && strlen($searchTerm) > 3) {
+                    $nameWords = array_filter(explode(' ', $nama));
+                    foreach ($nameWords as $nameWord) {
+                        if (strlen($nameWord) > 3) {
+                            $percent = 0.0;
+                            similar_text($searchTerm, $nameWord, $percent);
+                            if ($percent >= 70) {
+                                $score += (int) round($percent);
+                                $matched = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -152,16 +162,17 @@ class TransaksiPOSController extends Controller
                     'isi_per_pack' => $p->isi_per_pack,
                     'kategori' => $p->kategori,
                     '_score' => $score, // Internal scoring
+                    '_match' => $matched,
                 ];
             })
             ->filter(function ($item) {
-                return $item['_score'] > 0; // Hanya ambil yang match
+                return ($item['_score'] > 0) && !empty($item['_match']);
             })
             ->sortByDesc('_score') // Sort by relevance
             ->take(10) // Limit hasil
             ->values()
             ->map(function ($item) {
-                unset($item['_score']); // Remove internal score dari response
+                unset($item['_score'], $item['_match']);
                 return $item;
             });
 
@@ -239,6 +250,30 @@ class TransaksiPOSController extends Controller
 
             // Untuk non-tunai, set jumlah_bayar = total (tidak ada kembalian)
             $jumlahBayar = $isCashPayment ? $request->jumlah_bayar : $request->total;
+
+            // Enforce credit limit rules for credit transactions
+            if ($isCredit) {
+                $dp = (float)($request->dp ?? 0);
+                $total = (float)$request->total;
+                $creditPortion = max(0.0, $total - $dp);
+
+                // Ambil available limit dari kolom credit_limit (diperlakukan sebagai available)
+                $customer = \App\Models\Pelanggan::lockForUpdate()->find($request->id_pelanggan);
+                $available = (float)($customer->credit_limit ?? 0);
+
+                if ($creditPortion > $available) {
+                    $minDp = max(0.0, $total - $available);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Transaksi melebihi kredit limit. Tambahkan DP minimal: Rp ' . number_format($minDp, 0, ',', '.'),
+                        'errors' => [ 'dp' => ['DP minimal yang dibutuhkan: ' . $minDp] ],
+                    ], 422);
+                }
+
+                // Kurangi available limit sesuai porsi kredit
+                $customer->credit_limit = $available - $creditPortion;
+                $customer->save();
+            }
 
             // Create transaksi (siapkan field Cicilan Pintar untuk implementasi nanti)
             $transaksi = Transaksi::create([

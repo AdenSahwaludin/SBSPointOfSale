@@ -6,6 +6,7 @@ import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 
 interface Kategori {
     id_kategori: number;
@@ -61,14 +62,25 @@ const searchQuery = ref('');
 const barcodeInput = ref('');
 const cart = ref<CartItem[]>([]);
 const selectedPelanggan = ref<string>('P001'); // Default to 'Umum'
+const pelangganSearchQuery = ref('');
+const showPelangganDropdown = ref(false);
+const activePelangganIndex = ref(0);
 const metodeBayar = ref<string>('TUNAI');
 const jumlahBayar = ref<number>(0);
 const dpBayar = ref<number>(0); // DP untuk kredit
 const diskonGlobal = ref<number>(0);
 const pajakRate = ref<number>(0);
-const searchResults = ref<Produk[]>([]); // Hasil search dari API
-const isSearching = ref(false); // Loading state
-const searchTimeout = ref<number | null>(null); // Debounce timer
+const { query: productQuery, isSearching: isSearchingProducts, results: productResults, onInput: onProductSearchInput, clear: clearProductSearch, trigger: triggerProductSearch } = useDebouncedSearch<Produk>({
+    wait: 300,
+    minLength: 2,
+    search: async (q: string) => {
+        const response = await fetch(`/kasir/pos/search-produk?q=${encodeURIComponent(q)}`);
+        if (!response.ok) throw new Error('Search failed');
+        return (await response.json()) as Produk[];
+    },
+});
+const searchResults = productResults; // alias
+const isSearching = isSearchingProducts; // alias
 
 // Modal confirmation
 const showConfirmationModal = ref(false);
@@ -103,6 +115,48 @@ const filteredProduk = computed(() => {
 
     return filtered;
 });
+
+const filteredPelanggan = computed(() => {
+    const q = pelangganSearchQuery.value.trim().toLowerCase();
+    if (!q) return props.pelanggan;
+    return props.pelanggan.filter((p) => {
+        const name = (p.nama || '').toLowerCase();
+        const email = (p.email || '').toLowerCase();
+        const telp = (p.telepon || '').toLowerCase();
+        return name.includes(q) || email.includes(q) || telp.includes(q);
+    });
+});
+
+function openPelangganDropdown() {
+    showPelangganDropdown.value = true;
+    // Set active index to selected pelanggan if visible, else 0
+    const idx = filteredPelanggan.value.findIndex((p) => p.id_pelanggan === selectedPelanggan.value);
+    activePelangganIndex.value = idx >= 0 ? idx : 0;
+}
+
+function handlePelangganKeydown(e: KeyboardEvent) {
+    if (!showPelangganDropdown.value) return;
+    const len = filteredPelanggan.value.length;
+    if (len === 0) return;
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activePelangganIndex.value = (activePelangganIndex.value + 1) % len;
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activePelangganIndex.value = (activePelangganIndex.value - 1 + len) % len;
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const p = filteredPelanggan.value[activePelangganIndex.value];
+        if (p) {
+            selectedPelanggan.value = p.id_pelanggan;
+            pelangganSearchQuery.value = '';
+            showPelangganDropdown.value = false;
+        }
+    } else if (e.key === 'Escape') {
+        e.preventDefault();
+        showPelangganDropdown.value = false;
+    }
+}
 
 const subtotal = computed(() => {
     const result = cart.value.reduce((sum, item) => Number(sum) + Number(item.subtotal || 0), 0);
@@ -326,46 +380,10 @@ function clearCart() {
     jumlahBayar.value = 0;
 }
 
-// Live search dengan debounce
+// Live search (debounced) using composable
 function handleSearchInput() {
-    // Clear previous timeout
-    if (searchTimeout.value) {
-        clearTimeout(searchTimeout.value);
-    }
-
-    // Reset jika query kosong
-    if (!searchQuery.value || searchQuery.value.length < 2) {
-        searchResults.value = [];
-        isSearching.value = false;
-        return;
-    }
-
-    // Set loading state
-    isSearching.value = true;
-
-    // Debounce 300ms
-    searchTimeout.value = window.setTimeout(() => {
-        performSearch();
-    }, 300);
-}
-
-async function performSearch() {
-    try {
-        const response = await fetch(`/kasir/pos/search-produk?q=${encodeURIComponent(searchQuery.value)}`);
-        if (!response.ok) throw new Error('Search failed');
-
-        const data = await response.json();
-        searchResults.value = data;
-    } catch (error) {
-        console.error('Search error:', error);
-        addNotification({
-            type: 'error',
-            title: 'Pencarian gagal!',
-        });
-        searchResults.value = [];
-    } finally {
-        isSearching.value = false;
-    }
+    productQuery.value = searchQuery.value;
+    onProductSearchInput();
 }
 
 function handleBarcodeInput() {
@@ -407,17 +425,7 @@ function processTransaction() {
         return;
     }
 
-    // Validate kredit DP
-    if (metodeBayar.value === 'KREDIT') {
-        if (dpBayar.value <= 0) {
-            addNotification({ type: 'warning', title: 'DP kredit harus lebih dari 0' });
-            return;
-        }
-        if (dpBayar.value >= total.value) {
-            addNotification({ type: 'warning', title: 'DP tidak boleh sama/lebih besar dari total' });
-            return;
-        }
-    }
+    // Kredit: DP boleh 0, biarkan server validasi limit dan kondisi lainnya
 
     // Prepare transaction data for confirmation
     const selectedPelangganObj = props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value);
@@ -461,9 +469,13 @@ function handleConfirmTransaction() {
         },
         body: JSON.stringify(requestData),
     })
-        .then((response) => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
+        .then(async (response) => {
+            const data = await response.json().catch(() => null);
+            if (!response.ok) {
+                const msg = data?.message || 'Gagal menyimpan transaksi!';
+                throw new Error(msg);
+            }
+            return data;
         })
         .then((data) => {
             if (data.success) {
@@ -485,9 +497,11 @@ function handleConfirmTransaction() {
             }
         })
         .catch((error) => {
+            const msg = error?.message || 'Gagal menyimpan transaksi!';
+            const isCreditLimit = /kredit\s*limit/i.test(msg);
             addNotification({
-                type: 'error',
-                title: 'Gagal menyimpan transaksi!',
+                type: isCreditLimit ? 'warning' : 'error',
+                title: msg,
             });
             console.error('Transaction error:', error);
         });
@@ -529,9 +543,13 @@ function handlePrintReceipt() {
         },
         body: JSON.stringify(requestData),
     })
-        .then((response) => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
+        .then(async (response) => {
+            const data = await response.json().catch(() => null);
+            if (!response.ok) {
+                const msg = data?.message || 'Gagal menyimpan transaksi!';
+                throw new Error(msg);
+            }
+            return data;
         })
         .then((data) => {
             if (data.success) {
@@ -572,9 +590,11 @@ function handlePrintReceipt() {
             }
         })
         .catch((error) => {
+            const msg = error?.message || 'Gagal menyimpan transaksi!';
+            const isCreditLimit = /kredit\s*limit/i.test(msg);
             addNotification({
-                type: 'error',
-                title: 'Gagal menyimpan transaksi!',
+                type: isCreditLimit ? 'warning' : 'error',
+                title: msg,
             });
             console.error('Transaction error:', error);
         });
@@ -762,6 +782,7 @@ function generateReceiptHTML(transaction: any): string {
 
 function resetForm() {
     selectedPelanggan.value = 'P001';
+    pelangganSearchQuery.value = '';
     metodeBayar.value = 'TUNAI';
     diskonGlobal.value = 0;
     jumlahBayar.value = 0;
@@ -870,7 +891,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                             v-model="selectedKategori"
                             @change="
                                 searchQuery = '';
-                                searchResults = [];
+                                clearProductSearch();
                             "
                             class="rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                         >
@@ -982,14 +1003,62 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     <!-- Customer Selection -->
                     <div class="mb-4">
                         <label class="mb-2 block text-sm font-medium text-gray-700">Pelanggan</label>
-                        <select
-                            v-model="selectedPelanggan"
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
-                        >
-                            <option v-for="pelanggan in props.pelanggan" :key="pelanggan.id_pelanggan" :value="pelanggan.id_pelanggan">
-                                {{ pelanggan.nama }}
-                            </option>
-                        </select>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                v-model="pelangganSearchQuery"
+                                @focus="openPelangganDropdown()"
+                                @blur="
+                                    setTimeout(() => {
+                                        showPelangganDropdown = false;
+                                    }, 200)
+                                "
+                                @keydown="handlePelangganKeydown"
+                                :placeholder="props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan)?.nama || 'Cari pelanggan...'"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
+                            />
+                            <button
+                                v-if="pelangganSearchQuery"
+                                @click="
+                                    pelangganSearchQuery = '';
+                                    openPelangganDropdown();
+                                "
+                                type="button"
+                                class="absolute top-1/2 right-8 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                aria-label="Clear"
+                            >
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <i class="fas fa-search absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"></i>
+
+                            <!-- Dropdown -->
+                            <div
+                                v-if="showPelangganDropdown"
+                                class="absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg"
+                            >
+                                <div v-if="filteredPelanggan.length === 0" class="px-3 py-2 text-sm text-gray-500">Tidak ada pelanggan ditemukan</div>
+                                <button
+                                    v-for="(pelanggan, idx) in filteredPelanggan"
+                                    :key="pelanggan.id_pelanggan"
+                                    @click="
+                                        selectedPelanggan = pelanggan.id_pelanggan;
+                                        pelangganSearchQuery = '';
+                                        showPelangganDropdown = false;
+                                    "
+                                    :class="[
+                                        'w-full px-3 py-2 text-left text-sm transition-colors hover:bg-emerald-50',
+                                        selectedPelanggan === pelanggan.id_pelanggan || activePelangganIndex === idx
+                                            ? 'bg-emerald-100 font-semibold text-emerald-700'
+                                            : 'text-gray-900',
+                                    ]"
+                                >
+                                    <div class="font-medium">{{ pelanggan.nama }}</div>
+                                    <div class="text-xs text-gray-500" v-if="pelanggan.email || pelanggan.telepon">
+                                        {{ pelanggan.email || pelanggan.telepon }}
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
