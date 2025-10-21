@@ -92,13 +92,13 @@ function getTrustScoreColor(score: number) {
                         <h3 class="mb-3 font-medium text-emerald-700">Informasi Kontak</h3>
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div class="rounded-lg bg-emerald-50 p-3">
-                                <div class="text-xs uppercase tracking-wider text-emerald-600">Email</div>
+                                <div class="text-xs tracking-wider text-emerald-600 uppercase">Email</div>
                                 <div class="mt-1 text-sm text-emerald-800">
                                     {{ pelanggan.email || '-' }}
                                 </div>
                             </div>
                             <div class="rounded-lg bg-emerald-50 p-3">
-                                <div class="text-xs uppercase tracking-wider text-emerald-600">Telepon</div>
+                                <div class="text-xs tracking-wider text-emerald-600 uppercase">Telepon</div>
                                 <div class="mt-1 text-sm text-emerald-800">
                                     {{ pelanggan.telepon || '-' }}
                                 </div>
@@ -121,7 +121,7 @@ function getTrustScoreColor(score: number) {
                         <h3 class="mb-3 font-medium text-emerald-700">Informasi Kredit (Read-only)</h3>
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div class="rounded-lg bg-emerald-50 p-3">
-                                <div class="text-xs uppercase tracking-wider text-emerald-600">Trust Score</div>
+                                <div class="text-xs tracking-wider text-emerald-600 uppercase">Trust Score</div>
                                 <div class="mt-2">
                                     <span
                                         :class="getTrustScoreColor(pelanggan.trust_score)"
@@ -133,7 +133,7 @@ function getTrustScoreColor(score: number) {
                                 <p class="mt-2 text-xs text-emerald-600">Diatur oleh Admin</p>
                             </div>
                             <div class="rounded-lg bg-emerald-50 p-3">
-                                <div class="text-xs uppercase tracking-wider text-emerald-600">Credit Limit</div>
+                                <div class="text-xs tracking-wider text-emerald-600 uppercase">Credit Limit</div>
                                 <div class="mt-1 text-sm font-medium text-emerald-800">
                                     {{ formatCurrency(pelanggan.credit_limit) }}
                                 </div>
@@ -144,7 +144,7 @@ function getTrustScoreColor(score: number) {
 
                     <!-- Timestamps -->
                     <div class="rounded-lg bg-gray-50 p-3">
-                        <div class="text-xs uppercase tracking-wider text-gray-600">Tanggal Daftar</div>
+                        <div class="text-xs tracking-wider text-gray-600 uppercase">Tanggal Daftar</div>
                         <div class="mt-1 text-sm text-gray-800">
                             {{ formatDate(pelanggan.created_at) }}
                         </div>
@@ -154,11 +154,7 @@ function getTrustScoreColor(score: number) {
 
             <!-- Action Buttons -->
             <div class="flex gap-3">
-                <BaseButton
-                    @click="$inertia.visit(`/kasir/customers/${pelanggan.id_pelanggan}/edit`)"
-                    variant="primary"
-                    icon="fas fa-edit"
-                >
+                <BaseButton @click="$inertia.visit(`/kasir/customers/${pelanggan.id_pelanggan}/edit`)" variant="primary" icon="fas fa-edit">
                     Edit Pelanggan
                 </BaseButton>
                 <BaseButton @click="confirmDelete" variant="danger" icon="fas fa-trash"> Hapus </BaseButton>

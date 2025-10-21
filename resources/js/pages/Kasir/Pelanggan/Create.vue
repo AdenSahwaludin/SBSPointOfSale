@@ -147,7 +147,9 @@ function submit() {
                     </div>
                     <div>
                         <h4 class="font-medium text-blue-800">Catatan untuk Kasir</h4>
-                        <p class="text-sm text-blue-700">Trust Score dan Credit Limit akan diatur oleh Admin. Anda hanya perlu mengisi data dasar pelanggan.</p>
+                        <p class="text-sm text-blue-700">
+                            Trust Score dan Credit Limit akan diatur oleh Admin. Anda hanya perlu mengisi data dasar pelanggan.
+                        </p>
                     </div>
                 </div>
             </div>
