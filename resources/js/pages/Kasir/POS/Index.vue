@@ -125,9 +125,7 @@ const filteredProduk = computed(() => {
 });
 
 // Selected customer and credit info
-const selectedCustomer = computed<Pelanggan | undefined>(() =>
-    props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value),
-);
+const selectedCustomer = computed<Pelanggan | undefined>(() => props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value));
 const availableCredit = computed<number>(() => Number(selectedCustomer.value?.credit_limit || 0));
 const minimalDp = computed<number>(() => {
     if (metodeBayar.value !== 'KREDIT') return 0;
@@ -1116,7 +1114,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     </div>
 
                     <div v-else class="space-y-3">
-                        <div v-for="(item, index) in cart" :key="`${item.id_produk}-${item.mode_qty}`" class="rounded-lg bg-gray-50 p-3">
+                        <div v-for="(item, index) in cart" :key="`${item.id_produk}-${item.mode_qty}`" class="rounded-lg bg-gray-50">
                             <div class="mb-2 flex items-start justify-between">
                                 <h4 class="line-clamp-2 text-sm font-medium text-gray-900">{{ item.nama }}</h4>
                                 <button @click="removeFromCart(index)" class="text-xs text-red-500 hover:text-red-700">

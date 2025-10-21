@@ -48,6 +48,19 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
  });
 
  // ==========================================
+ // CUSTOMERS (Limited CRUD - Kasir specific)
+ // ==========================================
+ Route::prefix('customers')->name('customers.')->group(function () {
+  Route::get('/', [\App\Http\Controllers\Kasir\PelangganController::class, 'index'])->name('index');
+  Route::get('/create', [\App\Http\Controllers\Kasir\PelangganController::class, 'create'])->name('create');
+  Route::post('/', [\App\Http\Controllers\Kasir\PelangganController::class, 'store'])->name('store');
+  Route::get('/{id}', [\App\Http\Controllers\Kasir\PelangganController::class, 'show'])->name('show');
+  Route::get('/{id}/edit', [\App\Http\Controllers\Kasir\PelangganController::class, 'edit'])->name('edit');
+  Route::patch('/{id}', [\App\Http\Controllers\Kasir\PelangganController::class, 'update'])->name('update');
+  Route::delete('/{id}', [\App\Http\Controllers\Kasir\PelangganController::class, 'destroy'])->name('destroy');
+ });
+
+ // ==========================================
  // PROFILE MANAGEMENT (Kasir specific)
  // ==========================================
  Route::prefix('profile')->name('profile.')->group(function () {

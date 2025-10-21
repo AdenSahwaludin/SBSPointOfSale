@@ -1,0 +1,156 @@
+<script lang="ts" setup>
+import BaseButton from '@/components/BaseButton.vue';
+import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
+import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
+import { Head, useForm } from '@inertiajs/vue3';
+
+interface Props {
+    nextId: string;
+}
+
+const props = defineProps<Props>();
+
+const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/customers');
+
+const form = useForm({
+    id_pelanggan: props.nextId,
+    nama: '',
+    email: '',
+    telepon: '',
+    alamat: '',
+});
+
+function submit() {
+    form.post('/kasir/customers', {
+        onSuccess: () => {
+            form.reset();
+        },
+    });
+}
+</script>
+
+<template>
+    <Head title="Tambah Pelanggan - Kasir" />
+
+    <BaseLayout :menuItems="kasirMenuItems" userRole="kasir">
+        <div class="space-y-6">
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-emerald-800">Tambah Pelanggan</h1>
+                    <p class="text-emerald-600">Tambahkan pelanggan baru</p>
+                </div>
+                <BaseButton @click="$inertia.visit('/kasir/customers')" variant="secondary" icon="fas fa-arrow-left"> Kembali </BaseButton>
+            </div>
+
+            <!-- Form -->
+            <div class="card-emerald">
+                <form @submit.prevent="submit" class="space-y-6">
+                    <!-- ID Pelanggan -->
+                    <div>
+                        <label for="id_pelanggan" class="mb-2 block text-sm font-medium text-emerald-700">
+                            ID Pelanggan <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="id_pelanggan"
+                            v-model="form.id_pelanggan"
+                            type="text"
+                            required
+                            readonly
+                            class="w-full rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                        />
+                        <p class="mt-1 text-sm text-emerald-600">ID akan digenerate otomatis</p>
+                        <div v-if="form.errors.id_pelanggan" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.id_pelanggan }}
+                        </div>
+                    </div>
+
+                    <!-- Nama -->
+                    <div>
+                        <label for="nama" class="mb-2 block text-sm font-medium text-emerald-700">
+                            Nama Pelanggan <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="nama"
+                            v-model="form.nama"
+                            type="text"
+                            required
+                            class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                            placeholder="Masukkan nama pelanggan"
+                        />
+                        <div v-if="form.errors.nama" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.nama }}
+                        </div>
+                    </div>
+
+                    <!-- Email & Telepon -->
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div>
+                            <label for="email" class="mb-2 block text-sm font-medium text-emerald-700"> Email </label>
+                            <input
+                                id="email"
+                                v-model="form.email"
+                                type="email"
+                                class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                                placeholder="email@contoh.com"
+                            />
+                            <div v-if="form.errors.email" class="mt-1 text-sm text-red-600">
+                                {{ form.errors.email }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="telepon" class="mb-2 block text-sm font-medium text-emerald-700"> Telepon </label>
+                            <input
+                                id="telepon"
+                                v-model="form.telepon"
+                                type="tel"
+                                class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                                placeholder="081234567890"
+                            />
+                            <div v-if="form.errors.telepon" class="mt-1 text-sm text-red-600">
+                                {{ form.errors.telepon }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alamat -->
+                    <div>
+                        <label for="alamat" class="mb-2 block text-sm font-medium text-emerald-700"> Alamat </label>
+                        <textarea
+                            id="alamat"
+                            v-model="form.alamat"
+                            rows="3"
+                            class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                            placeholder="Masukkan alamat lengkap"
+                        ></textarea>
+                        <div v-if="form.errors.alamat" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.alamat }}
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-end gap-3">
+                        <BaseButton @click="$inertia.visit('/kasir/customers')" type="button" variant="secondary"> Batal </BaseButton>
+                        <BaseButton type="submit" variant="primary" :disabled="form.processing" icon="fas fa-save">
+                            {{ form.processing ? 'Menyimpan...' : 'Simpan Pelanggan' }}
+                        </BaseButton>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Info Box -->
+            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <div class="flex gap-3">
+                    <div class="text-blue-600">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-blue-800">Catatan untuk Kasir</h4>
+                        <p class="text-sm text-blue-700">Trust Score dan Credit Limit akan diatur oleh Admin. Anda hanya perlu mengisi data dasar pelanggan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </BaseLayout>
+</template>

@@ -32,6 +32,11 @@ export function useKasirMenuItems(): MenuItem[] {
             icon: 'fas fa-boxes',
         },
         {
+            name: 'Pelanggan',
+            href: '/kasir/customers',
+            icon: 'fas fa-users',
+        },
+        {
             name: 'Profile',
             href: '/kasir/profile',
             icon: 'fas fa-user-circle',
