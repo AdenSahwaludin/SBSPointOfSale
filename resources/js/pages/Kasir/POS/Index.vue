@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
 import TransactionConfirmationModal from '@/components/TransactionConfirmationModal.vue';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
-import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 
 interface Kategori {
     id_kategori: number;
@@ -30,6 +30,7 @@ interface Pelanggan {
     nama: string;
     email?: string;
     telepon?: string;
+    credit_limit?: number; // sisa limit tersedia
 }
 
 interface CartItem {
@@ -70,7 +71,14 @@ const jumlahBayar = ref<number>(0);
 const dpBayar = ref<number>(0); // DP untuk kredit
 const diskonGlobal = ref<number>(0);
 const pajakRate = ref<number>(0);
-const { query: productQuery, isSearching: isSearchingProducts, results: productResults, onInput: onProductSearchInput, clear: clearProductSearch, trigger: triggerProductSearch } = useDebouncedSearch<Produk>({
+const {
+    query: productQuery,
+    isSearching: isSearchingProducts,
+    results: productResults,
+    onInput: onProductSearchInput,
+    clear: clearProductSearch,
+    trigger: triggerProductSearch,
+} = useDebouncedSearch<Produk>({
     wait: 300,
     minLength: 2,
     search: async (q: string) => {
@@ -116,6 +124,18 @@ const filteredProduk = computed(() => {
     return filtered;
 });
 
+// Selected customer and credit info
+const selectedCustomer = computed<Pelanggan | undefined>(() =>
+    props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value),
+);
+const availableCredit = computed<number>(() => Number(selectedCustomer.value?.credit_limit || 0));
+const minimalDp = computed<number>(() => {
+    if (metodeBayar.value !== 'KREDIT') return 0;
+    const t = Number(total.value || 0);
+    const avail = availableCredit.value;
+    return Math.max(0, t - avail);
+});
+
 const filteredPelanggan = computed(() => {
     const q = pelangganSearchQuery.value.trim().toLowerCase();
     if (!q) return props.pelanggan;
@@ -156,6 +176,12 @@ function handlePelangganKeydown(e: KeyboardEvent) {
         e.preventDefault();
         showPelangganDropdown.value = false;
     }
+}
+
+function closePelangganDropdownDelayed() {
+    setTimeout(() => {
+        showPelangganDropdown.value = false;
+    }, 200);
 }
 
 const subtotal = computed(() => {
@@ -1008,11 +1034,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                 type="text"
                                 v-model="pelangganSearchQuery"
                                 @focus="openPelangganDropdown()"
-                                @blur="
-                                    setTimeout(() => {
-                                        showPelangganDropdown = false;
-                                    }, 200)
-                                "
+                                @blur="closePelangganDropdownDelayed()"
                                 @keydown="handlePelangganKeydown"
                                 :placeholder="props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan)?.nama || 'Cari pelanggan...'"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
@@ -1057,6 +1079,30 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                         {{ pelanggan.email || pelanggan.telepon }}
                                     </div>
                                 </button>
+                            </div>
+                        </div>
+                        <!-- Customer Info -->
+                        <div v-if="selectedCustomer" class="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="font-semibold text-gray-900">{{ selectedCustomer.nama }}</div>
+                                    <div class="text-xs text-gray-500">ID: {{ selectedCustomer.id_pelanggan }}</div>
+                                    <div v-if="selectedCustomer.telepon || selectedCustomer.email" class="mt-1 text-xs text-gray-600">
+                                        {{ selectedCustomer.telepon || selectedCustomer.email }}
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xs text-gray-500">Limit Tersedia</div>
+                                    <div class="font-bold text-emerald-600">{{ formatCurrency(availableCredit) }}</div>
+                                </div>
+                            </div>
+                            <div v-if="metodeBayar === 'KREDIT'" class="mt-2 rounded bg-amber-50 p-2 text-xs text-amber-800">
+                                <div>
+                                    Minimal DP jika melebihi limit:
+                                    <span class="font-semibold">{{ formatCurrency(minimalDp) }}</span>
+                                </div>
+                                <div v-if="minimalDp > 0" class="mt-1">Transaksi melampaui limit, tambahkan DP minimal tersebut.</div>
+                                <div v-else class="mt-1">DP tidak diperlukan berdasarkan limit tersedia.</div>
                             </div>
                         </div>
                     </div>

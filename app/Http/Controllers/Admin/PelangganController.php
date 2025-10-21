@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
+use App\Services\TrustScoreService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -23,6 +24,11 @@ class PelangganController extends Controller
             ->orderBy($request->get('sort_by', 'created_at'), $request->get('sort_order', 'desc'))
             ->paginate(10)
             ->withQueryString();
+
+        // Auto-apply account age rule so trust_score increases after 30/180 days
+        $pelanggan->getCollection()->each(function (Pelanggan $p) {
+            TrustScoreService::applyAccountAgeRule($p);
+        });
 
         return Inertia::render('Admin/Pelanggan/Index', [
             'pelanggan' => $pelanggan,
@@ -69,6 +75,7 @@ class PelangganController extends Controller
     public function show(string $id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
+        TrustScoreService::applyAccountAgeRule($pelanggan);
 
         return Inertia::render('Admin/Pelanggan/Show', [
             'pelanggan' => $pelanggan
@@ -81,6 +88,7 @@ class PelangganController extends Controller
     public function edit(string $id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
+        TrustScoreService::applyAccountAgeRule($pelanggan);
 
         return Inertia::render('Admin/Pelanggan/Edit', [
             'pelanggan' => $pelanggan
