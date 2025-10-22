@@ -25,12 +25,15 @@ class Pelanggan extends Model
         'aktif',
         'trust_score',
         'credit_limit',
+        'status_kredit',
+        'saldo_kredit',
     ];
 
     protected $casts = [
         'aktif' => 'boolean',
         'trust_score' => 'integer',
         'credit_limit' => 'decimal:0',
+        'saldo_kredit' => 'decimal:0',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

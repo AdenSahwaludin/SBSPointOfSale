@@ -24,6 +24,8 @@ class PelangganSeeder extends Seeder
                 'aktif' => true,
                 'trust_score' => 50,
                 'credit_limit' => 0,
+                'status_kredit' => 'aktif',
+                'saldo_kredit' => 0,
             ],
             [
                 'id_pelanggan' => 'P002',
@@ -35,6 +37,8 @@ class PelangganSeeder extends Seeder
                 'aktif' => true,
                 'trust_score' => 75,
                 'credit_limit' => 5000000,
+                'status_kredit' => 'aktif',
+                'saldo_kredit' => 0,
             ],
             [
                 'id_pelanggan' => 'P003',
@@ -46,6 +50,8 @@ class PelangganSeeder extends Seeder
                 'aktif' => true,
                 'trust_score' => 80,
                 'credit_limit' => 7500000,
+                'status_kredit' => 'aktif',
+                'saldo_kredit' => 0,
             ],
         ];
 

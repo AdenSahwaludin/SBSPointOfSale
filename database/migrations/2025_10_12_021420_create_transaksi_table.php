@@ -44,6 +44,21 @@ return new class extends Migration {
             $table->index('status_pembayaran');
             $table->index('jenis_transaksi');
             $table->index('ar_status');
+
+            // Foreign keys
+            $table->foreign('id_pelanggan')
+                ->references('id_pelanggan')
+                ->on('pelanggan')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
+
+            $table->foreign('id_kasir')
+                ->references('id_pengguna')
+                ->on('pengguna')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
+            // NOTE: id_kontrak foreign key is added in add_foreign_keys_and_constraints migration 
+            // to avoid circular reference (transaksi -> kontrak_kredit -> transaksi)
         });
 
         // Add check constraints (MySQL specific)

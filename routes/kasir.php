@@ -61,6 +61,17 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
  });
 
  // ==========================================
+ // CREDIT PAYMENT MANAGEMENT
+ // ==========================================
+ Route::prefix('pembayaran-kredit')->name('pembayaran-kredit.')->group(function () {
+  Route::get('/', [\App\Http\Controllers\Kasir\PembayaranKreditController::class, 'index'])->name('index');
+  Route::get('/create/{id_pelanggan}', [\App\Http\Controllers\Kasir\PembayaranKreditController::class, 'create'])->name('create');
+  Route::post('/', [\App\Http\Controllers\Kasir\PembayaranKreditController::class, 'store'])->name('store');
+  Route::get('/{id}', [\App\Http\Controllers\Kasir\PembayaranKreditController::class, 'show'])->name('show');
+  Route::get('/{id_pelanggan}/history', [\App\Http\Controllers\Kasir\PembayaranKreditController::class, 'history'])->name('history');
+ });
+
+ // ==========================================
  // PROFILE MANAGEMENT (Kasir specific)
  // ==========================================
  Route::prefix('profile')->name('profile.')->group(function () {

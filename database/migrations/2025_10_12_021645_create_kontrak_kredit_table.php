@@ -30,6 +30,19 @@ return new class extends Migration {
             // Add indexes
             $table->index('status');
             $table->index('mulai_kontrak');
+
+            // Foreign keys
+            $table->foreign('id_pelanggan')
+                ->references('id_pelanggan')
+                ->on('pelanggan')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
+
+            $table->foreign('nomor_transaksi')
+                ->references('nomor_transaksi')
+                ->on('transaksi')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
         });
 
         // Add check constraints (MySQL specific)

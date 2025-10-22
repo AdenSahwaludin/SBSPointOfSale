@@ -71,6 +71,7 @@ const jumlahBayar = ref<number>(0);
 const dpBayar = ref<number>(0); // DP untuk kredit
 const diskonGlobal = ref<number>(0);
 const pajakRate = ref<number>(0);
+const showCustomerInfo = ref<boolean>(false);
 const {
     query: productQuery,
     isSearching: isSearchingProducts,
@@ -867,7 +868,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
     <BaseLayout :menuItems="kasirMenuItems" userRole="kasir">
         <template #header> Point of Sale </template>
 
-        <div class="flex h-[calc(100vh-8rem)] gap-6">
+        <div class="flex h-[calc(100vh-6rem)] gap-6">
             <!-- Left Panel - Products -->
             <div class="flex flex-1 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                 <!-- Header Controls -->
@@ -1021,12 +1022,25 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
             <!-- Right Panel - Cart & Checkout -->
             <div class="flex w-[28rem] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                 <!-- Cart Header -->
-                <div class="border-b border-gray-100 p-6">
+                <div class="border-b border-gray-100 px-6 pt-6">
                     <h2 class="mb-4 text-xl font-bold text-gray-900">Keranjang Belanja</h2>
 
                     <!-- Customer Selection -->
                     <div class="mb-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-700">Pelanggan</label>
+                        <div class="mb-2 flex items-center justify-between">
+                            <label class="block text-sm font-medium text-gray-700">Pelanggan</label>
+                            <button
+                                type="button"
+                                class="inline-flex items-center rounded-full border border-emerald-200 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                @click="showCustomerInfo = !showCustomerInfo"
+                                :aria-expanded="showCustomerInfo ? 'true' : 'false'"
+                                aria-controls="customer-info-panel"
+                                title="Tampilkan informasi pelanggan"
+                            >
+                                <i class="fas fa-info-circle"></i>
+                                <span class="ml-1 hidden sm:inline">{{ showCustomerInfo ? 'Tutup Info' : 'Info' }}</span>
+                            </button>
+                        </div>
                         <div class="relative">
                             <input
                                 type="text"
@@ -1079,42 +1093,52 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                 </button>
                             </div>
                         </div>
-                        <!-- Customer Info -->
-                        <div v-if="selectedCustomer" class="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <div class="font-semibold text-gray-900">{{ selectedCustomer.nama }}</div>
-                                    <div class="text-xs text-gray-500">ID: {{ selectedCustomer.id_pelanggan }}</div>
-                                    <div v-if="selectedCustomer.telepon || selectedCustomer.email" class="mt-1 text-xs text-gray-600">
-                                        {{ selectedCustomer.telepon || selectedCustomer.email }}
+                        <!-- Customer Info (collapsible) -->
+                        <Transition name="collapse">
+                            <div
+                                v-if="selectedCustomer && showCustomerInfo"
+                                id="customer-info-panel"
+                                class="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm"
+                            >
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <div class="font-semibold text-gray-900">{{ selectedCustomer.nama }}</div>
+                                        <div class="text-xs text-gray-500">ID: {{ selectedCustomer.id_pelanggan }}</div>
+                                        <div v-if="selectedCustomer.telepon || selectedCustomer.email" class="mt-1 text-xs text-gray-600">
+                                            {{ selectedCustomer.telepon || selectedCustomer.email }}
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs text-gray-500">Limit Tersedia</div>
+                                        <div class="font-bold text-emerald-600">{{ formatCurrency(availableCredit) }}</div>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <div class="text-xs text-gray-500">Limit Tersedia</div>
-                                    <div class="font-bold text-emerald-600">{{ formatCurrency(availableCredit) }}</div>
+                                <div v-if="metodeBayar === 'KREDIT'" class="mt-2 rounded bg-amber-50 p-2 text-xs text-amber-800">
+                                    <div>
+                                        Minimal DP jika melebihi limit:
+                                        <span class="font-semibold">{{ formatCurrency(minimalDp) }}</span>
+                                    </div>
+                                    <div v-if="minimalDp > 0" class="mt-1">Transaksi melampaui limit, tambahkan DP minimal tersebut.</div>
+                                    <div v-else class="mt-1">DP tidak diperlukan berdasarkan limit tersedia.</div>
                                 </div>
                             </div>
-                            <div v-if="metodeBayar === 'KREDIT'" class="mt-2 rounded bg-amber-50 p-2 text-xs text-amber-800">
-                                <div>
-                                    Minimal DP jika melebihi limit:
-                                    <span class="font-semibold">{{ formatCurrency(minimalDp) }}</span>
-                                </div>
-                                <div v-if="minimalDp > 0" class="mt-1">Transaksi melampaui limit, tambahkan DP minimal tersebut.</div>
-                                <div v-else class="mt-1">DP tidak diperlukan berdasarkan limit tersedia.</div>
-                            </div>
-                        </div>
+                        </Transition>
                     </div>
                 </div>
 
                 <!-- Cart Items -->
-                <div class="flex-1 overflow-y-auto p-6">
+                <div class="flex-1 overflow-y-auto px-6 pb-6">
                     <div v-if="cart.length === 0" class="py-8 text-center text-gray-500">
                         <i class="fas fa-shopping-cart mb-4 text-4xl"></i>
                         <p>Keranjang kosong</p>
                     </div>
 
-                    <div v-else class="space-y-3">
-                        <div v-for="(item, index) in cart" :key="`${item.id_produk}-${item.mode_qty}`" class="rounded-lg bg-gray-50">
+                    <div v-else class="space-y-2">
+                        <div
+                            v-for="(item, index) in cart"
+                            :key="`${item.id_produk}-${item.mode_qty}`"
+                            class="rounded-lg border border-emerald-200 bg-emerald-50 p-4"
+                        >
                             <div class="mb-2 flex items-start justify-between">
                                 <h4 class="line-clamp-2 text-sm font-medium text-gray-900">{{ item.nama }}</h4>
                                 <button @click="removeFromCart(index)" class="text-xs text-red-500 hover:text-red-700">
@@ -1133,7 +1157,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                 <div class="flex items-center space-x-2">
                                     <button
                                         @click="updateQuantity(index, item.jumlah - 1)"
-                                        class="flex h-6 w-6 items-center justify-center rounded bg-gray-200 text-xs hover:bg-gray-300"
+                                        class="flex h-6 w-6 items-center justify-center rounded bg-emerald-100 text-xs hover:bg-emerald-200"
                                     >
                                         -
                                     </button>
@@ -1146,7 +1170,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                     />
                                     <button
                                         @click="updateQuantity(index, item.jumlah + 1)"
-                                        class="flex h-6 w-6 items-center justify-center rounded bg-gray-200 text-xs hover:bg-gray-300"
+                                        class="flex h-6 w-6 items-center justify-center rounded bg-emerald-100 text-xs hover:bg-emerald-200"
                                     >
                                         +
                                     </button>
@@ -1282,5 +1306,22 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+/* Smooth collapse for customer info */
+.collapse-enter-active,
+.collapse-leave-active {
+    transition:
+        max-height 0.25s ease,
+        opacity 0.25s ease;
+}
+.collapse-enter-from,
+.collapse-leave-to {
+    max-height: 0;
+    opacity: 0;
+}
+.collapse-enter-to,
+.collapse-leave-from {
+    max-height: 400px; /* enough for content */
+    opacity: 1;
 }
 </style>

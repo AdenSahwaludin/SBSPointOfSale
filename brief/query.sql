@@ -34,6 +34,8 @@ CREATE TABLE pelanggan (
   aktif           TINYINT(1) NOT NULL DEFAULT 1,
   trust_score     TINYINT UNSIGNED NOT NULL DEFAULT 50 CHECK (trust_score BETWEEN 0 AND 100),
   credit_limit    DECIMAL(12,0) NOT NULL DEFAULT 0 CHECK (credit_limit >= 0),
+  status_kredit   ENUM('aktif', 'nonaktif') NOT NULL DEFAULT 'aktif',
+  saldo_kredit    DECIMAL(12,0) NOT NULL DEFAULT 0 CHECK (saldo_kredit >= 0),
   created_at      TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT pelanggan_pkey PRIMARY KEY (id_pelanggan),
@@ -41,6 +43,8 @@ CREATE TABLE pelanggan (
 ) ENGINE=InnoDB;
 
 CREATE INDEX pelanggan_nama_idx ON pelanggan (nama);
+CREATE INDEX pelanggan_status_kredit_idx ON pelanggan (status_kredit);
+CREATE INDEX pelanggan_saldo_kredit_idx ON pelanggan (saldo_kredit);
 
 -- =========================================================
 -- 3) Master: PENGGUNA
@@ -246,34 +250,46 @@ CREATE UNIQUE INDEX jadwal_unq            ON jadwal_angsuran (id_kontrak, period
 CREATE INDEX        jadwal_jatuh_tempo_idx ON jadwal_angsuran (jatuh_tempo, status);
 
 -- =========================================================
--- 10) PEMBAYARAN (split payment + ke angsuran jika kredit)
+-- 10) PEMBAYARAN (unified: for transactions & credit balance payments)
 --     id_pembayaran: PAY-YYYYMMDD-0000001 (app-generated)
+--     tipe_pembayaran: 'transaksi' (pembayaran transaksi) or 'kredit' (pembayaran saldo kredit)
 -- =========================================================
 CREATE TABLE pembayaran (
   id_pembayaran     VARCHAR(32) NOT NULL,
-  id_transaksi      VARCHAR(40) NOT NULL,
-  id_angsuran       BIGINT UNSIGNED NULL,
-  metode            ENUM('TUNAI','QRIS','TRANSFER BCA', 'KREDIT') NOT NULL,
+  id_transaksi      VARCHAR(40) NULL,              -- FK to transaksi (NULL for kredit type)
+  id_angsuran       BIGINT UNSIGNED NULL,          -- FK to jadwal_angsuran (NULL for kredit type)
+  id_pelanggan      VARCHAR(7)  NULL,              -- FK to pelanggan (for kredit type)
+  id_kasir          VARCHAR(8)  NULL,              -- FK to pengguna (for kredit type)
+  metode            ENUM('TUNAI','QRIS','TRANSFER BCA','KREDIT','tunai','transfer','cek') NOT NULL,
+  tipe_pembayaran   ENUM('transaksi','kredit') NOT NULL DEFAULT 'transaksi',
   jumlah            DECIMAL(18,0) NOT NULL CHECK (jumlah > 0),
   tanggal           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  keterangan        VARCHAR(255),
+  keterangan        VARCHAR(255) NULL,
   created_at        TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at        TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
   CONSTRAINT pembayaran_pkey PRIMARY KEY (id_pembayaran),
   CONSTRAINT pembayaran_id_chk CHECK (id_pembayaran REGEXP '^PAY-[0-9]{8}-[0-9]{7}$'),
+  CONSTRAINT pembayaran_jumlah_chk CHECK (jumlah > 0),
+  
+  -- For transaction payments
   CONSTRAINT pembayaran_transaksi_fk FOREIGN KEY (id_transaksi) REFERENCES transaksi(nomor_transaksi)
     ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT pembayaran_angsuran_fk FOREIGN KEY (id_angsuran) REFERENCES jadwal_angsuran(id_angsuran)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  
+  -- For credit balance payments
+  CONSTRAINT pembayaran_pelanggan_fk FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT pembayaran_kasir_fk FOREIGN KEY (id_kasir) REFERENCES pengguna(id_pengguna)
     ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
-CREATE INDEX pembayaran_trx_idx     ON pembayaran (id_transaksi);
-CREATE INDEX pembayaran_tanggal_idx ON pembayaran (tanggal);
-CREATE INDEX pembayaran_angsuran_idx ON pembayaran (id_angsuran);
-
--- =========================================================
--- 11) VIEW Piutang (opsional)
--- =========================================================
+CREATE INDEX pembayaran_trx_idx           ON pembayaran (id_transaksi);
+CREATE INDEX pembayaran_tanggal_idx       ON pembayaran (tanggal);
+CREATE INDEX pembayaran_angsuran_idx      ON pembayaran (id_angsuran);
+CREATE INDEX pembayaran_pelanggan_idx     ON pembayaran (id_pelanggan);
+CREATE INDEX pembayaran_tipe_idx          ON pembayaran (tipe_pembayaran);
 CREATE OR REPLACE VIEW v_piutang_pelanggan AS
 SELECT
   k.id_pelanggan,

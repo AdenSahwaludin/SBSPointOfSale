@@ -20,6 +20,19 @@ return new class extends Migration {
             $table->integer('qty_to');
             $table->string('keterangan', 200)->nullable();
             $table->timestamps();
+
+            // Foreign keys
+            $table->foreign('from_produk_id')
+                ->references('id_produk')
+                ->on('produk')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
+
+            $table->foreign('to_produk_id')
+                ->references('id_produk')
+                ->on('produk')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
         });
 
         // Add check constraints (MySQL specific)

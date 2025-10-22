@@ -20,7 +20,10 @@ class Pembayaran extends Model
         'id_pembayaran',
         'id_transaksi',
         'id_angsuran',
+        'id_pelanggan',
+        'id_kasir',
         'metode',
+        'tipe_pembayaran',
         'jumlah',
         'tanggal',
         'keterangan',
@@ -30,6 +33,7 @@ class Pembayaran extends Model
         'id_angsuran' => 'integer',
         'jumlah' => 'decimal:0',
         'tanggal' => 'datetime',
+        'tipe_pembayaran' => 'string',
     ];
 
     public function transaksi(): BelongsTo
@@ -40,6 +44,22 @@ class Pembayaran extends Model
     public function jadwalAngsuran(): BelongsTo
     {
         return $this->belongsTo(JadwalAngsuran::class, 'id_angsuran', 'id_angsuran');
+    }
+
+    /**
+     * Relationship: Pembayaran belongs to Pelanggan (for kredit type)
+     */
+    public function pelanggan(): BelongsTo
+    {
+        return $this->belongsTo(Pelanggan::class, 'id_pelanggan', 'id_pelanggan');
+    }
+
+    /**
+     * Relationship: Pembayaran belongs to Kasir/User (for kredit type)
+     */
+    public function kasir(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_kasir', 'id_pengguna');
     }
 
     /**

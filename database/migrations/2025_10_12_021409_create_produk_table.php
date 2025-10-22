@@ -28,6 +28,13 @@ return new class extends Migration {
             // Add indexes
             $table->index('nama');
             $table->index('id_kategori');
+
+            // Foreign key
+            $table->foreign('id_kategori')
+                ->references('id_kategori')
+                ->on('kategori')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
         });
 
         // Add check constraints (MySQL specific)

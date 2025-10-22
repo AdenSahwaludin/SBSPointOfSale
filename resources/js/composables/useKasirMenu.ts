@@ -37,6 +37,11 @@ export function useKasirMenuItems(): MenuItem[] {
             icon: 'fas fa-users',
         },
         {
+            name: 'Pembayaran Kredit',
+            href: '/kasir/pembayaran-kredit',
+            icon: 'fas fa-credit-card',
+        },
+        {
             name: 'Profile',
             href: '/kasir/profile',
             icon: 'fas fa-user-circle',

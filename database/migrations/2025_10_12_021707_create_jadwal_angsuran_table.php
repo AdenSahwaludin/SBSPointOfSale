@@ -25,6 +25,13 @@ return new class extends Migration {
             // Add unique constraint and indexes
             $table->unique(['id_kontrak', 'periode_ke']);
             $table->index(['jatuh_tempo', 'status']);
+
+            // Foreign key
+            $table->foreign('id_kontrak')
+                ->references('id_kontrak')
+                ->on('kontrak_kredit')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
 
         // Add check constraints (MySQL specific)
