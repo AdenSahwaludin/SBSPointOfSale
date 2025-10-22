@@ -137,7 +137,7 @@ CREATE TABLE transaksi (
   biaya_pengiriman  DECIMAL(18,0) NOT NULL DEFAULT 0,
   total             DECIMAL(18,0) NOT NULL DEFAULT 0,
   metode_bayar      ENUM('TUNAI','QRIS','TRANSFER BCA','KREDIT') NOT NULL DEFAULT 'TUNAI',
-  status_pembayaran ENUM('MENUNGGU','LUNAS','BATAL','KREDIT') NOT NULL DEFAULT 'MENUNGGU',
+  status_pembayaran ENUM('MENUNGGU','LUNAS','BATAL') NOT NULL DEFAULT 'MENUNGGU',
   paid_at           TIMESTAMP NULL,
   -- Cicilan Pintar (jika metode_bayar='KREDIT')
   jenis_transaksi   ENUM('TUNAI','KREDIT') NOT NULL DEFAULT 'TUNAI',
@@ -153,6 +153,10 @@ CREATE TABLE transaksi (
 
   CONSTRAINT transaksi_pkey PRIMARY KEY (nomor_transaksi),
   CONSTRAINT transaksi_no_chk CHECK (nomor_transaksi REGEXP '^INV-[0-9]{4}-[0-9]{2}-[0-9]{3}-P[0-9]{3,6}$'),
+  CONSTRAINT transaksi_dp_chk CHECK (dp >= 0),
+  CONSTRAINT transaksi_tenor_chk CHECK (tenor_bulan IS NULL OR tenor_bulan BETWEEN 1 AND 24),
+  CONSTRAINT transaksi_bunga_chk CHECK (bunga_persen >= 0),
+  CONSTRAINT transaksi_cicilan_chk CHECK (cicilan_bulanan IS NULL OR cicilan_bulanan >= 0),
   CONSTRAINT transaksi_pelanggan_fk FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan)
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT transaksi_kasir_fk FOREIGN KEY (id_kasir) REFERENCES pengguna(id_pengguna)
@@ -260,9 +264,9 @@ CREATE TABLE pembayaran (
   id_angsuran       BIGINT UNSIGNED NULL,          -- FK to jadwal_angsuran (NULL for kredit type)
   id_pelanggan      VARCHAR(7)  NULL,              -- FK to pelanggan (for kredit type)
   id_kasir          VARCHAR(8)  NULL,              -- FK to pengguna (for kredit type)
-  metode            ENUM('TUNAI','QRIS','TRANSFER BCA','KREDIT','tunai','transfer','cek') NOT NULL,
+  metode            ENUM('tunai','transfer','cek','QRIS','TRANSFER BCA','KREDIT') NOT NULL,
   tipe_pembayaran   ENUM('transaksi','kredit') NOT NULL DEFAULT 'transaksi',
-  jumlah            DECIMAL(18,0) NOT NULL CHECK (jumlah > 0),
+  jumlah            DECIMAL(18,0) NOT NULL,
   tanggal           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   keterangan        VARCHAR(255) NULL,
   created_at        TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
@@ -290,6 +294,12 @@ CREATE INDEX pembayaran_tanggal_idx       ON pembayaran (tanggal);
 CREATE INDEX pembayaran_angsuran_idx      ON pembayaran (id_angsuran);
 CREATE INDEX pembayaran_pelanggan_idx     ON pembayaran (id_pelanggan);
 CREATE INDEX pembayaran_tipe_idx          ON pembayaran (tipe_pembayaran);
+
+-- =========================================================
+-- VIEWS
+-- =========================================================
+
+-- View: Piutang Pelanggan (Outstanding Credit)
 CREATE OR REPLACE VIEW v_piutang_pelanggan AS
 SELECT
   k.id_pelanggan,
