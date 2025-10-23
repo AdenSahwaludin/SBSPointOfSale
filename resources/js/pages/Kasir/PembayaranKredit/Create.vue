@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import { useCurrencyFormat } from '@/composables/useCurrencyFormat';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Pelanggan {
     id_pelanggan: string;
@@ -19,6 +20,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { formatCurrency, formatNumber, parseNumber } = useCurrencyFormat();
 
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pembayaran-kredit');
 
@@ -29,22 +31,23 @@ const form = useForm({
     keterangan: '',
 });
 
+const displayJumlah = ref('');
+
 const remainingCredit = computed(() => props.pelanggan.credit_limit - props.pelanggan.saldo_kredit);
+
+function handleJumlahInput(value: string) {
+    const cleaned = parseNumber(value);
+    displayJumlah.value = formatNumber(cleaned);
+    form.jumlah_pembayaran = cleaned.toString();
+}
 
 function submit() {
     form.post('/kasir/pembayaran-kredit', {
         onSuccess: () => {
             form.reset();
+            displayJumlah.value = '';
         },
     });
-}
-
-function formatCurrency(amount: number) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
 }
 </script>
 
@@ -125,12 +128,12 @@ function formatCurrency(amount: number) {
                         </label>
                         <input
                             id="jumlah_pembayaran"
-                            v-model="form.jumlah_pembayaran"
-                            type="number"
+                            :value="displayJumlah"
+                            @input="(e) => handleJumlahInput((e.target as HTMLInputElement).value)"
+                            type="text"
                             required
-                            :max="pelanggan.saldo_kredit"
                             class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
-                            placeholder="Masukkan jumlah pembayaran"
+                            placeholder="Masukkan jumlah pembayaran (cth: 1.000.000)"
                         />
                         <p class="mt-1 text-sm text-emerald-600">Maksimal: {{ formatCurrency(pelanggan.saldo_kredit) }}</p>
                         <div v-if="form.errors.jumlah_pembayaran" class="mt-1 text-sm text-red-600">
@@ -148,7 +151,7 @@ function formatCurrency(amount: number) {
                             v-model="form.metode_pembayaran"
                             class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                         >
-                            <option value="TUNAI">Tunai</option>
+                            <option value="TUNAI" selected>Tunai</option>
                             <option value="QRIS">QRIS</option>
                             <option value="TRANSFER BCA">Transfer BCA</option>
                         </select>

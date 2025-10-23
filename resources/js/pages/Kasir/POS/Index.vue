@@ -4,6 +4,7 @@ import TransactionConfirmationModal from '@/components/TransactionConfirmationMo
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { useNotifications } from '@/composables/useNotifications';
+import { useCurrencyFormat } from '@/composables/useCurrencyFormat';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
@@ -57,6 +58,9 @@ const props = defineProps<{
 
 const { addNotification } = useNotifications();
 
+// Currency formatting
+const { formatNumber, parseNumber } = useCurrencyFormat();
+
 // State management
 const selectedKategori = ref<number | null>(null);
 const searchQuery = ref('');
@@ -68,7 +72,9 @@ const showPelangganDropdown = ref(false);
 const activePelangganIndex = ref(0);
 const metodeBayar = ref<string>('TUNAI');
 const jumlahBayar = ref<number>(0);
+const jumlahBayarDisplay = ref<string>(''); // For formatted display
 const dpBayar = ref<number>(0); // DP untuk kredit
+const dpBayarDisplay = ref<string>(''); // For formatted display
 const diskonGlobal = ref<number>(0);
 const pajakRate = ref<number>(0);
 const showCustomerInfo = ref<boolean>(false);
@@ -403,6 +409,9 @@ function removeFromCart(index: number) {
 function clearCart() {
     cart.value = [];
     jumlahBayar.value = 0;
+    jumlahBayarDisplay.value = '';
+    dpBayar.value = 0;
+    dpBayarDisplay.value = '';
 }
 
 // Live search (debounced) using composable
@@ -811,7 +820,9 @@ function resetForm() {
     metodeBayar.value = 'TUNAI';
     diskonGlobal.value = 0;
     jumlahBayar.value = 0;
+    jumlahBayarDisplay.value = '';
     dpBayar.value = 0;
+    dpBayarDisplay.value = '';
 }
 
 // Format currency
@@ -1235,10 +1246,16 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     <div v-if="metodeBayar === 'TUNAI'">
                         <label class="mb-2 block text-sm font-medium text-gray-700">Jumlah Bayar</label>
                         <input
-                            v-model.number="jumlahBayar"
-                            type="number"
-                            :min="total"
-                            step="1000"
+                            :value="jumlahBayarDisplay"
+                            @input="(e) => {
+                                const input = (e.target as HTMLInputElement).value;
+                                jumlahBayarDisplay = formatNumber(parseNumber(input));
+                                jumlahBayar = parseNumber(input);
+                            }"
+                            @blur="() => {
+                                jumlahBayarDisplay = formatNumber(jumlahBayar);
+                            }"
+                            type="text"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                             placeholder="0"
                         />
@@ -1252,11 +1269,17 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     <div v-if="metodeBayar === 'KREDIT'" class="space-y-2">
                         <label class="mb-2 block text-sm font-medium text-gray-700">DP (Uang Muka)</label>
                         <input
-                            v-model.number="dpBayar"
-                            type="number"
-                            min="0"
+                            :value="dpBayarDisplay"
+                            @input="(e) => {
+                                const input = (e.target as HTMLInputElement).value;
+                                dpBayarDisplay = formatNumber(parseNumber(input));
+                                dpBayar = parseNumber(input);
+                            }"
+                            @blur="() => {
+                                dpBayarDisplay = formatNumber(dpBayar);
+                            }"
+                            type="text"
                             :max="Math.max(0, Number(total) - 1)"
-                            step="1000"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                             placeholder="0"
                         />

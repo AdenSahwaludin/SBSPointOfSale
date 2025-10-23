@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
+import { useCurrencyFormat } from '@/composables/useCurrencyFormat';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -61,6 +62,8 @@ const props = defineProps<{
     weekComparison: WeekComparison;
 }>();
 
+const { formatCurrency } = useCurrencyFormat();
+
 // Computed
 const maxHourValue = computed(() => {
     return Math.max(...props.salesByHour.map((d) => d.amount), 1);
@@ -72,11 +75,6 @@ const avgTransaction = computed(() => {
 });
 
 // Methods
-function formatCurrency(amount: number | null | undefined): string {
-    const n = Number(amount ?? 0);
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(isNaN(n) ? 0 : n);
-}
-
 function formatTime(dateString: string): string {
     return new Date(dateString).toLocaleTimeString('id-ID', {
         hour: '2-digit',

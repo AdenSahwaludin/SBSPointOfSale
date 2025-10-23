@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
+import { useCurrencyFormat } from '@/composables/useCurrencyFormat';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
@@ -35,16 +36,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { formatCurrency } = useCurrencyFormat();
 
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pembayaran-kredit');
-
-function formatCurrency(amount: number) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
 
 function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('id-ID', {
