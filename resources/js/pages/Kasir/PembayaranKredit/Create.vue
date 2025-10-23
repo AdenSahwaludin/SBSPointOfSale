@@ -27,7 +27,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pembayaran
 const form = useForm({
     id_pelanggan: props.pelanggan.id_pelanggan,
     jumlah_pembayaran: '',
-    metode_pembayaran: 'tunai',
+    metode_pembayaran: 'TUNAI',
     keterangan: '',
 });
 
