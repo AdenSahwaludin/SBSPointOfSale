@@ -6,15 +6,15 @@ import { computed } from 'vue';
 
 interface TodayStats {
     total_sales: number;
-    total_count: number;
-    items_sold: number;
-    pending_count: number;
+    total_transactions: number;
+    total_items_sold: number;
+    pending_transactions: number;
 }
 
 interface PaymentMethod {
-    metode: string;
-    jumlah: number;
-    total: number;
+    metode_bayar: string;
+    count: number;
+    amount: number;
 }
 
 interface Transaction {
@@ -28,8 +28,8 @@ interface Transaction {
 
 interface TopProduct {
     nama: string;
-    total_terjual: number;
-    total_revenue: number;
+    total_qty: number;
+    total_amount: number;
 }
 
 interface LowStockProduct {
@@ -46,8 +46,8 @@ interface SalesByHour {
 }
 
 interface WeekComparison {
-    this_week: { total: number; count: number };
-    last_week: { total: number; count: number };
+    this_week: number;
+    last_week: number;
     growth: number;
 }
 
@@ -67,13 +67,14 @@ const maxHourValue = computed(() => {
 });
 
 const avgTransaction = computed(() => {
-    if (props.todayStats.total_count === 0) return 0;
-    return props.todayStats.total_sales / props.todayStats.total_count;
+    if (props.todayStats.total_transactions === 0) return 0;
+    return props.todayStats.total_sales / props.todayStats.total_transactions;
 });
 
 // Methods
-function formatCurrency(amount: number): string {
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+function formatCurrency(amount: number | null | undefined): string {
+    const n = Number(amount ?? 0);
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(isNaN(n) ? 0 : n);
 }
 
 function formatTime(dateString: string): string {
@@ -98,7 +99,7 @@ function getPaymentMethodLabel(metode: string): string {
     const labels: Record<string, string> = {
         TUNAI: 'Tunai',
         QRIS: 'QRIS',
-        TRANSFER_BCA: 'Transfer BCA',
+        'TRANSFER BCA': 'Transfer BCA',
         KREDIT: 'Kredit',
     };
     return labels[metode] || metode;
@@ -126,7 +127,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Total Penjualan</p>
                             <p class="mt-2 text-2xl font-bold text-gray-900">{{ formatCurrency(todayStats.total_sales) }}</p>
-                            <p class="mt-1 text-xs text-gray-500">{{ todayStats.total_count }} transaksi</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ todayStats.total_transactions }} transaksi</p>
                         </div>
                         <div class="rounded-full bg-blue-50 p-3">
                             <i class="fas fa-money-bill-wave text-2xl text-blue-600"></i>
@@ -151,7 +152,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Item Terjual</p>
-                            <p class="mt-2 text-2xl font-bold text-gray-900">{{ todayStats.items_sold }}</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900">{{ todayStats.total_items_sold }}</p>
                             <p class="mt-1 text-xs text-gray-500">total item</p>
                         </div>
                         <div class="rounded-full bg-purple-50 p-3">
@@ -164,7 +165,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Menunggu Pembayaran</p>
-                            <p class="mt-2 text-2xl font-bold text-gray-900">{{ todayStats.pending_count }}</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900">{{ todayStats.pending_transactions }}</p>
                             <p class="mt-1 text-xs text-gray-500">transaksi</p>
                         </div>
                         <div class="rounded-full bg-orange-50 p-3">
@@ -180,14 +181,10 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div>
                         <p class="text-sm text-gray-600">Minggu Ini</p>
-                        <p class="mt-1 text-2xl font-bold text-gray-900">{{ formatCurrency(weekComparison.this_week.total) }}</p>
-                        <p class="text-xs text-gray-500">{{ weekComparison.this_week.count }} transaksi</p>
-                    </div>
+                        <p class="mt-1 text-2xl font-bold text-gray-900">{{ formatCurrency(weekComparison.this_week) }}</p>                    </div>
                     <div>
                         <p class="text-sm text-gray-600">Minggu Lalu</p>
-                        <p class="mt-1 text-2xl font-bold text-gray-900">{{ formatCurrency(weekComparison.last_week.total) }}</p>
-                        <p class="text-xs text-gray-500">{{ weekComparison.last_week.count }} transaksi</p>
-                    </div>
+                        <p class="mt-1 text-2xl font-bold text-gray-900">{{ formatCurrency(weekComparison.last_week) }}</p>                    </div>
                     <div>
                         <p class="text-sm text-gray-600">Pertumbuhan</p>
                         <p class="mt-1 flex items-center text-2xl font-bold" :class="weekComparison.growth >= 0 ? 'text-green-600' : 'text-red-600'">
@@ -236,17 +233,17 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                             <p class="text-sm">Belum ada transaksi</p>
                         </div>
                         <div v-else class="space-y-3">
-                            <div v-for="method in paymentMethods" :key="method.metode" class="flex items-center justify-between">
+                            <div v-for="method in paymentMethods" :key="method.metode_bayar" class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                                         <i class="fas fa-credit-card text-blue-600"></i>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-medium text-gray-900">{{ getPaymentMethodLabel(method.metode) }}</p>
-                                        <p class="text-xs text-gray-500">{{ method.jumlah }} transaksi</p>
+                                        <p class="text-sm font-medium text-gray-900">{{ getPaymentMethodLabel(method.metode_bayar) }}</p>
+                                        <p class="text-xs text-gray-500">{{ method.count }} transaksi</p>
                                     </div>
                                 </div>
-                                <p class="text-sm font-semibold text-gray-900">{{ formatCurrency(method.total) }}</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ formatCurrency(method.amount) }}</p>
                             </div>
                         </div>
                     </div>
@@ -272,10 +269,10 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-gray-900">{{ product.nama }}</p>
-                                        <p class="text-xs text-gray-500">{{ product.total_terjual }} terjual</p>
+                                        <p class="text-xs text-gray-500">{{ product.total_qty }} terjual</p>
                                     </div>
                                 </div>
-                                <p class="text-sm font-semibold text-emerald-600">{{ formatCurrency(product.total_revenue) }}</p>
+                                <p class="text-sm font-semibold text-emerald-600">{{ formatCurrency(product.total_amount) }}</p>
                             </div>
                         </div>
                     </div>

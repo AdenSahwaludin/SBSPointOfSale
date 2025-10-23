@@ -270,8 +270,10 @@ class TransaksiPOSController extends Controller
                     ], 422);
                 }
 
-                // Kurangi available limit sesuai porsi kredit
+                // Update credit: kurangi available limit, tambah saldo piutang, pastikan status aktif
                 $customer->credit_limit = $available - $creditPortion;
+                $customer->saldo_kredit = (float)($customer->saldo_kredit ?? 0) + $creditPortion;
+                $customer->status_kredit = 'aktif';
                 $customer->save();
             }
 
@@ -374,6 +376,9 @@ class TransaksiPOSController extends Controller
                         'id_pembayaran' => $idPembayaran,
                         'id_transaksi' => $nomorTransaksi,
                         'metode' => $request->metode_bayar,
+                        'tipe_pembayaran' => 'kredit',
+                        'id_pelanggan' => $request->id_pelanggan,
+                        'id_kasir' => Auth::user()->id_pengguna,
                         'jumlah' => $dp,
                         'tanggal' => now(),
                         'keterangan' => 'DP Kredit',

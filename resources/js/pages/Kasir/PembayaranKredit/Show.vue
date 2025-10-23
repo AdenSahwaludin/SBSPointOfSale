@@ -17,12 +17,12 @@ interface Kasir {
 }
 
 interface Pembayaran {
-    id: number;
+    id_pembayaran: string;
     id_pelanggan: string;
-    jumlah_pembayaran: number;
-    metode_pembayaran: string;
+    jumlah: number;
+    metode: string;
     keterangan: string | null;
-    tanggal_pembayaran: string;
+    tanggal: string;
     created_at: string;
     pelanggan: Pelanggan;
     kasir: Kasir | null;
@@ -95,7 +95,7 @@ function printReceipt() {
                         <div class="text-center">
                             <h2 class="text-xl font-bold text-emerald-800">SBS - Sari Bumi Sakti</h2>
                             <p class="text-sm text-emerald-600">Bukti Pembayaran Kredit</p>
-                            <p class="text-xs text-gray-500">No. Bukti: {{ pembayaran.id }}</p>
+                            <p class="text-xs text-gray-500">No. Bukti: {{ pembayaran.id_pembayaran }}</p>
                         </div>
                     </div>
 
@@ -114,8 +114,8 @@ function printReceipt() {
                         <div>
                             <h3 class="mb-2 font-bold text-emerald-800">Informasi Pembayaran</h3>
                             <div class="space-y-1 text-sm text-emerald-700">
-                                <div><strong>Tanggal:</strong> {{ formatDate(pembayaran.tanggal_pembayaran) }}</div>
-                                <div><strong>Metode:</strong> {{ formatMetode(pembayaran.metode_pembayaran) }}</div>
+                                <div><strong>Tanggal:</strong> {{ formatDate(pembayaran.tanggal) }}</div>
+                                <div><strong>Metode:</strong> {{ formatMetode(pembayaran.metode) }}</div>
                                 <div v-if="pembayaran.kasir"><strong>Kasir:</strong> {{ pembayaran.kasir.nama }}</div>
                             </div>
                         </div>
@@ -125,7 +125,7 @@ function printReceipt() {
                     <div class="border-t border-b border-emerald-300 py-4">
                         <div class="mb-3 flex justify-between">
                             <span class="text-emerald-700">Jumlah Pembayaran:</span>
-                            <span class="font-bold text-emerald-800">{{ formatCurrency(pembayaran.jumlah_pembayaran) }}</span>
+                            <span class="font-bold text-emerald-800">{{ formatCurrency(pembayaran.jumlah) }}</span>
                         </div>
                     </div>
 

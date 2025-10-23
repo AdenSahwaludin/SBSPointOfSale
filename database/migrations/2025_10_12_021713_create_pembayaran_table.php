@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->string('id_pembayaran', 32)->primary();
             $table->string('id_transaksi', 40)->nullable(); // nullable untuk pembayaran kredit langsung (non-transaksi)
             $table->unsignedBigInteger('id_angsuran')->nullable();
-            $table->enum('metode', allowed: ['TUNAI', 'QRIS', 'TRANSFER BCA', 'KREDIT', 'transfer', 'cek']);
+            $table->enum('metode', allowed: ['TUNAI', 'QRIS', 'TRANSFER BCA', 'KREDIT']);
             $table->decimal('jumlah', 18, 0);
             $table->timestamp('tanggal')->useCurrent();
             $table->string('keterangan', 255)->nullable();

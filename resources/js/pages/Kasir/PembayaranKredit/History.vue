@@ -13,10 +13,10 @@ interface Pelanggan {
 }
 
 interface Pembayaran {
-    id: number;
-    jumlah_pembayaran: number;
-    metode_pembayaran: string;
-    tanggal_pembayaran: string;
+    id_pembayaran: string;
+    jumlah: number;
+    metode: string;
+    tanggal: string;
     keterangan: string | null;
 }
 
@@ -117,20 +117,20 @@ function formatMetode(metode: string) {
                         <tbody class="divide-y divide-emerald-100 bg-white-emerald">
                             <tr
                                 v-for="item in pembayaran.data"
-                                :key="item.id"
+                                :key="item.id_pembayaran"
                                 class="emerald-transition transition-all duration-200 hover:bg-emerald-25"
                             >
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-emerald-800">{{ formatDate(item.tanggal_pembayaran) }}</div>
+                                    <div class="text-sm font-medium text-emerald-800">{{ formatDate(item.tanggal) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-bold text-green-700">{{ formatCurrency(item.jumlah_pembayaran) }}</div>
+                                    <div class="text-sm font-bold text-green-700">{{ formatCurrency(item.jumlah) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
                                         class="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700"
                                     >
-                                        {{ formatMetode(item.metode_pembayaran) }}
+                                        {{ formatMetode(item.metode) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">

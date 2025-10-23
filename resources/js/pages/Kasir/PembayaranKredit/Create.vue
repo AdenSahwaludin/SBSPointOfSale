@@ -128,9 +128,7 @@ function formatCurrency(amount: number) {
                             v-model="form.jumlah_pembayaran"
                             type="number"
                             required
-                            min="1000"
                             :max="pelanggan.saldo_kredit"
-                            step="1000"
                             class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                             placeholder="Masukkan jumlah pembayaran"
                         />
@@ -150,9 +148,9 @@ function formatCurrency(amount: number) {
                             v-model="form.metode_pembayaran"
                             class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                         >
-                            <option value="tunai">Tunai</option>
-                            <option value="transfer">Transfer Bank</option>
-                            <option value="cek">Cek</option>
+                            <option value="TUNAI">Tunai</option>
+                            <option value="QRIS">QRIS</option>
+                            <option value="TRANSFER BCA">Transfer BCA</option>
                         </select>
                         <div v-if="form.errors.metode_pembayaran" class="mt-1 text-sm text-red-600">
                             {{ form.errors.metode_pembayaran }}
