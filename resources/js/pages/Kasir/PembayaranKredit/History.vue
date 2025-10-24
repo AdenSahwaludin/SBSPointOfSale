@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
-import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { useCurrencyFormat } from '@/composables/useCurrencyFormat';
+import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head } from '@inertiajs/vue3';
 

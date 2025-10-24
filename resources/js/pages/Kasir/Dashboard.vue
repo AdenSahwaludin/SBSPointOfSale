@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { useCurrencyFormat } from '@/composables/useCurrencyFormat';
+import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -179,10 +179,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div>
                         <p class="text-sm text-gray-600">Minggu Ini</p>
-                        <p class="mt-1 text-2xl font-bold text-gray-900">{{ formatCurrency(weekComparison.this_week) }}</p>                    </div>
+                        <p class="mt-1 text-2xl font-bold text-gray-900">{{ formatCurrency(weekComparison.this_week) }}</p>
+                    </div>
                     <div>
                         <p class="text-sm text-gray-600">Minggu Lalu</p>
-                        <p class="mt-1 text-2xl font-bold text-gray-900">{{ formatCurrency(weekComparison.last_week) }}</p>                    </div>
+                        <p class="mt-1 text-2xl font-bold text-gray-900">{{ formatCurrency(weekComparison.last_week) }}</p>
+                    </div>
                     <div>
                         <p class="text-sm text-gray-600">Pertumbuhan</p>
                         <p class="mt-1 flex items-center text-2xl font-bold" :class="weekComparison.growth >= 0 ? 'text-green-600' : 'text-red-600'">
