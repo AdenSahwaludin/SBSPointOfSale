@@ -5,6 +5,7 @@ use App\Http\Controllers\Kasir\TransaksiPOSController;
 use App\Http\Controllers\Kasir\TransaksiController;
 use App\Http\Controllers\Kasir\ProdukController;
 use App\Http\Controllers\Kasir\AngsuranController;
+use App\Http\Controllers\Kasir\KonversiStokController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -69,6 +70,23 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
   Route::get('/{id}', [AngsuranController::class, 'show'])->name('show');
   Route::post('/{id}/pay', [AngsuranController::class, 'pay'])->name('pay');
  });
+
+ // ==========================================
+ // STOCK CONVERSION (Konversi Stok)
+ // ==========================================
+ Route::resource('konversi-stok', KonversiStokController::class)->names([
+  'index' => 'konversi-stok.index',
+  'create' => 'konversi-stok.create',
+  'store' => 'konversi-stok.store',
+  'show' => 'konversi-stok.show',
+  'edit' => 'konversi-stok.edit',
+  'update' => 'konversi-stok.update',
+  'destroy' => 'konversi-stok.destroy',
+ ]);
+
+ // Bulk delete konversi stok
+ Route::post('konversi-stok/bulk-delete', [KonversiStokController::class, 'bulkDelete'])
+  ->name('konversi-stok.bulk-delete');
 
  // ==========================================
  // PROFILE MANAGEMENT (Kasir specific)

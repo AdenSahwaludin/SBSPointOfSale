@@ -34,7 +34,7 @@ class AngsuranController extends Controller
         $endMonth = Carbon::now()->endOfMonth();
 
         $contracts = KontrakKredit::with(['pelanggan'])
-            ->when($unpaidOnly, fn ($q) => $q->where('status', '!=', 'LUNAS'))
+            ->when($unpaidOnly, fn($q) => $q->where('status', '!=', 'LUNAS'))
             ->when($search, function ($q) use ($search) {
                 $q->where('nomor_kontrak', 'like', "%{$search}%")
                     ->orWhereHas('pelanggan', function ($q2) use ($search) {
@@ -86,6 +86,7 @@ class AngsuranController extends Controller
         ];
 
         // also include a sidebar contracts list (due this month by default)
+        // PENTING: Pastikan kontrak yang sedang dilihat selalu ada di atas daftar
         $startMonth = Carbon::now()->startOfMonth();
         $endMonth = Carbon::now()->endOfMonth();
         $contracts = KontrakKredit::with(['pelanggan'])
@@ -94,6 +95,9 @@ class AngsuranController extends Controller
                 $qq->whereIn('status', ['DUE', 'LATE'])
                     ->whereBetween('jatuh_tempo', [$startMonth->toDateString(), $endMonth->toDateString()]);
             })
+            ->orWhere('id_kontrak', $id) // Selalu include kontrak yang sedang dilihat
+            ->where('status', '!=', 'LUNAS')
+            ->with(['pelanggan'])
             ->orderBy('mulai_kontrak', 'desc')
             ->paginate(10)
             ->withQueryString();

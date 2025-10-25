@@ -27,7 +27,6 @@ class KontrakKredit extends Model
   'cicilan_bulanan',
   'status',
   'score_snapshot',
-  'alasan_eligibilitas',
  ];
 
  protected $casts = [

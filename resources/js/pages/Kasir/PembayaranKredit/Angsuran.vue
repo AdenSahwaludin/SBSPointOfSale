@@ -70,6 +70,10 @@ function openContract(id: number) {
     router.get(`/kasir/angsuran/${id}`);
 }
 
+function backToList() {
+    router.get('/kasir/angsuran');
+}
+
 const schedule = computed(() =>
     (props.selected?.jadwal_angsurans || props.selected?.jadwal_angsuran || []).map((j: any) => ({
         ...j,
@@ -85,6 +89,24 @@ const totalDueThisMonth = computed(() => {
         .reduce((sum: number, it: any) => sum + Math.max(0, it.sisa), 0);
 });
 
+// Total sisa tagihan seluruh kontrak
+const totalSisaTagihan = computed(() => {
+    return schedule.value.filter((s: any) => s.status !== 'PAID').reduce((sum: number, it: any) => sum + Math.max(0, it.sisa), 0);
+});
+
+// Validasi: pembayaran tidak boleh melebihi total sisa
+const isPaymentValid = computed(() => {
+    return payAmount.value > 0 && payAmount.value <= totalSisaTagihan.value;
+});
+
+const paymentErrorMessage = computed(() => {
+    if (!payAmount.value || payAmount.value <= 0) return 'Masukkan jumlah pembayaran';
+    if (payAmount.value > totalSisaTagihan.value) {
+        return `Pembayaran tidak boleh melebihi Rp ${formatCurrency(totalSisaTagihan.value)}`;
+    }
+    return '';
+});
+
 function quickPay(months: number | 'all') {
     const notPaid = schedule.value.filter((s: any) => s.status !== 'PAID');
     const list = months === 'all' ? notPaid : notPaid.slice(0, Number(months));
@@ -94,7 +116,7 @@ function quickPay(months: number | 'all') {
 
 function submitPayment() {
     if (!props.selected) return;
-    if (!payAmount.value || payAmount.value <= 0) return;
+    if (!isPaymentValid.value) return;
     router.post(
         `/kasir/angsuran/${props.selected.id_kontrak}/pay`,
         {
@@ -148,6 +170,24 @@ function submitPayment() {
                         />
                     </div>
                 </div>
+            </div>
+
+            <!-- Detail Header with Back button -->
+            <div v-if="isDetailActive" class="flex items-center gap-4">
+                <button
+                    @click="backToList"
+                    class="group relative inline-flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-3 font-semibold text-white shadow-lg"
+                >
+                    <svg
+                        class="h-5 w-5 transition-transform duration-300 ease-in-out group-hover:-translate-x-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Kembali ke Daftar</span>
+                </button>
             </div>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -251,18 +291,6 @@ function submitPayment() {
                     <div class="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white p-5">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div
-                                    class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg"
-                                >
-                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                        />
-                                    </svg>
-                                </div>
                                 <div>
                                     <div class="text-lg font-bold text-gray-900">Detail Kontrak</div>
                                     <div v-if="selected" class="text-sm text-gray-600">
@@ -333,17 +361,7 @@ function submitPayment() {
                     </div>
 
                     <div class="p-6" v-if="selected">
-                        <div class="mb-4 flex items-center gap-2 text-sm font-bold text-gray-900">
-                            <svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                                />
-                            </svg>
-                            Jadwal Angsuran
-                        </div>
+                        <div class="mb-4 flex items-center gap-2 font-bold text-gray-900">Jadwal Angsuran</div>
                         <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
                             <div class="max-h-72 overflow-y-auto">
                                 <table class="w-full">
@@ -390,18 +408,6 @@ function submitPayment() {
                         <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
                             <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 shadow-lg">
                                 <div class="mb-4 flex items-center gap-2">
-                                    <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow"
-                                    >
-                                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                                            />
-                                        </svg>
-                                    </div>
                                     <span class="text-sm font-bold text-gray-900">Pembayaran</span>
                                 </div>
                                 <div class="space-y-4">
@@ -411,9 +417,9 @@ function submitPayment() {
                                             v-model="payMethod"
                                             class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                                         >
-                                            <option value="TUNAI">💵 Tunai</option>
-                                            <option value="QRIS">📱 QRIS</option>
-                                            <option value="TRANSFER BCA">🏦 Transfer BCA</option>
+                                            <option value="TUNAI">Tunai</option>
+                                            <option value="QRIS">QRIS</option>
+                                            <option value="TRANSFER BCA">Transfer BCA</option>
                                         </select>
                                     </div>
                                     <div>
@@ -423,10 +429,39 @@ function submitPayment() {
                                             <input
                                                 type="number"
                                                 min="0"
+                                                :max="totalSisaTagihan"
                                                 v-model.number="payAmount"
-                                                class="w-full rounded-lg border border-gray-300 bg-white py-2.5 pr-4 pl-10 text-sm font-medium transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                                                :class="[
+                                                    'w-full rounded-lg border bg-white py-2.5 pr-4 pl-10 text-sm font-medium transition focus:ring-2 focus:ring-emerald-500/20',
+                                                    payAmount > totalSisaTagihan && payAmount > 0
+                                                        ? 'border-red-500 focus:border-red-500'
+                                                        : 'border-gray-300 focus:border-emerald-500',
+                                                ]"
                                                 placeholder="0"
                                             />
+                                        </div>
+                                        <div
+                                            v-if="payAmount > totalSisaTagihan && payAmount > 0"
+                                            class="mt-2 flex items-center gap-1.5 text-xs text-red-600"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                                />
+                                            </svg>
+                                            {{ paymentErrorMessage }}
+                                        </div>
+                                        <div
+                                            v-if="payAmount > 0 && payAmount <= totalSisaTagihan"
+                                            class="mt-2 flex items-center gap-1.5 text-xs text-emerald-600"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Max: {{ formatCurrency(totalSisaTagihan) }}
                                         </div>
                                     </div>
                                     <div>
@@ -463,7 +498,13 @@ function submitPayment() {
                                     </div>
                                     <button
                                         @click="submitPayment"
-                                        class="group relative w-full overflow-hidden rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 font-bold text-white shadow-lg transition hover:shadow-xl"
+                                        :disabled="!isPaymentValid"
+                                        :class="[
+                                            'group relative w-full overflow-hidden rounded-lg px-4 py-3 font-bold text-white shadow-lg transition',
+                                            isPaymentValid
+                                                ? 'cursor-pointer bg-gradient-to-r from-emerald-600 to-teal-600 hover:shadow-xl'
+                                                : 'cursor-not-allowed bg-gray-400 opacity-60',
+                                        ]"
                                     >
                                         <span class="relative z-10 flex items-center justify-center gap-2">
                                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -474,9 +515,10 @@ function submitPayment() {
                                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                                 />
                                             </svg>
-                                            Proses Pembayaran
+                                            {{ isPaymentValid ? 'Proses Pembayaran' : 'Masukkan Jumlah Valid' }}
                                         </span>
                                         <div
+                                            v-if="isPaymentValid"
                                             class="absolute inset-0 -translate-x-full bg-white/20 transition-transform group-hover:translate-x-full"
                                         ></div>
                                     </button>
@@ -484,18 +526,6 @@ function submitPayment() {
                             </div>
                             <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 shadow-lg md:col-span-2">
                                 <div class="mb-4 flex items-center gap-2">
-                                    <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow"
-                                    >
-                                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                    </div>
                                     <span class="text-sm font-bold text-gray-900">Ringkasan Kontrak</span>
                                 </div>
                                 <div class="space-y-3">

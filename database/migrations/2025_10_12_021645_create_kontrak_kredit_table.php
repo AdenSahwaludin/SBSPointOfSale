@@ -24,7 +24,6 @@ return new class extends Migration {
             $table->decimal('cicilan_bulanan', 12, 0);
             $table->enum('status', ['AKTIF', 'LUNAS', 'TUNDA', 'GAGAL'])->default('AKTIF');
             $table->unsignedTinyInteger('score_snapshot')->default(50);
-            $table->string('alasan_eligibilitas', 200)->nullable();
             $table->timestamps();
 
             // Add indexes

@@ -42,6 +42,11 @@ export function useKasirMenuItems(): MenuItem[] {
             icon: 'fas fa-file-invoice-dollar',
         },
         {
+            name: 'Konversi Stok',
+            href: '/kasir/konversi-stok',
+            icon: 'fas fa-exchange-alt',
+        },
+        {
             name: 'Profile',
             href: '/kasir/profile',
             icon: 'fas fa-user-circle',

@@ -211,7 +211,6 @@ CREATE TABLE kontrak_kredit (
   cicilan_bulanan   DECIMAL(12,0) NOT NULL CHECK (cicilan_bulanan >= 0),
   status            ENUM('AKTIF','LUNAS','TUNDA','GAGAL') NOT NULL DEFAULT 'AKTIF',
   score_snapshot    TINYINT UNSIGNED NOT NULL DEFAULT 50,
-  alasan_eligibilitas VARCHAR(200),
   created_at        TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at        TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT kontrak_pkey PRIMARY KEY (id_kontrak),

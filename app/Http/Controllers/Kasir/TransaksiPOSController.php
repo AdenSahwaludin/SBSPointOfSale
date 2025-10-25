@@ -131,8 +131,14 @@ class TransaksiPOSController extends Controller
                 $searchWords = array_filter(explode(' ', $searchTerm));
                 foreach ($searchWords as $word) {
                     if (strlen($word) > 2) { // Skip kata pendek
-                        if (str_contains($nama, $word)) { $score += 60; $matched = true; }
-                        if (str_contains($sku, $word)) { $score += 40; $matched = true; }
+                        if (str_contains($nama, $word)) {
+                            $score += 60;
+                            $matched = true;
+                        }
+                        if (str_contains($sku, $word)) {
+                            $score += 40;
+                            $matched = true;
+                        }
                     }
                 }
 
@@ -144,7 +150,7 @@ class TransaksiPOSController extends Controller
                             $percent = 0.0;
                             similar_text($searchTerm, $nameWord, $percent);
                             if ($percent >= 70) {
-                                $score += (int) round($percent);
+                                $score += (int)round($percent);
                                 $matched = true;
                                 break;
                             }
@@ -273,7 +279,7 @@ class TransaksiPOSController extends Controller
                     return response()->json([
                         'success' => false,
                         'message' => 'Transaksi melebihi kredit limit. Tambahkan DP minimal: Rp ' . number_format($minDp, 0, ',', '.'),
-                        'errors' => [ 'dp' => ['DP minimal yang dibutuhkan: ' . $minDp] ],
+                        'errors' => ['dp' => ['DP minimal yang dibutuhkan: ' . $minDp]],
                     ], 422);
                 }
 
@@ -318,10 +324,10 @@ class TransaksiPOSController extends Controller
                 $bungaPersen = (float)($request->bunga_persen ?? 0);
                 $mulai = $request->mulai_kontrak ? Carbon::parse($request->mulai_kontrak) : Carbon::today();
                 // Hitung total tagihan (pokok + bunga), lalu distribusikan ke kelipatan 1000
-                $totalTagihan = (int) round($principal * (1 + ($bungaPersen / 100)));
-                $basePerMonth = (int) (floor(($totalTagihan / max(1, $tenorBulan)) / 1000) * 1000);
+                $totalTagihan = (int)round($principal * (1 + ($bungaPersen / 100)));
+                $basePerMonth = (int)(floor(($totalTagihan / max(1, $tenorBulan)) / 1000) * 1000);
                 $remainder = $totalTagihan - ($basePerMonth * $tenorBulan);
-                $extraMonths = (int) floor($remainder / 1000);
+                $extraMonths = (int)floor($remainder / 1000);
                 // Simpan nilai cicilan_bulanan kontrak sebagai base (informasi tampilan); rincian ada di jadwal
                 $cicilanBulanan = max(0, $basePerMonth);
 
@@ -338,7 +344,6 @@ class TransaksiPOSController extends Controller
                     'cicilan_bulanan' => $cicilanBulanan,
                     'status' => 'AKTIF',
                     'score_snapshot' => (int)($customer->trust_score ?? 50),
-                    'alasan_eligibilitas' => null,
                 ]);
 
                 // Buat jadwal angsuran bulanan, distribusi kelipatan 1000

@@ -28,7 +28,6 @@ class KontrakKreditSeeder extends Seeder
       'cicilan_bulanan' => 16000,
       'status' => 'AKTIF',
       'score_snapshot' => 80,
-      'alasan_eligibilitas' => 'Trust score tinggi, riwayat pembayaran baik',
     ]);
 
     // Update the transaction with contract ID
