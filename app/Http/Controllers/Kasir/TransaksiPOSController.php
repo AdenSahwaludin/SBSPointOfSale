@@ -9,6 +9,8 @@ use App\Models\Pelanggan;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use App\Models\Pembayaran;
+use App\Models\KontrakKredit;
+use App\Models\JadwalAngsuran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -229,6 +231,11 @@ class TransaksiPOSController extends Controller
             'jumlah_bayar' => 'exclude_unless:metode_bayar,TUNAI|required_if:metode_bayar,TUNAI|nullable|numeric|min:0|gte:total',
             // For credit transactions, require DP
             'dp' => 'required_if:metode_bayar,KREDIT|nullable|numeric|min:0|lt:total',
+            // Optional credit contract fields
+            'tenor_bulan' => 'exclude_unless:metode_bayar,KREDIT|nullable|integer|min:1|max:24',
+            'bunga_persen' => 'exclude_unless:metode_bayar,KREDIT|nullable|numeric|min:0|max:100',
+            'cicilan_bulanan' => 'exclude_unless:metode_bayar,KREDIT|nullable|numeric|min:0',
+            'mulai_kontrak' => 'exclude_unless:metode_bayar,KREDIT|nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -296,12 +303,57 @@ class TransaksiPOSController extends Controller
                 // Jenis transaksi
                 'jenis_transaksi' => $isCredit ? Transaksi::JENIS_KREDIT : Transaksi::JENIS_TUNAI,
                 'dp' => $isCredit ? ($request->dp ?? 0) : 0,
-                'tenor_bulan' => null,
-                'bunga_persen' => 0,
-                'cicilan_bulanan' => null,
+                'tenor_bulan' => $isCredit ? ($request->tenor_bulan ?? null) : null,
+                'bunga_persen' => $isCredit ? ($request->bunga_persen ?? 0) : 0,
+                'cicilan_bulanan' => $isCredit ? ($request->cicilan_bulanan ?? null) : null,
                 'ar_status' => $isCredit ? 'AKTIF' : 'NA',
                 'id_kontrak' => null,
             ]);
+
+            // Jika KREDIT: buat kontrak kredit dan jadwal angsuran
+            if ($isCredit) {
+                $customer = \App\Models\Pelanggan::find($request->id_pelanggan);
+                $principal = max(0.0, (float)$request->total - (float)($request->dp ?? 0));
+                $tenorBulan = (int)($request->tenor_bulan ?? 12);
+                $bungaPersen = (float)($request->bunga_persen ?? 0);
+                $mulai = $request->mulai_kontrak ? Carbon::parse($request->mulai_kontrak) : Carbon::today();
+                // Hitung cicilan flat jika belum diberikan klien
+                $cicilanBulanan = $request->cicilan_bulanan ?? (int)ceil(($principal * (1 + ($bungaPersen / 100))) / max(1, $tenorBulan));
+
+                $nomorKontrak = KontrakKredit::generateNomorKontrak();
+                $kontrak = KontrakKredit::create([
+                    'nomor_kontrak' => $nomorKontrak,
+                    'id_pelanggan' => $request->id_pelanggan,
+                    'nomor_transaksi' => $nomorTransaksi,
+                    'mulai_kontrak' => $mulai->toDateString(),
+                    'tenor_bulan' => $tenorBulan,
+                    'pokok_pinjaman' => $principal,
+                    'dp' => (float)($request->dp ?? 0),
+                    'bunga_persen' => $bungaPersen,
+                    'cicilan_bulanan' => $cicilanBulanan,
+                    'status' => 'AKTIF',
+                    'score_snapshot' => (int)($customer->trust_score ?? 50),
+                    'alasan_eligibilitas' => null,
+                ]);
+
+                // Buat jadwal angsuran bulanan
+                for ($i = 1; $i <= $tenorBulan; $i++) {
+                    $due = (clone $mulai)->addMonths($i)->toDateString();
+                    JadwalAngsuran::create([
+                        'id_kontrak' => $kontrak->id_kontrak,
+                        'periode_ke' => $i,
+                        'jatuh_tempo' => $due,
+                        'jumlah_tagihan' => $cicilanBulanan,
+                        'jumlah_dibayar' => 0,
+                        'status' => 'DUE',
+                        'paid_at' => null,
+                    ]);
+                }
+
+                // Tautkan kontrak ke transaksi
+                $transaksi->id_kontrak = $kontrak->id_kontrak;
+                $transaksi->save();
+            }
 
             foreach ($request->items as $item) {
                 $produk = Produk::find($item['id_produk']);

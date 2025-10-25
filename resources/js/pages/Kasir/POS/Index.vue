@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
 import TransactionConfirmationModal from '@/components/TransactionConfirmationModal.vue';
+import CreditContractModal from '@/components/CreditContractModal.vue';
 import { useCurrencyFormat } from '@/composables/useCurrencyFormat';
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
@@ -99,7 +100,9 @@ const isSearching = isSearchingProducts; // alias
 
 // Modal confirmation
 const showConfirmationModal = ref(false);
+const showCreditModal = ref(false);
 const pendingTransaction = ref<any>(null);
+const creditConfig = ref<null | { tenor_bulan: number; bunga_persen: number; cicilan_bulanan: number; mulai_kontrak: string; jadwal: Array<{ periode_ke: number; jatuh_tempo: string; jumlah_tagihan: number }> }>(null);
 
 // Form
 const transactionForm = useForm({
@@ -461,7 +464,7 @@ function processTransaction() {
 
     // Kredit: DP boleh 0, biarkan server validasi limit dan kondisi lainnya
 
-    // Prepare transaction data for confirmation
+    // Prepare transaction data
     const selectedPelangganObj = props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value);
 
     pendingTransaction.value = {
@@ -476,7 +479,13 @@ function processTransaction() {
         dp: metodeBayar.value === 'KREDIT' ? dpBayar.value : undefined,
     };
 
-    // Show confirmation modal
+    // If credit, collect credit contract info first
+    if (metodeBayar.value === 'KREDIT') {
+        showCreditModal.value = true;
+        return;
+    }
+
+    // Else show confirmation modal
     showConfirmationModal.value = true;
 }
 
@@ -492,7 +501,15 @@ function handleConfirmTransaction() {
         pajak: pendingTransaction.value.pajak,
         total: pendingTransaction.value.total,
         ...(pendingTransaction.value.metode_bayar === 'TUNAI' ? { jumlah_bayar: pendingTransaction.value.jumlah_bayar } : {}),
-        ...(pendingTransaction.value.metode_bayar === 'KREDIT' ? { dp: pendingTransaction.value.dp ?? 0 } : {}),
+        ...(pendingTransaction.value.metode_bayar === 'KREDIT'
+            ? {
+                  dp: pendingTransaction.value.dp ?? 0,
+                  tenor_bulan: creditConfig.value?.tenor_bulan,
+                  bunga_persen: creditConfig.value?.bunga_persen,
+                  cicilan_bulanan: creditConfig.value?.cicilan_bulanan,
+                  mulai_kontrak: creditConfig.value?.mulai_kontrak,
+              }
+            : {}),
     } as Record<string, any>;
 
     fetch('/kasir/pos', {
@@ -521,6 +538,7 @@ function handleConfirmTransaction() {
                 // Close modal and clear data
                 showConfirmationModal.value = false;
                 pendingTransaction.value = null;
+                creditConfig.value = null;
                 clearCart();
                 resetForm();
             } else {
@@ -566,7 +584,15 @@ function handlePrintReceipt() {
         pajak: pendingTransaction.value.pajak,
         total: pendingTransaction.value.total,
         ...(pendingTransaction.value.metode_bayar === 'TUNAI' ? { jumlah_bayar: pendingTransaction.value.jumlah_bayar } : {}),
-        ...(pendingTransaction.value.metode_bayar === 'KREDIT' ? { dp: pendingTransaction.value.dp ?? 0 } : {}),
+        ...(pendingTransaction.value.metode_bayar === 'KREDIT'
+            ? {
+                  dp: pendingTransaction.value.dp ?? 0,
+                  tenor_bulan: creditConfig.value?.tenor_bulan,
+                  bunga_persen: creditConfig.value?.bunga_persen,
+                  cicilan_bulanan: creditConfig.value?.cicilan_bulanan,
+                  mulai_kontrak: creditConfig.value?.mulai_kontrak,
+              }
+            : {}),
     } as Record<string, any>;
 
     fetch('/kasir/pos', {
@@ -595,6 +621,7 @@ function handlePrintReceipt() {
                 // Close modal and clear data
                 showConfirmationModal.value = false;
                 pendingTransaction.value = null;
+                creditConfig.value = null;
                 clearCart();
                 resetForm();
 
@@ -1326,6 +1353,14 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
             @confirm="handleConfirmTransaction"
             @cancel="handleCancelTransaction"
             @print="handlePrintReceipt"
+        />
+        <!-- Credit Contract Modal (opens before confirmation when KREDIT) -->
+        <CreditContractModal
+            :show="showCreditModal"
+            :total="Number(total)"
+            :dp="Number(dpBayar || 0)"
+            @cancel="() => { showCreditModal = false; }"
+            @confirm="(cfg) => { creditConfig = cfg; showCreditModal = false; showConfirmationModal = true; }"
         />
     </BaseLayout>
 </template>

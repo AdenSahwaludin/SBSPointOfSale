@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
             TransaksiBulkSeeder::class,
             KontrakKreditSeeder::class,
             JadwalAngsuranSeeder::class,
-            PembayaranKreditSeeder::class,
         ]);
     }
 }
