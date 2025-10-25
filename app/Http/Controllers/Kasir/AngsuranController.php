@@ -24,14 +24,17 @@ class AngsuranController extends Controller
     {
         $search = $request->get('search');
         $onlyDueThisMonth = filter_var($request->get('due_this_month', '0'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        $unpaidOnly = filter_var($request->get('unpaid_only', '1'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         if ($onlyDueThisMonth === null)
             $onlyDueThisMonth = false;
+        if ($unpaidOnly === null)
+            $unpaidOnly = true; // default hanya belum lunas
 
         $startMonth = Carbon::now()->startOfMonth();
         $endMonth = Carbon::now()->endOfMonth();
 
         $contracts = KontrakKredit::with(['pelanggan'])
-            ->where('status', '!=', 'LUNAS')
+            ->when($unpaidOnly, fn ($q) => $q->where('status', '!=', 'LUNAS'))
             ->when($search, function ($q) use ($search) {
                 $q->where('nomor_kontrak', 'like', "%{$search}%")
                     ->orWhereHas('pelanggan', function ($q2) use ($search) {
@@ -53,6 +56,7 @@ class AngsuranController extends Controller
             'filters' => [
                 'search' => $search,
                 'due_this_month' => $onlyDueThisMonth ? '1' : '0',
+                'unpaid_only' => $unpaidOnly ? '1' : '0',
             ],
         ]);
     }

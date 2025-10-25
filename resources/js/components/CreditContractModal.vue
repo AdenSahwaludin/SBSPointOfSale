@@ -24,16 +24,19 @@ const startDate = ref<string>(new Date().toISOString().slice(0, 10));
 
 const principal = computed(() => Math.max(0, Number(props.total || 0) - Number(props.dp || 0)));
 
-function calcMonthly(principalAmount: number, tenorMonths: number, interestPercent: number): number {
+function computeRoundedSchedule(principalAmount: number, tenorMonths: number, interestPercent: number) {
   const p = Number(principalAmount || 0);
   const t = Math.max(1, Number(tenorMonths || 1));
   const r = Math.max(0, Number(interestPercent || 0)) / 100;
-  // Flat: total bayar = pokok * (1 + r); cicilan = total/t
-  const totalWithInterest = p * (1 + r);
-  return Math.ceil(totalWithInterest / t);
+  const totalWithInterest = Math.round(p * (1 + r));
+  const base = Math.floor((totalWithInterest / t) / 1000) * 1000;
+  const remainder = totalWithInterest - base * t;
+  const extraMonths = Math.max(0, Math.floor(remainder / 1000));
+  return { totalWithInterest, base, extraMonths };
 }
 
-const cicilan = computed(() => calcMonthly(principal.value, tenor.value, bunga.value));
+const rounded = computed(() => computeRoundedSchedule(principal.value, tenor.value, bunga.value));
+const cicilan = computed(() => rounded.value.base);
 
 function addMonths(dateStr: string, add: number): string {
   const d = new Date(dateStr + 'T00:00:00');
@@ -46,11 +49,14 @@ function addMonths(dateStr: string, add: number): string {
 
 const jadwal = computed(() => {
   const items: Array<{ periode_ke: number; jatuh_tempo: string; jumlah_tagihan: number }> = [];
+  const base = rounded.value.base;
+  const extra = rounded.value.extraMonths;
   for (let i = 1; i <= tenor.value; i++) {
+    const amt = base + (i <= extra ? 1000 : 0);
     items.push({
       periode_ke: i,
       jatuh_tempo: addMonths(startDate.value, i),
-      jumlah_tagihan: cicilan.value,
+      jumlah_tagihan: amt,
     });
   }
   return items;
@@ -154,4 +160,3 @@ watch(
 
 <style scoped>
 </style>
-

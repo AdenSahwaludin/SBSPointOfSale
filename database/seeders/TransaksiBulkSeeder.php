@@ -68,7 +68,15 @@ class TransaksiBulkSeeder extends Seeder
             $isKredit = $metode === 'KREDIT';
             $dp = $isKredit ? (int)round($total * [0, 0.1, 0.2, 0.3][random_int(0, 3)]) : 0;
             $tenor = $isKredit ? [3, 6, 9, 12][random_int(0, 3)] : null;
-            $cicilan = $isKredit ? (int)ceil(($total - $dp) / max(1, $tenor)) : null;
+            if ($isKredit) {
+                $bunga = 2; // default bunga seed
+                $principal = max(0, $total - $dp);
+                $totalTagihan = (int) round($principal * (1 + ($bunga / 100)));
+                $basePerMonth = (int) (floor(($totalTagihan / max(1, $tenor)) / 1000) * 1000);
+                $cicilan = max(0, $basePerMonth);
+            } else {
+                $cicilan = null;
+            }
 
             $trx = Transaksi::create([
                 'nomor_transaksi' => $nomorTransaksi,
@@ -129,4 +137,3 @@ class TransaksiBulkSeeder extends Seeder
         }
     }
 }
-

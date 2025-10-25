@@ -317,8 +317,13 @@ class TransaksiPOSController extends Controller
                 $tenorBulan = (int)($request->tenor_bulan ?? 12);
                 $bungaPersen = (float)($request->bunga_persen ?? 0);
                 $mulai = $request->mulai_kontrak ? Carbon::parse($request->mulai_kontrak) : Carbon::today();
-                // Hitung cicilan flat jika belum diberikan klien
-                $cicilanBulanan = $request->cicilan_bulanan ?? (int)ceil(($principal * (1 + ($bungaPersen / 100))) / max(1, $tenorBulan));
+                // Hitung total tagihan (pokok + bunga), lalu distribusikan ke kelipatan 1000
+                $totalTagihan = (int) round($principal * (1 + ($bungaPersen / 100)));
+                $basePerMonth = (int) (floor(($totalTagihan / max(1, $tenorBulan)) / 1000) * 1000);
+                $remainder = $totalTagihan - ($basePerMonth * $tenorBulan);
+                $extraMonths = (int) floor($remainder / 1000);
+                // Simpan nilai cicilan_bulanan kontrak sebagai base (informasi tampilan); rincian ada di jadwal
+                $cicilanBulanan = max(0, $basePerMonth);
 
                 $nomorKontrak = KontrakKredit::generateNomorKontrak();
                 $kontrak = KontrakKredit::create([
@@ -336,14 +341,15 @@ class TransaksiPOSController extends Controller
                     'alasan_eligibilitas' => null,
                 ]);
 
-                // Buat jadwal angsuran bulanan
+                // Buat jadwal angsuran bulanan, distribusi kelipatan 1000
                 for ($i = 1; $i <= $tenorBulan; $i++) {
                     $due = (clone $mulai)->addMonths($i)->toDateString();
+                    $amount = $basePerMonth + ($i <= $extraMonths ? 1000 : 0);
                     JadwalAngsuran::create([
                         'id_kontrak' => $kontrak->id_kontrak,
                         'periode_ke' => $i,
                         'jatuh_tempo' => $due,
-                        'jumlah_tagihan' => $cicilanBulanan,
+                        'jumlah_tagihan' => $amount,
                         'jumlah_dibayar' => 0,
                         'status' => 'DUE',
                         'paid_at' => null,
