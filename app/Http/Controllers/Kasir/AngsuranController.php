@@ -24,7 +24,8 @@ class AngsuranController extends Controller
     {
         $search = $request->get('search');
         $onlyDueThisMonth = filter_var($request->get('due_this_month', '0'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        if ($onlyDueThisMonth === null) $onlyDueThisMonth = false;
+        if ($onlyDueThisMonth === null)
+            $onlyDueThisMonth = false;
 
         $startMonth = Carbon::now()->startOfMonth();
         $endMonth = Carbon::now()->endOfMonth();
@@ -33,14 +34,14 @@ class AngsuranController extends Controller
             ->where('status', '!=', 'LUNAS')
             ->when($search, function ($q) use ($search) {
                 $q->where('nomor_kontrak', 'like', "%{$search}%")
-                  ->orWhereHas('pelanggan', function ($q2) use ($search) {
-                      $q2->where('nama', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('pelanggan', function ($q2) use ($search) {
+                        $q2->where('nama', 'like', "%{$search}%");
+                    });
             })
             ->when($onlyDueThisMonth, function ($q) use ($startMonth, $endMonth) {
                 $q->whereHas('jadwalAngsuran', function ($qq) use ($startMonth, $endMonth) {
                     $qq->whereIn('status', ['DUE', 'LATE'])
-                       ->whereBetween('jatuh_tempo', [$startMonth->toDateString(), $endMonth->toDateString()]);
+                        ->whereBetween('jatuh_tempo', [$startMonth->toDateString(), $endMonth->toDateString()]);
                 });
             })
             ->orderBy('mulai_kontrak', 'desc')
@@ -61,9 +62,13 @@ class AngsuranController extends Controller
      */
     public function show(int $id): Response
     {
-        $kontrak = KontrakKredit::with(['pelanggan', 'transaksi', 'jadwalAngsuran' => function ($q) {
-            $q->orderBy('periode_ke');
-        }])->findOrFail($id);
+        $kontrak = KontrakKredit::with([
+            'pelanggan',
+            'transaksi',
+            'jadwalAngsuran' => function ($q) {
+                $q->orderBy('periode_ke');
+            }
+        ])->findOrFail($id);
 
         $summary = [
             'pokok_pinjaman' => (float)$kontrak->pokok_pinjaman,
@@ -83,7 +88,7 @@ class AngsuranController extends Controller
             ->where('status', '!=', 'LUNAS')
             ->whereHas('jadwalAngsuran', function ($qq) use ($startMonth, $endMonth) {
                 $qq->whereIn('status', ['DUE', 'LATE'])
-                   ->whereBetween('jatuh_tempo', [$startMonth->toDateString(), $endMonth->toDateString()]);
+                    ->whereBetween('jatuh_tempo', [$startMonth->toDateString(), $endMonth->toDateString()]);
             })
             ->orderBy('mulai_kontrak', 'desc')
             ->paginate(10)
@@ -108,9 +113,13 @@ class AngsuranController extends Controller
             'keterangan' => 'nullable|string|max:255',
         ]);
 
-        $kontrak = KontrakKredit::with(['jadwalAngsuran' => function ($q) {
-            $q->orderBy('periode_ke');
-        }, 'pelanggan', 'transaksi'])->findOrFail($id);
+        $kontrak = KontrakKredit::with([
+            'jadwalAngsuran' => function ($q) {
+                $q->orderBy('periode_ke');
+            },
+            'pelanggan',
+            'transaksi'
+        ])->findOrFail($id);
 
         DB::beginTransaction();
         try {
@@ -118,8 +127,10 @@ class AngsuranController extends Controller
             $kasirId = Auth::user()->id_pengguna ?? null;
 
             foreach ($kontrak->jadwalAngsuran as $angsuran) {
-                if ($remaining <= 0) break;
-                if ($angsuran->status === 'PAID') continue;
+                if ($remaining <= 0)
+                    break;
+                if ($angsuran->status === 'PAID')
+                    continue;
 
                 $sisa = (float)$angsuran->jumlah_tagihan - (float)$angsuran->jumlah_dibayar;
                 if ($sisa <= 0) {
