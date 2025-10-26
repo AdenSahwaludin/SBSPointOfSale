@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
-import TransactionConfirmationModal from '@/components/TransactionConfirmationModal.vue';
 import CreditContractModal from '@/components/CreditContractModal.vue';
+import TransactionConfirmationModal from '@/components/TransactionConfirmationModal.vue';
 import { useCurrencyFormat } from '@/composables/useCurrencyFormat';
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
@@ -102,7 +102,13 @@ const isSearching = isSearchingProducts; // alias
 const showConfirmationModal = ref(false);
 const showCreditModal = ref(false);
 const pendingTransaction = ref<any>(null);
-const creditConfig = ref<null | { tenor_bulan: number; bunga_persen: number; cicilan_bulanan: number; mulai_kontrak: string; jadwal: Array<{ periode_ke: number; jatuh_tempo: string; jumlah_tagihan: number }> }>(null);
+const creditConfig = ref<null | {
+    tenor_bulan: number;
+    bunga_persen: number;
+    cicilan_bulanan: number;
+    mulai_kontrak: string;
+    jadwal: Array<{ periode_ke: number; jatuh_tempo: string; jumlah_tagihan: number }>;
+}>(null);
 
 // Form
 const transactionForm = useForm({
@@ -1359,8 +1365,18 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
             :show="showCreditModal"
             :total="Number(total)"
             :dp="Number(dpBayar || 0)"
-            @cancel="() => { showCreditModal = false; }"
-            @confirm="(cfg) => { creditConfig = cfg; showCreditModal = false; showConfirmationModal = true; }"
+            @cancel="
+                () => {
+                    showCreditModal = false;
+                }
+            "
+            @confirm="
+                (cfg) => {
+                    creditConfig = cfg;
+                    showCreditModal = false;
+                    showConfirmationModal = true;
+                }
+            "
         />
     </BaseLayout>
 </template>

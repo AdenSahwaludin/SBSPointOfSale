@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->integer('rasio');
             $table->integer('qty_from');
             $table->integer('qty_to');
+            $table->enum('mode', ['penuh', 'parsial'])->default('penuh');
             $table->string('keterangan', 200)->nullable();
             $table->timestamps();
 

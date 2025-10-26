@@ -21,6 +21,7 @@ interface KonversiStok {
     rasio: number;
     qty_from: number;
     qty_to: number;
+    mode: 'penuh' | 'parsial';
     keterangan: string | null;
     from_produk: Produk;
     to_produk: Produk;
@@ -42,6 +43,7 @@ const form = useForm({
     rasio: props.konversi.rasio,
     qty_from: props.konversi.qty_from,
     qty_to: props.konversi.qty_to,
+    mode: (props.konversi.mode || 'penuh') as 'penuh' | 'parsial',
     keterangan: props.konversi.keterangan || '',
 });
 
@@ -354,6 +356,41 @@ function submit() {
                     <p v-if="form.errors.rasio" class="mt-1 text-sm text-red-500">{{ form.errors.rasio }}</p>
                 </div>
 
+                <!-- Mode Selection -->
+                <div>
+                    <label for="mode" class="mb-2 block text-sm font-semibold text-gray-700">
+                        Mode Konversi <span class="text-red-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Mode PENUH -->
+                        <label
+                            class="relative flex cursor-pointer items-center rounded-lg border-2 p-4 transition-all"
+                            :class="form.mode === 'penuh' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 bg-white hover:border-gray-400'"
+                        >
+                            <input type="radio" v-model="form.mode" value="penuh" class="h-4 w-4 text-emerald-600" />
+                            <span class="ml-3">
+                                <span class="font-semibold text-gray-900">Penuh</span>
+                                <p class="text-xs text-gray-600">Konversi semua quantity asal</p>
+                                <p class="text-xs font-medium text-emerald-700">Contoh: 1 karton → 144 pcs</p>
+                            </span>
+                        </label>
+
+                        <!-- Mode PARSIAL -->
+                        <label
+                            class="relative flex cursor-pointer items-center rounded-lg border-2 p-4 transition-all"
+                            :class="form.mode === 'parsial' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:border-gray-400'"
+                        >
+                            <input type="radio" v-model="form.mode" value="parsial" class="h-4 w-4 text-blue-600" />
+                            <span class="ml-3">
+                                <span class="font-semibold text-gray-900">Parsial</span>
+                                <p class="text-xs text-gray-600">Konversi sebagian quantity asal</p>
+                                <p class="text-xs font-medium text-blue-700">Contoh: 10 pcs dari 1 karton</p>
+                            </span>
+                        </label>
+                    </div>
+                    <p v-if="form.errors.mode" class="mt-1 text-sm text-red-500">{{ form.errors.mode }}</p>
+                </div>
+
                 <!-- Preview -->
                 <div v-if="selectedFromProduk && selectedToProduk && form.qty_from && form.qty_to" class="rounded-lg bg-emerald-50 p-4">
                     <h4 class="mb-2 font-semibold text-emerald-800">
@@ -379,7 +416,7 @@ function submit() {
                         rows="3"
                         maxlength="200"
                         class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
-                        placeholder="Contoh: Konversi dari karton ke pcs"
+                        placeholder="Contoh: Sisa 10pcs "
                     ></textarea>
                     <p class="mt-1 text-xs text-gray-500">Maksimal 200 karakter</p>
                 </div>

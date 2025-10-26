@@ -413,7 +413,7 @@ function submit() {
                         rows="3"
                         maxlength="200"
                         class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
-                        placeholder="Contoh: Konversi dari karton ke pcs"
+                        placeholder="Contoh: Sisa 10pcs"
                     ></textarea>
                     <p class="mt-1 text-xs text-gray-500">Maksimal 200 karakter</p>
                 </div>

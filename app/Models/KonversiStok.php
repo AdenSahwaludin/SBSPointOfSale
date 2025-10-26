@@ -19,6 +19,7 @@ class KonversiStok extends Model
         'rasio',
         'qty_from',
         'qty_to',
+        'mode',
         'keterangan',
     ];
 

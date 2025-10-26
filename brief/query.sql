@@ -117,7 +117,7 @@ CREATE TABLE konversi_stok (
 CREATE OR REPLACE VIEW v_produk_stok_setara_pcs AS
 SELECT
   p.id_produk, p.sku, p.nama, p.id_kategori, p.satuan, p.isi_per_pack, p.stok,
-  CASE WHEN p.satuan='karton' THEN p.stok * p.isi_per_pack ELSE p.stok END AS stok_setara_pcs
+  CASE WHEN p.satuan='kar ton' THEN p.stok * p.isi_per_pack ELSE p.stok END AS stok_setara_pcs
 FROM produk p;
 
 -- =========================================================

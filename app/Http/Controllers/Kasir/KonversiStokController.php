@@ -105,6 +105,7 @@ class KonversiStokController extends Controller
    'rasio' => 'required|integer|min:1',
    'qty_from' => 'required|integer|min:1',
    'qty_to' => 'required|integer|min:1',
+   'mode' => 'required|in:penuh,parsial',
    'keterangan' => 'nullable|string|max:200',
   ], [
    'from_produk_id.required' => 'Produk asal harus dipilih',
@@ -118,6 +119,8 @@ class KonversiStokController extends Controller
    'qty_from.min' => 'Jumlah produk asal minimal 1',
    'qty_to.required' => 'Jumlah produk tujuan harus diisi',
    'qty_to.min' => 'Jumlah produk tujuan minimal 1',
+   'mode.required' => 'Mode konversi harus dipilih',
+   'mode.in' => 'Mode konversi tidak valid',
   ]);
 
   try {
@@ -139,17 +142,32 @@ class KonversiStokController extends Controller
    // Create konversi record
    KonversiStok::create($validated);
 
+   // Calculate stok changes berdasarkan mode
+   if ($validated['mode'] === 'penuh') {
+    // Mode PENUH: stok karton berkurang sesuai qty_from, stok pcs bertambah qty_from * rasio
+    $stokKartonBerkurang = $validated['qty_from'];
+    $stokPcsBertambah = $validated['qty_from'] * $validated['rasio'];
+   } else {
+    // Mode PARSIAL: stok karton berkurang proporsional, stok pcs bertambah qty_to
+    // Contoh: 1 karton = 144 pcs (isi_per_pack), ambil 10 pcs => berkurang 10/144 = 0.069 karton
+    $isiPerPack = $produkAsal->isi_per_pack;
+    $stokKartonBerkurang = round($validated['qty_to'] / $isiPerPack, 3);
+    $stokPcsBertambah = $validated['qty_to'];
+   }
+
    // Update stok produk asal (kurangi)
-   $produkAsal->decrement('stok', $validated['qty_from']);
+   $produkAsal->stok = max(0, $produkAsal->stok - $stokKartonBerkurang);
+   $produkAsal->save();
 
    // Update stok produk tujuan (tambah)
-   $produkTujuan->increment('stok', $validated['qty_to']);
+   $produkTujuan->increment('stok', $stokPcsBertambah);
 
    DB::commit();
 
+   $modeLabel = $validated['mode'] === 'penuh' ? 'penuh' : 'parsial';
    return redirect()
     ->route('kasir.konversi-stok.index')
-    ->with('success', "Konversi stok berhasil! {$validated['qty_from']} {$produkAsal->satuan} {$produkAsal->nama} → {$validated['qty_to']} {$produkTujuan->satuan} {$produkTujuan->nama}");
+    ->with('success', "Konversi stok ({$modeLabel}) berhasil! {$stokKartonBerkurang} {$produkAsal->satuan} {$produkAsal->nama} → {$stokPcsBertambah} {$produkTujuan->satuan} {$produkTujuan->nama}");
   } catch (\Exception $e) {
    DB::rollBack();
 
