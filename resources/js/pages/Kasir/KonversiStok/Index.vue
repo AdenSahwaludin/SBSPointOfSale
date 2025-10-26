@@ -18,6 +18,7 @@ interface KonversiStok {
     rasio: number;
     qty_from: number;
     qty_to: number;
+    mode: 'penuh' | 'parsial';
     keterangan: string | null;
     created_at: string;
     updated_at: string;
@@ -270,10 +271,28 @@ function formatDate(dateString: string) {
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-center">
-                                    <div class="rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-1.5 text-center">
-                                        <span class="font-bold text-emerald-700">{{ item.qty_from }} {{ item.from_produk.satuan }}</span>
-                                        <i class="fas fa-arrow-right mx-2 text-emerald-600"></i>
-                                        <span class="font-bold text-teal-700">{{ item.qty_to }} {{ item.to_produk.satuan }}</span>
+                                    <div class="rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-2 text-center">
+                                        <div class="flex items-center justify-center gap-2 font-bold">
+                                            <span class="text-emerald-700">{{ item.qty_from }} {{ item.from_produk.satuan }}</span>
+                                            <i class="fas fa-arrow-right text-emerald-600"></i>
+                                            <span class="text-teal-700">{{ item.qty_to }} {{ item.to_produk.satuan }}</span>
+                                        </div>
+                                        <div class="mt-1 flex items-center justify-center gap-2">
+                                            <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700">Rasio 1:{{ item.rasio }}</span>
+                                            <span
+                                                :class="{
+                                                    'inline-block rounded-full px-2.5 py-1 text-xs font-semibold': true,
+                                                    'bg-orange-100 text-orange-700': item.mode === 'parsial',
+                                                    'bg-blue-100 text-blue-700': item.mode === 'penuh',
+                                                }"
+                                            >
+                                                <i
+                                                    :class="{ 'fas fa-cube': item.mode === 'parsial', 'fas fa-boxes': item.mode === 'penuh' }"
+                                                    class="mr-1"
+                                                ></i>
+                                                {{ item.mode === 'parsial' ? 'Parsial' : 'Penuh' }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
