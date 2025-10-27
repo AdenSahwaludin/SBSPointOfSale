@@ -223,6 +223,17 @@ function formatDate(dateString: string) {
                             <th class="px-6 py-3 text-center text-xs font-bold tracking-wider text-gray-700 uppercase">Konversi</th>
                             <th
                                 class="cursor-pointer px-6 py-3 text-left text-xs font-bold tracking-wider text-gray-700 uppercase transition hover:text-emerald-700"
+                                @click="sortBy('mode')"
+                            >
+                                Mode
+                                <i
+                                    v-if="filters.sort_field === 'mode'"
+                                    :class="filters.sort_direction === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"
+                                    class="fas ml-1"
+                                ></i>
+                            </th>
+                            <th
+                                class="cursor-pointer px-6 py-3 text-left text-xs font-bold tracking-wider text-gray-700 uppercase transition hover:text-emerald-700"
                                 @click="sortBy('to_produk_id')"
                             >
                                 Produk Tujuan
@@ -249,7 +260,7 @@ function formatDate(dateString: string) {
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <tr v-if="konversiStok.data.length === 0">
-                            <td colspan="7" class="px-6 py-12 text-center">
+                            <td colspan="8" class="px-6 py-12 text-center">
                                 <i class="fas fa-inbox mb-4 inline-block text-5xl text-gray-300"></i>
                                 <p class="text-gray-500">Tidak ada data konversi stok</p>
                             </td>
@@ -262,6 +273,19 @@ function formatDate(dateString: string) {
                                     v-model="selectedItems"
                                     class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                 />
+                            </td>
+                            <td class="px-6 py-4">
+                                <span
+                                    :class="{
+                                        'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold': true,
+                                        'bg-orange-100 text-orange-700': item.mode === 'parsial',
+                                        'bg-blue-100 text-blue-700': item.mode === 'penuh',
+                                    }"
+                                    :title="item.mode === 'parsial' ? 'Konversi sebagian dari qty asal' : 'Konversi semua qty asal'"
+                                >
+                                    <i :class="item.mode === 'parsial' ? 'fas fa-cube mr-1' : 'fas fa-boxes mr-1'"></i>
+                                    {{ item.mode === 'parsial' ? 'Parsial (sebagian)' : 'Penuh (semua)' }}
+                                </span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-col">
@@ -279,19 +303,6 @@ function formatDate(dateString: string) {
                                         </div>
                                         <div class="mt-1 flex items-center justify-center gap-2">
                                             <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700">Rasio 1:{{ item.rasio }}</span>
-                                            <span
-                                                :class="{
-                                                    'inline-block rounded-full px-2.5 py-1 text-xs font-semibold': true,
-                                                    'bg-orange-100 text-orange-700': item.mode === 'parsial',
-                                                    'bg-blue-100 text-blue-700': item.mode === 'penuh',
-                                                }"
-                                            >
-                                                <i
-                                                    :class="{ 'fas fa-cube': item.mode === 'parsial', 'fas fa-boxes': item.mode === 'penuh' }"
-                                                    class="mr-1"
-                                                ></i>
-                                                {{ item.mode === 'parsial' ? 'Parsial' : 'Penuh' }}
-                                            </span>
                                         </div>
                                     </div>
                                 </div>
