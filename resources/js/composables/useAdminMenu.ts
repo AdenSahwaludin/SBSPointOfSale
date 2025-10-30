@@ -15,7 +15,6 @@ export function useAdminMenuItems() {
                 { name: 'Produk', href: '/admin/produk', icon: 'fas fa-boxes' },
                 { name: 'Kategori', href: '/admin/kategori', icon: 'fas fa-tags' },
                 { name: 'Pelanggan', href: '/admin/pelanggan', icon: 'fas fa-user-friends' },
-                { name: 'Konversi Stok', href: '/admin/konversi-stok', icon: 'fas fa-exchange-alt' },
             ],
         },
         {

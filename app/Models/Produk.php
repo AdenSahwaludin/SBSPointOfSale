@@ -27,12 +27,14 @@ class Produk extends Model
         'harga',
         'harga_pack',
         'stok',
+        'sisa_pcs_terbuka',
     ];
 
     protected $casts = [
         'harga' => 'decimal:0',
         'harga_pack' => 'decimal:0',
         'stok' => 'integer',
+        'sisa_pcs_terbuka' => 'integer',
         'isi_per_pack' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

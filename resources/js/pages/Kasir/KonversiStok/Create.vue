@@ -83,21 +83,36 @@ function clearToProduk() {
     searchToProduk.value = '';
 }
 
-// Auto-calculate rasio when qty_from or qty_to changes
-watch([() => form.qty_from, () => form.qty_to], () => {
-    if (form.qty_from > 0 && form.qty_to > 0) {
-        form.rasio = Math.round(form.qty_to / form.qty_from);
-    }
-});
+// Rasio adalah kapasitas per pack (tetap mengikuti isi_per_pack)
+// Sinkronkan qty_to saat mode penuh berdasarkan qty_from * rasio
+watch(
+    () => form.qty_from,
+    () => {
+        if (form.mode === 'penuh' && form.qty_from > 0 && form.rasio > 0) {
+            form.qty_to = form.qty_from * form.rasio;
+        }
+    },
+);
 
 // Auto-suggest based on isi_per_pack
 watch(
     () => form.from_produk_id,
     () => {
         if (selectedFromProduk.value && selectedFromProduk.value.isi_per_pack) {
-            form.qty_from = 1;
-            form.qty_to = selectedFromProduk.value.isi_per_pack;
             form.rasio = selectedFromProduk.value.isi_per_pack;
+            // Default satu pack penuh saat pertama memilih produk
+            form.qty_from = 1;
+            form.qty_to = form.mode === 'penuh' ? form.qty_from * form.rasio : form.rasio;
+        }
+    },
+);
+
+// Jika user mengubah mode menjadi penuh, sesuaikan qty_to sesuai rasio
+watch(
+    () => form.mode,
+    () => {
+        if (form.mode === 'penuh' && form.qty_from > 0 && form.rasio > 0) {
+            form.qty_to = form.qty_from * form.rasio;
         }
     },
 );

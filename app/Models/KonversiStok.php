@@ -21,6 +21,9 @@ class KonversiStok extends Model
         'qty_to',
         'mode',
         'keterangan',
+        'packs_used',
+        'dari_buffer',
+        'sisa_buffer_after',
     ];
 
     protected $casts = [
@@ -29,6 +32,9 @@ class KonversiStok extends Model
         'rasio' => 'integer',
         'qty_from' => 'integer',
         'qty_to' => 'integer',
+        'packs_used' => 'integer',
+        'dari_buffer' => 'integer',
+        'sisa_buffer_after' => 'integer',
         'created_at' => 'datetime',
     ];
 

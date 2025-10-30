@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Kasir;
 use App\Http\Controllers\Controller;
 use App\Models\KonversiStok;
 use App\Models\Produk;
+use App\Services\KonversiStokService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -13,6 +14,12 @@ use Illuminate\Http\RedirectResponse;
 
 class KonversiStokController extends Controller
 {
+    protected $konversiService;
+
+    public function __construct(KonversiStokService $konversiService)
+    {
+        $this->konversiService = $konversiService;
+    }
   /**
    * Display a listing of the resource.
    */
@@ -103,7 +110,8 @@ class KonversiStokController extends Controller
       'from_produk_id' => 'required|exists:produk,id_produk',
       'to_produk_id' => 'required|exists:produk,id_produk|different:from_produk_id',
       'rasio' => 'required|integer|min:1',
-      'qty_from' => 'required|integer|min:1',
+      // qty_from bisa 0 pada konversi parsial yang hanya memakai buffer
+      'qty_from' => 'required|integer|min:0',
       'qty_to' => 'required|integer|min:1',
       'mode' => 'required|in:penuh,parsial',
       'keterangan' => 'nullable|string|max:200',
@@ -116,7 +124,7 @@ class KonversiStokController extends Controller
       'rasio.required' => 'Rasio konversi harus diisi',
       'rasio.min' => 'Rasio konversi minimal 1',
       'qty_from.required' => 'Jumlah produk asal harus diisi',
-      'qty_from.min' => 'Jumlah produk asal minimal 1',
+      'qty_from.min' => 'Jumlah produk asal minimal 0',
       'qty_to.required' => 'Jumlah produk tujuan harus diisi',
       'qty_to.min' => 'Jumlah produk tujuan minimal 1',
       'mode.required' => 'Mode konversi harus dipilih',
@@ -124,53 +132,23 @@ class KonversiStokController extends Controller
     ]);
 
     try {
-      // Get produk asal dan tujuan
+      $konversi = $this->konversiService->convert(
+        $validated['from_produk_id'],
+        $validated['to_produk_id'],
+        $validated['qty_to'],
+        $validated['mode'],
+        $validated['rasio'],
+        $validated['keterangan'] ?? null
+      );
+
+      $modeLabel = $validated['mode'] === 'penuh' ? 'penuh' : 'parsial';
       $produkAsal = Produk::findOrFail($validated['from_produk_id']);
       $produkTujuan = Produk::findOrFail($validated['to_produk_id']);
 
-      // Hitung rencana perubahan stok berdasarkan mode
-      if ($validated['mode'] === 'parsial') {
-        // PARSIAL: stok karton berkurang proporsional, stok pcs bertambah qty_to
-        // Contoh: 1 karton = 144 pcs, ambil 10 pcs => berkurang 10/144 = 0.069 karton
-        $isiPerPack = max(1, (int)$produkAsal->isi_per_pack);
-        $stokKartonBerkurang = round($validated['qty_to'] / $isiPerPack, 3);
-        $stokPcsBertambah = $validated['qty_to'];
-      } else {
-        // PENUH: stok karton berkurang sesuai qty_from, stok pcs bertambah qty_from * rasio
-        $stokKartonBerkurang = $validated['qty_from'];
-        $stokPcsBertambah = $validated['qty_from'] * $validated['rasio'];
-      }
-
-      // Validasi stok asal mencukupi
-      if ($produkAsal->stok < $stokKartonBerkurang) {
-        return redirect()
-          ->back()
-          ->withInput()
-          ->with('error', "Stok {$produkAsal->nama} tidak mencukupi. Stok tersedia: {$produkAsal->stok} {$produkAsal->satuan}");
-      }
-
-      // Start transaction
-      DB::beginTransaction();
-
-      // Create konversi record
-      KonversiStok::create($validated);
-
-      // Update stok produk asal (kurangi)
-      $produkAsal->stok = max(0, $produkAsal->stok - $stokKartonBerkurang);
-      $produkAsal->save();
-
-      // Update stok produk tujuan (tambah)
-      $produkTujuan->increment('stok', $stokPcsBertambah);
-
-      DB::commit();
-
-      $modeLabel = $validated['mode'] === 'penuh' ? 'penuh' : 'parsial';
       return redirect()
         ->route('kasir.konversi-stok.index')
-        ->with('success', "Konversi stok ({$modeLabel}) berhasil! {$stokKartonBerkurang} {$produkAsal->satuan} {$produkAsal->nama} → {$stokPcsBertambah} {$produkTujuan->satuan} {$produkTujuan->nama}");
+        ->with('success', "Konversi stok ({$modeLabel}) berhasil! {$konversi->packs_used} {$produkAsal->satuan} {$produkAsal->nama} → {$konversi->qty_to} {$produkTujuan->satuan} {$produkTujuan->nama}");
     } catch (\Exception $e) {
-      DB::rollBack();
-
       return redirect()
         ->back()
         ->withInput()
@@ -288,44 +266,19 @@ class KonversiStokController extends Controller
   {
     try {
       $konversi = KonversiStok::findOrFail($id);
-
-      // Get produk asal dan tujuan
       $produkAsal = Produk::findOrFail($konversi->from_produk_id);
       $produkTujuan = Produk::findOrFail($konversi->to_produk_id);
 
-      DB::beginTransaction();
-
-      // Reverse stok changes berdasarkan mode
-      if ($konversi->mode === 'penuh') {
-        // Mode PENUH: restore stok karton sesuai qty_from, kurangi stok pcs qty_from * rasio
-        $stokKartonBertambah = $konversi->qty_from;
-        $stokPcsBerkurang = $konversi->qty_from * $konversi->rasio;
-      } else {
-        // Mode PARSIAL: restore stok karton proporsional, kurangi stok pcs qty_to
-        $isiPerPack = $produkAsal->isi_per_pack;
-        $stokKartonBertambah = round($konversi->qty_to / $isiPerPack, 3);
-        $stokPcsBerkurang = $konversi->qty_to;
-      }
-
-      // Update stok produk asal (tambah balik)
-      $produkAsal->increment('stok', $stokKartonBertambah);
-
-      // Update stok produk tujuan (kurangi)
-      $produkTujuan->stok = max(0, $produkTujuan->stok - $stokPcsBerkurang);
-      $produkTujuan->save();
-
-      // Delete konversi record
-      $konversi->delete();
-
-      DB::commit();
+      // Use service untuk reverse konversi
+      $this->konversiService->reverse($id);
 
       $modeLabel = $konversi->mode === 'penuh' ? 'penuh' : 'parsial';
+      $message = "Konversi stok ({$modeLabel}) berhasil dihapus! Stok sudah dikembalikan untuk {$produkAsal->nama} ↔ {$produkTujuan->nama}";
+
       return redirect()
         ->route('kasir.konversi-stok.index')
-        ->with('success', "Konversi stok ({$modeLabel}) berhasil dihapus! Stok sudah dikembalikan: {$stokKartonBertambah} {$produkAsal->satuan} {$produkAsal->nama} ↔ {$stokPcsBerkurang} {$produkTujuan->satuan} {$produkTujuan->nama}");
+        ->with('success', $message);
     } catch (\Exception $e) {
-      DB::rollBack();
-
       return redirect()
         ->back()
         ->with('error', 'Gagal menghapus konversi stok: ' . $e->getMessage());
@@ -343,45 +296,13 @@ class KonversiStokController extends Controller
     ]);
 
     try {
-      DB::beginTransaction();
-
-      // Get all konversi records yang akan dihapus
-      $konversis = KonversiStok::whereIn('id_konversi', $request->ids)->get();
-
-      // Reverse stock untuk setiap konversi
-      foreach ($konversis as $konversi) {
-        $produkAsal = Produk::findOrFail($konversi->from_produk_id);
-        $produkTujuan = Produk::findOrFail($konversi->to_produk_id);
-
-        // Reverse stok changes berdasarkan mode
-        if ($konversi->mode === 'penuh') {
-          $stokKartonBertambah = $konversi->qty_from;
-          $stokPcsBerkurang = $konversi->qty_from * $konversi->rasio;
-        } else {
-          $isiPerPack = $produkAsal->isi_per_pack;
-          $stokKartonBertambah = round($konversi->qty_to / $isiPerPack, 3);
-          $stokPcsBerkurang = $konversi->qty_to;
-        }
-
-        // Update stok produk asal (tambah balik)
-        $produkAsal->increment('stok', $stokKartonBertambah);
-
-        // Update stok produk tujuan (kurangi)
-        $produkTujuan->stok = max(0, $produkTujuan->stok - $stokPcsBerkurang);
-        $produkTujuan->save();
-      }
-
-      // Delete semua konversi records
-      KonversiStok::whereIn('id_konversi', $request->ids)->delete();
-
-      DB::commit();
+      // Use service untuk reverse multiple konversi
+      $this->konversiService->bulkReverse($request->ids);
 
       return redirect()
         ->route('kasir.konversi-stok.index')
         ->with('success', count($request->ids) . ' konversi stok berhasil dihapus dan stok sudah dikembalikan');
     } catch (\Exception $e) {
-      DB::rollBack();
-
       return redirect()
         ->back()
         ->with('error', 'Gagal menghapus konversi stok: ' . $e->getMessage());

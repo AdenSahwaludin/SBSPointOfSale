@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('id_kategori', 4);
             $table->enum('satuan', ['pcs', 'karton', 'pack'])->default('pcs');
             $table->integer('isi_per_pack')->default(1);
+            $table->integer('sisa_pcs_terbuka')->default(0);
             $table->decimal('harga', 18, 0);
             $table->decimal('harga_pack', 18, 0)->nullable()->comment('Harga per 3+ pcs atau pack/karton');
             $table->integer('stok')->default(0);
