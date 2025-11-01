@@ -22,6 +22,7 @@
 ## ✨ Fitur Utama
 
 ### 1. **Manajemen Produk**
+
 - ✅ CRUD produk dengan kategori
 - ✅ Tracking stok real-time
 - ✅ Harga jual dan harga grosir (pack)
@@ -29,6 +30,7 @@
 - ✅ Status produk (aktif/non-aktif)
 
 ### 2. **Sistem Point of Sale (Kasir)**
+
 - ✅ Interface kasir modern dan intuitif
 - ✅ Search produk dengan filter real-time
 - ✅ Shopping cart dengan edit/delete
@@ -38,6 +40,7 @@
 - ✅ Transaction history
 
 ### 3. **Manajemen Kredit & Cicilan**
+
 - ✅ Kontrak kredit dengan terms
 - ✅ Sistem cicilan pintar dengan pembulatan
 - ✅ Jadwal angsuran otomatis
@@ -46,6 +49,7 @@
 - ✅ Credit limit auto-calculation
 
 ### 4. **🆕 Stock Conversion System (Buffer-Based)**
+
 - ✅ **Partial stock conversion** tanpa decimal storage
 - ✅ **Smart buffer management** - auto-open karton jika buffer kurang
 - ✅ **INT-only calculations** - hanya gunakan integer
@@ -56,6 +60,7 @@
 - ✅ **Race condition safe** - DB transactions + pessimistic locking
 
 ### 5. **Dashboard & Reporting**
+
 - ✅ Real-time sales dashboard
 - ✅ Inventory analytics
 - ✅ Revenue reports
@@ -66,12 +71,14 @@
 ## 🛠️ Stack Teknologi
 
 ### Backend
+
 - **PHP 8.3** dengan Laravel 11
 - **MySQL 8.0** (Database)
 - **Eloquent ORM** untuk database abstraction
 - **Pest PHP** untuk testing
 
 ### Frontend
+
 - **Vue 3** dengan Composition API
 - **TypeScript** untuk type safety
 - **Inertia.js** untuk server-side rendering
@@ -79,6 +86,7 @@
 - **Vite** untuk bundling
 
 ### Tools
+
 - **Composer** untuk PHP dependencies
 - **NPM/Bun** untuk JavaScript dependencies
 - **Git** untuk version control
@@ -88,6 +96,7 @@
 ## 🚀 Instalasi
 
 ### Prerequisites
+
 - PHP 8.3+
 - MySQL 8.0+
 - Node.js 18+ atau Bun
@@ -95,24 +104,29 @@
 - Git
 
 ### Step 1: Clone Repository
+
 ```bash
 git clone https://github.com/AdenSahwaludin/SBSPointOfSale.git
 cd pos-sbs
 ```
 
 ### Step 2: Install PHP Dependencies
+
 ```bash
 composer install
 ```
 
 ### Step 3: Setup Environment
+
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
 ### Step 4: Configure Database
+
 Edit `.env`:
+
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -123,6 +137,7 @@ DB_PASSWORD=
 ```
 
 ### Step 5: Install JavaScript Dependencies
+
 ```bash
 npm install
 # atau
@@ -130,12 +145,14 @@ bun install
 ```
 
 ### Step 6: Run Migrations & Seeders
+
 ```bash
 php artisan migrate
 php artisan db:seed
 ```
 
 ### Step 7: Build Frontend Assets
+
 ```bash
 npm run build
 # untuk development:
@@ -147,6 +164,7 @@ npm run dev
 ## 🗄️ Konfigurasi Database
 
 ### Setup MySQL Database
+
 ```sql
 CREATE DATABASE sbs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
@@ -154,6 +172,7 @@ CREATE DATABASE sbs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ### Struktur Database Utama
 
 #### Tabel `produk`
+
 ```sql
 - id_produk (PK)
 - sku (UNIQUE)
@@ -167,6 +186,7 @@ CREATE DATABASE sbs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 #### Tabel `konversi_stok`
+
 ```sql
 - id_konversi (PK)
 - from_produk_id (FK)
@@ -185,6 +205,7 @@ CREATE DATABASE sbs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ## ▶️ Menjalankan Aplikasi
 
 ### Development Server
+
 ```bash
 # Terminal 1: PHP server
 php artisan serve
@@ -196,11 +217,13 @@ npm run dev
 Akses: `http://localhost:8000`
 
 ### Production Build
+
 ```bash
 npm run build
 ```
 
 ### Testing
+
 ```bash
 # Run all tests
 php artisan test
@@ -262,6 +285,7 @@ AFTER:
 ### API Endpoints
 
 #### Kasir Routes
+
 ```
 POST   /kasir/konversi-stok/store          - Create conversion
 GET    /kasir/konversi-stok/{id}/destroy   - Delete (reverse) conversion
@@ -269,6 +293,7 @@ POST   /kasir/konversi-stok/bulkDelete     - Bulk delete conversions
 ```
 
 #### Admin Routes
+
 ```
 GET    /admin/konversi-stok                - List conversions
 POST   /admin/konversi-stok                - Create
@@ -283,6 +308,7 @@ POST   /admin/konversi-stok/bulkDelete     - Bulk delete
 **File:** `app/Services/KonversiStokService.php`
 
 #### Method: `convert()`
+
 ```php
 $konversi = $service->convert(
     fromProdukId: 1,
@@ -300,12 +326,14 @@ $konversi = $service->convert(
 ```
 
 #### Method: `reverse()`
+
 ```php
 $service->reverse($konversiId);
 // Undo conversion, restore stok & buffer ke kondisi semula
 ```
 
 #### Method: `bulkReverse()`
+
 ```php
 $service->bulkReverse([$id1, $id2, $id3]);
 // Undo multiple conversions dengan error handling
@@ -329,12 +357,12 @@ $service->bulkReverse([$id1, $id2, $id3]);
 Menjalankan 6 comprehensive tests:
 
 ```bash
-✓ partial conversion uses buffer         
-✓ partial conversion auto opens box      
-✓ full conversion                        
-✓ reverse conversion                     
-✓ insufficient stock throws exception    
-✓ bulk reverse conversions               
+✓ partial conversion uses buffer
+✓ partial conversion auto opens box
+✓ full conversion
+✓ reverse conversion
+✓ insufficient stock throws exception
+✓ bulk reverse conversions
 
 Tests: 6 passed (29 assertions)
 ```
@@ -346,6 +374,7 @@ php test-konversi.php
 ```
 
 Output:
+
 ```
 === Test Konversi Stok dengan MySQL ===
 
@@ -457,6 +486,7 @@ Legend:
 ### Stock Conversion Endpoints
 
 #### 1. Create Conversion (Kasir)
+
 ```http
 POST /kasir/konversi-stok/store
 Content-Type: application/json
@@ -489,11 +519,13 @@ Response 200:
 ```
 
 #### 2. Reverse Conversion (Delete)
+
 ```http
 DELETE /kasir/konversi-stok/42
 ```
 
 #### 3. Bulk Delete
+
 ```http
 POST /kasir/konversi-stok/bulkDelete
 Content-Type: application/json
@@ -510,29 +542,32 @@ Content-Type: application/json
 ### Development Workflow
 
 1. **Create Feature Branch**
-   ```bash
-   git checkout -b feature/nama-fitur
-   ```
+
+    ```bash
+    git checkout -b feature/nama-fitur
+    ```
 
 2. **Make Changes**
-   ```bash
-   # Edit files
-   # Run tests
-   php artisan test
-   ```
+
+    ```bash
+    # Edit files
+    # Run tests
+    php artisan test
+    ```
 
 3. **Commit dengan Conventional Commits**
-   ```bash
-   git add .
-   git commit -m "feat(module): description
 
-   Details about the change..."
-   ```
+    ```bash
+    git add .
+    git commit -m "feat(module): description
+
+    Details about the change..."
+    ```
 
 4. **Push & Create Pull Request**
-   ```bash
-   git push origin feature/nama-fitur
-   ```
+    ```bash
+    git push origin feature/nama-fitur
+    ```
 
 ### Commit Message Convention
 
@@ -545,6 +580,7 @@ Content-Type: application/json
 - `chore:` - Build/dependency updates
 
 Contoh:
+
 ```
 feat(stock-conversion): implement buffer-based partial conversion
 
