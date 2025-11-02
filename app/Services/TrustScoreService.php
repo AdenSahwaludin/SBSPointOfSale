@@ -19,8 +19,8 @@ class TrustScoreService
             return;
         }
 
-    // Compute days from created_at to now to avoid sign/timezone inconsistencies
-    $ageDays = $pelanggan->created_at->diffInDays(now());
+        // Compute days from created_at to now to avoid sign/timezone inconsistencies
+        $ageDays = $pelanggan->created_at->diffInDays(now());
 
         $minScore = 50;
         if ($ageDays >= 180) {
