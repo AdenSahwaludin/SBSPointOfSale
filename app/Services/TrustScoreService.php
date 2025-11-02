@@ -19,7 +19,8 @@ class TrustScoreService
             return;
         }
 
-        $ageDays = now()->diffInDays($pelanggan->created_at);
+    // Compute days from created_at to now to avoid sign/timezone inconsistencies
+    $ageDays = $pelanggan->created_at->diffInDays(now());
 
         $minScore = 50;
         if ($ageDays >= 180) {
@@ -29,12 +30,12 @@ class TrustScoreService
         }
 
         // Ensure trust_score does not decrease; clamp upper bound at 100
-        $newScore = max((int) $pelanggan->trust_score, $minScore);
+        $newScore = max((int)$pelanggan->trust_score, $minScore);
         $newScore = min($newScore, 100);
 
-        if ($newScore !== (int) $pelanggan->trust_score) {
-            $pelanggan->trust_score = $newScore;
-            $pelanggan->save();
+        if ($newScore !== (int)$pelanggan->trust_score) {
+            // Use forceFill to ensure the attribute is set regardless of mass-assignment rules
+            $pelanggan->forceFill(['trust_score' => $newScore])->save();
         }
     }
 }
