@@ -1,33 +1,40 @@
 # Trust Score Calculation Tests 🎯
 
 ## Overview
+
 Comprehensive feature tests untuk memvalidasi semua aturan perhitungan Trust Score sesuai spesifikasi dalam `brief/Catatan_Limit.txt`.
 
 ## Test Coverage ✅
 
 ### 1. **Umur Akun** (Account Age)
+
 - ✅ **Baseline 50** untuk akun baru (< 30 hari)
 - ✅ **+10 poin** untuk akun ≥ 30 hari
 - ✅ **+20 poin** untuk akun ≥ 180 hari
 
 ### 2. **Riwayat Angsuran** (Installment History)
+
 - ✅ **+2 poin** per angsuran yang dibayar tepat waktu
 - ✅ **-5 poin** per angsuran yang telat
 - ✅ **-25 poin** untuk angsuran yang gagal bayar (VOID status)
 
 ### 3. **Frekuensi Belanja** (Shopping Frequency)
+
 - ✅ **+5 poin** untuk pelanggan dengan ≥ 3 transaksi/bulan
 - ✅ **No bonus** untuk < 3 transaksi/bulan
 
 ### 4. **Nilai Transaksi** (Transaction Value)
+
 - ✅ **+5 poin** jika rata-rata transaksi > median toko
 - ✅ Calculated against all customers' transaction averages
 
 ### 5. **Tunggakan Aktif** (Active Arrears)
+
 - ✅ **-10 poin** untuk 1 angsuran DUE/LATE
 - ✅ **-15 poin** untuk > 1 angsuran DUE/LATE
 
 ### 6. **Edge Cases**
+
 - ✅ Trust score **maksimal 100** (tidak bisa lebih)
 - ✅ Trust score **minimal 0** (tidak bisa negatif)
 - ✅ Combined scenario test (multiple rules applied together)
@@ -35,16 +42,19 @@ Comprehensive feature tests untuk memvalidasi semua aturan perhitungan Trust Sco
 ## Running Tests 🚀
 
 ### Run all trust score tests:
+
 ```bash
 php artisan test --filter TrustScoreCalculation
 ```
 
 ### Run with verbose output:
+
 ```bash
 php artisan test --filter TrustScoreCalculation -v
 ```
 
 ### Run specific test:
+
 ```bash
 php artisan test --filter "it adds +10 for accounts"
 ```
@@ -60,7 +70,7 @@ php artisan test --filter "it adds +10 for accounts"
 
 ```php
 describe('Trust Score Calculation - Complete Rules', function () {
-    
+
     beforeEach(function () {
         // Clean database dan create test kasir user
     });
@@ -77,6 +87,7 @@ describe('Trust Score Calculation - Complete Rules', function () {
 ## Database Setup ⚙️
 
 Tests menggunakan SQLite in-memory database dengan RefreshDatabase trait:
+
 - Otomatis migrate dan rollback setiap test
 - Data isolated per test case
 - Foreign key constraints enforced
@@ -84,6 +95,7 @@ Tests menggunakan SQLite in-memory database dengan RefreshDatabase trait:
 ## Dependencies 📦
 
 Required models:
+
 - `Pelanggan`
 - `Transaksi`
 - `KontrakKredit`
@@ -91,6 +103,7 @@ Required models:
 - `User` (Pengguna)
 
 Required services:
+
 - `TrustScoreService` (untuk account age rule)
 
 ## Sample Test Output 📋
@@ -135,7 +148,9 @@ These tests validate the **calculation logic**. Next steps:
 ## Troubleshooting 🔧
 
 ### Foreign Key Errors
+
 Pastikan `User` (kasir) dibuat di `beforeEach()`:
+
 ```php
 User::create([
     'id_pengguna' => '001-KASIR',
@@ -145,16 +160,20 @@ User::create([
 ```
 
 ### Transaction Month Issues
+
 Gunakan `Carbon::now()->setDay()` untuk ensure same month:
+
 ```php
 'tanggal' => $now->copy()->setDay($i),
 ```
 
 ### SQLite vs MySQL
+
 Tests run on SQLite (in-memory). Production uses MySQL.
 Foreign key constraints work differently - test accordingly.
 
 ---
+
 Created: November 3, 2025
 Last Updated: November 3, 2025
 Status: ✅ All Tests Passing
