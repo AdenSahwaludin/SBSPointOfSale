@@ -8,6 +8,7 @@ use App\Models\JadwalAngsuran;
 use App\Models\Pembayaran;
 use App\Models\Pelanggan;
 use App\Models\Transaksi;
+use App\Events\PaymentReceived;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -150,7 +151,7 @@ class AngsuranController extends Controller
 
                 $bayar = min($remaining, $sisa);
                 // catat pembayaran per angsuran
-                Pembayaran::create([
+                $pembayaran = Pembayaran::create([
                     'id_pembayaran' => Pembayaran::generateIdPembayaran(),
                     'id_transaksi' => $kontrak->nomor_transaksi,
                     'id_angsuran' => $angsuran->id_angsuran,
@@ -162,6 +163,9 @@ class AngsuranController extends Controller
                     'tanggal' => now(),
                     'keterangan' => $validated['keterangan'] ?? 'Pembayaran angsuran',
                 ]);
+
+                // Trigger trust score/credit limit update asynchronously
+                event(new PaymentReceived($pembayaran));
 
                 // update angsuran
                 $angsuran->jumlah_dibayar = (float)$angsuran->jumlah_dibayar + $bayar;
