@@ -19,6 +19,9 @@ return new class extends Migration {
             $table->integer('qty_from');
             $table->integer('qty_to');
             $table->enum('mode', ['penuh', 'parsial'])->default('penuh');
+            $table->integer('packs_used')->default(0)->comment('Jumlah karton yang digunakan');
+            $table->integer('dari_buffer')->default(0)->comment('PCS yang diambil dari buffer terbuka');
+            $table->integer('sisa_buffer_after')->default(0)->comment('Sisa PCS buffer setelah konversi');
             $table->string('keterangan', 200)->nullable();
             $table->timestamps();
 
@@ -39,7 +42,7 @@ return new class extends Migration {
         // Add check constraints (MySQL specific)
         if (DB::getDriverName() === 'mysql') {
             DB::statement("ALTER TABLE konversi_stok ADD CONSTRAINT konversi_rasio_chk CHECK (rasio > 0)");
-            DB::statement("ALTER TABLE konversi_stok ADD CONSTRAINT konversi_qty_from_chk CHECK (qty_from > 0)");
+            DB::statement("ALTER TABLE konversi_stok ADD CONSTRAINT konversi_qty_from_chk CHECK (qty_from >= 0)");
             DB::statement("ALTER TABLE konversi_stok ADD CONSTRAINT konversi_qty_to_chk CHECK (qty_to > 0)");
         }
     }
