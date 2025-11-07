@@ -42,6 +42,18 @@ return new class extends Migration {
                 ->on('transaksi')
                 ->onUpdate('cascade')
                 ->onDelete('restrict');
+
+            // Circular reference FK: back-reference to transaksi.id_kontrak
+            // This is safe to define here as transaksi table already exists
+        });
+
+        // Add circular FK from transaksi to kontrak_kredit (transaksi table already created)
+        Schema::table('transaksi', function (Blueprint $table) {
+            $table->foreign('id_kontrak')
+                ->references('id_kontrak')
+                ->on('kontrak_kredit')
+                ->onUpdate('cascade')
+                ->onDelete('set null');
         });
 
         // Add check constraints (MySQL specific)

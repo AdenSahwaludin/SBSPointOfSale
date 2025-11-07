@@ -57,8 +57,8 @@ return new class extends Migration {
                 ->on('pengguna')
                 ->onUpdate('cascade')
                 ->onDelete('restrict');
-            // NOTE: id_kontrak foreign key is added in add_foreign_keys_and_constraints migration 
-            // to avoid circular reference (transaksi -> kontrak_kredit -> transaksi)
+            // NOTE: id_kontrak foreign key added in create_kontrak_kredit migration
+            // to handle circular reference (transaksi <-> kontrak_kredit)
         });
 
         // Add check constraints (MySQL specific)
