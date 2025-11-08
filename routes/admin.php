@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\TrustScoreController;
 use Illuminate\Support\Facades\Route;
 
 // Admin routes (Admin role only)
@@ -75,6 +76,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
   'update' => 'pelanggan.update',
   'destroy' => 'pelanggan.destroy',
  ]);
+
+ // ==========================================
+ // TRUST SCORE & KREDIT LIMIT MANAGEMENT
+ // ==========================================
+ Route::get('trust-score/{id}', [TrustScoreController::class, 'show'])
+  ->name('trust-score.show');
+ Route::post('trust-score/{id}/recalculate', [TrustScoreController::class, 'recalculate'])
+  ->name('trust-score.recalculate');
+ Route::post('trust-score/recalculate-all', [TrustScoreController::class, 'recalculateAll'])
+  ->name('trust-score.recalculate-all');
 
  // ==========================================
  // LAPORAN & ANALISIS (untuk masa depan)

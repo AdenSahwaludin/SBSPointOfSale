@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Pelanggan;
 use App\Services\TrustScoreService;
 use App\Services\CreditLimitService;
-use Illuminate\Console\Command;
+use Illuminate\Console\Command as Command;
 
 class RecalculateTrustScores extends Command
 {
@@ -75,7 +75,7 @@ class RecalculateTrustScores extends Command
         $newLimit = $limitBreakdown['credit_limit'];
 
         // Display breakdown
-        $this->displayBreakdown($scoreBreakdown, $limitBreakdown, $oldScore, $oldLimit);
+        $this->displayBreakdown($scoreBreakdown, $limitBreakdown, $oldScore, (int)$oldLimit);
 
         if (!$dryRun) {
             $pelanggan->forceFill([
@@ -161,7 +161,7 @@ class RecalculateTrustScores extends Command
     /**
      * Display trust score and credit limit breakdown.
      */
-    private function displayBreakdown(array $scoreBreakdown, array $limitBreakdown, int $oldScore, int $oldLimit): void
+    private function displayBreakdown(array $scoreBreakdown, array $limitBreakdown, int $oldScore, int|float $oldLimit): void
     {
         $this->newLine();
 
@@ -196,11 +196,11 @@ class RecalculateTrustScores extends Command
 
         // Changes Summary
         $scoreChange = $scoreBreakdown['total'] - $oldScore;
-        $limitChange = $limitBreakdown['credit_limit'] - $oldLimit;
+        $limitChange = $limitBreakdown['credit_limit'] - (int)$oldLimit;
 
         $this->line('<fg=cyan>📈 Changes:</>');
         $this->line("Trust Score: {$oldScore} → {$scoreBreakdown['total']} " . $this->formatChange($scoreChange));
-        $this->line("Credit Limit: Rp " . number_format($oldLimit, 0, ',', '.') . " → Rp " . number_format($limitBreakdown['credit_limit'], 0, ',', '.') . " " . $this->formatChange($limitChange));
+        $this->line("Credit Limit: Rp " . number_format((int)$oldLimit, 0, ',', '.') . " → Rp " . number_format($limitBreakdown['credit_limit'], 0, ',', '.') . " " . $this->formatChange($limitChange));
         $this->newLine();
     }
 
