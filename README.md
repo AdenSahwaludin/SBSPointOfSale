@@ -1,165 +1,328 @@
-# 🏪 SBS Point of Sale (POS) System
+# 🏪 SBS Point of Sale (POS) System# 🏪 SBS Point of Sale (POS) System
 
-**Sistem Point of Sale modern untuk manajemen penjualan, inventory, dan kredit dengan dukungan partial stock conversion.**
 
----
 
-## 📋 Daftar Isi
+**Modern POS system untuk penjualan, inventory, kredit & cicilan dengan stock conversion buffer-based.****Sistem Point of Sale modern untuk manajemen penjualan, inventory, dan kredit dengan dukungan partial stock conversion.**
 
-- [Fitur Utama](#fitur-utama)
-- [Stack Teknologi](#stack-teknologi)
-- [Instalasi](#instalasi)
-- [Konfigurasi Database](#konfigurasi-database)
-- [Menjalankan Aplikasi](#menjalankan-aplikasi)
+
+
+------
+
+
+
+## ✨ Fitur## 📋 Daftar Isi
+
+
+
+- **Manajemen Produk** - CRUD, SKU, tracking stok real-time- [Fitur Utama](#fitur-utama)
+
+- **Sistem Kasir** - Shopping cart, diskon, multiple payment methods- [Stack Teknologi](#stack-teknologi)
+
+- **Kredit & Cicilan** - Kontrak, jadwal angsuran, trust score auto-calculation- [Instalasi](#instalasi)
+
+- **Stock Conversion** - Buffer-based system untuk partial conversions (INT-only)- [Konfigurasi Database](#konfigurasi-database)
+
+- **Dashboard & Reports** - Real-time sales, inventory analytics- [Menjalankan Aplikasi](#menjalankan-aplikasi)
+
 - [Fitur Stock Conversion](#-fitur-stock-conversion)
-- [API Documentation](#api-documentation)
+
+---- [API Documentation](#api-documentation)
+
 - [Testing](#testing)
-- [Struktur Project](#struktur-project)
+
+## 🛠️ Stack- [Struktur Project](#struktur-project)
+
 - [Kontribusi](#kontribusi)
 
----
+- **Backend:** Laravel 11, PHP 8.3, MySQL 8.0, Pest PHP
+
+- **Frontend:** Vue 3, TypeScript, Inertia.js, Tailwind CSS, Vite---
+
+- **Tools:** Composer, NPM/Bun, Git
 
 ## ✨ Fitur Utama
 
+---
+
 ### 1. **Manajemen Produk**
 
+## 🚀 Quick Start
+
 - ✅ CRUD produk dengan kategori
-- ✅ Tracking stok real-time
-- ✅ Harga jual dan harga grosir (pack)
+
+### Prerequisites- ✅ Tracking stok real-time
+
+- PHP 8.3+, MySQL 8.0+, Node.js 18+, Composer, Git- ✅ Harga jual dan harga grosir (pack)
+
 - ✅ SKU dan barcode support
-- ✅ Status produk (aktif/non-aktif)
 
-### 2. **Sistem Point of Sale (Kasir)**
+### Setup- ✅ Status produk (aktif/non-aktif)
 
-- ✅ Interface kasir modern dan intuitif
+
+
+```bash### 2. **Sistem Point of Sale (Kasir)**
+
+git clone https://github.com/AdenSahwaludin/SBSPointOfSale.git
+
+cd pos-sbs- ✅ Interface kasir modern dan intuitif
+
 - ✅ Search produk dengan filter real-time
-- ✅ Shopping cart dengan edit/delete
-- ✅ Diskon per item dan total
-- ✅ Multiple payment methods (TUNAI, TRANSFER, CICILAN)
-- ✅ Receipt printing
+
+# Backend setup- ✅ Shopping cart dengan edit/delete
+
+composer install- ✅ Diskon per item dan total
+
+cp .env.example .env- ✅ Multiple payment methods (TUNAI, TRANSFER, CICILAN)
+
+php artisan key:generate- ✅ Receipt printing
+
 - ✅ Transaction history
 
-### 3. **Manajemen Kredit & Cicilan**
+# Database setup
 
-- ✅ Kontrak kredit dengan terms
+# Edit .env with DB_CONNECTION=mysql, DB_DATABASE=sbs### 3. **Manajemen Kredit & Cicilan**
+
+php artisan migrate
+
+php artisan db:seed- ✅ Kontrak kredit dengan terms
+
 - ✅ Sistem cicilan pintar dengan pembulatan
-- ✅ Jadwal angsuran otomatis
-- ✅ Payment tracking dan due date management
-- ✅ Trust score untuk pelanggan
+
+# Frontend setup- ✅ Jadwal angsuran otomatis
+
+npm install- ✅ Payment tracking dan due date management
+
+npm run build- ✅ Trust score untuk pelanggan
+
 - ✅ Credit limit auto-calculation
 
-### 4. **🆕 Stock Conversion System (Buffer-Based)**
+# Run
 
-- ✅ **Partial stock conversion** tanpa decimal storage
-- ✅ **Smart buffer management** - auto-open karton jika buffer kurang
+php artisan serve          # Terminal 1### 4. **🆕 Stock Conversion System (Buffer-Based)**
+
+npm run dev               # Terminal 2
+
+# Access: http://localhost:8000- ✅ **Partial stock conversion** tanpa decimal storage
+
+```- ✅ **Smart buffer management** - auto-open karton jika buffer kurang
+
 - ✅ **INT-only calculations** - hanya gunakan integer
-- ✅ **Complete audit trail** - track packs_used, dari_buffer, sisa_buffer_after
+
+---- ✅ **Complete audit trail** - track packs_used, dari_buffer, sisa_buffer_after
+
 - ✅ **Mode PENUH & PARSIAL** - fleksibel sesuai kebutuhan
-- ✅ **Undo/Reverse** - revert konversi dengan restoration penuh
+
+## 📖 Usage- ✅ **Undo/Reverse** - revert konversi dengan restoration penuh
+
 - ✅ **Bulk operations** - proses banyak konversi sekaligus
-- ✅ **Race condition safe** - DB transactions + pessimistic locking
 
-### 5. **Dashboard & Reporting**
+### Testing- ✅ **Race condition safe** - DB transactions + pessimistic locking
 
-- ✅ Real-time sales dashboard
-- ✅ Inventory analytics
+
+
+```bash### 5. **Dashboard & Reporting**
+
+php artisan test
+
+php artisan test --coverage- ✅ Real-time sales dashboard
+
+```- ✅ Inventory analytics
+
 - ✅ Revenue reports
-- ✅ Customer insights
 
----
+### Stock Conversion Service- ✅ Customer insights
+
+
+
+```php---
+
+use App\Services\KonversiStokService;
 
 ## 🛠️ Stack Teknologi
 
+$service = new KonversiStokService();
+
 ### Backend
 
-- **PHP 8.3** dengan Laravel 11
-- **MySQL 8.0** (Database)
-- **Eloquent ORM** untuk database abstraction
-- **Pest PHP** untuk testing
+// Convert 100 pcs (partial - uses buffer + opens boxes if needed)
 
-### Frontend
+$konversi = $service->convert(- **PHP 8.3** dengan Laravel 11
+
+    fromProdukId: 1,- **MySQL 8.0** (Database)
+
+    toProdukId: 2,- **Eloquent ORM** untuk database abstraction
+
+    qtyTo: 100,- **Pest PHP** untuk testing
+
+    mode: 'parsial',
+
+    rasio: 120### Frontend
+
+);
 
 - **Vue 3** dengan Composition API
-- **TypeScript** untuk type safety
-- **Inertia.js** untuk server-side rendering
-- **Tailwind CSS** untuk styling
+
+// Reverse conversion- **TypeScript** untuk type safety
+
+$service->reverse($konversi->id_konversi);- **Inertia.js** untuk server-side rendering
+
+```- **Tailwind CSS** untuk styling
+
 - **Vite** untuk bundling
 
-### Tools
+**Buffer Logic:**
 
-- **Composer** untuk PHP dependencies
+- Keeps leftover PCS in buffer (`sisa_pcs_terbuka`) instead of creating decimals### Tools
+
+- Auto-opens boxes when buffer insufficient
+
+- Complete audit trail: `packs_used`, `dari_buffer`, `sisa_buffer_after`- **Composer** untuk PHP dependencies
+
 - **NPM/Bun** untuk JavaScript dependencies
-- **Git** untuk version control
 
----
+### Admin Endpoints- **Git** untuk version control
 
-## 🚀 Instalasi
 
-### Prerequisites
 
-- PHP 8.3+
+```---
+
+GET    /admin/trust-score/{id}              - View trust score & credit limit
+
+POST   /admin/trust-score/{id}/recalculate  - Recalculate single customer## 🚀 Instalasi
+
+POST   /admin/trust-score/recalculate-all   - Batch recalculate all
+
+```### Prerequisites
+
+
+
+---- PHP 8.3+
+
 - MySQL 8.0+
-- Node.js 18+ atau Bun
+
+## 📁 Key Files- Node.js 18+ atau Bun
+
 - Composer
-- Git
 
-### Step 1: Clone Repository
+```- Git
 
-```bash
+app/Services/
+
+├── KonversiStokService.php      - Stock conversion logic### Step 1: Clone Repository
+
+├── TrustScoreService.php        - Trust score calculation
+
+└── CreditLimitService.php       - Credit limit auto-update```bash
+
 git clone https://github.com/AdenSahwaludin/SBSPointOfSale.git
-cd pos-sbs
-```
 
-### Step 2: Install PHP Dependencies
+app/Console/Commands/cd pos-sbs
 
-```bash
+└── RecalculateTrustScores.php   - Batch recalculation command```
+
+
+
+app/Events/Listeners/### Step 2: Install PHP Dependencies
+
+├── PaymentReceived.php
+
+└── UpdateTrustScoreOnPayment.php```bash
+
 composer install
-```
 
-### Step 3: Setup Environment
+database/migrations/```
 
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+├── *create_*_table.php          - All schema in create tables (consolidated)
 
-### Step 4: Configure Database
+└── 2025_10_30_000000_add_indexes_to_pelanggan_table.php### Step 3: Setup Environment
 
-Edit `.env`:
 
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+
+tests/```bash
+
+├── Unit/KonversiStokServiceTest.php  - 6 comprehensive testscp .env.example .env
+
+└── Feature/CreditLimitCalculationTest.php - 16 credit testsphp artisan key:generate
+
+``````
+
+
+
+---### Step 4: Configure Database
+
+
+
+## 🧪 Testing StatusEdit `.env`:
+
+
+
+✅ **Stock Conversion:** 6 tests (29 assertions) - PASSING  ```env
+
+✅ **Credit Limit:** 16 tests (31 assertions) - PASSING  DB_CONNECTION=mysql
+
+✅ **Trust Score:** 14 tests - PASSINGDB_HOST=127.0.0.1
+
 DB_PORT=3306
-DB_DATABASE=sbs
+
+Run all: `php artisan test`DB_DATABASE=sbs
+
 DB_USERNAME=root
-DB_PASSWORD=
+
+---DB_PASSWORD=
+
 ```
+
+## 📋 Git Workflow
 
 ### Step 5: Install JavaScript Dependencies
 
 ```bash
-npm install
-# atau
-bun install
-```
 
-### Step 6: Run Migrations & Seeders
+git checkout -b feature/nama-fitur```bash
 
-```bash
+# Make changes + testnpm install
+
+php artisan test# atau
+
+git add .bun install
+
+git commit -m "feat(module): description"```
+
+git push origin feature/nama-fitur
+
+```### Step 6: Run Migrations & Seeders
+
+
+
+**Commit format:** `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:````bash
+
 php artisan migrate
-php artisan db:seed
+
+---php artisan db:seed
+
 ```
+
+## 📄 License
 
 ### Step 7: Build Frontend Assets
 
+Proprietary - SBS Point of Sale System
+
 ```bash
-npm run build
+
+## 👨‍💻 Authornpm run build
+
 # untuk development:
-npm run dev
+
+**Aden Sahwaludin** | [GitHub](https://github.com/AdenSahwaludin/SBSPointOfSale)npm run dev
+
 ```
 
 ---
+
+---
+
+*Updated: Nov 9, 2025 | Version: 2.0.0*
 
 ## 🗄️ Konfigurasi Database
 
