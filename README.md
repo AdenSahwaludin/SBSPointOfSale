@@ -1,18 +1,10 @@
 # 🏪 SBS Point of Sale (POS) System# 🏪 SBS Point of Sale (POS) System
 
+**Modern POS system untuk penjualan, inventory, kredit & cicilan dengan stock conversion buffer-based.\*\***Sistem Point of Sale modern untuk manajemen penjualan, inventory, dan kredit dengan dukungan partial stock conversion.\*\*
 
-
-**Modern POS system untuk penjualan, inventory, kredit & cicilan dengan stock conversion buffer-based.****Sistem Point of Sale modern untuk manajemen penjualan, inventory, dan kredit dengan dukungan partial stock conversion.**
-
-
-
-------
-
-
+---
 
 ## ✨ Fitur## 📋 Daftar Isi
-
-
 
 - **Manajemen Produk** - CRUD, SKU, tracking stok real-time- [Fitur Utama](#fitur-utama)
 
@@ -58,9 +50,7 @@
 
 ### Setup- ✅ Status produk (aktif/non-aktif)
 
-
-
-```bash### 2. **Sistem Point of Sale (Kasir)**
+````bash### 2. **Sistem Point of Sale (Kasir)**
 
 git clone https://github.com/AdenSahwaludin/SBSPointOfSale.git
 
@@ -244,21 +234,15 @@ tests/```bash
 
 └── Feature/CreditLimitCalculationTest.php - 16 credit testsphp artisan key:generate
 
-``````
-
-
+````
 
 ---### Step 4: Configure Database
 
-
-
 ## 🧪 Testing StatusEdit `.env`:
 
+✅ **Stock Conversion:** 6 tests (29 assertions) - PASSING ```env
 
-
-✅ **Stock Conversion:** 6 tests (29 assertions) - PASSING  ```env
-
-✅ **Credit Limit:** 16 tests (31 assertions) - PASSING  DB_CONNECTION=mysql
+✅ **Credit Limit:** 16 tests (31 assertions) - PASSING DB_CONNECTION=mysql
 
 ✅ **Trust Score:** 14 tests - PASSINGDB_HOST=127.0.0.1
 
@@ -270,7 +254,7 @@ DB_USERNAME=root
 
 ---DB_PASSWORD=
 
-```
+`````
 
 ## 📋 Git Workflow
 
@@ -300,7 +284,7 @@ php artisan migrate
 
 ---php artisan db:seed
 
-```
+`````
 
 ## 📄 License
 
@@ -322,7 +306,7 @@ Proprietary - SBS Point of Sale System
 
 ---
 
-*Updated: Nov 9, 2025 | Version: 2.0.0*
+_Updated: Nov 9, 2025 | Version: 2.0.0_
 
 ## 🗄️ Konfigurasi Database
 
