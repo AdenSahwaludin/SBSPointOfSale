@@ -1,0 +1,189 @@
+@startuml Kasir_Transaksi_Kredit_Activity
+title Activity Diagram - Kasir: Transaksi Kredit (Pembayaran Angsuran)
+skinparam backgroundColor #fefefe
+skinparam activity {
+    BackgroundColor #fce4ec
+    BorderColor #c2185b
+    FontColor #000000
+}
+skinparam note {
+    BackgroundColor #fffde7
+    BorderColor #f57f17
+    FontColor #000000
+}
+
+start
+:Kasir membuka menu Pembayaran Kredit;
+:Tampilkan list kontrak dengan due/late;
+
+if (Filter?) then (Ya)
+    :Input search: nama pelanggan/nomor kontrak;
+    :Filter by: status (DUE/LATE/ALL);
+else (Tidak)
+endif
+
+:Pilih kontrak untuk pembayaran;
+
+:Load kontrak detail:
+:<- Pelanggan: Nama, Nomor ID
+:<- Pokok pinjaman, bunga, DP
+:<- Tenor, cicilan bulanan;
+
+:Load schedule angsuran:
+note right
+  Tampilkan tabel:
+  - Periode | Jatuh Tempo | Jumlah | Dibayar | Sisa | Status
+  - 1       | 30/11/2024  | 500K   | 500K    | 0    | PAID
+  - 2       | 30/12/2024  | 500K   | 0       | 500K | DUE
+  - 3       | 30/01/2025  | 500K   | 0       | 500K | DUE
+end note
+
+:Highlight baris yang belum lunas (status != PAID);
+
+:Kasir input jumlah pembayaran:
+:<amount_input = Rp XXX;
+note right
+  Kasir bisa:
+  - Bayar sebagian (partial)
+  - Bayar satu angsuran penuh
+  - Bayar lump-sum (semua sisa)
+end note
+
+:Sistem calculate alokasi pembayaran;
+note right
+  Alokasi dari angsuran tertua (FIFO):
+  Jika pembayaran = 1.2M:
+  - Periode 2: 500K (lunas)
+  - Periode 3: 500K (lunas)
+  - Periode 4: 200K (partial)
+end note
+
+if (Pilih metode pembayaran?) then (Tunai)
+    :Input cash received: Rp XXX;
+    :Calculate kembalian;
+    note right
+      Total bayar: 1.2M
+      Tunai diterima: 1.5M
+      Kembalian: 300K
+    end note
+elseif (QRIS)
+    :Tampilkan QRIS code;
+    :Tunggu pembayaran (polling Midtrans);
+    if (Payment confirmed?) then (Ya)
+    else (Timeout)
+        :⚠️ Pembayaran dibatalkan;
+        stop
+    endif
+elseif (Transfer Bank)
+    :Tampilkan nomor rekening;
+    :Kasir input bukti transfer;
+    :Verify pembayaran manual;
+endif
+
+:Mulai DB Transaction;
+
+:Update setiap angsuran yang terbayar:
+foreach angsuran in pembayaran_list
+    :Calculate: 
+    :<- sisa = jumlah_tagihan - jumlah_dibayar_sebelum;
+    :<- bayar_now = min(sisa, sisa_payment_amount);
+    
+    :Update angsuran:
+    :<- jumlah_dibayar += bayar_now
+    :<- if (jumlah_dibayar >= jumlah_tagihan):
+    :<    status = PAID
+    :<    paid_at = NOW()
+    
+    :Decrease sisa_payment_amount;
+end
+
+:Create record pembayaran:
+note right
+  INSERT pembayaran:
+  - id_pembayaran (auto-generated)
+  - id_transaksi (kontrak ke transaksi)
+  - id_angsuran
+  - id_pelanggan
+  - id_kasir
+  - metode (TUNAI/QRIS/TRANSFER)
+  - tipe_pembayaran (kredit)
+  - jumlah
+  - tanggal (NOW)
+  - keterangan
+end note
+
+:Update pelanggan saldo & limit:
+:<- saldo_kredit = max(0, saldo_kredit - total_bayar);
+:<- credit_limit = credit_limit + total_bayar;
+note right
+  Credit limit naik karena membayar
+  Kapasitas cicilan baru tersedia
+end note
+
+:Trigger event: PaymentReceived;
+note right
+  Event listener akan:
+  1. Calculate new trust score
+  2. Calculate new credit limit
+  3. Log changes
+  4. Async processing (queue)
+end note
+
+:Check if kontrak lunas:
+if (Semua angsuran PAID?) then (Ya)
+    :Update kontrak status = LUNAS;
+    :Update transaksi:
+    :<- status_pembayaran = LUNAS
+    :<- ar_status = LUNAS
+    :<- paid_at = NOW();
+    :Send notification: Cicilan selesai;
+else (Masih ada utang)
+    :Hitung summary sisa:
+    :<- total_tagihan = SUM(jumlah_tagihan)
+    :<- total_dibayar = SUM(jumlah_dibayar)
+    :<- total_sisa = total_tagihan - total_dibayar;
+endif
+
+if (Semua update berhasil?) then (Ya)
+    :Commit Transaction;
+else (Ada error)
+    :Rollback Transaction;
+    :❌ Tampilkan error message;
+    stop
+endif
+
+:✅ Pembayaran berhasil diproses;
+
+:Tampilkan receipt pembayaran:
+note right
+  BUKTI PEMBAYARAN KREDIT
+  
+  Pelanggan: Budi
+  Kontrak: KK-2024-0001
+  Jumlah: Rp 1.200.000
+  Metode: Tunai
+  Kembalian: Rp 300.000
+  
+  Angsuran dibayar:
+  - Per 2 (30/12): LUNAS
+  - Per 3 (30/01): LUNAS
+  - Per 4 (28/02): 200K dari 500K
+  
+  Credit Limit baru: Rp 5.300.000
+  Sisa cicilan: Rp 1.800.000
+  
+  Tanggal: 15/12/2024 14:30
+  Kasir: Ahmad
+end note
+
+:Print receipt (thermal printer);
+
+:Tanya apakah ingin pembayaran lagi?;
+if (Lagi?) then (Ya)
+    :Kembali ke awal;
+else (Tidak)
+    :Kembali ke menu Kasir;
+    stop
+endif
+
+@enduml

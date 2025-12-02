@@ -1,0 +1,133 @@
+@startuml Kasir_Konversi_Stok_Activity
+!define AWSPUML https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v14.0/dist
+!include AWSPUML/AWSCommon.puml
+
+title Activity Diagram - Kasir: Konversi Stok (Parsial & Penuh)
+skinparam backgroundColor #fefefe
+skinparam activity {
+    BackgroundColor #f3e5f5
+    BorderColor #7b1fa2
+    FontColor #000000
+}
+skinparam note {
+    BackgroundColor #fffde7
+    BorderColor #f57f17
+    FontColor #000000
+}
+
+start
+:Kasir membuka menu Konversi Stok;
+:Pilih produk sumber (karton);
+:Input produk tujuan (PCS);
+:Input jumlah PCS yang ingin dikonversi;
+note right
+  Kasir tentukan jumlah PCS target
+end note
+
+if (Pilih Mode?) then (Parsial)
+    :Sistem cek buffer stok;
+    if (Buffer cukup?) then (Ya)
+        :Gunakan dari buffer;
+        :Sisa buffer = buffer - qty;
+        note right
+          Tidak perlu buka karton
+          packs_used = 0
+          dari_buffer = qty
+        end note
+    else (Tidak)
+        :Hitung karton yang perlu dibuka;
+        :karton_dibuka = ceil((qty - buffer) / isi_per_pack);
+        :total_pcs = buffer + (karton_dibuka * isi_per_pack);
+        :Gunakan qty dari total_pcs;
+        :sisa_buffer = total_pcs - qty;
+        note right
+          Buka karton otomatis
+          packs_used = karton_dibuka
+          dari_buffer = buffer
+          sisa_buffer_after = sisa_buffer
+        end note
+    endif
+    :Kurangi stok karton sumber;
+else (Penuh)
+    :Gunakan seluruh karton;
+    :qty_pcs = qty_karton * isi_per_pack;
+    note right
+      Mode penuh: 1 karton = 1 unit
+      tidak ada buffer
+    end note
+    :Clear buffer ke 0;
+endif
+
+:Validasi:
+if (Stok karton cukup?) then (Ya)
+else (Tidak)
+    :❌ Tampilkan error: Stok tidak cukup;
+    stop
+endif
+
+if (Qty valid?) then (Ya)
+else (Tidak)
+    :❌ Tampilkan error: Qty harus > 0;
+    stop
+endif
+
+:Mulai DB Transaction;
+:Lock produk sumber untuk update;
+:Lock produk tujuan untuk update;
+
+:Update stok karton sumber:
+:<stok_karton = stok_karton - packs_used;
+note right
+  Jika mode parsial: kurang qty tertentu
+  Jika mode penuh: kurang qty_karton
+end note
+
+if (Mode Parsial?) then (Ya)
+    :Update buffer stok sumber:
+    :<sisa_pcs_terbuka = sisa_buffer_after;
+else (Tidak)
+    :Clear buffer stok sumber:
+    :<sisa_pcs_terbuka = 0;
+endif
+
+:Update stok PCS tujuan:
+:<stok_pcs = stok_pcs + qty;
+
+:Catat data konversi:
+:<id_konversi, from_produk_id, to_produk_id;
+:<qty_to, mode, packs_used, dari_buffer;
+:<sisa_buffer_after, tanggal, keterangan;
+
+if (Semua update berhasil?) then (Ya)
+    :Commit Transaction;
+else (Error)
+    :Rollback Transaction;
+    :❌ Tampilkan error message;
+    stop
+endif
+
+:✅ Konversi berhasil;
+:Tampilkan detail konversi;
+note right
+  Breakdown:
+  - Karton digunakan: X
+  - Dari buffer: Y PCS
+  - Buffer sisa: Z PCS
+  - Total PCS dihasilkan: Qty
+end note
+
+:Tanya apakah ingin cetak struk?;
+if (Cetak?) then (Ya)
+    :Generate & print struk konversi;
+else (Tidak)
+endif
+
+:Tanya apakah ingin konversi lagi?;
+if (Lagi?) then (Ya)
+    :Kembali ke awal;
+else (Tidak)
+    :Kembali ke menu Kasir;
+    stop
+endif
+
+@enduml
