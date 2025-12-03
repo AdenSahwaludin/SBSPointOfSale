@@ -1,0 +1,47 @@
+@startuml
+title Sequence Diagram - Admin: Manajemen Kredit (Ringkas)
+
+actor Admin
+participant "UI" as UI
+participant "Controller" as Controller
+participant "TrustService" as Trust
+participant "CreditService" as Credit
+participant "Database" as DB
+
+Admin -> UI: Buka menu Manajemen Kredit
+UI -> Controller: Request data pelanggan
+Controller -> DB: Query data pelanggan
+DB --> Controller
+Controller --> UI: Kirim list pelanggan
+
+Admin -> UI: Pilih pelanggan
+UI -> Controller: Minta analisis kredit
+Controller -> Trust: Hitung trust score
+Trust -> DB: Ambil riwayat transaksi
+DB --> Trust
+Trust --> Controller: Trust score
+
+Controller -> Credit: Hitung credit limit
+Credit -> DB: Ambil transaksi selesai
+DB --> Credit
+Credit --> Controller: Credit limit
+
+Controller --> UI: Tampilkan hasil analisis
+
+Admin -> UI: Klik Recalculate
+UI -> Controller: Hitung ulang skor dan limit
+Controller -> Trust: Hitung ulang trust score
+Trust --> Controller
+Controller -> Credit: Hitung ulang credit limit
+Credit --> Controller
+Controller -> DB: Simpan jika ada perubahan
+DB --> Controller
+Controller --> UI: Tampilkan hasil baru
+
+Admin -> UI: Unduh laporan
+UI -> Controller: Minta data laporan
+Controller -> DB: Ambil data kredit
+DB --> Controller
+Controller --> UI: Kirim file laporan
+
+@enduml

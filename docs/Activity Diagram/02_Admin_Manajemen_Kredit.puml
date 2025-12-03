@@ -1,180 +1,30 @@
-@startuml Admin_Manajemen_Kredit_Activity
-title Activity Diagram - Admin: Manajemen Kredit
-skinparam backgroundColor #fefefe
-skinparam activity {
-    BackgroundColor #e8f5e9
-    BorderColor #2e7d32
-    FontColor #000000
-}
-skinparam note {
-    BackgroundColor #fffde7
-    BorderColor #f57f17
-    FontColor #000000
-}
+@startuml
+!theme plain
 
+|Kasir|
 start
-:Admin membuka menu Manajemen Kredit;
-:Tampilkan list kontrak kredit;
+:Buka menu Pembayaran Kredit;
+:Pilih kontrak pelanggan;
 
-if (Pilih aksi?) then (Lihat Detail)
-    :Pilih kontrak kredit;
-    :Load data kontrak:
-    :<- Nomor kontrak
-    :<- Data pelanggan
-    :<- Pokok pinjaman, DP, bunga
-    :<- Tenor, cicilan bulanan;
-    
-    :Tampilkan schedule angsuran:
-    :<- Periode ke-X
-    :<- Jatuh tempo
-    :<- Jumlah tagihan
-    :<- Jumlah dibayar
-    :<- Status (DUE/LATE/PAID);
-    
-    :Calculate summary:
-    :<- Total tagihan = SUM(jumlah_tagihan)
-    :<- Total dibayar = SUM(jumlah_dibayar)
-    :<- Total sisa = Total tagihan - Total dibayar;
-    
-    :Tampilkan ringkasan kontrak;
-    note right
-      Summary:
-      - Status kontrak (BERJALAN/LUNAS)
-      - Progress: XX% terbayar
-      - Sisa yang dibayar: Rp XXX
-      - Next due date: XX/XX/XXXX
-    end note
-    
-elif (Analisis Kredit) then
-    :Pilih pelanggan untuk analisis;
-    :Load riwayat pembayaran:
-    :<- Total transaksi: X
-    :<- Avg transaction: Rp XXX
-    :<- On-time payments: X%
-    :<- Late payments: X
-    :<- Failed payments: X;
-    
-    :Calculate trust score breakdown:
-    :<- Baseline: 50
-    :<- Account age bonus: +X
-    :<- Installment history: +/-X
-    :<- Shopping frequency: +/-X
-    :<- Transaction value: +/-X
-    :<- Active arrears: +/-X;
-    :<- Total trust score: X/100;
-    
-    :Calculate credit limit:
-    :<- Method 1: 50% largest = Rp XXX
-    :<- Method 2: 50% avg top3 = Rp XXX
-    :<- Method 3: 30% 6-months = Rp XXX
-    :<- Base limit = max(M1, M2, M3)
-    :<- Trust factor (TS): X.X×
-    :<- Final limit = base × factor;
-    
-    :Tampilkan analisis lengkap:
-    note right
-      Trust Score Breakdown:
-      - Current TS: 75/100
-      - Eligibility: APPROVED
-      - Recommended action: None
-      
-      Credit Limit:
-      - Current limit: Rp 5.000.000
-      - Used: Rp 2.500.000
-      - Available: Rp 2.500.000
-    end note
-    
-elif (Recalculate) then
-    :Pilih customer atau ALL;
-    if (Single customer?) then (Ya)
-        :Input ID pelanggan;
-        :Load current trust score & limit;
-        :Calculate new trust score;
-        :Calculate new credit limit;
-        :Compare old vs new;
-        note right
-          Old: TS 70, Limit Rp 4M
-          New: TS 75, Limit Rp 5M
-        end note
-        
-        if (Approve perubahan?) then (Ya)
-            :Update database;
-            :Log: TS 70→75, Limit Rp4M→5M;
-            :✅ Recalculate single success;
-        else (Tidak)
-            :Cancel, tidak ada perubahan;
-        endif
-    else (All customers)
-        :Start batch process;
-        :Show progress bar;
-        :foreach customer in all_customers
-            :Calculate new TS & limit;
-            :Compare dengan current values;
-            if (Ada perubahan?) then (Ya)
-                :Update database;
-                :Log change;
-            else (Tidak)
-                :Skip, no changes;
-            endif
-        end
-        :✅ Batch recalculate complete;
-        :Show summary:
-        note right
-          Total processed: 150
-          Updated: 45
-          Unchanged: 105
-          Processing time: 2.3s
-        end note
-    endif
-    
-elif (Approve Kontrak) then
-    :Pilih kontrak pending;
-    :Review data kontrak:
-    :<- Customer info
-    :<- Loan amount & terms
-    :<- Payment schedule
-    :<- Trust score & limit check;
-    
-    if (Trust score >= 50?) then (Ya)
-    else (Tidak)
-        :⚠️ Warning: TS < 50 (Rejected);
-    endif
-    
-    if (Qty <= credit limit?) then (Ya)
-    else (Tidak)
-        :⚠️ Warning: Qty > credit limit;
-    endif
-    
-    if (Approve?) then (Ya)
-        :Set status = AKTIF;
-        :Generate & send contract;
-        :Send notification ke kasir;
-        :Log approval:
-        :<- Approved by: Admin name
-        :<- Approval date: XX/XX/XXXX
-        :<- Notes: ...;
-        :✅ Kontrak approved;
-    else (Tolak)
-        :Set status = DITOLAK;
-        :Input rejection reason;
-        :Send notification ke customer;
-        :Log rejection;
-    endif
-    
-elif (Download Laporan Kredit) then
-    :Pilih periode laporan;
-    :Filter: status, tgl awal, tgl akhir;
-    :Generate report:
-    :<- Total outstanding
-    :<- Total overdue
-    :<- Collection rate
-    :<- Top defaulters;
-    :Export ke PDF/Excel;
-    :Download file;
-    :✅ Laporan downloaded;
-endif
+|Sistem|
+:Tampilkan detail kontrak dan cicilan;
+:Tampilkan daftar angsuran belum lunas;
 
-:Kembali ke menu Admin;
+|Kasir|
+:Input jumlah pembayaran;
+:Pilih metode (Tunai / QRIS / Transfer);
+
+|Sistem|
+:Validasi dan alokasikan pembayaran;
+:Update status angsuran;
+:Simpan data pembayaran;
+
+:Perbarui saldo kredit & limit;
+:Hitung ulang trust score;
+
+:Tampilkan bukti pembayaran;
+
+|Kasir|
+:Print struk;
 stop
-
 @enduml

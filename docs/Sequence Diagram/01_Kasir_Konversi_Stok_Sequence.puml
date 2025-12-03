@@ -1,0 +1,33 @@
+@startuml Kasir_Konversi_Stok_Sequence
+title Sequence Diagram - Kasir: Konversi Stok
+
+actor Kasir
+participant "UI" as UI
+participant "Controller" as Controller
+participant "Service" as Service
+participant "DB" as DB
+
+Kasir -> UI: Buka menu konversi stok
+UI -> Controller: GET konversi-stok
+Controller -> DB: Ambil data produk
+DB --> Controller
+Controller --> UI: Tampilkan form
+
+Kasir -> UI: Input data konversi
+UI -> Controller: Submit form
+Controller -> Service: Proses konversi
+
+Service -> DB: Mulai transaksi
+Service -> DB: Validasi & update stok
+Service -> DB: Simpan data konversi
+DB --> Service: Commit
+
+Service --> Controller: Berhasil
+Controller --> UI: Tampilkan konfirmasi
+Kasir <-- UI: Lihat hasil konversi
+
+Kasir -> UI: Cetak struk (opsional)
+UI -> UI: Kirim ke printer
+
+Kasir -> UI: Konversi lagi atau keluar
+@enduml

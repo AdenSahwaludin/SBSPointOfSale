@@ -1,0 +1,85 @@
+4.2.5.	Perancangan Fisik Basis Data
+Pada perancangan fisik basis data ini merupakan tahapan lanjutan dalam membangun struktur database yang akan digunakan secara nyata dalam sistem. Tahap ini bertujuan untuk mendefinisikan nama field, tipe data, serta constraint seperti primary key (PK) dan foreign key (FK) pada masing-masing tabel. 
+Perancangan fisik ini nantinya menjadi acuan implementasi di dalam sistem POS SBS.
+1.	Tabel Pengguna
+id_pengguna dibentuk dari nomor urut + inisial nama, misal: 001-ADN. kata_sandi menggunakan hashing bcrypt dengan panjang tetap 60 karakter.
+Tabel 4. 1 Tabel Pengguna
+No.	Nama Field	Tipe Data	Constraint
+1	id_pengguna	CHAR(7)	PK
+2	nama	VARCHAR(100)	
+3	email	VARCHAR(50)	UNIQUE
+4	telepon	VARCHAR(20)	
+5	kata_sandi	CHAR(60)	enkripsi bcrypt
+6	role	ENUM	('admin', 'kasir')
+7	terakhir_login	DATETIME	
+2.	Tabel Pelanggan
+id_pelanggan diformat sebagai P001, P002, dst sampai P999999, karena disiapkan untuk tampilan terurut rapi dan cocok digunakan sebagai bagian dari ID Transaksi.
+Tabel 4. 2 Tabel Pelanggan
+No.	Nama Field	Tipe Data	Constraint
+1	id_pelanggan	VARCHAR(7)	PK
+2	nama	VARCHAR(100)	
+3	email	VARCHAR(50)	UNIQUE
+4	telepon	VARCHAR(20)	
+5	kota	VARCHAR(50)	
+6	alamat	TEXT	
+3.	Tabel Kategori
+id_kategori menggunakan auto increment karena cukup berbentuk angka dan tidak memerlukan struktur khusus.
+Tabel 4. 3 Tabel Kategori
+No.	Nama Field	Tipe Data	Constraint
+1	id_kategori	TINYINT	PK, AUTO_INCREMENT, UNSIGNED
+2	nama	VARCHAR(100)	
+4.	Tabel Produk
+id_produk menggunakan format EAN-13 barcode standar, maka dipilih CHAR(13) untuk menjamin panjang tetap dan efisiensi penyimpanan.
+
+
+
+
+
+
+
+
+Tabel 4. 4 Tabel Produk
+No.	Nama Field	Tipe Data	Constraint
+1	id_produk	CHAR(13)	PK
+2	id_kategori	TINYINT	FK, UNSIGNED
+3	nama	VARCHAR(100)	
+4	gambar	VARCHAR(255)	
+5	nomor_bpom	VARCHAR(50)	
+6	harga	DECIMAL	
+7	biaya_produk	DECIMAL	
+8	stok	int	
+9	batas_stok	INT	
+5.	Tabel Transaksi
+id_transaksi memakai format: INV-2025-05-001-P000001 dengan struktur dinamis (tahun, bulan, urut, id_pelanggan), karena itu harus digenerate dari backend dan bukan auto-increment.
+Tabel 4. 5 Tabel Transaksi
+No.	Nama Field	Tipe Data	Constraint
+1	id_transaksi	VARCHAR(28)	PK
+2	id_pengguna	CHAR(7)	FK
+3	id_pelanggan	VARCHAR(7)	FK
+4	tanggal	DATE	
+5	total	DECIMAL	
+6	status	ENUM	menunggu, selesai, dibatalkan
+7	catatan	TEXT	Nullable
+8	diskon	DECIMAL	Nullable
+9	pajak	DECIMAL	Nullable
+10	biaya_pengiriman	INT	
+6.	Tabel Detail
+Digunakan untuk mencatat daftar produk dalam 1 transaksi. ID-nya menggunakan auto increment karena tidak butuh format khusus.
+Tabel 4. 6 Tabel Detail Transaksi
+No.	Nama Field	Tipe Data	Constraint
+1	id_detail	INT	PK, AUTO_INCREMENT, UNSIGNED
+2	id_transaksi	VARCHAR(28)	FK
+3	id_produk	CHAR(13)	FK
+4	jumlah	INT	
+5	harga_satuan	DECIMAL	
+7.	Tabel Pembayaran
+id_pembayaran menggunakan format PAY-YYYYMMDD-0000001, maka tidak cocok memakai AUTO_INCREMENT. Lebih baik digenerate dari aplikasi saat insert.
+
+Tabel 4. 7 Tabel Pembayaran
+No.	Nama Field	Tipe Data	Constraint
+1	id_pembayaran	CHAR(20)	PK
+2	id_transaksi	VARCHAR(28)	FK
+3	metode	ENUM	tunai, non_tunai
+4	jumlah	DECIMAL	
+5	keterangan	VARCHAR(255)	Nullable
+6	tanggal	DATE	

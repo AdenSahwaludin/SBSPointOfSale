@@ -1,0 +1,214 @@
+@startuml Kasir_Transaksi_Kredit_Sequence
+title Sequence Diagram - Kasir: Transaksi Kredit (Pembayaran Angsuran)
+
+actor Kasir
+participant "UI" as UI
+participant "AngsuranController" as Controller
+participant "KontrakKredit Model" as Kontrak
+participant "JadwalAngsuran Model" as Jadwal
+participant "Pembayaran Model" as Pembayaran
+participant "Pelanggan Model" as Pelanggan
+participant "PaymentReceived Event" as Event
+participant "UpdateTrustScoreListener" as Listener
+participant "TrustScoreService" as TrustService
+participant "CreditLimitService" as CreditService
+participant "Database" as DB
+
+Kasir -> UI: Buka menu Pembayaran Kredit
+activate UI
+UI -> Controller: GET /kasir/angsuran
+activate Controller
+Controller -> Kontrak: Get contracts\nwhere status != LUNAS
+Kontrak -> DB: Query contracts
+DB --> Kontrak: Contracts
+Controller <-- Kontrak: Return list
+Controller --> UI: List kontrak
+deactivate Controller
+deactivate UI
+
+Kasir -> UI: Pilih kontrak untuk pembayaran
+activate UI
+UI -> Controller: GET /kasir/angsuran/{id}
+activate Controller
+
+Controller -> Kontrak: Find by ID with relations
+Kontrak -> DB: SELECT kontrak, pelanggan, jadwal
+DB --> Kontrak: Data
+Controller <-- Kontrak: Return
+
+Controller --> UI: Tampilkan detail:
+note over UI
+  - Pelanggan: Nama, ID
+  - Kontrak: Pokok, bunga, DP
+  - Schedule dengan status DUE/LATE/PAID
+end note
+deactivate Controller
+deactivate UI
+
+Kasir -> UI: Input jumlah pembayaran
+activate UI
+note over UI
+  Amount input validation:
+  - Min amount
+  - Format number
+end note
+
+UI -> Controller: POST /kasir/angsuran/{id}/pay
+activate Controller
+
+Controller -> Controller: Validate amount
+alt Validation Failed
+    Controller --> UI: 422 Error
+else OK
+end
+
+Controller -> DB: BEGIN TRANSACTION
+activate DB
+
+Controller -> Jadwal: Get angsuran list\nwhere status != PAID
+Jadwal -> DB: SELECT * FROM jadwal_angsuran
+DB --> Jadwal: Angsuran
+Controller <-- Jadwal: Return
+
+note over Controller
+  Initialize:
+  remaining = amount
+  kasir_id = Auth::id()
+end note
+
+loop for each angsuran in list
+    break if remaining <= 0
+    end
+    
+    Controller -> Controller: Calculate sisa tagihan:
+    note over Controller
+      sisa = jumlah_tagihan - jumlah_dibayar_sebelum
+    end note
+    
+    Controller -> Controller: Allocate payment (FIFO):
+    note over Controller
+      bayar = min(remaining, sisa)
+    end note
+    
+    Controller -> Pembayaran: Create record
+    Pembayaran -> DB: INSERT INTO pembayaran
+    DB --> Pembayaran: pembayaran_id
+    
+    Controller -> Event: Dispatch PaymentReceived(pembayaran)
+    activate Event
+    
+    note over Event
+      Async processing in queue:
+      - UpdateTrustScoreOnPayment listener
+      - Will update TS and limit
+    end note
+    
+    Event ->> Listener: Queue job
+    deactivate Event
+    
+    Controller -> Jadwal: Update angsuran
+    note over Controller
+      jumlah_dibayar += bayar
+      if jumlah_dibayar >= jumlah_tagihan:
+        status = PAID
+        paid_at = NOW()
+    end note
+    
+    Jadwal -> DB: UPDATE jadwal_angsuran
+    DB --> Jadwal: Success
+    
+    Controller -> Pelanggan: Update saldo & limit
+    note over Controller
+      saldo_kredit = max(0, saldo - bayar)
+      credit_limit = credit_limit + bayar
+    end note
+    
+    Pelanggan -> DB: UPDATE pelanggan
+    DB --> Pelanggan: Success
+    
+    Controller -> Controller: Decrease remaining
+end
+
+Controller -> Kontrak: Check if lunas
+alt Semua angsuran PAID?
+    Controller -> Kontrak: Update status = LUNAS
+    Kontrak -> DB: UPDATE kontrak
+    DB --> Kontrak: Success
+end
+
+Controller -> DB: COMMIT TRANSACTION
+DB --> Controller: Committed
+deactivate DB
+
+Controller --> UI: 200 OK - Payment success
+deactivate Controller
+
+UI --> Kasir: Tampilkan receipt
+Kasir <-- UI: Detail pembayaran:\n- Jumlah: Rp X\n- Metode: Y\n- Angsuran dibayar: Z\n- Sisa cicilan: W
+
+Kasir -> UI: Cetak bukti?
+alt Cetak
+    UI -> UI: Generate & print receipt
+    Kasir <-- UI: Bukti dicetak
+end
+
+note over Listener
+  Background Job Processing
+  (Asynchronous - tidak blocking)
+end note
+
+activate Listener
+
+Listener -> TrustService: calculateFullScore(pelanggan)
+activate TrustService
+
+note over TrustService
+  Recalculate trust score based on:
+  - Payment history update
+  - New payment recorded
+  - Possible status changes
+end note
+
+TrustService -> TrustService: Calculate breakdown
+TrustService --> Listener: Return new_score
+deactivate TrustService
+
+Listener -> CreditService: calculateCreditLimit(pelanggan)
+activate CreditService
+
+CreditService -> CreditService: Recalculate based on:
+note over CreditService
+  - New trust score
+  - Current transactions
+  - 6-month history
+end note
+
+CreditService --> Listener: Return new_limit
+deactivate CreditService
+
+Listener -> DB: Update if changed
+alt TS or Limit changed?
+    DB --> Listener: Updated
+end
+
+Listener -> Listener: Log changes
+note over Listener
+  Log record:
+  - Customer ID
+  - Old TS -> New TS
+  - Old Limit -> New Limit
+  - Triggered by: Payment event
+  - Timestamp
+end note
+
+Listener -> Listener: Mark job complete
+deactivate Listener
+
+note over Kasir
+  Customer dapat akses baru:
+  - Increased credit limit (jika TS naik)
+  - Updated trust score
+  - New balance available untuk cicilan
+end note
+
+@enduml
