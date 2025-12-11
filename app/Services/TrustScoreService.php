@@ -15,7 +15,7 @@ class TrustScoreService
      */
     public static function applyAccountAgeRule(Pelanggan $pelanggan): void
     {
-        if (!$pelanggan->created_at) {
+        if (! $pelanggan->created_at) {
             return;
         }
 
@@ -30,10 +30,10 @@ class TrustScoreService
         }
 
         // Ensure trust_score does not decrease; clamp upper bound at 100
-        $newScore = max((int)$pelanggan->trust_score, $minScore);
+        $newScore = max((int) $pelanggan->trust_score, $minScore);
         $newScore = min($newScore, 100);
 
-        if ($newScore !== (int)$pelanggan->trust_score) {
+        if ($newScore !== (int) $pelanggan->trust_score) {
             // Use forceFill to ensure the attribute is set regardless of mass-assignment rules
             $pelanggan->forceFill(['trust_score' => $newScore])->save();
         }
@@ -65,7 +65,7 @@ class TrustScoreService
         })->get(['status', 'paid_at', 'jatuh_tempo']);
 
         foreach ($installments as $angsuran) {
-            $status = (string)$angsuran->status;
+            $status = (string) $angsuran->status;
             if ($status === 'LUNAS') {
                 // On-time if paid_at <= due date
                 if ($angsuran->paid_at && $angsuran->jatuh_tempo && $angsuran->paid_at->lessThanOrEqualTo($angsuran->jatuh_tempo)) {
@@ -91,8 +91,8 @@ class TrustScoreService
         $allTotals = \App\Models\Transaksi::pluck('total');
         $transactionValueDelta = 0;
         if ($allTotals->count() > 0) {
-            $median = $allTotals->map(fn($t) => (float)$t)->median();
-            $avg = (float)\App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)->avg('total');
+            $median = $allTotals->map(fn ($t) => (float) $t)->median();
+            $avg = (float) \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)->avg('total');
             if ($avg > $median) {
                 $transactionValueDelta = 5;
             }
@@ -118,7 +118,7 @@ class TrustScoreService
             + $activeArrearsDelta;
 
         // Clamp to 0..100
-        $total = max(0, min(100, (int)round($total)));
+        $total = max(0, min(100, (int) round($total)));
 
         return [
             'baseline' => $baseline,
@@ -139,10 +139,10 @@ class TrustScoreService
     {
         $breakdown = self::calculateFullScore($pelanggan);
 
-        if ((int)$pelanggan->trust_score !== (int)$breakdown['total']) {
-            $pelanggan->forceFill(['trust_score' => (int)$breakdown['total']])->save();
+        if ((int) $pelanggan->trust_score !== (int) $breakdown['total']) {
+            $pelanggan->forceFill(['trust_score' => (int) $breakdown['total']])->save();
         }
 
-        return $withBreakdown ? $breakdown : (int)$breakdown['total'];
+        return $withBreakdown ? $breakdown : (int) $breakdown['total'];
     }
 }

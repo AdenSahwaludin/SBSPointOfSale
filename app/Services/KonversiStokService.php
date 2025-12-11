@@ -2,25 +2,25 @@
 
 namespace App\Services;
 
-use App\Models\Produk;
 use App\Models\KonversiStok;
+use App\Models\Produk;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class KonversiStokService
 {
     /**
      * Melakukan konversi stok dari karton ke pcs dengan logika parsial
-     * 
-     * @param int $fromProdukId ID produk sumber (karton)
-     * @param int $toProdukId ID produk tujuan (pcs)
-     * @param int $qtyTo Jumlah PCS yang diminta
-     * @param string $mode 'penuh' atau 'parsial'
-     * @param int $rasio Rasio konversi (1 karton = ? pcs)
-     * @param string|null $keterangan Keterangan tambahan
-     * 
+     *
+     * @param  int  $fromProdukId  ID produk sumber (karton)
+     * @param  int  $toProdukId  ID produk tujuan (pcs)
+     * @param  int  $qtyTo  Jumlah PCS yang diminta
+     * @param  string  $mode  'penuh' atau 'parsial'
+     * @param  int  $rasio  Rasio konversi (1 karton = ? pcs)
+     * @param  string|null  $keterangan  Keterangan tambahan
      * @return KonversiStok Data konversi yang tersimpan
+     *
      * @throws Exception Jika stok tidak cukup atau data tidak valid
      */
     public function convert(
@@ -36,7 +36,7 @@ class KonversiStokService
             throw new Exception('Jumlah PCS yang diminta harus lebih dari 0');
         }
 
-        if (!in_array($mode, ['penuh', 'parsial'])) {
+        if (! in_array($mode, ['penuh', 'parsial'])) {
             throw new Exception('Mode harus "penuh" atau "parsial"');
         }
 
@@ -73,7 +73,7 @@ class KonversiStokService
             // Validasi stok cukup
             if ($conversionData['packs_needed'] > $fromProduk->stok) {
                 throw new Exception(
-                    "Stok karton tidak cukup. Dibutuhkan {$conversionData['packs_needed']} karton, " .
+                    "Stok karton tidak cukup. Dibutuhkan {$conversionData['packs_needed']} karton, ".
                     "tersedia {$fromProduk->stok} karton"
                 );
             }
@@ -108,16 +108,15 @@ class KonversiStokService
 
     /**
      * Hitung kebutuhan konversi berdasarkan mode
-     * 
+     *
      * Logika:
      * 1. Jika ada sisa_pcs_terbuka dan cukup untuk qty_to, ambil dari buffer
      * 2. Jika tidak cukup di buffer, buka karton baru dan hitung sisa
-     * 
-     * @param Produk $produk Produk sumber dengan buffer
-     * @param int $qtyTo Jumlah PCS yang diminta
-     * @param string $mode Mode konversi
-     * @param int $isiPerPack Jumlah PCS per karton
-     * 
+     *
+     * @param  Produk  $produk  Produk sumber dengan buffer
+     * @param  int  $qtyTo  Jumlah PCS yang diminta
+     * @param  string  $mode  Mode konversi
+     * @param  int  $isiPerPack  Jumlah PCS per karton
      * @return array Berisi: packs_needed, dari_buffer, sisa_buffer_after
      */
     private function calculateConversion(
@@ -126,7 +125,7 @@ class KonversiStokService
         string $mode,
         int $isiPerPack
     ): array {
-        $sisaBuffer = (int)$produk->sisa_pcs_terbuka;
+        $sisaBuffer = (int) $produk->sisa_pcs_terbuka;
         $dariBuffer = 0;
         $packsNeeded = 0;
 
@@ -164,9 +163,10 @@ class KonversiStokService
 
     /**
      * Reverse konversi stok (undo)
-     * 
-     * @param int $konversiId ID konversi yang akan di-reverse
+     *
+     * @param  int  $konversiId  ID konversi yang akan di-reverse
      * @return bool Success
+     *
      * @throws Exception
      */
     public function reverse(int $konversiId): bool
@@ -205,8 +205,8 @@ class KonversiStokService
 
     /**
      * Bulk reverse konversi stok
-     * 
-     * @param array $konversiIds Array ID konversi yang akan di-reverse
+     *
+     * @param  array  $konversiIds  Array ID konversi yang akan di-reverse
      * @return int Jumlah konversi yang berhasil di-reverse
      */
     public function bulkReverse(array $konversiIds): int
@@ -220,6 +220,7 @@ class KonversiStokService
                 }
             } catch (Exception $e) {
                 Log::warning("Failed to reverse konversi_stok ID {$id}: {$e->getMessage()}");
+
                 continue;
             }
         }

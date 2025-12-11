@@ -37,6 +37,11 @@ export function useKasirMenuItems(): MenuItem[] {
             icon: 'fas fa-users',
         },
         {
+            name: 'Purchase Order',
+            href: '/kasir/goods-in',
+            icon: 'fas fa-file-invoice',
+        },
+        {
             name: 'Angsuran Kredit',
             href: '/kasir/angsuran',
             icon: 'fas fa-file-invoice-dollar',
@@ -45,6 +50,11 @@ export function useKasirMenuItems(): MenuItem[] {
             name: 'Konversi Stok',
             href: '/kasir/konversi-stok',
             icon: 'fas fa-exchange-alt',
+        },
+        {
+            name: 'Stock Adjustment',
+            href: '/kasir/stock-adjustment',
+            icon: 'fas fa-clipboard-check',
         },
         {
             name: 'Profile',

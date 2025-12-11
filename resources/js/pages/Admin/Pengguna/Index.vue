@@ -16,6 +16,7 @@ interface Pengguna {
 
 interface Props {
     pengguna: Pengguna[];
+    currentUserId: string;
 }
 
 const props = defineProps<Props>();
@@ -133,10 +134,12 @@ function formatDate(dateString?: string) {
                                         />
                                         <BaseButton
                                             @click="confirmDelete(user)"
+                                            :disabled="user.id_pengguna === props.currentUserId"
                                             variant="danger"
                                             size="xs"
                                             icon="fas fa-trash"
                                             custom-class="rounded-lg p-2"
+                                            :title="user.id_pengguna === props.currentUserId ? 'Tidak bisa menghapus akun sendiri' : 'Hapus'"
                                         />
                                     </div>
                                 </td>
@@ -145,7 +148,7 @@ function formatDate(dateString?: string) {
                     </table>
                 </div>
 
-                <!-- Empty State -->
+                <!-- Empty State -->    
                 <div v-if="pengguna.length === 0" class="py-12 text-center">
                     <i class="fas fa-users mb-4 text-4xl text-emerald-300"></i>
                     <h3 class="mb-2 text-lg font-medium text-emerald-800">Belum ada pengguna</h3>

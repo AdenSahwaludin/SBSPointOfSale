@@ -1,85 +1,116 @@
-4.2.5.	Perancangan Fisik Basis Data
-Pada perancangan fisik basis data ini merupakan tahapan lanjutan dalam membangun struktur database yang akan digunakan secara nyata dalam sistem. Tahap ini bertujuan untuk mendefinisikan nama field, tipe data, serta constraint seperti primary key (PK) dan foreign key (FK) pada masing-masing tabel. 
-Perancangan fisik ini nantinya menjadi acuan implementasi di dalam sistem POS SBS.
 1.	Tabel Pengguna
 id_pengguna dibentuk dari nomor urut + inisial nama, misal: 001-ADN. kata_sandi menggunakan hashing bcrypt dengan panjang tetap 60 karakter.
 Tabel 4. 1 Tabel Pengguna
 No.	Nama Field	Tipe Data	Constraint
-1	id_pengguna	CHAR(7)	PK
-2	nama	VARCHAR(100)	
-3	email	VARCHAR(50)	UNIQUE
-4	telepon	VARCHAR(20)	
-5	kata_sandi	CHAR(60)	enkripsi bcrypt
-6	role	ENUM	('admin', 'kasir')
-7	terakhir_login	DATETIME	
+1	id_pengguna	VARCHAR(8)	PK
+2	nama	VARCHAR(100)	NOT NULL
+3	email	VARCHAR(100)	UNIQUE, NULLABLE
+4	telepon	VARCHAR(15)	NULLABLE
+5	password	VARCHAR(60)	NULLABLE, bcrypt
+6	role	ENUM	'kasir', 'admin'
+7	terakhir_login	TIMESTAMP	NULLABLE
+8	remember_token	VARCHAR(100)	NULLABLE
+9	created_at	TIMESTAMP	auto-generated
+10	updated_at	TIMESTAMP	auto-updated
+
 2.	Tabel Pelanggan
 id_pelanggan diformat sebagai P001, P002, dst sampai P999999, karena disiapkan untuk tampilan terurut rapi dan cocok digunakan sebagai bagian dari ID Transaksi.
 Tabel 4. 2 Tabel Pelanggan
 No.	Nama Field	Tipe Data	Constraint
 1	id_pelanggan	VARCHAR(7)	PK
-2	nama	VARCHAR(100)	
-3	email	VARCHAR(50)	UNIQUE
-4	telepon	VARCHAR(20)	
-5	kota	VARCHAR(50)	
-6	alamat	TEXT	
+2	nama	VARCHAR(100)	NOT NULL
+3	email	VARCHAR(100)	UNIQUE, NULLABLE
+4	telepon	VARCHAR(15)	NULLABLE
+5	kota	VARCHAR(50)	NULLABLE
+6	alamat	TEXT	NULLABLE
+7	aktif	BOOLEAN	default: 1
+8	trust_score	TINYINT UNSIGNED	default: 50 (0-100)
+9	credit_limit	DECIMAL(12,0)	default: 0
+10	status_kredit	ENUM	'aktif', 'nonaktif'
+11	saldo_kredit	DECIMAL(12,0)	default: 0
+12	created_at	TIMESTAMP	auto-generated
+13	updated_at	TIMESTAMP	auto-updated
+
 3.	Tabel Kategori
 id_kategori menggunakan auto increment karena cukup berbentuk angka dan tidak memerlukan struktur khusus.
 Tabel 4. 3 Tabel Kategori
 No.	Nama Field	Tipe Data	Constraint
 1	id_kategori	TINYINT	PK, AUTO_INCREMENT, UNSIGNED
 2	nama	VARCHAR(100)	
+
 4.	Tabel Produk
-id_produk menggunakan format EAN-13 barcode standar, maka dipilih CHAR(13) untuk menjamin panjang tetap dan efisiensi penyimpanan.
-
-
-
-
-
-
-
-
+id_produk menggunakan BIGINT auto-increment. Produk mendukung multiple satuan dengan isi_per_pack untuk konversi stok dan buffer untuk sisa PCS.
 Tabel 4. 4 Tabel Produk
 No.	Nama Field	Tipe Data	Constraint
-1	id_produk	CHAR(13)	PK
-2	id_kategori	TINYINT	FK, UNSIGNED
-3	nama	VARCHAR(100)	
-4	gambar	VARCHAR(255)	
-5	nomor_bpom	VARCHAR(50)	
-6	harga	DECIMAL	
-7	biaya_produk	DECIMAL	
-8	stok	int	
-9	batas_stok	INT	
+1	id_produk	BIGINT	PK, AUTO_INCREMENT
+2	sku	VARCHAR(32)	UNIQUE, NOT NULL
+3	barcode	VARCHAR(13)	UNIQUE, NULLABLE (EAN-13)
+4	no_bpom	VARCHAR(18)	NULLABLE
+5	nama	VARCHAR(100)	NOT NULL
+6	id_kategori	TINYINT UNSIGNED	FK
+7	satuan	ENUM	'pcs', 'karton', 'pack'
+8	isi_per_pack	INTEGER	default: 1, > 0
+9	stok	INTEGER	default: 0
+10	sisa_pcs_terbuka	INTEGER	default: 0 (buffer PCS)
+11	harga	DECIMAL(18,0)	NOT NULL, >= 0
+12	harga_pack	DECIMAL(18,0)	NULLABLE (harga grosir)
+13	created_at	TIMESTAMP	auto-generated
+14	updated_at	TIMESTAMP	auto-updated
+
 5.	Tabel Transaksi
-id_transaksi memakai format: INV-2025-05-001-P000001 dengan struktur dinamis (tahun, bulan, urut, id_pelanggan), karena itu harus digenerate dari backend dan bukan auto-increment.
+nomor_transaksi memakai format: INV-YYYY-MM-NNN-PXXXXXX dengan struktur dinamis. Diperluas dengan fields cicilan untuk mendukung kredit.
 Tabel 4. 5 Tabel Transaksi
 No.	Nama Field	Tipe Data	Constraint
-1	id_transaksi	VARCHAR(28)	PK
-2	id_pengguna	CHAR(7)	FK
-3	id_pelanggan	VARCHAR(7)	FK
-4	tanggal	DATE	
-5	total	DECIMAL	
-6	status	ENUM	menunggu, selesai, dibatalkan
-7	catatan	TEXT	Nullable
-8	diskon	DECIMAL	Nullable
-9	pajak	DECIMAL	Nullable
-10	biaya_pengiriman	INT	
-6.	Tabel Detail
+1	nomor_transaksi	VARCHAR(40)	PK
+2	id_pelanggan	VARCHAR(7)	FK
+3	id_kasir	VARCHAR(8)	FK
+4	tanggal	TIMESTAMP	default: CURRENT_TIMESTAMP
+5	total_item	INTEGER	default: 0
+6	subtotal	DECIMAL(18,0)	default: 0
+7	diskon	DECIMAL(18,0)	default: 0
+8	pajak	DECIMAL(18,0)	default: 0
+9	biaya_pengiriman	DECIMAL(18,0)	default: 0
+10	total	DECIMAL(18,0)	default: 0
+11	metode_bayar	ENUM	'TUNAI','QRIS','TRANSFER BCA','KREDIT'
+12	status_pembayaran	ENUM	'MENUNGGU','LUNAS','BATAL'
+13	paid_at	TIMESTAMP	NULLABLE
+14	jenis_transaksi	ENUM	'TUNAI','KREDIT'
+15	dp	DECIMAL(12,0)	default: 0
+16	tenor_bulan	TINYINT UNSIGNED	NULLABLE
+17	bunga_persen	DECIMAL(5,0)	default: 0
+18	cicilan_bulanan	DECIMAL(12,0)	NULLABLE
+19	ar_status	ENUM	'NA','AKTIF','LUNAS','GAGAL','BATAL'
+20	id_kontrak	BIGINT UNSIGNED	NULLABLE, FK
+21	created_at	TIMESTAMP	auto-generated
+22	updated_at	TIMESTAMP	auto-updated
+
+6.	Tabel Detail Transaksi
 Digunakan untuk mencatat daftar produk dalam 1 transaksi. ID-nya menggunakan auto increment karena tidak butuh format khusus.
 Tabel 4. 6 Tabel Detail Transaksi
 No.	Nama Field	Tipe Data	Constraint
-1	id_detail	INT	PK, AUTO_INCREMENT, UNSIGNED
-2	id_transaksi	VARCHAR(28)	FK
-3	id_produk	CHAR(13)	FK
-4	jumlah	INT	
-5	harga_satuan	DECIMAL	
-7.	Tabel Pembayaran
-id_pembayaran menggunakan format PAY-YYYYMMDD-0000001, maka tidak cocok memakai AUTO_INCREMENT. Lebih baik digenerate dari aplikasi saat insert.
+1	id_detail	BIGINT	PK, AUTO_INCREMENT, UNSIGNED
+2	nomor_transaksi	VARCHAR(40)	FK
+3	id_produk	BIGINT	FK
+4	jumlah	INTEGER	NOT NULL, > 0
+5	harga_satuan	DECIMAL(18,0)	NOT NULL
+6	diskon_item	DECIMAL(18,0)	default: 0
+7	subtotal_item	DECIMAL(18,0)	calculated
+8	created_at	TIMESTAMP	auto-generated
+9	updated_at	TIMESTAMP	auto-updated
 
+7.	Tabel Pembayaran
+id_pembayaran menggunakan format PAY-YYYYMMDD-0000001, digenerate dari aplikasi saat insert. Mendukung pembayaran transaksi dan pembayaran kredit (cicilan).
 Tabel 4. 7 Tabel Pembayaran
 No.	Nama Field	Tipe Data	Constraint
-1	id_pembayaran	CHAR(20)	PK
-2	id_transaksi	VARCHAR(28)	FK
-3	metode	ENUM	tunai, non_tunai
-4	jumlah	DECIMAL	
-5	keterangan	VARCHAR(255)	Nullable
-6	tanggal	DATE	
+1	id_pembayaran	VARCHAR(32)	PK
+2	id_transaksi	VARCHAR(40)	FK, NULLABLE
+3	id_angsuran	BIGINT	FK, NULLABLE
+4	metode	ENUM	'TUNAI','QRIS','TRANSFER BCA','KREDIT'
+5	jumlah	DECIMAL(18,0)	NOT NULL, > 0
+6	tanggal	TIMESTAMP	default: CURRENT_TIMESTAMP
+7	keterangan	VARCHAR(255)	NULLABLE
+8	id_pelanggan	VARCHAR(7)	FK, NULLABLE
+9	id_kasir	VARCHAR(8)	FK, NULLABLE
+10	tipe_pembayaran	ENUM	'transaksi','kredit'
+11	created_at	TIMESTAMP	auto-generated
+12	updated_at	TIMESTAMP	auto-updated	

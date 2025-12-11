@@ -9,15 +9,20 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
 
     protected $table = 'pengguna';
+
     protected $primaryKey = 'id_pengguna';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = ['id_pengguna', 'nama', 'email', 'telepon', 'password', 'role', 'terakhir_login'];
+
     protected $hidden = ['password', 'remember_token'];
+
     protected $casts = ['terakhir_login' => 'datetime'];
 
     // Laravel expects 'password' col; mapping dari 'kata_sandi' → 'password'

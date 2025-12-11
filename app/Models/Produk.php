@@ -12,8 +12,11 @@ class Produk extends Model
     use HasFactory;
 
     protected $table = 'produk';
+
     protected $primaryKey = 'id_produk';
+
     public $incrementing = true;
+
     protected $keyType = 'int';
 
     protected $fillable = [
@@ -36,6 +39,8 @@ class Produk extends Model
         'stok' => 'integer',
         'sisa_pcs_terbuka' => 'integer',
         'isi_per_pack' => 'integer',
+        'rop' => 'integer',
+        'roq' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -73,6 +78,22 @@ class Produk extends Model
     }
 
     /**
+     * Get the stock adjustments for the product
+     */
+    public function adjustments(): HasMany
+    {
+        return $this->hasMany(StockAdjustment::class, 'id_produk');
+    }
+
+    /**
+     * Get the goods in details for the product
+     */
+    public function goodsInDetails(): HasMany
+    {
+        return $this->hasMany(GoodsInDetail::class, 'id_produk');
+    }
+
+    /**
      * Scope: Products with low stock
      */
     public function scopeLowStock($query)
@@ -101,7 +122,7 @@ class Produk extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return 'Rp ' . number_format((float)$this->harga, 0, ',', '.');
+        return 'Rp '.number_format((float) $this->harga, 0, ',', '.');
     }
 
     /**
