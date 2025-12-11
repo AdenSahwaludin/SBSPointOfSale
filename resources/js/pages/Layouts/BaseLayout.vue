@@ -132,10 +132,10 @@ onMounted(() => {
                     <div v-if="item.children && item.children.length > 0">
                         <button
                             @click="toggleMenu(item.name)"
-                            class="group emerald-transition flex w-full items-center rounded-xl px-3 py-3 text-nowrap text-emerald-700 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 hover:text-emerald-600"
+                            class="group emerald-transition flex w-full items-center rounded-xl px-3 py-3 text-nowrap text-emerald-700 transition-all duration-300 ease-in-out hover:bg-emerald-50 hover:text-emerald-600"
                             :class="{ 'shadow-emerald-sm border-l-4 border-emerald-400 bg-emerald-100 text-emerald-700': item.active }"
                         >
-                            <i :class="item.icon" class="mr-3 h-5 w-5 transition-all duration-300"></i>
+                            <i :class="item.icon" class="mr-3 h-5 w-5 transition-all duration-300 group-hover:rotate-12"></i>
                             <span
                                 v-if="isSidebarOpen"
                                 class="flex-1 translate-x-0 transform text-left opacity-100 transition-all duration-500 ease-in-out"
@@ -168,10 +168,10 @@ onMounted(() => {
                                     :key="child.name"
                                     :href="child.href || '#'"
                                     @click="closeSidebarOnMobile"
-                                    class="emerald-transition flex items-center rounded-lg px-3 py-2 text-sm text-emerald-600 transition-all duration-300 ease-in-out hover:translate-x-1 hover:bg-emerald-50 hover:text-emerald-700"
+                                    class="emerald-transition flex items-center rounded-lg px-3 py-2 text-sm text-emerald-600 transition-all duration-300 ease-in-out hover:bg-emerald-50 hover:text-emerald-700"
                                     :class="{ 'shadow-emerald-sm border-l-4 border-emerald-400 bg-emerald-100 text-emerald-700': child.active }"
                                 >
-                                    <i :class="child.icon" class="mr-2 h-4 w-4 transition-all duration-300"></i>
+                                    <i :class="child.icon" class="mr-2 h-4 w-4 transition-all duration-300 group-hover:rotate-12"></i>
                                     {{ child.name }}
                                 </Link>
                             </div>
@@ -183,10 +183,10 @@ onMounted(() => {
                         v-else
                         :href="item.href || '#'"
                         @click="closeSidebarOnMobile"
-                        class="group emerald-transition flex items-center rounded-xl px-3 py-3 text-emerald-700 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 hover:text-emerald-600"
+                        class="group emerald-transition flex items-center rounded-xl px-3 py-3 text-emerald-700 transition-all duration-300 ease-in-out hover:bg-emerald-50 hover:text-emerald-600"
                         :class="{ 'shadow-emerald-sm border-l-4 border-emerald-400 bg-emerald-100 text-emerald-700': item.active }"
                     >
-                        <i :class="item.icon" class="mr-3 h-5 w-5 transition-all duration-300"></i>
+                        <i :class="item.icon" class="mr-3 h-5 w-5 transition-all duration-300 group-hover:rotate-12"></i>
                         <span v-if="isSidebarOpen" class="translate-x-0 transform text-nowrap opacity-100 transition-all duration-500 ease-in-out">{{
                             item.name
                         }}</span>
@@ -227,7 +227,7 @@ onMounted(() => {
                     <div class="flex items-center space-x-4">
                         <button
                             @click="toggleSidebar"
-                            class="emerald-transition rounded-lg p-2 text-emerald-600 transition-all duration-300 ease-in-out hover:scale-110 hover:bg-emerald-50 active:scale-95"
+                            class="emerald-transition rounded-lg p-2 text-emerald-600 transition-all duration-300 ease-in-out hover:bg-emerald-50 hover:text-emerald-700 active:scale-95"
                         >
                             <svg class="h-6 w-6 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -245,7 +245,7 @@ onMounted(() => {
                     <div class="relative">
                         <button
                             @click="isProfileDropdownOpen = !isProfileDropdownOpen"
-                            class="emerald-transition flex items-center space-x-3 rounded-lg p-2 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-emerald-50 active:scale-95"
+                            class="emerald-transition flex items-center space-x-3 rounded-lg p-2 transition-all duration-300 ease-in-out hover:bg-emerald-50 active:scale-95"
                         >
                             <div
                                 class="bg-emerald-gradient-subtle-1 hover:shadow-emerald emerald-hover-glow flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white transition-all duration-300"

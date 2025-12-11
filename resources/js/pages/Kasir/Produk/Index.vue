@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 
 interface Kategori {
     id_kategori: number;
@@ -440,7 +440,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                                         <p class="text-xs text-emerald-600">per pack ({{ produk.isi_per_pack }} satuan)</p>
                                         <p class="mt-2 text-xs text-blue-700">
                                             <span class="font-semibold">{{ formatCurrency(getPerUnitPrice(produk)) }}</span>
-                                            <span class="text-blue-600">per satuan</span>
+                                            <span class="text-blue-600"> per satuan</span>
                                         </p>
                                     </div>
                                     <div v-else>
