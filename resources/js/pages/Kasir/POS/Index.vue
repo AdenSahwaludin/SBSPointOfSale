@@ -1007,7 +1007,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     </div>
 
                     <!-- Products grid -->
-                    <div v-else class="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
+                    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-3 xl:grid-cols-4">
                         <div
                             v-for="produk in filteredProduk"
                             :key="produk.id_produk"

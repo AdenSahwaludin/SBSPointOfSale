@@ -229,8 +229,12 @@ class GoodsInController extends Controller
     {
         $kasirId = Auth::user()->id_pengguna;
 
-        // Get approved POs with received goods count
-        $approvedPOs = $this->goodsInService->getApprovedPOsForReceiving()->toArray();
+        // Get approved and partial_received POs (in progress receiving)
+        $approvedPOs = GoodsIn::with(['details.produk', 'kasir', 'receivedGoods'])
+            ->whereIn('status', ['approved', 'partial_received'])
+            ->orderBy('tanggal_approval', 'desc')
+            ->get()
+            ->toArray();
 
         return Inertia::render('Kasir/GoodsIn/ReceivingIndex', [
             'approvedPOs' => $approvedPOs,
@@ -242,9 +246,9 @@ class GoodsInController extends Controller
      */
     public function receivingShow(GoodsIn $goodsIn): Response
     {
-        // Only show if PO is approved
-        if ($goodsIn->status !== 'approved') {
-            abort(403, 'Hanya PO dengan status approved yang dapat dicatat barangnya.');
+        // Only show if PO is approved or partially received
+        if (! in_array($goodsIn->status, ['approved', 'partial_received'])) {
+            abort(403, 'Hanya PO dengan status approved atau partial_received yang dapat dicatat barangnya.');
         }
 
         $goodsIn->load(['details.produk', 'kasir', 'receivedGoods']);
@@ -273,15 +277,18 @@ class GoodsInController extends Controller
     }
 
     /**
-     * Record received goods for approved PO.
+     * Record received goods for approved or partially received PO.
      */
     public function recordReceived(RecordGoodsReceivedRequest $request, GoodsIn $goodsIn)
     {
         try {
-            // Only allow recording if PO is approved
-            if ($goodsIn->status !== 'approved') {
+            // Reload PO to get fresh status from DB
+            $goodsIn->refresh();
+
+            // Only allow recording if PO is approved or partially received
+            if (! in_array($goodsIn->status, ['approved', 'partial_received'])) {
                 return back()
-                    ->withErrors(['error' => 'Hanya PO dengan status approved yang dapat dicatat barangnya.']);
+                    ->withErrors(['error' => 'Hanya PO dengan status approved atau partial_received yang dapat dicatat barangnya.']);
             }
 
             $kasirId = Auth::user()->id_pengguna;

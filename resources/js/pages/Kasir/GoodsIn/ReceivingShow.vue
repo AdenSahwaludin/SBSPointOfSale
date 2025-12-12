@@ -242,8 +242,8 @@ const goBack = () => {
 
                             <!-- Damaged Quantity Input -->
                             <div>
-                                <label class="block text-sm font-medium text-red-700">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <label class="block text-sm font-medium text-amber-700">
+                                    <i class="fas fa-package mr-1"></i>
                                     Qty Rusak/Cacat (Opsional)
                                 </label>
                                 <input
@@ -258,10 +258,10 @@ const goBack = () => {
                                     "
                                     :max="(selectedItems[item.id_goods_in_detail] || 1) - 1"
                                     min="0"
-                                    class="mt-1 w-full rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-red-950 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
+                                    class="mt-1 w-full rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-950 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
                                     placeholder="0"
                                 />
-                                <p class="mt-1 text-xs text-red-600">
+                                <p class="mt-1 text-xs text-amber-700">
                                     Barang rusak tidak akan menambah stok. Maks: {{ (selectedItems[item.id_goods_in_detail] || 1) - 1 }}
                                 </p>
                             </div>
