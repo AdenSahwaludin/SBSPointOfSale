@@ -79,6 +79,7 @@ const dpBayarDisplay = ref<string>(''); // For formatted display
 const diskonGlobal = ref<number>(0);
 const pajakRate = ref<number>(0);
 const showCustomerInfo = ref<boolean>(false);
+const showCustomerInfoModal = ref<boolean>(false);
 const {
     query: productQuery,
     isSearching: isSearchingProducts,
@@ -196,6 +197,10 @@ function closePelangganDropdownDelayed() {
     setTimeout(() => {
         showPelangganDropdown.value = false;
     }, 200);
+}
+
+function openCustomerInfoModal() {
+    showCustomerInfoModal.value = true;
 }
 
 const subtotal = computed(() => {
@@ -1070,19 +1075,17 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     <h2 class="mb-4 text-xl font-bold text-gray-900">Keranjang Belanja</h2>
 
                     <!-- Customer Selection -->
-                    <div class="mb-4">
+                    <div class="relative mb-4">
                         <div class="mb-2 flex items-center justify-between">
                             <label class="block text-sm font-medium text-gray-700">Pelanggan</label>
                             <button
                                 type="button"
                                 class="inline-flex items-center rounded-full border border-emerald-200 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                                @click="showCustomerInfo = !showCustomerInfo"
-                                :aria-expanded="showCustomerInfo ? 'true' : 'false'"
-                                aria-controls="customer-info-panel"
+                                @click="openCustomerInfoModal()"
                                 title="Tampilkan informasi pelanggan"
                             >
                                 <i class="fas fa-info-circle"></i>
-                                <span class="ml-1 hidden sm:inline">{{ showCustomerInfo ? 'Tutup Info' : 'Info' }}</span>
+                                <span class="ml-1 hidden sm:inline">Info</span>
                             </button>
                         </div>
                         <div class="relative">
@@ -1378,6 +1381,61 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                 }
             "
         />
+
+        <!-- Customer Info Modal -->
+        <div
+            v-if="showCustomerInfoModal && selectedCustomer"
+            class="absolute top-20 right-0 z-50 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg"
+        >
+            <div class="space-y-3">
+                <!-- Header -->
+                <div class="flex items-center gap-3 border-b border-gray-200 pb-3">
+                    <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                        <i class="fas fa-user text-emerald-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-medium text-gray-900">{{ selectedCustomer.nama }}</h3>
+                        <p class="text-xs text-gray-500">ID: {{ selectedCustomer.id_pelanggan }}</p>
+                    </div>
+                    <button
+                        @click="showCustomerInfoModal = false"
+                        class="text-gray-400 hover:text-gray-600"
+                    >
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Customer Details -->
+                <div class="space-y-2 text-xs">
+                    <!-- Email -->
+                    <div v-if="selectedCustomer.email" class="flex items-start gap-2">
+                        <i class="fas fa-envelope mt-0.5 text-emerald-600 flex-shrink-0"></i>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-500">Email</p>
+                            <p class="text-gray-900">{{ selectedCustomer.email }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Telepon -->
+                    <div v-if="selectedCustomer.telepon" class="flex items-start gap-2">
+                        <i class="fas fa-phone mt-0.5 text-emerald-600 flex-shrink-0"></i>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-500">Telepon</p>
+                            <p class="text-gray-900">{{ selectedCustomer.telepon }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Credit Limit -->
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-credit-card mt-0.5 text-emerald-600 flex-shrink-0"></i>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-500">Limit Tersedia</p>
+                            <p class="font-bold text-emerald-600">{{ formatCurrency(availableCredit) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </BaseLayout>
 </template>
 
