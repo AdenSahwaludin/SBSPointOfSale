@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Kasir;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateGoodsInRequest;
+use App\Http\Requests\StoreGoodsInItemRequest;
+use App\Models\GoodsIn;
+use App\Models\GoodsInDetail;
+use App\Models\Produk;
 use App\Services\GoodsInService;
 use App\Services\InventoryReportService;
 use Illuminate\Support\Facades\Auth;
@@ -68,13 +72,152 @@ class GoodsInController extends Controller
     /**
      * Display the specified PO.
      */
-    public function show($id): Response
+    public function show(GoodsIn $goodsIn): Response
     {
-        $goodsIn = \App\Models\GoodsIn::with(['details.produk', 'kasir', 'admin'])
-            ->findOrFail($id);
+        $goodsIn->load(['details.produk', 'kasir', 'admin']);
+
+        // Get available products (not already in this PO)
+        $addedProductIds = $goodsIn->details()->pluck('id_produk')->toArray();
+        $availableProducts = Produk::whereNotIn('id_produk', $addedProductIds)
+            ->orderBy('nama')
+            ->get();
 
         return Inertia::render('Kasir/GoodsIn/Show', [
             'goodsIn' => $goodsIn,
+            'availableProducts' => $availableProducts,
         ]);
+    }
+
+    /**
+     * Add item to PO.
+     */
+    public function addItem(StoreGoodsInItemRequest $request, GoodsIn $goodsIn)
+    {
+        try {
+            $validated = $request->validated();
+            $this->goodsInService->addItemToGoodsIn(
+                $goodsIn,
+                $validated['id_produk'],
+                $validated['qty_request']
+            );
+
+            return redirect()
+                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->with('success', 'Item berhasil ditambahkan ke PO.');
+        } catch (\InvalidArgumentException $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()])
+                ->withInput();
+        } catch (\LogicException $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()])
+                ->withInput();
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal menambahkan item: '.$e->getMessage()])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Update item quantity in PO.
+     */
+    public function updateItem(StoreGoodsInItemRequest $request, GoodsIn $goodsIn, $id_detail)
+    {
+        try {
+            $detail = GoodsInDetail::where('id_goods_in_detail', $id_detail)
+                ->where('id_goods_in', $goodsIn->id_goods_in)
+                ->firstOrFail();
+
+            $validated = $request->validated();
+            $this->goodsInService->updateItemQty($detail, $validated['qty_request']);
+
+            return redirect()
+                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->with('success', 'Kuantitas item berhasil diperbarui.');
+        } catch (\LogicException $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()])
+                ->withInput();
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal memperbarui item: '.$e->getMessage()])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Remove item from PO.
+     */
+    public function removeItem(GoodsIn $goodsIn, $id_detail)
+    {
+        try {
+            $detail = GoodsInDetail::where('id_goods_in_detail', $id_detail)
+                ->where('id_goods_in', $goodsIn->id_goods_in)
+                ->firstOrFail();
+
+            $this->goodsInService->removeItemFromGoodsIn($detail);
+
+            return redirect()
+                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->with('success', 'Item berhasil dihapus dari PO.');
+        } catch (\LogicException $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()])
+                ->withInput();
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal menghapus item: '.$e->getMessage()])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Submit PO for approval.
+     */
+    public function submit(GoodsIn $goodsIn)
+    {
+        try {
+            $this->goodsInService->submitGoodsIn($goodsIn);
+
+            return redirect()
+                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->with('success', 'PO berhasil diajukan untuk persetujuan.');
+        } catch (\LogicException $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()])
+                ->withInput();
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal mengajukan PO: '.$e->getMessage()])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Delete PO (only if in draft status).
+     */
+    public function destroy(GoodsIn $goodsIn)
+    {
+        try {
+            // Only allow deleting draft POs
+            if ($goodsIn->status !== 'draft') {
+                return back()
+                    ->withErrors(['error' => 'Hanya PO dengan status draft yang dapat dihapus.']);
+            }
+
+            // Delete all related details first
+            $goodsIn->details()->delete();
+
+            // Delete the PO itself
+            $goodsIn->delete();
+
+            return redirect()
+                ->route('kasir.goods-in.index')
+                ->with('success', 'PO berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal menghapus PO: '.$e->getMessage()]);
+        }
     }
 }

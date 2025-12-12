@@ -40,7 +40,7 @@ describe('Goods In - Kasir Operations', function () {
         // Check GoodsIn record was created
         $goodsIn = GoodsIn::where('id_kasir', $this->kasir->id_pengguna)->first();
         expect($goodsIn)->not->toBeNull();
-        expect($goodsIn->status)->toBe(GoodsInStatus::Submitted->value);
+        expect($goodsIn->status)->toBe(GoodsInStatus::Draft->value);
         expect($goodsIn->nomor_po)->toMatch('/^PO-\d{4}-\d{2}-\d{5}$/');
 
         // Check details were created

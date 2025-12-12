@@ -30,10 +30,10 @@ class GoodsInService
             // Generate unique PO number
             $nomorPO = GoodsIn::generateNomorPO();
 
-            // Create the main PO record
+            // Create the main PO record with draft status to allow item management
             $goodsIn = GoodsIn::create([
                 'nomor_po' => $nomorPO,
-                'status' => GoodsInStatus::Submitted->value,
+                'status' => GoodsInStatus::Draft->value,
                 'tanggal_request' => now(),
                 'id_kasir' => $kasirId,
             ]);
@@ -150,5 +150,112 @@ class GoodsInService
             ->where('id_kasir', $kasirId)
             ->orderBy('tanggal_request', 'desc')
             ->get();
+    }
+
+    /**
+     * Add item to GoodsIn (PO)
+     *
+     * @param  GoodsIn  $goodsIn  The GoodsIn instance
+     * @param  int  $id_produk  Product ID
+     * @param  int  $qty_request  Quantity requested
+     * @return GoodsInDetail The created detail
+     *
+     * @throws \LogicException If PO is not in draft status
+     * @throws \InvalidArgumentException If product already exists in this PO
+     */
+    public function addItemToGoodsIn(GoodsIn $goodsIn, int $id_produk, int $qty_request): GoodsInDetail
+    {
+        // Only allow adding if PO status is 'draft'
+        if ($goodsIn->status !== GoodsInStatus::Draft->value) {
+            throw new \LogicException('Hanya PO dengan status draft yang dapat diubah.');
+        }
+
+        // Check if produk already exists in this PO
+        $existing = $goodsIn->details()->where('id_produk', $id_produk)->first();
+        if ($existing) {
+            $produk = \App\Models\Produk::findOrFail($id_produk);
+            throw new \InvalidArgumentException("Produk {$produk->nama} sudah ada di PO ini. Ubah qty-nya jika ingin menambah.");
+        }
+
+        return DB::transaction(function () use ($goodsIn, $id_produk, $qty_request) {
+            return GoodsInDetail::create([
+                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_produk' => $id_produk,
+                'qty_request' => $qty_request,
+                'qty_received' => 0,
+            ]);
+        });
+    }
+
+    /**
+     * Update item quantity in GoodsIn
+     *
+     * @param  GoodsInDetail  $detail  The detail to update
+     * @param  int  $qty_request  New quantity
+     * @return GoodsInDetail The updated detail
+     *
+     * @throws \LogicException If PO is not in draft status
+     */
+    public function updateItemQty(GoodsInDetail $detail, int $qty_request): GoodsInDetail
+    {
+        $goodsIn = $detail->goodsIn;
+
+        // Only allow updating if PO status is 'draft'
+        if ($goodsIn->status !== GoodsInStatus::Draft->value) {
+            throw new \LogicException('Hanya PO dengan status draft yang dapat diubah.');
+        }
+
+        return DB::transaction(function () use ($detail, $qty_request) {
+            $detail->update(['qty_request' => $qty_request]);
+
+            return $detail;
+        });
+    }
+
+    /**
+     * Remove item from GoodsIn
+     *
+     * @param  GoodsInDetail  $detail  The detail to remove
+     * @return bool True if successfully removed
+     *
+     * @throws \LogicException If PO is not in draft status
+     */
+    public function removeItemFromGoodsIn(GoodsInDetail $detail): bool
+    {
+        $goodsIn = $detail->goodsIn;
+
+        // Only allow removing if PO status is 'draft'
+        if ($goodsIn->status !== GoodsInStatus::Draft->value) {
+            throw new \LogicException('Hanya PO dengan status draft yang dapat diubah.');
+        }
+
+        return DB::transaction(function () use ($detail) {
+            return $detail->delete();
+        });
+    }
+
+    /**
+     * Submit GoodsIn (PO) for approval
+     *
+     * @param  GoodsIn  $goodsIn  The GoodsIn to submit
+     * @return GoodsIn The updated GoodsIn
+     *
+     * @throws \LogicException If PO is not in draft status or has no items
+     */
+    public function submitGoodsIn(GoodsIn $goodsIn): GoodsIn
+    {
+        // Check if PO has items
+        $itemCount = $goodsIn->details()->count();
+        if ($itemCount === 0) {
+            throw new \LogicException('PO harus memiliki minimal 1 item untuk diajukan.');
+        }
+
+        return DB::transaction(function () use ($goodsIn) {
+            $goodsIn->update([
+                'status' => GoodsInStatus::Submitted->value,
+            ]);
+
+            return $goodsIn->load(['details.produk', 'kasir']);
+        });
     }
 }

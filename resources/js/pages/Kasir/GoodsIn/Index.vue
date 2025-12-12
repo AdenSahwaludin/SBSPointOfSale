@@ -2,7 +2,7 @@
 import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 
 interface GoodsInDetail {
     id_goods_in_detail: number;
@@ -18,7 +18,7 @@ interface GoodsInDetail {
 interface GoodsIn {
     id_goods_in: number;
     nomor_po: string;
-    status: 'submitted' | 'approved' | 'rejected' | 'received';
+    status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'received';
     tanggal_request: string;
     tanggal_approval?: string;
     details?: GoodsInDetail[];
@@ -42,6 +42,7 @@ function formatDate(dateString: string) {
 
 function getStatusBadgeClass(status: string) {
     const classes = {
+        draft: 'bg-gray-100 text-gray-700 border-gray-200',
         submitted: 'bg-yellow-100 text-yellow-700 border-yellow-200',
         approved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
         rejected: 'bg-red-100 text-red-700 border-red-200',
@@ -52,6 +53,7 @@ function getStatusBadgeClass(status: string) {
 
 function getStatusLabel(status: string) {
     const labels = {
+        draft: 'Draft',
         submitted: 'Diajukan',
         approved: 'Disetujui',
         rejected: 'Ditolak',
@@ -62,6 +64,13 @@ function getStatusLabel(status: string) {
 
 function getItemsCount(goodsIn: GoodsIn) {
     return goodsIn.details?.length || 0;
+}
+
+function deletePO(goodsIn: GoodsIn) {
+    if (!confirm(`Yakin ingin menghapus PO ${goodsIn.nomor_po}? Tindakan ini tidak bisa dibatalkan.`)) return;
+
+    const form = useForm({});
+    form.delete(`/kasir/goods-in/${goodsIn.id_goods_in}`);
 }
 </script>
 
@@ -152,6 +161,14 @@ function getItemsCount(goodsIn: GoodsIn) {
                                     >
                                         Detail
                                     </BaseButton>
+                                    <button
+                                        v-if="po.status === 'draft'"
+                                        @click="deletePO(po)"
+                                        class="ml-2 text-red-600 transition-colors hover:text-red-700"
+                                        title="Hapus PO"
+                                    >
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>

@@ -98,6 +98,18 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
         'show' => 'goods-in.show',
     ])->only(['index', 'create', 'store', 'show']);
 
+    // PO Item management routes
+    Route::post('goods-in/{goodsIn}/items', [\App\Http\Controllers\Kasir\GoodsInController::class, 'addItem'])
+        ->name('goods-in.items.add');
+    Route::patch('goods-in/{goodsIn}/items/{id_detail}', [\App\Http\Controllers\Kasir\GoodsInController::class, 'updateItem'])
+        ->name('goods-in.items.update');
+    Route::delete('goods-in/{goodsIn}/items/{id_detail}', [\App\Http\Controllers\Kasir\GoodsInController::class, 'removeItem'])
+        ->name('goods-in.items.remove');
+    Route::post('goods-in/{goodsIn}/submit', [\App\Http\Controllers\Kasir\GoodsInController::class, 'submit'])
+        ->name('goods-in.submit');
+    Route::delete('goods-in/{goodsIn}', [\App\Http\Controllers\Kasir\GoodsInController::class, 'destroy'])
+        ->name('goods-in.destroy');
+
     // ==========================================
     // STOCK ADJUSTMENT (Penyesuaian Stok & Retur)
     // ==========================================

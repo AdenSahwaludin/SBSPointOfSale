@@ -18,6 +18,11 @@ export function useAdminMenuItems() {
             ],
         },
         {
+            name: 'Persetujuan PO',
+            href: '/admin/goods-in-approval',
+            icon: 'fas fa-file-invoice',
+        },
+        {
             name: 'Transaksi',
             icon: 'fas fa-cash-register',
             children: [
