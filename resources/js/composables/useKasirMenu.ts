@@ -27,14 +27,12 @@ export function useKasirMenuItems(): MenuItem[] {
             ],
         },
         {
-            name: 'Produk',
-            href: '/kasir/products',
-            icon: 'fas fa-boxes',
-        },
-        {
-            name: 'Pelanggan',
-            href: '/kasir/customers',
-            icon: 'fas fa-users',
+            name: 'Manajemen Data',
+            icon: 'fas fa-database',
+            children: [
+                { name: 'Produk', href: '/kasir/products', icon: 'fas fa-boxes' },
+                { name: 'Pelanggan', href: '/kasir/customers', icon: 'fas fa-users' },
+            ],
         },
         {
             name: 'Purchase Order',
