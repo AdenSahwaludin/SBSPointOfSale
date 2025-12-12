@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class GoodsInDetail extends Model
 {
     use HasFactory;
+
     protected $table = 'goods_in_details';
 
     protected $primaryKey = 'id_goods_in_detail';

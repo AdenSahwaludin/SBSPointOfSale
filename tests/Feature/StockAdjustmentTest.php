@@ -88,7 +88,7 @@ describe('Stock Adjustment - Negative Adjustments', function () {
         $initialStock = 50;
         $produk = Produk::factory()->create(['stok' => $initialStock]);
         $qtyAdjustment = 5;
-        
+
         $response = $this->actingAs($this->kasir)
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,

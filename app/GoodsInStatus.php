@@ -8,6 +8,7 @@ enum GoodsInStatus: string
     case Submitted = 'submitted';
     case Approved = 'approved';
     case Rejected = 'rejected';
+    case PartialReceived = 'partial_received';
     case Received = 'received';
 
     public function label(): string
@@ -17,7 +18,8 @@ enum GoodsInStatus: string
             self::Submitted => 'Menunggu Persetujuan',
             self::Approved => 'Disetujui',
             self::Rejected => 'Ditolak',
-            self::Received => 'Diterima',
+            self::PartialReceived => 'Diterima Sebagian',
+            self::Received => 'Diterima Lengkap',
         };
     }
 
@@ -28,6 +30,7 @@ enum GoodsInStatus: string
             self::Submitted => 'yellow',
             self::Approved => 'green',
             self::Rejected => 'red',
+            self::PartialReceived => 'indigo',
             self::Received => 'blue',
         };
     }

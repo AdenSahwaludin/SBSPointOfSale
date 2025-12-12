@@ -2,10 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -58,11 +59,11 @@ return new class extends Migration {
 
         // Add check constraints (MySQL specific)
         if (DB::getDriverName() === 'mysql') {
-            DB::statement("ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_tenor_chk CHECK (tenor_bulan BETWEEN 1 AND 24)");
-            DB::statement("ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_pokok_chk CHECK (pokok_pinjaman >= 0)");
-            DB::statement("ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_dp_chk CHECK (dp >= 0)");
-            DB::statement("ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_bunga_chk CHECK (bunga_persen >= 0)");
-            DB::statement("ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_cicilan_chk CHECK (cicilan_bulanan >= 0)");
+            DB::statement('ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_tenor_chk CHECK (tenor_bulan BETWEEN 1 AND 24)');
+            DB::statement('ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_pokok_chk CHECK (pokok_pinjaman >= 0)');
+            DB::statement('ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_dp_chk CHECK (dp >= 0)');
+            DB::statement('ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_bunga_chk CHECK (bunga_persen >= 0)');
+            DB::statement('ALTER TABLE kontrak_kredit ADD CONSTRAINT kontrak_cicilan_chk CHECK (cicilan_bulanan >= 0)');
         }
     }
 

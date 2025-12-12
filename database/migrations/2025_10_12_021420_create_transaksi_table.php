@@ -2,10 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -64,10 +65,10 @@ return new class extends Migration {
         // Add check constraints (MySQL specific)
         if (DB::getDriverName() === 'mysql') {
             DB::statement("ALTER TABLE transaksi ADD CONSTRAINT transaksi_no_chk CHECK (nomor_transaksi REGEXP '^INV-[0-9]{4}-[0-9]{2}-[0-9]{3}-P[0-9]{3,6}$')");
-            DB::statement("ALTER TABLE transaksi ADD CONSTRAINT transaksi_dp_chk CHECK (dp >= 0)");
-            DB::statement("ALTER TABLE transaksi ADD CONSTRAINT transaksi_tenor_chk CHECK (tenor_bulan IS NULL OR tenor_bulan BETWEEN 1 AND 24)");
-            DB::statement("ALTER TABLE transaksi ADD CONSTRAINT transaksi_bunga_chk CHECK (bunga_persen >= 0)");
-            DB::statement("ALTER TABLE transaksi ADD CONSTRAINT transaksi_cicilan_chk CHECK (cicilan_bulanan IS NULL OR cicilan_bulanan >= 0)");
+            DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_dp_chk CHECK (dp >= 0)');
+            DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_tenor_chk CHECK (tenor_bulan IS NULL OR tenor_bulan BETWEEN 1 AND 24)');
+            DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_bunga_chk CHECK (bunga_persen >= 0)');
+            DB::statement('ALTER TABLE transaksi ADD CONSTRAINT transaksi_cicilan_chk CHECK (cicilan_bulanan IS NULL OR cicilan_bulanan >= 0)');
         }
     }
 

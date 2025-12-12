@@ -2,10 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -36,9 +37,9 @@ return new class extends Migration {
 
         // Add check constraints (MySQL specific)
         if (DB::getDriverName() === 'mysql') {
-            DB::statement("ALTER TABLE jadwal_angsuran ADD CONSTRAINT jadwal_periode_chk CHECK (periode_ke >= 1)");
-            DB::statement("ALTER TABLE jadwal_angsuran ADD CONSTRAINT jadwal_tagihan_chk CHECK (jumlah_tagihan >= 0)");
-            DB::statement("ALTER TABLE jadwal_angsuran ADD CONSTRAINT jadwal_dibayar_chk CHECK (jumlah_dibayar >= 0)");
+            DB::statement('ALTER TABLE jadwal_angsuran ADD CONSTRAINT jadwal_periode_chk CHECK (periode_ke >= 1)');
+            DB::statement('ALTER TABLE jadwal_angsuran ADD CONSTRAINT jadwal_tagihan_chk CHECK (jumlah_tagihan >= 0)');
+            DB::statement('ALTER TABLE jadwal_angsuran ADD CONSTRAINT jadwal_dibayar_chk CHECK (jumlah_dibayar >= 0)');
         }
     }
 

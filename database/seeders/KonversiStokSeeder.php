@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\KonversiStok;
 use App\Models\Produk;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class KonversiStokSeeder extends Seeder

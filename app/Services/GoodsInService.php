@@ -272,9 +272,13 @@ class GoodsInService
      */
     public function recordReceivedGoods(GoodsIn $goodsIn, array $items, string $kasirId): \Illuminate\Support\Collection
     {
-        // Only allow recording if PO status is 'approved'
-        if ($goodsIn->status !== GoodsInStatus::Approved->value) {
-            throw new \LogicException('Hanya PO dengan status approved yang dapat dicatat barangnya.');
+        // Allow recording if PO status is 'approved', 'partial_received', or 'received'
+        if (! in_array($goodsIn->status, [
+            GoodsInStatus::Approved->value,
+            GoodsInStatus::PartialReceived->value,
+            GoodsInStatus::Received->value,
+        ])) {
+            throw new \LogicException('Hanya PO dengan status approved, partial_received, atau received yang dapat dicatat barangnya.');
         }
 
         return DB::transaction(function () use ($goodsIn, $items, $kasirId) {
@@ -288,12 +292,17 @@ class GoodsInService
                     throw new \InvalidArgumentException('Item tidak sesuai dengan PO.');
                 }
 
+                // Calculate damaged goods (default to 0 if not provided)
+                $qtyDamaged = $item['qty_damaged'] ?? 0;
+                $qtyGood = $item['qty_received'] - $qtyDamaged;
+
                 // Create the received goods record
                 $received = \App\Models\GoodsReceived::create([
                     'id_goods_in' => $goodsIn->id_goods_in,
                     'id_goods_in_detail' => $detail->id_goods_in_detail,
                     'id_produk' => $detail->id_produk,
                     'qty_received' => $item['qty_received'],
+                    'qty_damaged' => $qtyDamaged,
                     'id_kasir' => $kasirId,
                     'catatan' => $item['catatan'] ?? null,
                     'status' => 'completed',
@@ -302,10 +311,30 @@ class GoodsInService
                 // Update the detail's qty_received
                 $detail->increment('qty_received', $item['qty_received']);
 
-                // Update the product stock (stok)
-                Produk::findOrFail($detail->id_produk)->increment('stok', $item['qty_received']);
+                // Update the product stock only with good items (qty_received - qty_damaged)
+                if ($qtyGood > 0) {
+                    Produk::findOrFail($detail->id_produk)->increment('stok', $qtyGood);
+                }
 
                 $receivedRecords->push($received);
+            }
+
+            // Check if PO is fully received or partially received
+            $goodsIn->refresh();
+            $allDetails = $goodsIn->details;
+
+            $isFullyReceived = $allDetails->every(function ($detail) {
+                return $detail->qty_received >= $detail->qty_request;
+            });
+
+            // Update PO status based on receiving completeness
+            if ($isFullyReceived) {
+                $goodsIn->update(['status' => GoodsInStatus::Received->value]);
+            } else {
+                // Only update to partial_received if current status is 'approved'
+                if ($goodsIn->status === GoodsInStatus::Approved->value) {
+                    $goodsIn->update(['status' => GoodsInStatus::PartialReceived->value]);
+                }
             }
 
             // Reload with relationships

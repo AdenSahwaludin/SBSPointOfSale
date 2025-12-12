@@ -2,26 +2,32 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Carbon\Carbon;
 
 class Transaksi extends Model
 {
     use HasFactory;
 
     public const STATUS_MENUNGGU = 'MENUNGGU';
+
     public const STATUS_LUNAS = 'LUNAS';
+
     public const STATUS_BATAL = 'BATAL';
 
     public const JENIS_TUNAI = 'TUNAI';
+
     public const JENIS_KREDIT = 'KREDIT';
 
     protected $table = 'transaksi';
+
     protected $primaryKey = 'nomor_transaksi';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -108,7 +114,7 @@ class Transaksi extends Model
             // Extract sequence dari nomor transaksi terakhir
             $parts = explode('-', $lastTransaction->nomor_transaksi);
             if (count($parts) >= 4) {
-                $sequence = (int)$parts[3] + 1;
+                $sequence = (int) $parts[3] + 1;
             }
         }
 
@@ -160,6 +166,6 @@ class Transaksi extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return 'Rp ' . number_format((float)$this->total, 0, ',', '.');
+        return 'Rp '.number_format((float) $this->total, 0, ',', '.');
     }
 }

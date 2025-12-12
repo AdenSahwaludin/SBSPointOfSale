@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 
 class Pembayaran extends Model
 {
     use HasFactory;
 
     protected $table = 'pembayaran';
+
     protected $primaryKey = 'id_pembayaran';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -79,7 +82,7 @@ class Pembayaran extends Model
             // Extract sequence dari ID terakhir
             $parts = explode('-', $lastPayment->id_pembayaran);
             if (count($parts) >= 3) {
-                $sequence = (int)$parts[2] + 1;
+                $sequence = (int) $parts[2] + 1;
             }
         }
 
@@ -91,6 +94,6 @@ class Pembayaran extends Model
      */
     public function getFormattedJumlahAttribute(): string
     {
-        return 'Rp ' . number_format((float)$this->jumlah, 0, ',', '.');
+        return 'Rp '.number_format((float) $this->jumlah, 0, ',', '.');
     }
 }

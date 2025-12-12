@@ -32,7 +32,7 @@ class PelangganController extends Controller
 
         return Inertia::render('Admin/Pelanggan/Index', [
             'pelanggan' => $pelanggan,
-            'filters' => $request->only(['search', 'sort_by', 'sort_order'])
+            'filters' => $request->only(['search', 'sort_by', 'sort_order']),
         ]);
     }
 
@@ -42,7 +42,7 @@ class PelangganController extends Controller
     public function create()
     {
         return Inertia::render('Admin/Pelanggan/Create', [
-            'nextId' => Pelanggan::generateNextId()
+            'nextId' => Pelanggan::generateNextId(),
         ]);
     }
 
@@ -60,7 +60,7 @@ class PelangganController extends Controller
             'alamat' => 'nullable|string',
             'aktif' => 'boolean',
             'trust_score' => 'integer|min:0|max:100',
-            'credit_limit' => 'numeric|min:0'
+            'credit_limit' => 'numeric|min:0',
         ]);
 
         Pelanggan::create($validated);
@@ -78,7 +78,7 @@ class PelangganController extends Controller
         TrustScoreService::applyAccountAgeRule($pelanggan);
 
         return Inertia::render('Admin/Pelanggan/Show', [
-            'pelanggan' => $pelanggan
+            'pelanggan' => $pelanggan,
         ]);
     }
 
@@ -91,7 +91,7 @@ class PelangganController extends Controller
         TrustScoreService::applyAccountAgeRule($pelanggan);
 
         return Inertia::render('Admin/Pelanggan/Edit', [
-            'pelanggan' => $pelanggan
+            'pelanggan' => $pelanggan,
         ]);
     }
 
@@ -104,13 +104,13 @@ class PelangganController extends Controller
 
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
-            'email' => 'nullable|email|max:100|unique:pelanggan,email,' . $id . ',id_pelanggan',
+            'email' => 'nullable|email|max:100|unique:pelanggan,email,'.$id.',id_pelanggan',
             'telepon' => 'nullable|string|max:15',
             'kota' => 'nullable|string|max:50',
             'alamat' => 'nullable|string',
             'aktif' => 'boolean',
             'trust_score' => 'integer|min:0|max:100',
-            'credit_limit' => 'numeric|min:0'
+            'credit_limit' => 'numeric|min:0',
         ]);
 
         $pelanggan->update($validated);

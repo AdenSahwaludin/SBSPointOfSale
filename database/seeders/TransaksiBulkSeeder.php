@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Pelanggan;
+use App\Models\Pembayaran;
+use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
-use App\Models\Produk;
-use App\Models\Pembayaran;
-use App\Models\Pelanggan;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class TransaksiBulkSeeder extends Seeder
 {
@@ -41,7 +40,7 @@ class TransaksiBulkSeeder extends Seeder
             $details = [];
             foreach ($picked as $produk) {
                 $qty = random_int(1, 5);
-                $harga = (int)$produk->harga;
+                $harga = (int) $produk->harga;
                 $lineTotal = $harga * $qty;
                 $subtotal += $lineTotal;
                 $totalItem += $qty;
@@ -53,7 +52,7 @@ class TransaksiBulkSeeder extends Seeder
                     'mode_qty' => 'unit',
                     'diskon_item' => 0,
                     'subtotal' => $lineTotal,
-                    'isi_pack_saat_transaksi' => max(1, (int)$produk->isi_per_pack),
+                    'isi_pack_saat_transaksi' => max(1, (int) $produk->isi_per_pack),
                     // Note: satuan_saat_transaksi column doesn't exist in table, removed
                 ];
             }
@@ -66,7 +65,7 @@ class TransaksiBulkSeeder extends Seeder
             $nomorTransaksi = sprintf('INV-%s-%s-%s-%s', $tanggal->format('Y'), $tanggal->format('m'), $sequence, $idPelanggan);
 
             $isKredit = $metode === 'KREDIT';
-            $dp = $isKredit ? (int)round($total * [0, 0.1, 0.2, 0.3][random_int(0, 3)]) : 0;
+            $dp = $isKredit ? (int) round($total * [0, 0.1, 0.2, 0.3][random_int(0, 3)]) : 0;
             $tenor = $isKredit ? [3, 6, 9, 12][random_int(0, 3)] : null;
             if ($isKredit) {
                 $bunga = 2; // default bunga seed
@@ -111,7 +110,7 @@ class TransaksiBulkSeeder extends Seeder
                 // DP payment
                 if ($dp > 0) {
                     Pembayaran::create([
-                        'id_pembayaran' => 'PAY-' . $tanggal->format('Ymd') . '-' . str_pad((string)random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
+                        'id_pembayaran' => 'PAY-'.$tanggal->format('Ymd').'-'.str_pad((string) random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
                         'id_transaksi' => $trx->nomor_transaksi,
                         'id_angsuran' => null,
                         'metode' => 'TRANSFER BCA',
@@ -125,7 +124,7 @@ class TransaksiBulkSeeder extends Seeder
             } else {
                 // Full payment record for non-credit
                 Pembayaran::create([
-                    'id_pembayaran' => 'PAY-' . $tanggal->format('Ymd') . '-' . str_pad((string)random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
+                    'id_pembayaran' => 'PAY-'.$tanggal->format('Ymd').'-'.str_pad((string) random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
                     'id_transaksi' => $trx->nomor_transaksi,
                     'id_angsuran' => null,
                     'metode' => $metode === 'TUNAI' ? 'TUNAI' : 'TRANSFER BCA',

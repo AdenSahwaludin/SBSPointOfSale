@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +13,7 @@ class ProfileController extends Controller
     public function show()
     {
         return Inertia::render('Kasir/Profile', [
-            'user' => Auth::user()
+            'user' => Auth::user(),
         ]);
     }
 
@@ -29,7 +28,7 @@ class ProfileController extends Controller
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('pengguna', 'email')->ignore($user->id_pengguna, 'id_pengguna')
+                Rule::unique('pengguna', 'email')->ignore($user->id_pengguna, 'id_pengguna'),
             ],
             'telepon' => 'nullable|string|max:20',
         ]);
@@ -52,7 +51,7 @@ class ProfileController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Password saat ini tidak sesuai.']);
         }
 

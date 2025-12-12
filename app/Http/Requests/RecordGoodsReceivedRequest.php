@@ -25,6 +25,7 @@ class RecordGoodsReceivedRequest extends FormRequest
             'items' => 'required|array|min:1',
             'items.*.id_goods_in_detail' => 'required|integer|exists:goods_in_details,id_goods_in_detail',
             'items.*.qty_received' => 'required|integer|min:1',
+            'items.*.qty_damaged' => 'nullable|integer|min:0|lt:items.*.qty_received',
             'items.*.catatan' => 'nullable|string|max:500',
         ];
     }
@@ -38,6 +39,8 @@ class RecordGoodsReceivedRequest extends FormRequest
             'items.*.id_goods_in_detail.exists' => 'Item detail tidak valid.',
             'items.*.qty_received.required' => 'Qty diterima harus diisi.',
             'items.*.qty_received.min' => 'Qty diterima minimal 1.',
+            'items.*.qty_damaged.min' => 'Qty rusak tidak boleh negatif.',
+            'items.*.qty_damaged.lt' => 'Qty rusak harus lebih kecil dari qty diterima.',
         ];
     }
 }

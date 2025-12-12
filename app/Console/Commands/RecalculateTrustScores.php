@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Pelanggan;
-use App\Services\TrustScoreService;
 use App\Services\CreditLimitService;
-use Illuminate\Console\Command as Command;
+use App\Services\TrustScoreService;
+use Illuminate\Console\Command;
 
 class RecalculateTrustScores extends Command
 {
@@ -48,6 +48,7 @@ class RecalculateTrustScores extends Command
         }
 
         $this->error('Please specify --customer=ID or --all');
+
         return Command::FAILURE;
     }
 
@@ -58,8 +59,9 @@ class RecalculateTrustScores extends Command
     {
         $pelanggan = Pelanggan::find($customerId);
 
-        if (!$pelanggan) {
+        if (! $pelanggan) {
             $this->error("Customer {$customerId} not found");
+
             return Command::FAILURE;
         }
 
@@ -75,9 +77,9 @@ class RecalculateTrustScores extends Command
         $newLimit = $limitBreakdown['credit_limit'];
 
         // Display breakdown
-        $this->displayBreakdown($scoreBreakdown, $limitBreakdown, $oldScore, (int)$oldLimit);
+        $this->displayBreakdown($scoreBreakdown, $limitBreakdown, $oldScore, (int) $oldLimit);
 
-        if (!$dryRun) {
+        if (! $dryRun) {
             $pelanggan->forceFill([
                 'trust_score' => $newScore,
                 'credit_limit' => $newLimit,
@@ -98,6 +100,7 @@ class RecalculateTrustScores extends Command
 
         if ($total === 0) {
             $this->warn('No customers found');
+
             return Command::SUCCESS;
         }
 
@@ -122,7 +125,7 @@ class RecalculateTrustScores extends Command
             $limitChanged = $oldLimit !== $newLimit;
 
             if ($scoreChanged || $limitChanged) {
-                if (!$dryRun) {
+                if (! $dryRun) {
                     $pelanggan->forceFill([
                         'trust_score' => $newScore,
                         'credit_limit' => $newLimit,
@@ -185,22 +188,22 @@ class RecalculateTrustScores extends Command
         $this->table(
             ['Method', 'Value'],
             [
-                ['50% Largest Transaction', 'Rp ' . number_format($limitBreakdown['breakdown']['method_1_half_largest'], 0, ',', '.')],
-                ['50% Avg Top 3', 'Rp ' . number_format($limitBreakdown['breakdown']['method_2_avg_top3'], 0, ',', '.')],
-                ['30% Last 6 Months', 'Rp ' . number_format($limitBreakdown['breakdown']['method_3_six_months'], 0, ',', '.')],
-                ['<fg=blue>Selected Base</>', '<fg=blue>Rp ' . number_format($limitBreakdown['limit_base'], 0, ',', '.') . '</>'],
-                ['Trust Factor', $limitBreakdown['trust_factor'] . 'x'],
-                ['<fg=yellow>CREDIT LIMIT</>', '<fg=yellow>Rp ' . number_format($limitBreakdown['credit_limit'], 0, ',', '.') . '</>'],
+                ['50% Largest Transaction', 'Rp '.number_format($limitBreakdown['breakdown']['method_1_half_largest'], 0, ',', '.')],
+                ['50% Avg Top 3', 'Rp '.number_format($limitBreakdown['breakdown']['method_2_avg_top3'], 0, ',', '.')],
+                ['30% Last 6 Months', 'Rp '.number_format($limitBreakdown['breakdown']['method_3_six_months'], 0, ',', '.')],
+                ['<fg=blue>Selected Base</>', '<fg=blue>Rp '.number_format($limitBreakdown['limit_base'], 0, ',', '.').'</>'],
+                ['Trust Factor', $limitBreakdown['trust_factor'].'x'],
+                ['<fg=yellow>CREDIT LIMIT</>', '<fg=yellow>Rp '.number_format($limitBreakdown['credit_limit'], 0, ',', '.').'</>'],
             ]
         );
 
         // Changes Summary
         $scoreChange = $scoreBreakdown['total'] - $oldScore;
-        $limitChange = $limitBreakdown['credit_limit'] - (int)$oldLimit;
+        $limitChange = $limitBreakdown['credit_limit'] - (int) $oldLimit;
 
         $this->line('<fg=cyan>📈 Changes:</>');
-        $this->line("Trust Score: {$oldScore} → {$scoreBreakdown['total']} " . $this->formatChange($scoreChange));
-        $this->line("Credit Limit: Rp " . number_format((int)$oldLimit, 0, ',', '.') . " → Rp " . number_format($limitBreakdown['credit_limit'], 0, ',', '.') . " " . $this->formatChange($limitChange));
+        $this->line("Trust Score: {$oldScore} → {$scoreBreakdown['total']} ".$this->formatChange($scoreChange));
+        $this->line('Credit Limit: Rp '.number_format((int) $oldLimit, 0, ',', '.').' → Rp '.number_format($limitBreakdown['credit_limit'], 0, ',', '.').' '.$this->formatChange($limitChange));
         $this->newLine();
     }
 
@@ -214,7 +217,8 @@ class RecalculateTrustScores extends Command
         } elseif ($points < 0) {
             return "<fg=red>{$points}</>";
         }
-        return (string)$points;
+
+        return (string) $points;
     }
 
     /**
@@ -227,6 +231,7 @@ class RecalculateTrustScores extends Command
         } elseif ($change < 0) {
             return "<fg=red>({$change})</>";
         }
+
         return '<fg=gray>(no change)</>';
     }
 }

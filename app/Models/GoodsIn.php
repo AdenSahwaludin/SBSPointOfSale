@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class GoodsIn extends Model
 {
     use HasFactory;
+
     protected $table = 'goods_ins';
 
     protected $primaryKey = 'id_goods_in';

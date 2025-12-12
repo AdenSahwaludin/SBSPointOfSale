@@ -49,10 +49,11 @@ const page = usePage();
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/goods-in-receiving');
 const showForm = ref(false);
 const selectedItems = ref<Record<number, number>>({});
+const selectedDamaged = ref<Record<number, number>>({});
 const selectedNotes = ref<Record<number, string>>({});
 
 const form = useForm({
-    items: [] as Array<{ id_goods_in_detail: number; qty_received: number; catatan?: string }>,
+    items: [] as Array<{ id_goods_in_detail: number; qty_received: number; qty_damaged?: number; catatan?: string }>,
 });
 
 const allItemsReceived = computed(() => {
@@ -66,9 +67,11 @@ const itemsWithRemaining = computed(() => {
 const toggleItemSelection = (detailId: number) => {
     if (selectedItems.value[detailId] !== undefined) {
         delete selectedItems.value[detailId];
+        delete selectedDamaged.value[detailId];
         delete selectedNotes.value[detailId];
     } else {
         selectedItems.value[detailId] = 1;
+        selectedDamaged.value[detailId] = 0;
         selectedNotes.value[detailId] = '';
     }
 };
@@ -85,6 +88,7 @@ const submitForm = () => {
     const items = Object.entries(selectedItems.value).map(([detailId, qty]) => ({
         id_goods_in_detail: parseInt(detailId),
         qty_received: qty,
+        qty_damaged: selectedDamaged.value[parseInt(detailId)] || 0,
         catatan: selectedNotes.value[parseInt(detailId)] || undefined,
     }));
 
@@ -93,6 +97,7 @@ const submitForm = () => {
         preserveScroll: true,
         onSuccess: () => {
             selectedItems.value = {};
+            selectedDamaged.value = {};
             selectedNotes.value = {};
             showForm.value = false;
         },
@@ -233,6 +238,32 @@ const goBack = () => {
                                     min="1"
                                     class="mt-1 w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-emerald-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
                                 />
+                            </div>
+
+                            <!-- Damaged Quantity Input -->
+                            <div>
+                                <label class="block text-sm font-medium text-red-700">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Qty Rusak/Cacat (Opsional)
+                                </label>
+                                <input
+                                    type="number"
+                                    :value="selectedDamaged[item.id_goods_in_detail] || 0"
+                                    @input="
+                                        (e) => {
+                                            const damagedQty = Math.max(0, parseInt((e.target as HTMLInputElement).value) || 0);
+                                            const receivedQty = selectedItems[item.id_goods_in_detail] || 1;
+                                            selectedDamaged[item.id_goods_in_detail] = Math.min(damagedQty, receivedQty - 1);
+                                        }
+                                    "
+                                    :max="(selectedItems[item.id_goods_in_detail] || 1) - 1"
+                                    min="0"
+                                    class="mt-1 w-full rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-red-950 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
+                                    placeholder="0"
+                                />
+                                <p class="mt-1 text-xs text-red-600">
+                                    Barang rusak tidak akan menambah stok. Maks: {{ (selectedItems[item.id_goods_in_detail] || 1) - 1 }}
+                                </p>
                             </div>
 
                             <!-- Notes Input -->

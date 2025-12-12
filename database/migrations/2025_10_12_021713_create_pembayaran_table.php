@@ -2,10 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('pembayaran', function (Blueprint $table) {
@@ -58,7 +59,7 @@ return new class extends Migration {
         // Add check constraints (MySQL specific)
         if (DB::getDriverName() === 'mysql') {
             DB::statement("ALTER TABLE pembayaran ADD CONSTRAINT pembayaran_id_chk CHECK (id_pembayaran REGEXP '^PAY-[0-9]{8}-[0-9]{7}$')");
-            DB::statement("ALTER TABLE pembayaran ADD CONSTRAINT pembayaran_jumlah_chk CHECK (jumlah > 0)");
+            DB::statement('ALTER TABLE pembayaran ADD CONSTRAINT pembayaran_jumlah_chk CHECK (jumlah > 0)');
         }
     }
 

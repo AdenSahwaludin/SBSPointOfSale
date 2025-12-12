@@ -11,6 +11,7 @@ class KonversiStok extends Model
     use HasFactory;
 
     protected $table = 'konversi_stok';
+
     protected $primaryKey = 'id_konversi';
 
     protected $fillable = [

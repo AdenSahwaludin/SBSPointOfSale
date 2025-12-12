@@ -21,4 +21,3 @@ class PaymentReceived
         $this->pembayaran = $pembayaran;
     }
 }
-

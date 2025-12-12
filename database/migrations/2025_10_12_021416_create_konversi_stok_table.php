@@ -2,10 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -41,9 +42,9 @@ return new class extends Migration {
 
         // Add check constraints (MySQL specific)
         if (DB::getDriverName() === 'mysql') {
-            DB::statement("ALTER TABLE konversi_stok ADD CONSTRAINT konversi_rasio_chk CHECK (rasio > 0)");
-            DB::statement("ALTER TABLE konversi_stok ADD CONSTRAINT konversi_qty_from_chk CHECK (qty_from >= 0)");
-            DB::statement("ALTER TABLE konversi_stok ADD CONSTRAINT konversi_qty_to_chk CHECK (qty_to > 0)");
+            DB::statement('ALTER TABLE konversi_stok ADD CONSTRAINT konversi_rasio_chk CHECK (rasio > 0)');
+            DB::statement('ALTER TABLE konversi_stok ADD CONSTRAINT konversi_qty_from_chk CHECK (qty_from >= 0)');
+            DB::statement('ALTER TABLE konversi_stok ADD CONSTRAINT konversi_qty_to_chk CHECK (qty_to > 0)');
         }
     }
 

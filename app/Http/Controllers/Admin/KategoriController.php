@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class KategoriController extends Controller
 {
@@ -97,11 +97,11 @@ class KategoriController extends Controller
             'produk' => function ($query) {
                 $query->select('id_produk', 'nama', 'sku', 'harga', 'stok', 'id_kategori')
                     ->orderBy('nama');
-            }
+            },
         ])->findOrFail($id);
 
         return Inertia::render('Admin/Kategori/Show', [
-            'kategori' => $kategori
+            'kategori' => $kategori,
         ]);
     }
 
@@ -113,7 +113,7 @@ class KategoriController extends Controller
         $kategori = Kategori::findOrFail($id);
 
         return Inertia::render('Admin/Kategori/Edit', [
-            'kategori' => $kategori
+            'kategori' => $kategori,
         ]);
     }
 
@@ -129,7 +129,7 @@ class KategoriController extends Controller
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('kategori', 'nama')->ignore($kategori->id_kategori, 'id_kategori')
+                Rule::unique('kategori', 'nama')->ignore($kategori->id_kategori, 'id_kategori'),
             ],
         ], [
             'nama.required' => 'Nama kategori wajib diisi.',
@@ -164,7 +164,7 @@ class KategoriController extends Controller
         // Check if category has products
         if ($kategori->produk()->exists()) {
             return back()->withErrors([
-                'delete' => 'Kategori tidak dapat dihapus karena masih memiliki produk.'
+                'delete' => 'Kategori tidak dapat dihapus karena masih memiliki produk.',
             ]);
         }
 
@@ -206,7 +206,7 @@ class KategoriController extends Controller
 
                     if ($kategoriesWithProducts > 0) {
                         return back()->withErrors([
-                            'bulk' => 'Beberapa kategori tidak dapat dihapus karena masih memiliki produk.'
+                            'bulk' => 'Beberapa kategori tidak dapat dihapus karena masih memiliki produk.',
                         ]);
                     }
 

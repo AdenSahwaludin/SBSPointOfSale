@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Produk;
-use App\Models\Kategori;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ProdukSeeder extends Seeder

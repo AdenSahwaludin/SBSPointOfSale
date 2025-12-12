@@ -9,87 +9,88 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JadwalAngsuran extends Model
 {
- use HasFactory;
+    use HasFactory;
 
- protected $table = 'jadwal_angsuran';
- protected $primaryKey = 'id_angsuran';
+    protected $table = 'jadwal_angsuran';
 
- protected $fillable = [
-  'id_kontrak',
-  'periode_ke',
-  'jatuh_tempo',
-  'jumlah_tagihan',
-  'jumlah_dibayar',
-  'status',
-  'paid_at',
- ];
+    protected $primaryKey = 'id_angsuran';
 
- protected $casts = [
-  'id_kontrak' => 'integer',
-  'periode_ke' => 'integer',
-  'jatuh_tempo' => 'date',
-  'jumlah_tagihan' => 'decimal:0',
-  'jumlah_dibayar' => 'decimal:0',
-  'paid_at' => 'datetime',
-  'created_at' => 'datetime',
-  'updated_at' => 'datetime',
- ];
+    protected $fillable = [
+        'id_kontrak',
+        'periode_ke',
+        'jatuh_tempo',
+        'jumlah_tagihan',
+        'jumlah_dibayar',
+        'status',
+        'paid_at',
+    ];
 
- public function kontrakKredit(): BelongsTo
- {
-  return $this->belongsTo(KontrakKredit::class, 'id_kontrak', 'id_kontrak');
- }
+    protected $casts = [
+        'id_kontrak' => 'integer',
+        'periode_ke' => 'integer',
+        'jatuh_tempo' => 'date',
+        'jumlah_tagihan' => 'decimal:0',
+        'jumlah_dibayar' => 'decimal:0',
+        'paid_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
- public function pembayaran(): HasMany
- {
-  return $this->hasMany(Pembayaran::class, 'id_angsuran', 'id_angsuran');
- }
+    public function kontrakKredit(): BelongsTo
+    {
+        return $this->belongsTo(KontrakKredit::class, 'id_kontrak', 'id_kontrak');
+    }
 
- /**
-  * Scope: Angsuran yang jatuh tempo
-  */
- public function scopeDue($query)
- {
-  return $query->where('status', 'DUE');
- }
+    public function pembayaran(): HasMany
+    {
+        return $this->hasMany(Pembayaran::class, 'id_angsuran', 'id_angsuran');
+    }
 
- /**
-  * Scope: Angsuran yang telat
-  */
- public function scopeLate($query)
- {
-  return $query->where('status', 'LATE');
- }
+    /**
+     * Scope: Angsuran yang jatuh tempo
+     */
+    public function scopeDue($query)
+    {
+        return $query->where('status', 'DUE');
+    }
 
- /**
-  * Scope: Angsuran yang sudah dibayar
-  */
- public function scopePaid($query)
- {
-  return $query->where('status', 'PAID');
- }
+    /**
+     * Scope: Angsuran yang telat
+     */
+    public function scopeLate($query)
+    {
+        return $query->where('status', 'LATE');
+    }
 
- /**
-  * Check if angsuran is overdue
-  */
- public function isOverdue(): bool
- {
-  return $this->jatuh_tempo < now() && $this->status !== 'PAID';
- }
+    /**
+     * Scope: Angsuran yang sudah dibayar
+     */
+    public function scopePaid($query)
+    {
+        return $query->where('status', 'PAID');
+    }
 
- /**
-  * Get sisa tagihan
-  */
- public function getSisaTagihanAttribute(): float
- {
-  return $this->jumlah_tagihan - $this->jumlah_dibayar;
- }
+    /**
+     * Check if angsuran is overdue
+     */
+    public function isOverdue(): bool
+    {
+        return $this->jatuh_tempo < now() && $this->status !== 'PAID';
+    }
 
- /**
-  * Check if fully paid
-  */
- public function isFullyPaid(): bool
- {
-  return $this->jumlah_dibayar >= $this->jumlah_tagihan;
- }
+    /**
+     * Get sisa tagihan
+     */
+    public function getSisaTagihanAttribute(): float
+    {
+        return $this->jumlah_tagihan - $this->jumlah_dibayar;
+    }
+
+    /**
+     * Check if fully paid
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->jumlah_dibayar >= $this->jumlah_tagihan;
+    }
 }

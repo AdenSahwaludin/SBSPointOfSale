@@ -1,21 +1,23 @@
 <?php
+
 namespace App\Http\Controllers\Kasir;
+
+use App\Events\PaymentReceived;
 use App\Http\Controllers\Controller;
-use App\Models\Produk;
+use App\Models\JadwalAngsuran;
 use App\Models\Kategori;
+use App\Models\KontrakKredit;
 use App\Models\Pelanggan;
+use App\Models\Pembayaran;
+use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
-use App\Models\Pembayaran;
-use App\Models\KontrakKredit;
-use App\Models\JadwalAngsuran;
-use App\Events\PaymentReceived;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class TransaksiPOSController extends Controller
 {
@@ -137,14 +139,14 @@ class TransaksiPOSController extends Controller
                 }
 
                 // 5. Fuzzy matching kuat (aktif hanya jika belum match)
-                if (!$matched && strlen($searchTerm) > 3) {
+                if (! $matched && strlen($searchTerm) > 3) {
                     $nameWords = array_filter(explode(' ', $nama));
                     foreach ($nameWords as $nameWord) {
                         if (strlen($nameWord) > 3) {
                             $percent = 0.0;
                             similar_text($searchTerm, $nameWord, $percent);
                             if ($percent >= 70) {
-                                $score += (int)round($percent);
+                                $score += (int) round($percent);
                                 $matched = true;
                                 break;
                             }
@@ -168,19 +170,18 @@ class TransaksiPOSController extends Controller
                 ];
             })
             ->filter(function ($item) {
-                return ($item['_score'] > 0) && !empty($item['_match']);
+                return ($item['_score'] > 0) && ! empty($item['_match']);
             })
             ->take(10)
             ->values()
             ->map(function ($item) {
                 unset($item['_score'], $item['_match']);
+
                 return $item;
             });
 
         return response()->json($produk);
     }
-
-
 
     /**
      * Get produk by barcode (gunakan kolom barcode)
@@ -194,7 +195,7 @@ class TransaksiPOSController extends Controller
             ->inStock()
             ->first();
 
-        if (!$produk) {
+        if (! $produk) {
             return response()->json(['message' => 'Produk tidak ditemukan'], 404);
         }
 
@@ -258,26 +259,27 @@ class TransaksiPOSController extends Controller
 
             // Enforce credit limit rules for credit transactions
             if ($isCredit) {
-                $dp = (float)($request->dp ?? 0);
-                $total = (float)$request->total;
+                $dp = (float) ($request->dp ?? 0);
+                $total = (float) $request->total;
                 $creditPortion = max(0.0, $total - $dp);
 
                 // Ambil available limit dari kolom credit_limit (diperlakukan sebagai available)
                 $customer = \App\Models\Pelanggan::lockForUpdate()->find($request->id_pelanggan);
-                $available = (float)($customer->credit_limit ?? 0);
+                $available = (float) ($customer->credit_limit ?? 0);
 
                 if ($creditPortion > $available) {
                     $minDp = max(0.0, $total - $available);
+
                     return response()->json([
                         'success' => false,
-                        'message' => 'Transaksi melebihi kredit limit. Tambahkan DP minimal: Rp ' . number_format($minDp, 0, ',', '.'),
-                        'errors' => ['dp' => ['DP minimal yang dibutuhkan: ' . $minDp]],
+                        'message' => 'Transaksi melebihi kredit limit. Tambahkan DP minimal: Rp '.number_format($minDp, 0, ',', '.'),
+                        'errors' => ['dp' => ['DP minimal yang dibutuhkan: '.$minDp]],
                     ], 422);
                 }
 
                 // Update credit: kurangi available limit, tambah saldo piutang, pastikan status aktif
                 $customer->credit_limit = $available - $creditPortion;
-                $customer->saldo_kredit = (float)($customer->saldo_kredit ?? 0) + $creditPortion;
+                $customer->saldo_kredit = (float) ($customer->saldo_kredit ?? 0) + $creditPortion;
                 $customer->status_kredit = 'aktif';
                 $customer->save();
             }
@@ -311,16 +313,16 @@ class TransaksiPOSController extends Controller
             // Jika KREDIT: buat kontrak kredit dan jadwal angsuran
             if ($isCredit) {
                 $customer = \App\Models\Pelanggan::find($request->id_pelanggan);
-                $principal = max(0.0, (float)$request->total - (float)($request->dp ?? 0));
-                $tenorBulan = (int)($request->tenor_bulan ?? 12);
-                $bungaPersen = (float)($request->bunga_persen ?? 0);
+                $principal = max(0.0, (float) $request->total - (float) ($request->dp ?? 0));
+                $tenorBulan = (int) ($request->tenor_bulan ?? 12);
+                $bungaPersen = (float) ($request->bunga_persen ?? 0);
                 $mulai = $request->mulai_kontrak ? Carbon::parse($request->mulai_kontrak) : Carbon::today();
 
                 // Hitung total tagihan (pokok + bunga), lalu distribusikan ke kelipatan 1000
-                $totalTagihan = (int)round($principal * (1 + ($bungaPersen / 100)));
-                $basePerMonth = (int)(floor(($totalTagihan / max(1, $tenorBulan)) / 1000) * 1000);
+                $totalTagihan = (int) round($principal * (1 + ($bungaPersen / 100)));
+                $basePerMonth = (int) (floor(($totalTagihan / max(1, $tenorBulan)) / 1000) * 1000);
                 $remainder = $totalTagihan - ($basePerMonth * $tenorBulan);
-                $extraMonths = (int)floor($remainder / 1000);
+                $extraMonths = (int) floor($remainder / 1000);
 
                 // Simpan nilai cicilan_bulanan kontrak sebagai base (informasi tampilan); rincian ada di jadwal
                 $cicilanBulanan = max(0, $basePerMonth);
@@ -333,11 +335,11 @@ class TransaksiPOSController extends Controller
                     'mulai_kontrak' => $mulai->toDateString(),
                     'tenor_bulan' => $tenorBulan,
                     'pokok_pinjaman' => $principal,
-                    'dp' => (float)($request->dp ?? 0),
+                    'dp' => (float) ($request->dp ?? 0),
                     'bunga_persen' => $bungaPersen,
                     'cicilan_bulanan' => $cicilanBulanan,
                     'status' => 'AKTIF',
-                    'score_snapshot' => (int)($customer->trust_score ?? 50),
+                    'score_snapshot' => (int) ($customer->trust_score ?? 50),
                 ]);
 
                 // Buat jadwal angsuran bulanan, distribusi kelipatan 1000
@@ -364,7 +366,7 @@ class TransaksiPOSController extends Controller
                 $produk = Produk::find($item['id_produk']);
 
                 // Tentukan satuan stok yang dikurangi berdasarkan satuan produk
-                $isiPerPack = max(1, (int)($produk->isi_per_pack ?? 1));
+                $isiPerPack = max(1, (int) ($produk->isi_per_pack ?? 1));
 
                 // Jika produk kemasan besar (karton/pack), stok disimpan dalam unit kemasan tsb
                 if (in_array($produk->satuan, ['karton', 'pack'], true)) {
@@ -373,7 +375,7 @@ class TransaksiPOSController extends Controller
                         throw new \RuntimeException("Produk {$produk->nama} hanya bisa dijual per {$produk->satuan}");
                     }
 
-                    $deductUnits = (int)$item['jumlah']; // kurangi stok per karton/pack
+                    $deductUnits = (int) $item['jumlah']; // kurangi stok per karton/pack
 
                     if ($produk->stok < $deductUnits) {
                         throw new \RuntimeException("Stok {$produk->nama} tidak mencukupi");
@@ -382,9 +384,9 @@ class TransaksiPOSController extends Controller
                     $isiPackSaatTransaksi = $isiPerPack; // snapshot isi per kemasan saat transaksi
                 } else {
                     // Produk satuan pcs: jika mode pack, konversi ke pcs; jika unit, langsung pcs
-                    $deductUnits = (int)($item['mode_qty'] === 'pack'
-                        ? ((int)$item['jumlah']) * $isiPerPack
-                        : (int)$item['jumlah']);
+                    $deductUnits = (int) ($item['mode_qty'] === 'pack'
+                        ? ((int) $item['jumlah']) * $isiPerPack
+                        : (int) $item['jumlah']);
 
                     if ($produk->stok < $deductUnits) {
                         throw new \RuntimeException("Stok {$produk->nama} tidak mencukupi");
@@ -423,12 +425,12 @@ class TransaksiPOSController extends Controller
                     'metode' => $request->metode_bayar,
                     'jumlah' => $request->total,
                     'tanggal' => now(),
-                    'keterangan' => 'Pembayaran tunai - Kembalian: Rp ' . number_format($kembalian, 0, ',', '.'),
+                    'keterangan' => 'Pembayaran tunai - Kembalian: Rp '.number_format($kembalian, 0, ',', '.'),
                 ]);
                 event(new PaymentReceived($pembayaran));
             } elseif ($isCredit) {
                 // Kredit: catat DP (jika ada)
-                $dp = (float)($request->dp ?? 0);
+                $dp = (float) ($request->dp ?? 0);
                 if ($dp > 0) {
                     $pembayaran = Pembayaran::create([
                         'id_pembayaran' => $idPembayaran,
@@ -458,7 +460,7 @@ class TransaksiPOSController extends Controller
                     'metode' => $request->metode_bayar,
                     'jumlah' => $request->total,
                     'tanggal' => now(),
-                    'keterangan' => 'Pembayaran diterima via ' . $label,
+                    'keterangan' => 'Pembayaran diterima via '.$label,
                 ]);
                 event(new PaymentReceived($pembayaran));
             }
@@ -473,7 +475,7 @@ class TransaksiPOSController extends Controller
                     'total' => $request->total,
                     'kembalian' => $isCashPayment ? ($jumlahBayar - $request->total) : 0,
                     'metode_bayar' => $request->metode_bayar,
-                ]
+                ],
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -482,7 +484,7 @@ class TransaksiPOSController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menyimpan transaksi: ' . $e->getMessage()
+                'message' => 'Gagal menyimpan transaksi: '.$e->getMessage(),
             ], $status);
         }
     }
@@ -496,10 +498,10 @@ class TransaksiPOSController extends Controller
             'pelanggan',
             'kasir',
             'detail.produk',
-            'pembayaran'
+            'pembayaran',
         ])->find($nomorTransaksi);
 
-        if (!$transaksi) {
+        if (! $transaksi) {
             return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
         }
 
@@ -529,7 +531,7 @@ class TransaksiPOSController extends Controller
 
             $transaksi = Transaksi::with('detail.produk')->find($nomorTransaksi);
 
-            if (!$transaksi) {
+            if (! $transaksi) {
                 return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
             }
 
@@ -545,7 +547,7 @@ class TransaksiPOSController extends Controller
                     // Jika produk pcs dijual per pack, kembalikan ke pcs dengan konversi;
                     // jika produk kemasan besar, kembalikan per kemasan (tanpa konversi)
                     if (($detail->produk->satuan ?? 'pcs') === 'pcs') {
-                        $qtyToRestore *= max(1, (int)$detail->isi_pack_saat_transaksi);
+                        $qtyToRestore *= max(1, (int) $detail->isi_pack_saat_transaksi);
                     }
                 }
 
@@ -562,27 +564,15 @@ class TransaksiPOSController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Transaksi berhasil dibatalkan'
+                'message' => 'Transaksi berhasil dibatalkan',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membatalkan transaksi: ' . $e->getMessage()
+                'message' => 'Gagal membatalkan transaksi: '.$e->getMessage(),
             ], 500);
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

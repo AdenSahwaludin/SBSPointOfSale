@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers\Kasir;
 
+use App\Events\PaymentReceived;
 use App\Http\Controllers\Controller;
 use App\Models\KontrakKredit;
-use App\Models\JadwalAngsuran;
 use App\Models\Pembayaran;
-use App\Models\Pelanggan;
 use App\Models\Transaksi;
-use App\Events\PaymentReceived;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
-use Carbon\Carbon;
 
 class AngsuranController extends Controller
 {
@@ -26,16 +24,18 @@ class AngsuranController extends Controller
         $search = $request->get('search');
         $onlyDueThisMonth = filter_var($request->get('due_this_month', '0'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         $unpaidOnly = filter_var($request->get('unpaid_only', '1'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        if ($onlyDueThisMonth === null)
+        if ($onlyDueThisMonth === null) {
             $onlyDueThisMonth = false;
-        if ($unpaidOnly === null)
-            $unpaidOnly = true; // default hanya belum lunas
+        }
+        if ($unpaidOnly === null) {
+            $unpaidOnly = true;
+        } // default hanya belum lunas
 
         $startMonth = Carbon::now()->startOfMonth();
         $endMonth = Carbon::now()->endOfMonth();
 
         $contracts = KontrakKredit::with(['pelanggan'])
-            ->when($unpaidOnly, fn($q) => $q->where('status', '!=', 'LUNAS'))
+            ->when($unpaidOnly, fn ($q) => $q->where('status', '!=', 'LUNAS'))
             ->when($search, function ($q) use ($search) {
                 $q->where('nomor_kontrak', 'like', "%{$search}%")
                     ->orWhereHas('pelanggan', function ($q2) use ($search) {
@@ -72,18 +72,18 @@ class AngsuranController extends Controller
             'transaksi',
             'jadwalAngsuran' => function ($q) {
                 $q->orderBy('periode_ke');
-            }
+            },
         ])->findOrFail($id);
 
         $summary = [
-            'pokok_pinjaman' => (float)$kontrak->pokok_pinjaman,
-            'dp' => (float)$kontrak->dp,
-            'bunga_persen' => (float)$kontrak->bunga_persen,
-            'cicilan_bulanan' => (float)$kontrak->cicilan_bulanan,
-            'tenor_bulan' => (int)$kontrak->tenor_bulan,
-            'total_tagihan' => (float)$kontrak->jadwalAngsuran->sum('jumlah_tagihan'),
-            'total_dibayar' => (float)$kontrak->jadwalAngsuran->sum('jumlah_dibayar'),
-            'total_sisa' => (float)($kontrak->jadwalAngsuran->sum('jumlah_tagihan') - $kontrak->jadwalAngsuran->sum('jumlah_dibayar')),
+            'pokok_pinjaman' => (float) $kontrak->pokok_pinjaman,
+            'dp' => (float) $kontrak->dp,
+            'bunga_persen' => (float) $kontrak->bunga_persen,
+            'cicilan_bulanan' => (float) $kontrak->cicilan_bulanan,
+            'tenor_bulan' => (int) $kontrak->tenor_bulan,
+            'total_tagihan' => (float) $kontrak->jadwalAngsuran->sum('jumlah_tagihan'),
+            'total_dibayar' => (float) $kontrak->jadwalAngsuran->sum('jumlah_dibayar'),
+            'total_sisa' => (float) ($kontrak->jadwalAngsuran->sum('jumlah_tagihan') - $kontrak->jadwalAngsuran->sum('jumlah_dibayar')),
         ];
 
         // also include a sidebar contracts list (due this month by default)
@@ -127,25 +127,28 @@ class AngsuranController extends Controller
                 $q->orderBy('periode_ke');
             },
             'pelanggan',
-            'transaksi'
+            'transaksi',
         ])->findOrFail($id);
 
         DB::beginTransaction();
         try {
-            $remaining = (float)$validated['jumlah'];
+            $remaining = (float) $validated['jumlah'];
             $kasirId = Auth::user()->id_pengguna ?? null;
 
             foreach ($kontrak->jadwalAngsuran as $angsuran) {
-                if ($remaining <= 0)
+                if ($remaining <= 0) {
                     break;
-                if ($angsuran->status === 'PAID')
+                }
+                if ($angsuran->status === 'PAID') {
                     continue;
+                }
 
-                $sisa = (float)$angsuran->jumlah_tagihan - (float)$angsuran->jumlah_dibayar;
+                $sisa = (float) $angsuran->jumlah_tagihan - (float) $angsuran->jumlah_dibayar;
                 if ($sisa <= 0) {
                     $angsuran->status = 'PAID';
                     $angsuran->paid_at = now();
                     $angsuran->save();
+
                     continue;
                 }
 
@@ -168,7 +171,7 @@ class AngsuranController extends Controller
                 event(new PaymentReceived($pembayaran));
 
                 // update angsuran
-                $angsuran->jumlah_dibayar = (float)$angsuran->jumlah_dibayar + $bayar;
+                $angsuran->jumlah_dibayar = (float) $angsuran->jumlah_dibayar + $bayar;
                 if ($angsuran->jumlah_dibayar >= $angsuran->jumlah_tagihan) {
                     $angsuran->status = 'PAID';
                     $angsuran->paid_at = now();
@@ -182,8 +185,8 @@ class AngsuranController extends Controller
                 // adjust customer credit balance and limit
                 $pelanggan = $kontrak->pelanggan;
                 if ($pelanggan) {
-                    $pelanggan->saldo_kredit = max(0, (float)$pelanggan->saldo_kredit - $bayar);
-                    $pelanggan->credit_limit = (float)$pelanggan->credit_limit + $bayar;
+                    $pelanggan->saldo_kredit = max(0, (float) $pelanggan->saldo_kredit - $bayar);
+                    $pelanggan->credit_limit = (float) $pelanggan->credit_limit + $bayar;
                     $pelanggan->save();
                 }
 
@@ -207,10 +210,12 @@ class AngsuranController extends Controller
             }
 
             DB::commit();
+
             return back()->with('success', 'Pembayaran angsuran berhasil diproses');
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
+
+            return back()->with('error', 'Gagal memproses pembayaran: '.$e->getMessage());
         }
     }
 }

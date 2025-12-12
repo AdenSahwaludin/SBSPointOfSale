@@ -342,3 +342,150 @@ it('increments product stock when recording received goods', function () {
     $produk->refresh();
     expect($produk->stok)->toBe($initialStock + 20);
 });
+
+it('can record damaged goods and only increments stock with good items', function () {
+    $kasir = User::factory()->create(['role' => 'kasir']);
+    $admin = User::factory()->create(['role' => 'admin']);
+    $produk = Produk::factory()->create(['nama' => 'Produk Test', 'sku' => 'SKU-TEST', 'stok' => 100]);
+    $service = app(GoodsInService::class);
+
+    $po = GoodsIn::factory()
+        ->for($kasir, 'kasir')
+        ->for($admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($produk, 'produk')
+        ->create(['qty_request' => 20, 'qty_received' => 0]);
+
+    $initialStock = $produk->stok;
+
+    // Record received goods with damaged items
+    $service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 20,
+            'qty_damaged' => 3, // 3 damaged
+        ],
+    ], $kasir->id_pengguna);
+
+    // Verify product stock only increased by good items (20 - 3 = 17)
+    $produk->refresh();
+    expect($produk->stok)->toBe($initialStock + 17);
+
+    // Verify goods_received record has qty_damaged
+    $this->assertDatabaseHas('goods_received', [
+        'id_goods_in_detail' => $detail->id_goods_in_detail,
+        'qty_received' => 20,
+        'qty_damaged' => 3,
+    ]);
+});
+
+it('updates PO status to partial_received when not all items fully received', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 20, 'qty_received' => 0]);
+
+    // Receive only 10 out of 20
+    $this->service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 10,
+        ],
+    ], $this->kasir->id_pengguna);
+
+    // Verify PO status updated to partial_received
+    $po->refresh();
+    expect($po->status)->toBe('partial_received');
+});
+
+it('updates PO status to received when all items fully received', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail1 = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 20, 'qty_received' => 0]);
+
+    $detail2 = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk2, 'produk')
+        ->create(['qty_request' => 15, 'qty_received' => 0]);
+
+    // Receive all items
+    $this->service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail1->id_goods_in_detail,
+            'qty_received' => 20,
+        ],
+        [
+            'id_goods_in_detail' => $detail2->id_goods_in_detail,
+            'qty_received' => 15,
+        ],
+    ], $this->kasir->id_pengguna);
+
+    // Verify PO status updated to received
+    $po->refresh();
+    expect($po->status)->toBe('received');
+});
+
+it('allows multiple partial receives until completion', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 30, 'qty_received' => 0]);
+
+    // First partial receive - 10 items
+    $this->service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 10,
+        ],
+    ], $this->kasir->id_pengguna);
+
+    $po->refresh();
+    expect($po->status)->toBe('partial_received');
+
+    // Second partial receive - 15 more items (total 25)
+    $this->service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 15,
+        ],
+    ], $this->kasir->id_pengguna);
+
+    $po->refresh();
+    expect($po->status)->toBe('partial_received'); // Still partial
+
+    // Final receive - 5 more items (total 30 = complete)
+    $this->service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 5,
+        ],
+    ], $this->kasir->id_pengguna);
+
+    $po->refresh();
+    $detail->refresh();
+    expect($po->status)->toBe('received');
+    expect($detail->qty_received)->toBe(30);
+});

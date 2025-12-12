@@ -2,112 +2,113 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Carbon\Carbon;
 
 class KontrakKredit extends Model
 {
- use HasFactory;
+    use HasFactory;
 
- protected $table = 'kontrak_kredit';
- protected $primaryKey = 'id_kontrak';
+    protected $table = 'kontrak_kredit';
 
- protected $fillable = [
-  'nomor_kontrak',
-  'id_pelanggan',
-  'nomor_transaksi',
-  'mulai_kontrak',
-  'tenor_bulan',
-  'pokok_pinjaman',
-  'dp',
-  'bunga_persen',
-  'cicilan_bulanan',
-  'status',
-  'score_snapshot',
- ];
+    protected $primaryKey = 'id_kontrak';
 
- protected $casts = [
-  'mulai_kontrak' => 'date',
-  'tenor_bulan' => 'integer',
-  'pokok_pinjaman' => 'decimal:0',
-  'dp' => 'decimal:0',
-  'bunga_persen' => 'decimal:2',
-  'cicilan_bulanan' => 'decimal:0',
-  'score_snapshot' => 'integer',
-  'created_at' => 'datetime',
-  'updated_at' => 'datetime',
- ];
+    protected $fillable = [
+        'nomor_kontrak',
+        'id_pelanggan',
+        'nomor_transaksi',
+        'mulai_kontrak',
+        'tenor_bulan',
+        'pokok_pinjaman',
+        'dp',
+        'bunga_persen',
+        'cicilan_bulanan',
+        'status',
+        'score_snapshot',
+    ];
 
- public function pelanggan(): BelongsTo
- {
-  return $this->belongsTo(Pelanggan::class, 'id_pelanggan', 'id_pelanggan');
- }
+    protected $casts = [
+        'mulai_kontrak' => 'date',
+        'tenor_bulan' => 'integer',
+        'pokok_pinjaman' => 'decimal:0',
+        'dp' => 'decimal:0',
+        'bunga_persen' => 'decimal:2',
+        'cicilan_bulanan' => 'decimal:0',
+        'score_snapshot' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
- public function transaksi(): BelongsTo
- {
-  return $this->belongsTo(Transaksi::class, 'nomor_transaksi', 'nomor_transaksi');
- }
+    public function pelanggan(): BelongsTo
+    {
+        return $this->belongsTo(Pelanggan::class, 'id_pelanggan', 'id_pelanggan');
+    }
 
- public function jadwalAngsuran(): HasMany
- {
-  return $this->hasMany(JadwalAngsuran::class, 'id_kontrak', 'id_kontrak');
- }
+    public function transaksi(): BelongsTo
+    {
+        return $this->belongsTo(Transaksi::class, 'nomor_transaksi', 'nomor_transaksi');
+    }
 
- /**
-  * Generate nomor kontrak baru
-  */
- public static function generateNomorKontrak(): string
- {
-  $today = Carbon::now();
-  $yearMonth = $today->format('Ym');
+    public function jadwalAngsuran(): HasMany
+    {
+        return $this->hasMany(JadwalAngsuran::class, 'id_kontrak', 'id_kontrak');
+    }
 
-  $lastKontrak = self::where('nomor_kontrak', 'like', "KRD-{$yearMonth}-%")
-   ->orderBy('nomor_kontrak', 'desc')
-   ->first();
+    /**
+     * Generate nomor kontrak baru
+     */
+    public static function generateNomorKontrak(): string
+    {
+        $today = Carbon::now();
+        $yearMonth = $today->format('Ym');
 
-  $sequence = 1;
-  if ($lastKontrak) {
-   $parts = explode('-', $lastKontrak->nomor_kontrak);
-   if (count($parts) >= 3) {
-    $sequence = (int)$parts[2] + 1;
-   }
-  }
+        $lastKontrak = self::where('nomor_kontrak', 'like', "KRD-{$yearMonth}-%")
+            ->orderBy('nomor_kontrak', 'desc')
+            ->first();
 
-  return sprintf('KRD-%s-%04d', $yearMonth, $sequence);
- }
+        $sequence = 1;
+        if ($lastKontrak) {
+            $parts = explode('-', $lastKontrak->nomor_kontrak);
+            if (count($parts) >= 3) {
+                $sequence = (int) $parts[2] + 1;
+            }
+        }
 
- /**
-  * Scope: Kontrak aktif
-  */
- public function scopeAktif($query)
- {
-  return $query->where('status', 'AKTIF');
- }
+        return sprintf('KRD-%s-%04d', $yearMonth, $sequence);
+    }
 
- /**
-  * Check if contract is active
-  */
- public function isAktif(): bool
- {
-  return $this->status === 'AKTIF';
- }
+    /**
+     * Scope: Kontrak aktif
+     */
+    public function scopeAktif($query)
+    {
+        return $query->where('status', 'AKTIF');
+    }
 
- /**
-  * Get total yang sudah dibayar
-  */
- public function getTotalDibayarAttribute(): float
- {
-  return $this->jadwalAngsuran()->sum('jumlah_dibayar');
- }
+    /**
+     * Check if contract is active
+     */
+    public function isAktif(): bool
+    {
+        return $this->status === 'AKTIF';
+    }
 
- /**
-  * Get sisa tagihan
-  */
- public function getSisaTagihanAttribute(): float
- {
-  return $this->jadwalAngsuran()->sum('jumlah_tagihan') - $this->total_dibayar;
- }
+    /**
+     * Get total yang sudah dibayar
+     */
+    public function getTotalDibayarAttribute(): float
+    {
+        return $this->jadwalAngsuran()->sum('jumlah_dibayar');
+    }
+
+    /**
+     * Get sisa tagihan
+     */
+    public function getSisaTagihanAttribute(): float
+    {
+        return $this->jadwalAngsuran()->sum('jumlah_tagihan') - $this->total_dibayar;
+    }
 }

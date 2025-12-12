@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Produk;
 use App\Models\Kategori;
+use App\Models\Produk;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -40,7 +40,7 @@ class ProdukController extends Controller
             'filters' => [
                 'per_page' => $perPage,
                 'page' => $page,
-            ]
+            ],
         ]);
     }
 
@@ -53,7 +53,7 @@ class ProdukController extends Controller
 
         return Inertia::render('Admin/Produk/Create', [
             'kategori' => $kategori,
-            'nextPrefix' => 'PDK' // Simple prefix
+            'nextPrefix' => 'PDK', // Simple prefix
         ]);
     }
 
@@ -72,7 +72,7 @@ class ProdukController extends Controller
         ]);
 
         // Generate ID
-        $id_produk = 'PDK-' . $request->suffix;
+        $id_produk = 'PDK-'.$request->suffix;
 
         // Check if ID already exists
         if (Produk::where('id_produk', $id_produk)->exists()) {
@@ -100,7 +100,7 @@ class ProdukController extends Controller
         $produk = Produk::with('kategori')->where('id_produk', $id)->firstOrFail();
 
         return Inertia::render('Admin/Produk/Show', [
-            'produk' => $produk
+            'produk' => $produk,
         ]);
     }
 
@@ -114,7 +114,7 @@ class ProdukController extends Controller
 
         return Inertia::render('Admin/Produk/Edit', [
             'produk' => $produk,
-            'kategori' => $kategori
+            'kategori' => $kategori,
         ]);
     }
 
@@ -279,6 +279,7 @@ class ProdukController extends Controller
             ->values()
             ->map(function ($item) {
                 unset($item['_score']); // Remove internal score dari response
+
                 return $item;
             });
 

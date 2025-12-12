@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\PaymentReceived;
-use App\Services\TrustScoreService;
 use App\Services\CreditLimitService;
+use App\Services\TrustScoreService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -31,8 +31,9 @@ class UpdateTrustScoreOnPayment implements ShouldQueue
         // Get the customer from payment
         $pelanggan = $pembayaran->pelanggan;
 
-        if (!$pelanggan) {
+        if (! $pelanggan) {
             Log::warning("Payment {$pembayaran->id_pembayaran} has no associated customer");
+
             return;
         }
 

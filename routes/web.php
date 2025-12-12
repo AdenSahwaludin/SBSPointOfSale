@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 // ==========================================
 // ROOT REDIRECT
@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', function () {
     if (Auth::check()) {
         $user = Auth::user();
+
         return redirect(match ($user->role) {
             'admin' => '/admin',
             'kasir' => '/kasir',
             default => '/dashboard'
         });
     }
+
     return redirect()->route('login');
 })->name('home');
 
@@ -31,10 +33,10 @@ Route::get('/', function () {
 // INCLUDE SEPARATE ROUTE FILES
 // ==========================================
 // Authentication routes (login, logout, profile)
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
 
 // Admin routes (admin dashboard, user management, product management, etc.)
-require __DIR__ . '/admin.php';
+require __DIR__.'/admin.php';
 
 // Kasir routes (POS system, transactions, kasir profile, etc.)
-require __DIR__ . '/kasir.php';
+require __DIR__.'/kasir.php';

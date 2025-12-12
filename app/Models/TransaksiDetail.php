@@ -11,6 +11,7 @@ class TransaksiDetail extends Model
     use HasFactory;
 
     protected $table = 'transaksi_detail';
+
     protected $primaryKey = 'id_detail';
 
     protected $fillable = [
@@ -56,7 +57,7 @@ class TransaksiDetail extends Model
      */
     public function getFormattedSubtotalAttribute(): string
     {
-        return 'Rp ' . number_format((float)$this->subtotal, 0, ',', '.');
+        return 'Rp '.number_format((float) $this->subtotal, 0, ',', '.');
     }
 
     /**
@@ -64,7 +65,7 @@ class TransaksiDetail extends Model
      */
     public function getFormattedHargaSatuanAttribute(): string
     {
-        return 'Rp ' . number_format((float)$this->harga_satuan, 0, ',', '.');
+        return 'Rp '.number_format((float) $this->harga_satuan, 0, ',', '.');
     }
 
     /**

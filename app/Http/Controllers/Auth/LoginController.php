@@ -24,7 +24,7 @@ class LoginController extends Controller
             ->orWhere('id_pengguna', $request->login)
             ->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'login' => 'Email atau Password anda salah.',
             ]);
@@ -38,7 +38,7 @@ class LoginController extends Controller
             'user_id' => $user->id_pengguna,
             'login_time' => $loginTime,
             'update_success' => $updated,
-            'user_terakhir_login' => $user->fresh()->terakhir_login
+            'user_terakhir_login' => $user->fresh()->terakhir_login,
         ]);
 
         // Set remember duration: 1 day default, 7 weeks if remember me

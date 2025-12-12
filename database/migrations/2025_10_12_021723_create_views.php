@@ -3,7 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -13,7 +14,7 @@ return new class extends Migration {
 
         if ($driver === 'sqlite') {
             // SQLite: Drop then create (since it doesn't support CREATE OR REPLACE)
-            DB::statement("DROP VIEW IF EXISTS v_produk_stok_setara_pcs");
+            DB::statement('DROP VIEW IF EXISTS v_produk_stok_setara_pcs');
             DB::statement("
                 CREATE VIEW v_produk_stok_setara_pcs AS
                 SELECT
@@ -28,7 +29,7 @@ return new class extends Migration {
                 FROM produk p
             ");
 
-            DB::statement("DROP VIEW IF EXISTS v_piutang_pelanggan");
+            DB::statement('DROP VIEW IF EXISTS v_piutang_pelanggan');
             DB::statement("
                 CREATE VIEW v_piutang_pelanggan AS
                 SELECT
@@ -75,7 +76,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        DB::statement("DROP VIEW IF EXISTS v_piutang_pelanggan");
-        DB::statement("DROP VIEW IF EXISTS v_produk_stok_setara_pcs");
+        DB::statement('DROP VIEW IF EXISTS v_piutang_pelanggan');
+        DB::statement('DROP VIEW IF EXISTS v_produk_stok_setara_pcs');
     }
 };

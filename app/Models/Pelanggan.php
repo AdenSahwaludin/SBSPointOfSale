@@ -11,8 +11,11 @@ class Pelanggan extends Model
     use HasFactory;
 
     protected $table = 'pelanggan';
+
     protected $primaryKey = 'id_pelanggan';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -61,14 +64,14 @@ class Pelanggan extends Model
     {
         $lastCustomer = self::orderBy('id_pelanggan', 'desc')->first();
 
-        if (!$lastCustomer) {
+        if (! $lastCustomer) {
             return 'P001';
         }
 
-        $lastNumber = (int)substr($lastCustomer->id_pelanggan, 1);
+        $lastNumber = (int) substr($lastCustomer->id_pelanggan, 1);
         $nextNumber = $lastNumber + 1;
 
-        return 'P' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return 'P'.str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
     /**

@@ -16,6 +16,7 @@ class GoodsReceived extends Model
         'id_goods_in_detail',
         'id_produk',
         'qty_received',
+        'qty_damaged',
         'id_kasir',
         'catatan',
         'status',

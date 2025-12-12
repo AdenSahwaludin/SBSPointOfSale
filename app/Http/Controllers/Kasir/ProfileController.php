@@ -16,7 +16,7 @@ class ProfileController extends Controller
     public function show()
     {
         return Inertia::render('Kasir/Profile', [
-            'user' => Auth::user()
+            'user' => Auth::user(),
         ]);
     }
 
@@ -27,7 +27,7 @@ class ProfileController extends Controller
 
         $request->validate([
             'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:pengguna,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:pengguna,email,'.$user->id,
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
@@ -58,7 +58,7 @@ class ProfileController extends Controller
         ]);
 
         // Verify current password
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             throw ValidationException::withMessages([
                 'current_password' => 'Password saat ini tidak cocok.',
             ]);
