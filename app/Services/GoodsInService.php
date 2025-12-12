@@ -5,6 +5,7 @@ namespace App\Services;
 use App\GoodsInStatus;
 use App\Models\GoodsIn;
 use App\Models\GoodsInDetail;
+use App\Models\Produk;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -257,5 +258,87 @@ class GoodsInService
 
             return $goodsIn->load(['details.produk', 'kasir']);
         });
+    }
+
+    /**
+     * Record received goods for an approved PO
+     *
+     * @param  GoodsIn  $goodsIn  The PO to record received goods for
+     * @param  array  $items  Array of items with qty_received and notes
+     * @param  string  $kasirId  The ID of the kasir recording the received goods
+     * @return \Illuminate\Support\Collection Collection of created GoodsReceived records
+     *
+     * @throws \LogicException If PO is not approved
+     */
+    public function recordReceivedGoods(GoodsIn $goodsIn, array $items, string $kasirId): \Illuminate\Support\Collection
+    {
+        // Only allow recording if PO status is 'approved'
+        if ($goodsIn->status !== GoodsInStatus::Approved->value) {
+            throw new \LogicException('Hanya PO dengan status approved yang dapat dicatat barangnya.');
+        }
+
+        return DB::transaction(function () use ($goodsIn, $items, $kasirId) {
+            $receivedRecords = collect();
+
+            foreach ($items as $item) {
+                $detail = GoodsInDetail::findOrFail($item['id_goods_in_detail']);
+
+                // Verify the detail belongs to this PO
+                if ($detail->id_goods_in !== $goodsIn->id_goods_in) {
+                    throw new \InvalidArgumentException('Item tidak sesuai dengan PO.');
+                }
+
+                // Create the received goods record
+                $received = \App\Models\GoodsReceived::create([
+                    'id_goods_in' => $goodsIn->id_goods_in,
+                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'id_produk' => $detail->id_produk,
+                    'qty_received' => $item['qty_received'],
+                    'id_kasir' => $kasirId,
+                    'catatan' => $item['catatan'] ?? null,
+                    'status' => 'completed',
+                ]);
+
+                // Update the detail's qty_received
+                $detail->increment('qty_received', $item['qty_received']);
+
+                // Update the product stock (stok)
+                Produk::findOrFail($detail->id_produk)->increment('stok', $item['qty_received']);
+
+                $receivedRecords->push($received);
+            }
+
+            // Reload with relationships
+            return \App\Models\GoodsReceived::with(['produk', 'kasir'])
+                ->whereIn('id_goods_received', $receivedRecords->pluck('id_goods_received'))
+                ->get();
+        });
+    }
+
+    /**
+     * Get received goods for a specific PO
+     *
+     * @param  GoodsIn  $goodsIn  The PO
+     * @return \Illuminate\Support\Collection Collection of received goods
+     */
+    public function getReceivedGoodsByPO(GoodsIn $goodsIn): \Illuminate\Support\Collection
+    {
+        return \App\Models\GoodsReceived::with(['produk', 'kasir'])
+            ->where('id_goods_in', $goodsIn->id_goods_in)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get all pending received goods (across all approved POs)
+     *
+     * @return \Illuminate\Support\Collection Collection of approved POs with received goods count
+     */
+    public function getApprovedPOsForReceiving(): \Illuminate\Support\Collection
+    {
+        return GoodsIn::with(['details.produk', 'kasir', 'receivedGoods'])
+            ->where('status', GoodsInStatus::Approved->value)
+            ->orderBy('tanggal_approval', 'desc')
+            ->get();
     }
 }

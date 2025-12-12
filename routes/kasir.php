@@ -110,6 +110,14 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
     Route::delete('goods-in/{goodsIn}', [\App\Http\Controllers\Kasir\GoodsInController::class, 'destroy'])
         ->name('goods-in.destroy');
 
+    // Receiving goods from approved POs
+    Route::get('goods-in-receiving', [\App\Http\Controllers\Kasir\GoodsInController::class, 'receivingIndex'])
+        ->name('goods-in-receiving.index');
+    Route::get('goods-in/{goodsIn}/receiving', [\App\Http\Controllers\Kasir\GoodsInController::class, 'receivingShow'])
+        ->name('goods-in.receiving-show');
+    Route::post('goods-in/{goodsIn}/record-received', [\App\Http\Controllers\Kasir\GoodsInController::class, 'recordReceived'])
+        ->name('goods-in.record-received');
+
     // ==========================================
     // STOCK ADJUSTMENT (Penyesuaian Stok & Retur)
     // ==========================================

@@ -38,8 +38,11 @@ export function useKasirMenuItems(): MenuItem[] {
         },
         {
             name: 'Purchase Order',
-            href: '/kasir/goods-in',
             icon: 'fas fa-file-invoice',
+            children: [
+                { name: 'Buat Purchase Order', href: '/kasir/goods-in', icon: 'fas fa-plus-circle' },
+                { name: 'Penerimaan Barang', href: '/kasir/goods-in-receiving', icon: 'fas fa-box-open' },
+            ],
         },
         {
             name: 'Angsuran Kredit',
@@ -47,14 +50,12 @@ export function useKasirMenuItems(): MenuItem[] {
             icon: 'fas fa-file-invoice-dollar',
         },
         {
-            name: 'Konversi Stok',
-            href: '/kasir/konversi-stok',
-            icon: 'fas fa-exchange-alt',
-        },
-        {
-            name: 'Stock Adjustment',
-            href: '/kasir/stock-adjustment',
-            icon: 'fas fa-clipboard-check',
+            name: 'Manajemen Stok',
+            icon: 'fas fa-boxes',
+            children: [
+                { name: 'Split Pack', href: '/kasir/konversi-stok', icon: 'fas fa-exchange-alt' },
+                { name: 'Stock Adjustment', href: '/kasir/stock-adjustment', icon: 'fas fa-clipboard-check' },
+            ],
         },
         {
             name: 'Profile',

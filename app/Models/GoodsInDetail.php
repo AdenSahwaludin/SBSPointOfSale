@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GoodsInDetail extends Model
 {
+    use HasFactory;
     protected $table = 'goods_in_details';
 
     protected $primaryKey = 'id_goods_in_detail';

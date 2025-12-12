@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Kasir;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateGoodsInRequest;
+use App\Http\Requests\RecordGoodsReceivedRequest;
 use App\Http\Requests\StoreGoodsInItemRequest;
 use App\Models\GoodsIn;
 use App\Models\GoodsInDetail;
@@ -218,6 +219,91 @@ class GoodsInController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withErrors(['error' => 'Gagal menghapus PO: '.$e->getMessage()]);
+        }
+    }
+
+    /**
+     * Show approved POs for receiving goods.
+     */
+    public function receivingIndex(): Response
+    {
+        $kasirId = Auth::user()->id_pengguna;
+
+        // Get approved POs with received goods count
+        $approvedPOs = $this->goodsInService->getApprovedPOsForReceiving()->toArray();
+
+        return Inertia::render('Kasir/GoodsIn/ReceivingIndex', [
+            'approvedPOs' => $approvedPOs,
+        ]);
+    }
+
+    /**
+     * Show form to record received goods for a specific PO.
+     */
+    public function receivingShow(GoodsIn $goodsIn): Response
+    {
+        // Only show if PO is approved
+        if ($goodsIn->status !== 'approved') {
+            abort(403, 'Hanya PO dengan status approved yang dapat dicatat barangnya.');
+        }
+
+        $goodsIn->load(['details.produk', 'kasir', 'receivedGoods']);
+
+        // Get items that haven't been fully received yet
+        $pendingItems = $goodsIn->details()->with('produk')->get()->map(function ($detail) {
+            return [
+                'id_goods_in_detail' => $detail->id_goods_in_detail,
+                'id_produk' => $detail->id_produk,
+                'nama_produk' => $detail->produk->nama,
+                'sku' => $detail->produk->sku,
+                'qty_request' => $detail->qty_request,
+                'qty_received' => $detail->qty_received,
+                'qty_remaining' => $detail->qty_request - $detail->qty_received,
+            ];
+        });
+
+        // Get already received goods
+        $receivedGoods = $this->goodsInService->getReceivedGoodsByPO($goodsIn);
+
+        return Inertia::render('Kasir/GoodsIn/ReceivingShow', [
+            'goodsIn' => $goodsIn,
+            'pendingItems' => $pendingItems,
+            'receivedGoods' => $receivedGoods,
+        ]);
+    }
+
+    /**
+     * Record received goods for approved PO.
+     */
+    public function recordReceived(RecordGoodsReceivedRequest $request, GoodsIn $goodsIn)
+    {
+        try {
+            // Only allow recording if PO is approved
+            if ($goodsIn->status !== 'approved') {
+                return back()
+                    ->withErrors(['error' => 'Hanya PO dengan status approved yang dapat dicatat barangnya.']);
+            }
+
+            $kasirId = Auth::user()->id_pengguna;
+            $validated = $request->validated();
+
+            $this->goodsInService->recordReceivedGoods($goodsIn, $validated['items'], $kasirId);
+
+            return redirect()
+                ->route('kasir.goods-in.receiving-show', $goodsIn->id_goods_in)
+                ->with('success', 'Barang berhasil dicatat.');
+        } catch (\InvalidArgumentException $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()])
+                ->withInput();
+        } catch (\LogicException $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()])
+                ->withInput();
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal mencatat barang: '.$e->getMessage()])
+                ->withInput();
         }
     }
 }

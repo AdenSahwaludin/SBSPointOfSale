@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GoodsIn extends Model
 {
+    use HasFactory;
     protected $table = 'goods_ins';
 
     protected $primaryKey = 'id_goods_in';
@@ -40,6 +42,11 @@ class GoodsIn extends Model
     public function details(): HasMany
     {
         return $this->hasMany(GoodsInDetail::class, 'id_goods_in');
+    }
+
+    public function receivedGoods(): HasMany
+    {
+        return $this->hasMany(GoodsReceived::class, 'id_goods_in');
     }
 
     public static function generateNomorPO(): string

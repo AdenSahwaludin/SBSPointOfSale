@@ -1,0 +1,344 @@
+<?php
+
+use App\Models\GoodsIn;
+use App\Models\GoodsInDetail;
+use App\Models\Produk;
+use App\Models\User;
+use App\Services\GoodsInService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->kasir = User::factory()->create(['role' => 'kasir']);
+    $this->admin = User::factory()->create(['role' => 'admin']);
+
+    $this->produk1 = Produk::factory()->create(['nama' => 'Produk A', 'sku' => 'SKU-001']);
+    $this->produk2 = Produk::factory()->create(['nama' => 'Produk B', 'sku' => 'SKU-002']);
+
+    $this->service = app(GoodsInService::class);
+});
+
+it('can show list of approved POs for receiving', function () {
+    // Create approved PO
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 10, 'qty_received' => 0]);
+
+    $response = $this->actingAs($this->kasir)
+        ->get(route('kasir.goods-in-receiving.index'));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Kasir/GoodsIn/ReceivingIndex')
+        ->has('approvedPOs', 1)
+    );
+});
+
+it('can show receiving form for approved PO', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 10, 'qty_received' => 0]);
+
+    $response = $this->actingAs($this->kasir)
+        ->get(route('kasir.goods-in.receiving-show', $po->id_goods_in));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Kasir/GoodsIn/ReceivingShow')
+        ->has('goodsIn')
+        ->has('pendingItems', 1)
+    );
+});
+
+it('cannot show receiving form if PO is not approved', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->state(['status' => 'draft'])
+        ->create();
+
+    $response = $this->actingAs($this->kasir)
+        ->get(route('kasir.goods-in.receiving-show', $po->id_goods_in));
+
+    $response->assertStatus(403);
+});
+
+it('can record received goods for approved PO', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 10, 'qty_received' => 0]);
+
+    $response = $this->actingAs($this->kasir)
+        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+            'items' => [
+                [
+                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'qty_received' => 5,
+                    'catatan' => 'Sebagian barang diterima',
+                ],
+            ],
+        ]);
+
+    $response->assertRedirect(route('kasir.goods-in.receiving-show', $po->id_goods_in));
+
+    // Check goods received was created
+    $this->assertDatabaseHas('goods_received', [
+        'id_goods_in' => $po->id_goods_in,
+        'id_goods_in_detail' => $detail->id_goods_in_detail,
+        'qty_received' => 5,
+        'id_kasir' => $this->kasir->id_pengguna,
+    ]);
+
+    // Check qty_received was updated
+    $detail->refresh();
+    $this->assertEquals(5, $detail->qty_received);
+});
+
+it('can record received goods for multiple items', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail1 = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 10, 'qty_received' => 0]);
+
+    $detail2 = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk2, 'produk')
+        ->create(['qty_request' => 20, 'qty_received' => 0]);
+
+    $response = $this->actingAs($this->kasir)
+        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+            'items' => [
+                [
+                    'id_goods_in_detail' => $detail1->id_goods_in_detail,
+                    'qty_received' => 10,
+                ],
+                [
+                    'id_goods_in_detail' => $detail2->id_goods_in_detail,
+                    'qty_received' => 15,
+                    'catatan' => 'Sisa 5 akan datang minggu depan',
+                ],
+            ],
+        ]);
+
+    $response->assertRedirect();
+
+    // Check both were created
+    $this->assertDatabaseCount('goods_received', 2);
+    $detail1->refresh();
+    $detail2->refresh();
+    $this->assertEquals(10, $detail1->qty_received);
+    $this->assertEquals(15, $detail2->qty_received);
+});
+
+it('cannot record received goods for draft PO', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->state(['status' => 'draft'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create();
+
+    $response = $this->actingAs($this->kasir)
+        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+            'items' => [
+                [
+                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'qty_received' => 5,
+                ],
+            ],
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHasErrors('error');
+});
+
+it('validates required qty_received field', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create();
+
+    $response = $this->actingAs($this->kasir)
+        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+            'items' => [
+                [
+                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    // qty_received missing
+                ],
+            ],
+        ]);
+
+    $response->assertInvalid('items.0.qty_received');
+});
+
+it('validates qty_received is at least 1', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create();
+
+    $response = $this->actingAs($this->kasir)
+        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+            'items' => [
+                [
+                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'qty_received' => 0,
+                ],
+            ],
+        ]);
+
+    $response->assertInvalid('items.0.qty_received');
+});
+
+it('requires at least one item to record', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $response = $this->actingAs($this->kasir)
+        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+            'items' => [],
+        ]);
+
+    $response->assertInvalid('items');
+});
+
+it('can retrieve received goods for a PO', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 10]);
+
+    $this->service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 5,
+        ],
+    ], $this->kasir->id_pengguna);
+
+    $receivedGoods = $this->service->getReceivedGoodsByPO($po);
+
+    $this->assertCount(1, $receivedGoods);
+    $this->assertEquals(5, $receivedGoods[0]->qty_received);
+});
+
+it('can track multiple receives for same item', function () {
+    $po = GoodsIn::factory()
+        ->for($this->kasir, 'kasir')
+        ->for($this->admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($this->produk1, 'produk')
+        ->create(['qty_request' => 30, 'qty_received' => 0]);
+
+    // First receive
+    $this->service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 10,
+        ],
+    ], $this->kasir->id_pengguna);
+
+    $detail->refresh();
+    $this->assertEquals(10, $detail->qty_received);
+
+    // Second receive
+    $this->service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 15,
+        ],
+    ], $this->kasir->id_pengguna);
+
+    $detail->refresh();
+    $this->assertEquals(25, $detail->qty_received);
+
+    // Should have 2 goods_received records
+    $receivedGoods = $this->service->getReceivedGoodsByPO($po);
+    $this->assertCount(2, $receivedGoods);
+});
+
+it('increments product stock when recording received goods', function () {
+    $kasir = User::factory()->create(['role' => 'kasir']);
+    $admin = User::factory()->create(['role' => 'admin']);
+    $produk = Produk::factory()->create(['nama' => 'Produk Test', 'sku' => 'SKU-TEST', 'stok' => 100]);
+    $service = app(GoodsInService::class);
+
+    $po = GoodsIn::factory()
+        ->for($kasir, 'kasir')
+        ->for($admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($produk, 'produk')
+        ->create(['qty_request' => 20, 'qty_received' => 0]);
+
+    $initialStock = $produk->stok;
+
+    // Record received goods
+    $service->recordReceivedGoods($po, [
+        [
+            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'qty_received' => 20,
+        ],
+    ], $kasir->id_pengguna);
+
+    // Verify product stock increased
+    $produk->refresh();
+    expect($produk->stok)->toBe($initialStock + 20);
+});
