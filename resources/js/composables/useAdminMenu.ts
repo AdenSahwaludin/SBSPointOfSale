@@ -23,6 +23,11 @@ export function useAdminMenuItems() {
             icon: 'fas fa-file-invoice',
         },
         {
+            name: 'Riwayat PO',
+            href: '/admin/goods-in-history',
+            icon: 'fas fa-history',
+        },
+        {
             name: 'Transaksi',
             icon: 'fas fa-cash-register',
             children: [

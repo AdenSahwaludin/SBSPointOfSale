@@ -98,6 +98,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     });
 
     // ==========================================
+    // GOODS IN HISTORY (Riwayat Barang Masuk)
+    // ==========================================
+    Route::prefix('goods-in-history')->name('goods-in-history.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\GoodsInHistoryController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\GoodsInHistoryController::class, 'show'])->name('show');
+    });
+
+    // ==========================================
     // LAPORAN & ANALISIS (untuk masa depan)
     // ==========================================
     // Route::get('/laporan/penjualan', [LaporanController::class, 'penjualan'])->name('laporan.penjualan');

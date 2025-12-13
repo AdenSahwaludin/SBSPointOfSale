@@ -20,6 +20,29 @@ interface TransaksiDetail {
     subtotal: number;
 }
 
+interface JadwalAngsuran {
+    id_angsuran: number;
+    periode_ke: number;
+    jatuh_tempo: string;
+    jumlah_tagihan: number;
+    jumlah_dibayar: number;
+    status: string;
+    paid_at: string | null;
+}
+
+interface KontrakKredit {
+    id_kontrak: number;
+    nomor_kontrak: string;
+    mulai_kontrak: string;
+    tenor_bulan: number;
+    pokok_pinjaman: number;
+    dp: number;
+    bunga_persen: number;
+    cicilan_bulanan: number;
+    status: string;
+    jadwal_angsuran: JadwalAngsuran[];
+}
+
 interface Transaksi {
     nomor_transaksi: string;
     id_pelanggan: string;
@@ -35,6 +58,7 @@ interface Transaksi {
     pelanggan: Pelanggan;
     kasir: Kasir;
     detail: TransaksiDetail[];
+    kontrak_kredit?: KontrakKredit | null;
 }
 
 interface Props {
@@ -79,6 +103,29 @@ function getStatusBadgeClass(status: string): string {
         default:
             return 'bg-gray-100 text-gray-800';
     }
+}
+
+function getAngsuranStatusBadgeClass(status: string): string {
+    switch (status) {
+        case 'PAID':
+            return 'bg-green-100 text-green-800';
+        case 'DUE':
+            return 'bg-blue-100 text-blue-800';
+        case 'LATE':
+            return 'bg-red-100 text-red-800';
+        case 'UPCOMING':
+            return 'bg-gray-100 text-gray-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
+}
+
+function formatShortDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
 }
 
 function handleClose() {
@@ -191,6 +238,91 @@ function handlePrint() {
                                 <div class="flex justify-between border-t border-gray-300 pt-2 text-base">
                                     <span class="font-semibold text-gray-900">Total</span>
                                     <span class="font-bold text-emerald-600">{{ formatCurrency(transaksi.total) }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Credit Installment Panel (only for KREDIT transactions) -->
+                        <div
+                            v-if="transaksi.metode_bayar === 'KREDIT' && transaksi.kontrak_kredit"
+                            class="rounded-lg border border-blue-200 bg-blue-50 p-4"
+                        >
+                            <h4 class="mb-4 flex items-center text-lg font-semibold text-blue-900">
+                                <i class="fas fa-credit-card mr-2"></i>
+                                Informasi Angsuran Kredit
+                            </h4>
+
+                            <!-- Contract Details -->
+                            <div class="mb-4 grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="font-medium text-blue-700">Nomor Kontrak</p>
+                                    <p class="mt-1 text-blue-900">{{ transaksi.kontrak_kredit.nomor_kontrak }}</p>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-blue-700">Mulai Kontrak</p>
+                                    <p class="mt-1 text-blue-900">{{ formatShortDate(transaksi.kontrak_kredit.mulai_kontrak) }}</p>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-blue-700">Tenor</p>
+                                    <p class="mt-1 text-blue-900">{{ transaksi.kontrak_kredit.tenor_bulan }} bulan</p>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-blue-700">Bunga</p>
+                                    <p class="mt-1 text-blue-900">{{ transaksi.kontrak_kredit.bunga_persen }}%</p>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-blue-700">DP (Uang Muka)</p>
+                                    <p class="mt-1 font-semibold text-blue-900">{{ formatCurrency(transaksi.kontrak_kredit.dp) }}</p>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-blue-700">Cicilan Bulanan</p>
+                                    <p class="mt-1 font-semibold text-blue-900">{{ formatCurrency(transaksi.kontrak_kredit.cicilan_bulanan) }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Schedule Table -->
+                            <div class="mt-4">
+                                <h5 class="mb-3 font-semibold text-blue-900">Jadwal Angsuran</h5>
+                                <div class="overflow-hidden rounded-lg border border-blue-200">
+                                    <table class="w-full text-xs">
+                                        <thead class="bg-blue-100">
+                                            <tr>
+                                                <th class="px-3 py-2 text-left font-medium text-blue-900">Periode</th>
+                                                <th class="px-3 py-2 text-left font-medium text-blue-900">Jatuh Tempo</th>
+                                                <th class="px-3 py-2 text-right font-medium text-blue-900">Tagihan</th>
+                                                <th class="px-3 py-2 text-right font-medium text-blue-900">Terbayar</th>
+                                                <th class="px-3 py-2 text-left font-medium text-blue-900">Status</th>
+                                                <th class="px-3 py-2 text-left font-medium text-blue-900">Tanggal Bayar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-blue-200">
+                                            <tr
+                                                v-for="jadwal in transaksi.kontrak_kredit.jadwal_angsuran"
+                                                :key="jadwal.id_angsuran"
+                                                class="bg-white hover:bg-blue-50"
+                                            >
+                                                <td class="px-3 py-2 font-medium text-gray-900">#{{ jadwal.periode_ke }}</td>
+                                                <td class="px-3 py-2 text-gray-900">{{ formatShortDate(jadwal.jatuh_tempo) }}</td>
+                                                <td class="px-3 py-2 text-right font-semibold text-gray-900">
+                                                    {{ formatCurrency(jadwal.jumlah_tagihan) }}
+                                                </td>
+                                                <td class="px-3 py-2 text-right text-gray-900">{{ formatCurrency(jadwal.jumlah_dibayar) }}</td>
+                                                <td class="px-3 py-2">
+                                                    <span
+                                                        :class="[
+                                                            'inline-flex rounded-full px-2 py-1 text-xs font-semibold',
+                                                            getAngsuranStatusBadgeClass(jadwal.status),
+                                                        ]"
+                                                    >
+                                                        {{ jadwal.status }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-3 py-2 text-gray-900">
+                                                    {{ jadwal.paid_at ? formatShortDate(jadwal.paid_at) : '-' }}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>

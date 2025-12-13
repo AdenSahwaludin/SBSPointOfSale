@@ -1385,7 +1385,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
         <!-- Customer Info Modal -->
         <div
             v-if="showCustomerInfoModal && selectedCustomer"
-            class="absolute top-20 right-0 z-50 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg"
+            class="absolute top-44 right-14 z-50 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg"
         >
             <div class="space-y-3">
                 <!-- Header -->
@@ -1397,11 +1397,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                         <h3 class="text-sm font-medium text-gray-900">{{ selectedCustomer.nama }}</h3>
                         <p class="text-xs text-gray-500">ID: {{ selectedCustomer.id_pelanggan }}</p>
                     </div>
-                    <button
-                        @click="showCustomerInfoModal = false"
-                        class="text-gray-400 hover:text-gray-600"
-                    >
-                        <i class="fas fa-times text-sm"></i>
+                    <button @click="showCustomerInfoModal = false" class="-mt-8 -mr-5 p-4 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
 
@@ -1409,7 +1406,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                 <div class="space-y-2 text-xs">
                     <!-- Email -->
                     <div v-if="selectedCustomer.email" class="flex items-start gap-2">
-                        <i class="fas fa-envelope mt-0.5 text-emerald-600 flex-shrink-0"></i>
+                        <i class="fas fa-envelope mt-0.5 flex-shrink-0 text-emerald-600"></i>
                         <div class="flex-1">
                             <p class="font-medium text-gray-500">Email</p>
                             <p class="text-gray-900">{{ selectedCustomer.email }}</p>
@@ -1418,7 +1415,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
 
                     <!-- Telepon -->
                     <div v-if="selectedCustomer.telepon" class="flex items-start gap-2">
-                        <i class="fas fa-phone mt-0.5 text-emerald-600 flex-shrink-0"></i>
+                        <i class="fas fa-phone mt-0.5 flex-shrink-0 text-emerald-600"></i>
                         <div class="flex-1">
                             <p class="font-medium text-gray-500">Telepon</p>
                             <p class="text-gray-900">{{ selectedCustomer.telepon }}</p>
@@ -1427,7 +1424,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
 
                     <!-- Credit Limit -->
                     <div class="flex items-start gap-2">
-                        <i class="fas fa-credit-card mt-0.5 text-emerald-600 flex-shrink-0"></i>
+                        <i class="fas fa-credit-card mt-0.5 flex-shrink-0 text-emerald-600"></i>
                         <div class="flex-1">
                             <p class="font-medium text-gray-500">Limit Tersedia</p>
                             <p class="font-bold text-emerald-600">{{ formatCurrency(availableCredit) }}</p>

@@ -23,7 +23,7 @@ class TransaksiController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
-        $query = Transaksi::with(['pelanggan', 'kasir', 'detail'])
+        $query = Transaksi::with(['pelanggan', 'kasir', 'detail', 'kontrakKredit.jadwalAngsuran'])
             ->orderBy('tanggal', 'desc');
 
         // Search by nomor_transaksi, pelanggan nama
@@ -88,7 +88,7 @@ class TransaksiController extends Controller
         $status = $request->get('status');
         $metodeBayar = $request->get('metode_bayar');
 
-        $query = Transaksi::with(['pelanggan', 'kasir', 'detail'])
+        $query = Transaksi::with(['pelanggan', 'kasir', 'detail', 'kontrakKredit.jadwalAngsuran'])
             ->whereDate('tanggal', Carbon::today())
             ->orderBy('tanggal', 'desc');
 
@@ -141,7 +141,7 @@ class TransaksiController extends Controller
      */
     public function show(string $nomorTransaksi): Response
     {
-        $transaksi = Transaksi::with(['pelanggan', 'kasir', 'detail.produk'])
+        $transaksi = Transaksi::with(['pelanggan', 'kasir', 'detail.produk', 'kontrakKredit.jadwalAngsuran'])
             ->findOrFail($nomorTransaksi);
 
         return Inertia::render('Kasir/Transactions/Show', [
