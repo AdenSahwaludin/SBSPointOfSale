@@ -59,8 +59,8 @@ export function useTransactionsList<T extends AnyObject>(
         const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
         return sevenDaysAgo.toISOString().split('T')[0];
     };
-    const startDate = ref<string | undefined>(withDateRange ? props.filters?.start_date || getDefault7DaysAgo() : undefined);
-    const endDate = ref<string | undefined>(withDateRange ? props.filters?.end_date || new Date().toISOString().split('T')[0] : undefined);
+    const startDate = ref<string | undefined>(withDateRange ? props.filters?.start_date || undefined : undefined);
+    const endDate = ref<string | undefined>(withDateRange ? props.filters?.end_date || undefined : undefined);
 
     // Computed
     const displayedTransaksi = computed(() => props.transaksi.data);

@@ -2,7 +2,8 @@
 import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface Pelanggan {
     id_pelanggan: string;
@@ -18,13 +19,24 @@ interface Pelanggan {
     updated_at: string;
 }
 
+interface Transaksi {
+    nomor_transaksi: string;
+    id_pelanggan: string;
+    tanggal: string;
+    status_pembayaran: string;
+    total: number;
+    metode_bayar: string;
+}
+
 interface Props {
     pelanggan: Pelanggan;
+    transaksi: Transaksi[];
 }
 
 const props = defineProps<Props>();
 
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pelanggan');
+const showTransactionHistory = ref(false);
 
 function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -34,6 +46,11 @@ function formatDate(dateString: string) {
         hour: '2-digit',
         minute: '2-digit',
     });
+}
+
+function viewTransactionDetail(nomorTransaksi: string) {
+    // Navigate to transaction detail page
+    router.visit(`/admin/transactions/${nomorTransaksi}`);
 }
 
 function formatCurrency(amount: number) {
@@ -55,6 +72,14 @@ function getTrustScoreLabel(score: number) {
     if (score >= 60) return 'Good';
     if (score >= 40) return 'Fair';
     return 'Poor';
+}
+
+function getStatusColor(status: string) {
+    const statusLower = status.toLowerCase();
+    if (statusLower === 'lunas') return 'text-green-700 bg-green-100 border-green-200';
+    if (statusLower === 'menunggu') return 'text-yellow-700 bg-yellow-100 border-yellow-200';
+    if (statusLower === 'batal') return 'text-red-700 bg-red-100 border-red-200';
+    return 'text-gray-700 bg-gray-100 border-gray-200';
 }
 </script>
 
@@ -228,14 +253,71 @@ function getTrustScoreLabel(score: number) {
                                 Edit Pelanggan
                             </BaseButton>
 
-                            <BaseButton variant="secondary" icon="fas fa-history" custom-class="w-full justify-center" disabled>
+                            <BaseButton
+                                @click="showTransactionHistory = !showTransactionHistory"
+                                variant="secondary"
+                                icon="fas fa-history"
+                                custom-class="w-full justify-center"
+                            >
                                 Riwayat Transaksi
                             </BaseButton>
-
-                            <BaseButton variant="secondary" icon="fas fa-print" custom-class="w-full justify-center" disabled>
-                                Cetak Info
-                            </BaseButton>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div v-if="showTransactionHistory" class="space-y-6">
+                <div class="card-emerald">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-emerald-800">Riwayat Transaksi (10 Terbaru)</h3>
+                        <BaseButton
+                            @click="showTransactionHistory = false"
+                            variant="secondary"
+                            icon="fas fa-times"
+                            custom-class="px-3 py-1 text-sm"
+                        />
+                    </div>
+
+                    <div v-if="transaksi.length > 0" class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="border-b-2 border-emerald-200 bg-emerald-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-emerald-800">No. Transaksi</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-emerald-800">Tanggal</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-emerald-800">Total</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-emerald-800">Metode Bayar</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-emerald-800">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-emerald-100">
+                                <tr
+                                    v-for="trans in transaksi"
+                                    :key="trans.nomor_transaksi"
+                                    class="cursor-pointer transition-colors hover:bg-emerald-50"
+                                    @click="viewTransactionDetail(trans.nomor_transaksi)"
+                                >
+                                    <td class="px-4 py-3 text-emerald-700">
+                                        <span class="font-medium text-emerald-600 hover:text-emerald-800">{{ trans.nomor_transaksi }}</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-emerald-700">{{ formatDate(trans.tanggal) }}</td>
+                                    <td class="px-4 py-3 font-medium text-emerald-800">{{ formatCurrency(trans.total) }}</td>
+                                    <td class="px-4 py-3 text-emerald-700">{{ trans.metode_bayar }}</td>
+                                    <td class="px-4 py-3">
+                                        <span
+                                            :class="getStatusColor(trans.status_pembayaran)"
+                                            class="inline-flex rounded-full border px-2 py-1 text-xs font-semibold"
+                                        >
+                                            {{ trans.status_pembayaran }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-else class="py-8 text-center">
+                        <i class="fas fa-inbox mb-3 text-4xl text-emerald-300"></i>
+                        <p class="text-emerald-600">Belum ada transaksi</p>
                     </div>
                 </div>
             </div>

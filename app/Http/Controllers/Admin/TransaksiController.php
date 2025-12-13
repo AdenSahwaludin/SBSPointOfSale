@@ -2,11 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TransaksiController extends Controller
 {
+    /**
+     * Display transaction detail
+     */
+    public function show(string $nomorTransaksi): Response
+    {
+        $transaksi = Transaksi::with(['pelanggan', 'kasir', 'detail.produk', 'kontrakKredit.jadwalAngsuran'])
+            ->findOrFail($nomorTransaksi);
+
+        return Inertia::render('Admin/Transactions/Show', [
+            'transaksi' => $transaksi,
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -27,14 +43,6 @@ class TransaksiController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
     {
         //
     }

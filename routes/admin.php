@@ -2,10 +2,11 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\KategoriController;
-use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
+use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Admin\TrustScoreController;
+use App\Http\Controllers\PelangganController;
 use Illuminate\Support\Facades\Route;
 
 // Admin routes (Admin role only)
@@ -76,6 +77,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         'update' => 'pelanggan.update',
         'destroy' => 'pelanggan.destroy',
     ]);
+
+    // ==========================================
+    // TRANSAKSI
+    // ==========================================
+    Route::get('transactions/{nomorTransaksi}', [TransaksiController::class, 'show'])
+        ->name('transactions.show');
 
     // ==========================================
     // TRUST SCORE & KREDIT LIMIT MANAGEMENT

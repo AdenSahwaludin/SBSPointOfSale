@@ -1376,6 +1376,13 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
             @confirm="
                 (cfg) => {
                     creditConfig = cfg;
+                    // Update pendingTransaction with credit details
+                    if (pendingTransaction) {
+                        pendingTransaction.tenor_bulan = cfg.tenor_bulan;
+                        pendingTransaction.bunga_persen = cfg.bunga_persen;
+                        pendingTransaction.cicilan_bulanan = cfg.cicilan_bulanan;
+                        pendingTransaction.mulai_kontrak = cfg.mulai_kontrak;
+                    }
                     showCreditModal = false;
                     showConfirmationModal = true;
                 }
@@ -1383,9 +1390,11 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
         />
 
         <!-- Customer Info Modal -->
+        <div v-if="showCustomerInfoModal && selectedCustomer" class="fixed inset-0 z-40" @click="showCustomerInfoModal = false"></div>
         <div
             v-if="showCustomerInfoModal && selectedCustomer"
             class="absolute top-44 right-14 z-50 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg"
+            @click.stop
         >
             <div class="space-y-3">
                 <!-- Header -->
