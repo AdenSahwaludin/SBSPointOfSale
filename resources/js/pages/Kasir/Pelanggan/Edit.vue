@@ -29,6 +29,18 @@ const form = useForm({
     alamat: props.pelanggan.alamat || '',
 });
 
+// Handle telepon input - only allow numbers
+function handlePhoneInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    // Remove any non-numeric characters
+    const numericValue = value.replace(/[^0-9]/g, '');
+    // Update the form value with only numbers
+    form.telepon = numericValue;
+    // Update the input field display
+    target.value = numericValue;
+}
+
 function submit() {
     form.patch(`/kasir/customers/${props.pelanggan.id_pelanggan}`, {
         onSuccess: () => {
@@ -108,6 +120,9 @@ function submit() {
                                 id="telepon"
                                 v-model="form.telepon"
                                 type="tel"
+                                pattern="[0-9]*"
+                                maxlength="15"
+                                @input="handlePhoneInput"
                                 class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                                 placeholder="081234567890"
                             />

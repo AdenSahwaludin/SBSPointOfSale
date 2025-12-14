@@ -77,7 +77,7 @@ class PelangganController extends Controller
             'id_pelanggan' => 'required|string|max:7|unique:pelanggan,id_pelanggan|regex:/^P[0-9]{3,6}$/',
             'nama' => 'required|string|max:100',
             'email' => 'nullable|email|max:100|unique:pelanggan,email',
-            'telepon' => 'nullable|string|max:15',
+            'telepon' => 'nullable|numeric|digits_between:1,15',
             'alamat' => 'nullable|string',
         ];
 
@@ -147,7 +147,7 @@ class PelangganController extends Controller
         $rules = [
             'nama' => 'required|string|max:100',
             'email' => 'nullable|email|max:100|unique:pelanggan,email,'.$id.',id_pelanggan',
-            'telepon' => 'nullable|string|max:15',
+            'telepon' => 'nullable|numeric|digits_between:1,15',
             'alamat' => 'nullable|string',
         ];
 
@@ -179,7 +179,12 @@ class PelangganController extends Controller
 
         // Check if pelanggan has transactions
         if ($pelanggan->transaksi()->exists()) {
-            return back()->with('error', 'Pelanggan tidak dapat dihapus karena memiliki transaksi');
+            return back()->with('error', 'Pelanggan tidak dapat dihapus karena memiliki riwayat transaksi');
+        }
+
+        // Check if pelanggan has active credit contracts
+        if ($pelanggan->kontrakKredit()->exists()) {
+            return back()->with('error', 'Pelanggan tidak dapat dihapus karena memiliki kontrak kredit aktif');
         }
 
         $pelanggan->delete();

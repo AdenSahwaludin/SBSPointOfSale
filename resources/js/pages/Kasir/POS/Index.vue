@@ -102,6 +102,7 @@ const isSearching = isSearchingProducts; // alias
 // Modal confirmation
 const showConfirmationModal = ref(false);
 const showCreditModal = ref(false);
+const isProcessingTransaction = ref(false);
 const pendingTransaction = ref<any>(null);
 const creditConfig = ref<null | {
     tenor_bulan: number;
@@ -501,7 +502,11 @@ function processTransaction() {
 }
 
 function handleConfirmTransaction() {
-    if (!pendingTransaction.value) return;
+    // Check if already processing to prevent double submission
+    if (!pendingTransaction.value || isProcessingTransaction.value) return;
+
+    // Set processing flag immediately to prevent rapid re-clicks
+    isProcessingTransaction.value = true;
 
     const requestData = {
         id_pelanggan: selectedPelanggan.value,
@@ -567,12 +572,17 @@ function handleConfirmTransaction() {
                 title: msg,
             });
             console.error('Transaction error:', error);
+        })
+        .finally(() => {
+            // Reset processing flag after operation completes
+            isProcessingTransaction.value = false;
         });
 }
 
 function handleCancelTransaction() {
     showConfirmationModal.value = false;
     pendingTransaction.value = null;
+    isProcessingTransaction.value = false;
     addNotification({
         type: 'info',
         title: 'Transaksi dibatalkan',
@@ -580,7 +590,11 @@ function handleCancelTransaction() {
 }
 
 function handlePrintReceipt() {
-    if (!pendingTransaction.value) return;
+    // Check if already processing to prevent double submission
+    if (!pendingTransaction.value || isProcessingTransaction.value) return;
+
+    // Set processing flag immediately
+    isProcessingTransaction.value = true;
 
     // Store transaction data for receipt before clearing
     const transactionForReceipt = { ...pendingTransaction.value };
@@ -669,6 +683,10 @@ function handlePrintReceipt() {
                 title: msg,
             });
             console.error('Transaction error:', error);
+        })
+        .finally(() => {
+            // Reset processing flag after operation completes
+            isProcessingTransaction.value = false;
         });
 }
 

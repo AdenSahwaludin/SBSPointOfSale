@@ -134,17 +134,23 @@
 
                 <!-- Footer -->
                 <div class="flex gap-3 border-t border-gray-200 p-6">
-                    <BaseButton @click="$emit('cancel')" variant="outline" class="flex-1">
+                    <BaseButton @click="$emit('cancel')" variant="outline" class="flex-1" :disabled="isSubmitting">
                         <i class="fas fa-times mr-2"></i>
                         Batal
                     </BaseButton>
-                    <BaseButton @click="handlePrint" variant="secondary" class="flex-1">
+                    <BaseButton @click="handlePrint" variant="secondary" class="flex-1" :disabled="isSubmitting">
                         <i class="fas fa-print mr-2"></i>
                         Cetak Struk
                     </BaseButton>
-                    <BaseButton @click="$emit('confirm')" variant="primary" class="flex-1">
+                    <BaseButton
+                        @click="handleConfirm"
+                        variant="primary"
+                        class="flex-1"
+                        :disabled="isSubmitting"
+                        :loading="isSubmitting"
+                    >
                         <i class="fas fa-check mr-2"></i>
-                        Selesaikan
+                        {{ isSubmitting ? 'Memproses...' : 'Selesaikan' }}
                     </BaseButton>
                 </div>
             </div>
@@ -154,7 +160,7 @@
 
 <script setup lang="ts">
 import BaseButton from '@/components/BaseButton.vue';
-import { computed } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 interface CartItem {
     id_produk: string;
@@ -198,6 +204,8 @@ const emit = defineEmits<{
     print: [];
 }>();
 
+const isSubmitting = ref(false);
+
 const kembalian = computed(() => {
     if (props.transaction.metode_bayar === 'TUNAI' && props.transaction.jumlah_bayar) {
         return props.transaction.jumlah_bayar - props.transaction.total;
@@ -212,6 +220,51 @@ function formatCurrency(amount: number): string {
 function handlePrint() {
     emit('print');
 }
+
+function handleConfirm() {
+    if (isSubmitting.value) return;
+    isSubmitting.value = true;
+    emit('confirm');
+}
+
+// Handle Enter key to submit
+function handleKeyDown(event: KeyboardEvent) {
+    if (!props.show || isSubmitting.value) return;
+
+    // Enter key = submit
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleConfirm();
+    }
+
+    // Escape key = cancel
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        if (!isSubmitting.value) {
+            emit('cancel');
+        }
+    }
+}
+
+// Watch modal visibility to attach/remove keyboard listeners
+watch(
+    () => props.show,
+    (isVisible) => {
+        if (isVisible) {
+            window.addEventListener('keydown', handleKeyDown);
+        } else {
+            window.removeEventListener('keydown', handleKeyDown);
+            isSubmitting.value = false;
+        }
+    }
+);
+
+// Cleanup on component unmount
+onMounted(() => {
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+});
 </script>
 
 <style scoped>

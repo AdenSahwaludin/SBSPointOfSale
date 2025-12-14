@@ -7,27 +7,28 @@ Sistem otomatis untuk meningkatkan credit limit dan mengelola saldo kredit berda
 ## 📋 Aturan Peningkatan Credit Limit
 
 ### Trust Score Requirement
+
 - **Syarat Utama**: Trust score minimal **70** untuk bisa mendapatkan peningkatan credit limit
 - Customer dengan trust score < 70 tidak akan mendapat auto-increase
 
 ### Bonus Based on Transaction Frequency (6 bulan terakhir)
 
-| Transaction Count | Bonus | Deskripsi |
-|------------------|-------|-----------|
-| 0-2 | 0% | No bonus |
-| 3-5 | 10% | Mulai aktif |
-| 6-10 | 15% | Sangat aktif |
-| 11+ | 20% | Sangat loyal |
+| Transaction Count | Bonus | Deskripsi    |
+| ----------------- | ----- | ------------ |
+| 0-2               | 0%    | No bonus     |
+| 3-5               | 10%   | Mulai aktif  |
+| 6-10              | 15%   | Sangat aktif |
+| 11+               | 20%   | Sangat loyal |
 
 **Formula**: Bonus = Total Spending (6 bulan) × Frequency Percentage × Trust Multiplier
 
 ### Trust Score Multiplier
 
-| Trust Score | Multiplier | Contoh |
-|-----------|-----------|---------|
-| 70-74 | 1.0× | Standard |
-| 75-89 | 1.2× | Premium |
-| 90+ | 1.5× | VIP |
+| Trust Score | Multiplier | Contoh   |
+| ----------- | ---------- | -------- |
+| 70-74       | 1.0×       | Standard |
+| 75-89       | 1.2×       | Premium  |
+| 90+         | 1.5×       | VIP      |
 
 ### Contoh Perhitungan
 
@@ -161,12 +162,14 @@ if ($pelanggan && $pelanggan->trust_score >= 70) {
 ## 📊 Contoh Scenario Real-World
 
 ### Customer Baru (P004 - Umum)
+
 ```
 Initial: TS=50, Limit=0, Saldo=0
 Status: Tidak boleh kredit (TS < 70)
 ```
 
 ### Setelah 1 Bulan Transaksi
+
 ```
 TS meningkat ke 60 (account age bonus)
 Limit tetap 0
@@ -174,6 +177,7 @@ Status: Manual review needed (MANUAL_REVIEW)
 ```
 
 ### Setelah 6 Bulan Transaksi Aktif
+
 ```
 TS meningkat ke 75 (account age + activity)
 Total spending 6M: Rp 12,000,000
@@ -191,16 +195,18 @@ Available Credit: Rp 5,760,000 (belum pakai)
 ```
 
 ### Saat Membuat Transaksi Kredit Rp 2,000,000
+
 ```
 Before: Available = 5,760,000
 Credit Transaction: -2,000,000
 
-After: 
+After:
   - Saldo Kredit (outstanding) = 2,000,000
   - Available Credit = 5,760,000 - 2,000,000 = 3,760,000
 ```
 
 ### Saat Pembayaran Rp 500,000
+
 ```
 Before: Saldo Kredit = 2,000,000
 Payment: +500,000
@@ -219,6 +225,7 @@ php artisan test tests/Feature/CustomerCreditScoringTest.php
 ```
 
 **Coverage**:
+
 - ✅ Auto-increase credit functionality
 - ✅ Saldo kredit restoration
 - ✅ Eligibility checks

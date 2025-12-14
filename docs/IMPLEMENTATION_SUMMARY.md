@@ -3,6 +3,7 @@
 ## Kebutuhan yang Dipenuhi
 
 User request:
+
 > "Awalnya trust score (TS) pelanggan adalah 50 dan pelanggan belum boleh melakukan kredit. Tolong buatkan mekanisme agar TS dapat bertambah otomatis melalui aktivitas transaksi... credit limit dan saldo kredit belum bertambah walaupun pelanggan sudah bertransaksi. Tolong buatkan aturan agar credit limit dan saldo kredit dapat meningkat secara bertahap berdasarkan riwayat dan nilai transaksi pelanggan."
 
 ✅ **Semua requirement telah dipenuhi dan diimplementasikan.**
@@ -11,15 +12,18 @@ User request:
 
 ## 🎁 Deliverables
 
-### 1. **Service Class: CustomerCreditScoringService** 
+### 1. **Service Class: CustomerCreditScoringService**
+
 📍 `app/Services/CustomerCreditScoringService.php`
 
 Comprehensive service dengan 5 metode utama:
 
 #### a) `autoIncreaseCredit(Pelanggan $pelanggan): array`
+
 Meningkatkan credit limit otomatis berdasarkan aktivitas transaksi.
 
 **Logic:**
+
 - Syarat: Trust score >= 70
 - Analisa transaksi 6 bulan terakhir
 - Hitung bonus berdasarkan frekuensi
@@ -27,6 +31,7 @@ Meningkatkan credit limit otomatis berdasarkan aktivitas transaksi.
 - Update database jika ada peningkatan
 
 **Contoh Output:**
+
 ```php
 [
     'limit_increased' => true,
@@ -37,25 +42,31 @@ Meningkatkan credit limit otomatis berdasarkan aktivitas transaksi.
 ```
 
 #### b) `restoreCreditBalance(Pelanggan $pelanggan, int $paidAmount): array`
+
 Kembalikan saldo kredit saat ada pembayaran.
 
 **Logic:**
+
 - Kurangi saldo_kredit sesuai jumlah pembayaran
 - Prevent negative values (minimum 0)
 - Catat data original untuk audit
 
 #### c) `isCreditEligible(Pelanggan $pelanggan): array`
+
 Cek apakah customer bisa membuat transaksi kredit.
 
 **Validation:**
+
 - Trust score minimum (checked via CreditLimitService)
 - Available credit > 0
 - Status kredit aktif
 
 #### d) `getDetailedScoreBreakdown(Pelanggan $pelanggan): array`
+
 Breakdown lengkap credit profile untuk analytics/reporting.
 
 **Includes:**
+
 - Current trust score & factors
 - Credit limit & available balance
 - Transaction history (6 months)
@@ -63,9 +74,11 @@ Breakdown lengkap credit profile untuk analytics/reporting.
 - Eligibility status
 
 #### e) `calculateCreditIncreaseAmount()` (Private Helper)
+
 Formula untuk menghitung bonus amount.
 
 **Rules:**
+
 ```
 Transaction Count (6 months):
 - 0-2  → 0% bonus
@@ -86,6 +99,7 @@ Increase = round(Bonus / 1000) × 1000  // Rounded to nearest thousand
 ---
 
 ### 2. **Integration with TransaksiPOSController**
+
 📍 `app/Http/Controllers/Kasir/TransaksiPOSController.php` (lines 468-476)
 
 Auto-triggered setelah transaksi berhasil di-commit:
@@ -103,25 +117,30 @@ if ($pelanggan && $pelanggan->trust_score >= 70) {
 ---
 
 ### 3. **Comprehensive Test Suite**
+
 📍 `tests/Feature/CustomerCreditScoringTest.php`
 
 10 test cases covering:
 
 ✅ **Auto-Increase Credit Tests:**
+
 - Does not increase for low trust score
 - Increases with 3+ transactions (10% bonus)
-- Increases with 6+ transactions (15% bonus)  
+- Increases with 6+ transactions (15% bonus)
 - Applies trust score multiplier correctly
 
 ✅ **Saldo Kredit Management Tests:**
+
 - Restores balance on payment
 - Prevents negative values
 
 ✅ **Breakdown & Analytics Tests:**
+
 - Returns comprehensive breakdown
 - Includes all required fields
 
 ✅ **Eligibility Check Tests:**
+
 - Rejects low trust score
 - Rejects maxed-out limit
 - Approves eligible customers
@@ -132,9 +151,11 @@ if ($pelanggan && $pelanggan->trust_score >= 70) {
 ---
 
 ### 4. **Documentation**
+
 📍 `docs/CREDIT_SCORING_AUTO_UPDATE.md`
 
 Comprehensive guide dengan:
+
 - Overview & rules
 - Bonus tiers & multipliers
 - Real-world scenarios
@@ -149,6 +170,7 @@ Comprehensive guide dengan:
 ### Scenario: Pelanggan Regular → Pelanggan Premium
 
 **Month 1: Pelanggan P005 baru (Umum)**
+
 ```
 Initial State:
 - Trust Score: 50 (baseline)
@@ -158,6 +180,7 @@ Initial State:
 ```
 
 **Month 2: Transaksi pertama**
+
 ```
 After 1 transaksi TUNAI Rp 500k:
 - Trust Score: 50 (activity bonus 0, not yet 3 tx)
@@ -166,6 +189,7 @@ After 1 transaksi TUNAI Rp 500k:
 ```
 
 **Month 3-6: Transaksi berkelanjutan**
+
 ```
 Total transaksi: 12x
 Total spending: Rp 6,000,000
@@ -184,6 +208,7 @@ Result:
 ```
 
 **Month 7: Kredit pertama**
+
 ```
 Transaksi Kredit: Rp 1,500,000
 - Saldo Kredit (outstanding) = Rp 1,500,000
@@ -191,6 +216,7 @@ Transaksi Kredit: Rp 1,500,000
 ```
 
 **Month 8: Pembayaran cicilan**
+
 ```
 Pembayaran: Rp 500,000
 - Saldo Kredit = 1,500,000 - 500,000 = Rp 1,000,000
@@ -238,23 +264,27 @@ Return result array
 ## 📈 Business Logic Features
 
 ### Smart Calculation
+
 - Uses max of 3 methods for base limit (dari CreditLimitService)
 - Frequency-based bonus incentivizes regular transactions
 - Trust score multiplier rewards loyal customers
 - Rounded to thousands for clean numbers
 
 ### Risk Mitigation
+
 - Only increases if TS >= 70 (proven good behavior)
 - Based on actual transaction history (6 months)
 - Never decreases existing limit
 - Prevents over-extension
 
 ### Transparency
+
 - Customers can see exact breakdown
 - Understands why limit changed
 - Incentivizes good behavior
 
 ### Simplicity
+
 - Automatic, no manual intervention
 - Consistent rules applied fairly
 - Easily auditable
@@ -278,25 +308,25 @@ Return result array
 ✅ TS turun ke < 70 → autoIncreaseCredit() berhenti  
 ✅ Transaksi di luar 6 bulan window → Tidak dihitung  
 ✅ Status kredit non-aktif → isCreditEligible() returns false  
-✅ Concurrent transactions → forceFill() handles properly  
+✅ Concurrent transactions → forceFill() handles properly
 
 ---
 
 ## 📋 Related Files Modified
 
 1. **app/Services/CustomerCreditScoringService.php** (NEW)
-   - Main service implementation
+    - Main service implementation
 
 2. **app/Http/Controllers/Kasir/TransaksiPOSController.php** (MODIFIED)
-   - Added imports + auto-increase trigger
-   - Lines 14-17 (imports)
-   - Lines 468-476 (trigger call)
+    - Added imports + auto-increase trigger
+    - Lines 14-17 (imports)
+    - Lines 468-476 (trigger call)
 
 3. **tests/Feature/CustomerCreditScoringTest.php** (UPDATED)
-   - Complete test suite with 10 test cases
+    - Complete test suite with 10 test cases
 
 4. **docs/CREDIT_SCORING_AUTO_UPDATE.md** (NEW)
-   - Comprehensive documentation
+    - Comprehensive documentation
 
 ---
 
@@ -352,7 +382,7 @@ Trust Multipliers:
 
 ### If You Need to Modify:
 
-1. **Change Bonus Percentages**: 
+1. **Change Bonus Percentages**:
    → Edit `calculateCreditIncreaseAmount()` match blocks
 
 2. **Change Trust Score Requirement**:
@@ -378,7 +408,7 @@ php artisan test  # Run full suite
 Sistem auto-increase credit limit & saldo kredit yang comprehensive dan production-ready telah berhasil diimplementasikan. Sistem ini:
 
 - ✅ Automatically increases credit limit based on transaction activity
-- ✅ Manages saldo kredit (available credit balance) properly  
+- ✅ Manages saldo kredit (available credit balance) properly
 - ✅ Rewards loyal, good-behaving customers
 - ✅ Prevents over-extension through careful validation
 - ✅ Fully tested with zero regressions
