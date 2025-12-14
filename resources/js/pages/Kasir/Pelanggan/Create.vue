@@ -17,6 +17,7 @@ const form = useForm({
     nama: '',
     email: '',
     telepon: '',
+    kota: '',
     alamat: '',
 });
 
@@ -83,8 +84,8 @@ function submit() {
                         </div>
                     </div>
 
-                    <!-- Email & Telepon -->
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <!-- Email, Telepon & Kota -->
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <div>
                             <label for="email" class="mb-2 block text-sm font-medium text-emerald-700"> Email </label>
                             <input
@@ -110,6 +111,20 @@ function submit() {
                             />
                             <div v-if="form.errors.telepon" class="mt-1 text-sm text-red-600">
                                 {{ form.errors.telepon }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="kota" class="mb-2 block text-sm font-medium text-emerald-700"> Kota </label>
+                            <input
+                                id="kota"
+                                v-model="form.kota"
+                                type="text"
+                                class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                                placeholder="Jakarta, Bandung, dll"
+                            />
+                            <div v-if="form.errors.kota" class="mt-1 text-sm text-red-600">
+                                {{ form.errors.kota }}
                             </div>
                         </div>
                     </div>

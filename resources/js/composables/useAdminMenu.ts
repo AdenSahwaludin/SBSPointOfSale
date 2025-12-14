@@ -33,6 +33,7 @@ export function useAdminMenuItems() {
             children: [
                 { name: 'Semua Transaksi', href: '/admin/transactions', icon: 'fas fa-receipt' },
                 { name: 'Laporan Harian', href: '/admin/reports/daily', icon: 'fas fa-calendar-day' },
+                { name: 'Laporan Mingguan', href: '/admin/reports/weekly', icon: 'fas fa-calendar-week' },
                 { name: 'Laporan Bulanan', href: '/admin/reports/monthly', icon: 'fas fa-calendar-alt' },
             ],
         },

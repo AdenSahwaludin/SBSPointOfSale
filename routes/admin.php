@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Admin\TrustScoreController;
 use App\Http\Controllers\PelangganController;
@@ -17,7 +18,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     // Quick access routes (for navigation)
     Route::inertia('/users', 'Admin/Users')->name('users');
     Route::inertia('/produk', 'Admin/Produk')->name('produk');
-    Route::inertia('/reports', 'Admin/Reports')->name('reports');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports');
     Route::inertia('/settings', 'Admin/Settings')->name('settings');
 
     // ==========================================
@@ -81,8 +82,22 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     // ==========================================
     // TRANSAKSI
     // ==========================================
-    Route::get('transactions/{nomorTransaksi}', [TransaksiController::class, 'show'])
-        ->name('transactions.show');
+    Route::prefix('transactions')->name('transactions.')->group(function () {
+        Route::get('/', [TransaksiController::class, 'index'])->name('index');
+        Route::get('/laporan-mingguan', [TransaksiController::class, 'weeklyReport'])->name('weekly-report');
+        Route::get('/laporan-harian', [TransaksiController::class, 'dailyReport'])->name('daily-report');
+        Route::get('/laporan-bulanan', [TransaksiController::class, 'monthlyReport'])->name('monthly-report');
+        Route::get('/{nomorTransaksi}', [TransaksiController::class, 'show'])->name('show');
+    });
+
+    // ==========================================
+    // LAPORAN
+    // ==========================================
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/daily', [TransaksiController::class, 'dailyReport'])->name('daily');
+        Route::get('/weekly', [TransaksiController::class, 'weeklyReport'])->name('weekly');
+        Route::get('/monthly', [TransaksiController::class, 'monthlyReport'])->name('monthly');
+    });
 
     // ==========================================
     // TRUST SCORE & KREDIT LIMIT MANAGEMENT

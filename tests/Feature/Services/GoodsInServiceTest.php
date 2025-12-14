@@ -27,7 +27,7 @@ test('can create PO request', function () {
     $po = $this->service->createPORequest($kasir->id_pengguna, $items);
 
     expect($po)->toBeInstanceOf(GoodsIn::class)
-        ->and($po->status)->toBe(GoodsInStatus::Submitted->value)
+        ->and($po->status)->toBe(GoodsInStatus::Draft->value)
         ->and($po->id_kasir)->toBe($kasir->id_pengguna)
         ->and($po->details)->toHaveCount(1)
         ->and($po->details->first()->qty_request)->toBe(10);
@@ -55,7 +55,8 @@ test('can approve PO', function () {
     ];
 
     $po = $this->service->createPORequest($kasir->id_pengguna, $items);
-    $approvedPO = $this->service->approvePO($po->id_goods_in, $admin->id_pengguna, 'Approved');
+    $submittedPO = $this->service->submitGoodsIn($po);
+    $approvedPO = $this->service->approvePO($submittedPO->id_goods_in, $admin->id_pengguna, 'Approved');
 
     expect($approvedPO->status)->toBe(GoodsInStatus::Approved->value)
         ->and($approvedPO->id_admin)->toBe($admin->id_pengguna)
@@ -85,7 +86,8 @@ test('can reject PO', function () {
     ];
 
     $po = $this->service->createPORequest($kasir->id_pengguna, $items);
-    $rejectedPO = $this->service->rejectPO($po->id_goods_in, $admin->id_pengguna, 'Out of budget');
+    $submittedPO = $this->service->submitGoodsIn($po);
+    $rejectedPO = $this->service->rejectPO($submittedPO->id_goods_in, $admin->id_pengguna, 'Out of budget');
 
     expect($rejectedPO->status)->toBe(GoodsInStatus::Rejected->value)
         ->and($rejectedPO->id_admin)->toBe($admin->id_pengguna)
@@ -106,8 +108,10 @@ test('can get pending POs', function () {
         ['id_produk' => $produk->id_produk, 'qty_request' => 10],
     ];
 
-    $this->service->createPORequest($kasir->id_pengguna, $items);
-    $this->service->createPORequest($kasir->id_pengguna, $items);
+    $po1 = $this->service->createPORequest($kasir->id_pengguna, $items);
+    $po2 = $this->service->createPORequest($kasir->id_pengguna, $items);
+    $this->service->submitGoodsIn($po1);
+    $this->service->submitGoodsIn($po2);
 
     $pendingPOs = $this->service->getPendingPOs();
 
