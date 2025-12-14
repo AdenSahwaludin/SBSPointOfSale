@@ -12,6 +12,7 @@ use App\Models\Pembayaran;
 use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
+use App\Services\CustomerCreditScoringService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -466,6 +467,12 @@ class TransaksiPOSController extends Controller
             }
 
             DB::commit();
+
+            // Auto-increase credit limit and saldo based on transaction activity
+            $pelanggan = Pelanggan::find($request->id_pelanggan);
+            if ($pelanggan && $pelanggan->trust_score >= 70) {
+                CustomerCreditScoringService::autoIncreaseCredit($pelanggan);
+            }
 
             return response()->json([
                 'success' => true,
