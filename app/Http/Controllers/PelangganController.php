@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
+use App\Services\PelangganDeletionService;
 use App\Services\TrustScoreService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class PelangganController extends Controller
@@ -17,7 +19,9 @@ class PelangganController extends Controller
 
     public function __construct()
     {
-        $user = auth()->user();
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         if ($user && $user->role === 'admin') {
             $this->userRole = 'admin';
             $this->viewPrefix = 'Admin/Pelanggan/';
@@ -172,25 +176,57 @@ class PelangganController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * Validasi penghapusan dengan pemeriksaan relasi foreign key
      */
     public function destroy(string $id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
 
-        // Check if pelanggan has transactions
-        if ($pelanggan->transaksi()->exists()) {
-            return back()->with('error', 'Pelanggan tidak dapat dihapus karena memiliki riwayat transaksi');
+        // Gunakan service untuk validasi penghapusan
+        $deletionService = new PelangganDeletionService;
+        $validation = $deletionService->validateDeletion($pelanggan);
+
+        if (! $validation['can_delete']) {
+            // Jika tidak bisa dihapus, kembalikan dengan pesan error yang jelas
+            return back()->with('error', $validation['message']);
         }
 
-        // Check if pelanggan has active credit contracts
-        if ($pelanggan->kontrakKredit()->exists()) {
-            return back()->with('error', 'Pelanggan tidak dapat dihapus karena memiliki kontrak kredit aktif');
-        }
-
+        // Hapus pelanggan jika validasi lolos
         $pelanggan->delete();
 
         return redirect()->route("{$this->routePrefix}.index")
             ->with('success', 'Pelanggan berhasil dihapus');
+    }
+
+    /**
+     * Get detailed blocking reasons for customer deletion via API
+     * Digunakan untuk menampilkan informasi detail kepada pengguna
+     */
+    public function getDeletionBlockReasons(string $id)
+    {
+        $pelanggan = Pelanggan::findOrFail($id);
+
+        // Gunakan service untuk mendapatkan alasan blocking
+        $deletionService = new PelangganDeletionService;
+        $validation = $deletionService->validateDeletion($pelanggan);
+
+        if ($validation['can_delete']) {
+            return response()->json([
+                'can_delete' => true,
+                'message' => 'Pelanggan dapat dihapus',
+                'reasons' => [],
+            ]);
+        }
+
+        // Dapatkan detail alasan
+        $blockingReasons = $deletionService->getDeletionBlockReasons($pelanggan);
+
+        return response()->json([
+            'can_delete' => false,
+            'message' => $validation['message'],
+            'summary' => $validation['reasons'],
+            'details' => $blockingReasons,
+        ]);
     }
 
     /**

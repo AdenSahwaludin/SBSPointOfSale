@@ -61,6 +61,8 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
         Route::get('/{id}/edit', [PelangganController::class, 'edit'])->name('edit');
         Route::patch('/{id}', [PelangganController::class, 'update'])->name('update');
         Route::delete('/{id}', [PelangganController::class, 'destroy'])->name('destroy');
+        // API endpoint untuk mendapatkan alasan blocking penghapusan
+        Route::get('/{id}/deletion-block-reasons', [PelangganController::class, 'getDeletionBlockReasons'])->name('deletion-block-reasons');
     });
 
     // ==========================================
