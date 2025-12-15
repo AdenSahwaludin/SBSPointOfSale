@@ -65,10 +65,17 @@ class ProdukController extends Controller
         $request->validate([
             'suffix' => 'required|string|max:4',
             'nama' => 'required|string|max:255',
-            'kategori_id' => 'required|exists:kategori,id_kategori',
+            'id_kategori' => 'required|exists:kategori,id_kategori',
+            'barcode' => 'nullable|string|max:13',
+            'no_bpom' => 'nullable|string|max:18',
+            'satuan' => 'required|in:pcs,karton,pack',
+            'isi_per_pack' => 'required|integer|min:1',
             'harga' => 'required|numeric|min:0',
+            'harga_pack' => 'nullable|numeric|min:0',
             'stok' => 'required|integer|min:0',
-            'satuan' => 'required|string|max:50',
+            'sisa_pcs_terbuka' => 'required|integer|min:0',
+            'batas_stok_minimum' => 'required|integer|min:0',
+            'jumlah_restock' => 'required|integer|min:0',
         ]);
 
         // Generate ID
@@ -81,11 +88,19 @@ class ProdukController extends Controller
 
         Produk::create([
             'id_produk' => $id_produk,
+            'sku' => $id_produk,
             'nama' => $request->nama,
-            'id_kategori' => $request->kategori_id,
-            'harga' => $request->harga,
-            'stok' => $request->stok,
+            'id_kategori' => $request->id_kategori,
+            'barcode' => $request->barcode,
+            'no_bpom' => $request->no_bpom,
             'satuan' => $request->satuan,
+            'isi_per_pack' => $request->isi_per_pack,
+            'harga' => $request->harga,
+            'harga_pack' => $request->harga_pack,
+            'stok' => $request->stok,
+            'sisa_pcs_terbuka' => $request->sisa_pcs_terbuka,
+            'batas_stok_minimum' => $request->batas_stok_minimum,
+            'jumlah_restock' => $request->jumlah_restock,
         ]);
 
         return redirect()->route('admin.produk.index')
