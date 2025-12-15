@@ -49,7 +49,7 @@ class TransaksiBulkSeeder extends Seeder
                     'nama_produk' => $produk->nama,
                     'harga_satuan' => $harga,
                     'jumlah' => $qty,
-                    'mode_qty' => 'unit',
+                    'jenis_satuan' => 'unit',
                     'diskon_item' => 0,
                     'subtotal' => $lineTotal,
                     'isi_pack_saat_transaksi' => max(1, (int) $produk->isi_per_pack),

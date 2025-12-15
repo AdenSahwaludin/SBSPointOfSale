@@ -224,7 +224,7 @@ class TransaksiPOSController extends Controller
             'items' => 'required|array|min:1',
             'items.*.id_produk' => 'required|exists:produk,id_produk',
             'items.*.jumlah' => 'required|integer|min:1',
-            'items.*.mode_qty' => 'required|in:unit,pack',
+            'items.*.jenis_satuan' => 'required|in:unit,pack',
             'items.*.harga_satuan' => 'required|numeric|min:0',
             'metode_bayar' => 'required|in:TUNAI,QRIS,TRANSFER BCA,KREDIT',
             'subtotal' => 'required|numeric|min:0',
@@ -379,8 +379,8 @@ class TransaksiPOSController extends Controller
 
                 // Jika produk kemasan besar (karton/pack), stok disimpan dalam unit kemasan tsb
                 if (in_array($produk->satuan, ['karton', 'pack'], true)) {
-                    // Penjualan hanya boleh per kemasan (mode_qty harus 'pack')
-                    if (($item['mode_qty'] ?? 'pack') !== 'pack') {
+                    // Penjualan hanya boleh per kemasan (jenis_satuan harus 'pack')
+                    if (($item['jenis_satuan'] ?? 'pack') !== 'pack') {
                         throw new \RuntimeException("Produk {$produk->nama} hanya bisa dijual per {$produk->satuan}");
                     }
 
@@ -393,7 +393,7 @@ class TransaksiPOSController extends Controller
                     $isiPackSaatTransaksi = $isiPerPack; // snapshot isi per kemasan saat transaksi
                 } else {
                     // Produk satuan pcs: jika mode pack, konversi ke pcs; jika unit, langsung pcs
-                    $deductUnits = (int) ($item['mode_qty'] === 'pack'
+                    $deductUnits = (int) ($item['jenis_satuan'] === 'pack'
                         ? ((int) $item['jumlah']) * $isiPerPack
                         : (int) $item['jumlah']);
 
@@ -401,7 +401,7 @@ class TransaksiPOSController extends Controller
                         throw new \RuntimeException("Stok {$produk->nama} tidak mencukupi");
                     }
 
-                    $isiPackSaatTransaksi = $item['mode_qty'] === 'pack' ? $isiPerPack : 1;
+                    $isiPackSaatTransaksi = $item['jenis_satuan'] === 'pack' ? $isiPerPack : 1;
                 }
 
                 TransaksiDetail::create([
@@ -410,7 +410,7 @@ class TransaksiPOSController extends Controller
                     'nama_produk' => $produk->nama,
                     'harga_satuan' => $item['harga_satuan'],
                     'jumlah' => $item['jumlah'],
-                    'mode_qty' => $item['mode_qty'],
+                    'jenis_satuan' => $item['jenis_satuan'],
                     'isi_pack_saat_transaksi' => $isiPackSaatTransaksi,
                     'diskon_item' => 0,
                     // PENTING: subtotal = jumlah × harga_satuan (harga_satuan sudah termasuk konversi pack)
@@ -547,7 +547,7 @@ class TransaksiPOSController extends Controller
             foreach ($transaksi->detail as $detail) {
                 $qtyToRestore = $detail->jumlah;
 
-                if ($detail->mode_qty === 'pack') {
+                if ($detail->jenis_satuan === 'pack') {
                     // Jika produk pcs dijual per pack, kembalikan ke pcs dengan konversi;
                     // jika produk kemasan besar, kembalikan per kemasan (tanpa konversi)
                     if (($detail->produk->satuan ?? 'pcs') === 'pcs') {

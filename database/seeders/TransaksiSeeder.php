@@ -55,7 +55,7 @@ class TransaksiSeeder extends Seeder
             'nama_produk' => $produk1->nama,
             'harga_satuan' => $produk1->harga,
             'jumlah' => 2,
-            'mode_qty' => 'unit',
+            'jenis_satuan' => 'unit',
             'diskon_item' => 0,
             'subtotal' => 32000,
         ]);
@@ -102,7 +102,7 @@ class TransaksiSeeder extends Seeder
             'nama_produk' => $produk2->nama,
             'harga_satuan' => $produk2->harga,
             'jumlah' => 10,
-            'mode_qty' => 'unit',
+            'jenis_satuan' => 'unit',
             'diskon_item' => 0,
             'subtotal' => 140000,
         ]);

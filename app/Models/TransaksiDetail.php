@@ -20,8 +20,8 @@ class TransaksiDetail extends Model
         'nama_produk',
         'harga_satuan',
         'jumlah',
-        'mode_qty',
-        'isi_pack_saat_transaksi', // 1️⃣ Tambahkan kolom baru
+        'jenis_satuan',
+        'isi_pack_saat_transaksi',
         'diskon_item',
         'subtotal',
     ];
@@ -69,10 +69,10 @@ class TransaksiDetail extends Model
     }
 
     /**
-     * Get unit description based on mode_qty
+     * Get unit description based on jenis_satuan
      */
     public function getUnitDescriptionAttribute(): string
     {
-        return $this->mode_qty === 'pack' ? 'pack' : 'unit';
+        return $this->jenis_satuan === 'pack' ? 'pack' : 'unit';
     }
 }

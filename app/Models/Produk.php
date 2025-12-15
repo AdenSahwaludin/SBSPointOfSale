@@ -31,6 +31,8 @@ class Produk extends Model
         'harga_pack',
         'stok',
         'sisa_pcs_terbuka',
+        'batas_stok_minimum',
+        'jumlah_restock',
     ];
 
     protected $casts = [
