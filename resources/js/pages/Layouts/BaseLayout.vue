@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import NotificationContainer from '@/components/NotificationContainer.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { computed, onMounted, ref, watch } from 'vue';
-import { useNotifications } from '@/composables/useNotifications';
+import { computed, onMounted, ref } from 'vue';
 
 interface MenuItem {
     name: string;
@@ -21,34 +20,11 @@ interface Props {
 const props = defineProps<Props>();
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
-const { success, error, warning, info } = useNotifications();
 
 const isSidebarOpen = ref(true);
 const isMobile = ref(false);
 const isProfileDropdownOpen = ref(false);
 const expandedMenus = ref<Set<string>>(new Set());
-
-// Watch for flash messages
-watch(
-    () => page.props.flash,
-    (flash: any) => {
-        if (flash) {
-            if (flash.success) {
-                success('Sukses', flash.success);
-            }
-            if (flash.error) {
-                error('Error', flash.error);
-            }
-            if (flash.warning) {
-                warning('Peringatan', flash.warning);
-            }
-            if (flash.info) {
-                info('Informasi', flash.info);
-            }
-        }
-    },
-    { immediate: true, deep: true }
-);
 
 function logout() {
     if (window.confirm('Apakah Anda yakin ingin logout?')) {

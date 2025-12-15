@@ -78,8 +78,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         'update' => 'pelanggan.update',
         'destroy' => 'pelanggan.destroy',
     ]);
-    // API endpoint untuk mendapatkan alasan blocking penghapusan
-    Route::get('pelanggan/{id}/deletion-block-reasons', [PelangganController::class, 'getDeletionBlockReasons'])->name('pelanggan.deletion-block-reasons');
 
     // ==========================================
     // TRANSAKSI

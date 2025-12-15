@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
-use App\Services\PelangganDeletionService;
 use App\Services\TrustScoreService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -176,57 +175,45 @@ class PelangganController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * Validasi penghapusan dengan pemeriksaan relasi foreign key
      */
     public function destroy(string $id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
 
-        // Gunakan service untuk validasi penghapusan
-        $deletionService = new PelangganDeletionService;
-        $validation = $deletionService->validateDeletion($pelanggan);
-
-        if (! $validation['can_delete']) {
-            // Jika tidak bisa dihapus, kembalikan dengan pesan error yang jelas
-            return back()->with('error', $validation['message']);
+        // Check if pelanggan has any transactions
+        $transactionCount = $pelanggan->transaksi()->count();
+        if ($transactionCount > 0) {
+            return back()->with('error', "Pelanggan tidak dapat dihapus karena sudah memiliki {$transactionCount} riwayat transaksi. Data pelanggan dengan transaksi harus dipertahankan untuk keperluan audit dan pelaporan.");
         }
 
-        // Hapus pelanggan jika validasi lolos
-        $pelanggan->delete();
-
-        return redirect()->route("{$this->routePrefix}.index")
-            ->with('success', 'Pelanggan berhasil dihapus');
-    }
-
-    /**
-     * Get detailed blocking reasons for customer deletion via API
-     * Digunakan untuk menampilkan informasi detail kepada pengguna
-     */
-    public function getDeletionBlockReasons(string $id)
-    {
-        $pelanggan = Pelanggan::findOrFail($id);
-
-        // Gunakan service untuk mendapatkan alasan blocking
-        $deletionService = new PelangganDeletionService;
-        $validation = $deletionService->validateDeletion($pelanggan);
-
-        if ($validation['can_delete']) {
-            return response()->json([
-                'can_delete' => true,
-                'message' => 'Pelanggan dapat dihapus',
-                'reasons' => [],
-            ]);
+        // Check if pelanggan has active credit contracts
+        $activeContracts = $pelanggan->kontrakKredit()->where('status', 'AKTIF')->count();
+        if ($activeContracts > 0) {
+            return back()->with('error', "Pelanggan tidak dapat dihapus karena memiliki {$activeContracts} kontrak kredit aktif. Silakan selesaikan atau batalkan kontrak terlebih dahulu.");
         }
 
-        // Dapatkan detail alasan
-        $blockingReasons = $deletionService->getDeletionBlockReasons($pelanggan);
+        // Check if pelanggan has completed credit contracts
+        $completedContracts = $pelanggan->kontrakKredit()->count();
+        if ($completedContracts > 0) {
+            return back()->with('error', "Pelanggan tidak dapat dihapus karena memiliki riwayat kontrak kredit ({$completedContracts} kontrak). Data pelanggan dengan riwayat kredit harus dipertahankan untuk keperluan audit.");
+        }
 
-        return response()->json([
-            'can_delete' => false,
-            'message' => $validation['message'],
-            'summary' => $validation['reasons'],
-            'details' => $blockingReasons,
-        ]);
+        // Check if pelanggan has outstanding credit balance
+        if ($pelanggan->saldo_kredit > 0) {
+            $formattedBalance = number_format($pelanggan->saldo_kredit, 0, ',', '.');
+
+            return back()->with('error', "Pelanggan tidak dapat dihapus karena masih memiliki saldo kredit outstanding sebesar Rp {$formattedBalance}. Silakan lunasi terlebih dahulu.");
+        }
+
+        // If all checks pass, proceed with deletion
+        try {
+            $pelanggan->delete();
+
+            return redirect()->route("{$this->routePrefix}.index")
+                ->with('success', "Pelanggan {$pelanggan->nama} berhasil dihapus dari sistem.");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus pelanggan. Terjadi kesalahan: '.$e->getMessage());
+        }
     }
 
     /**
