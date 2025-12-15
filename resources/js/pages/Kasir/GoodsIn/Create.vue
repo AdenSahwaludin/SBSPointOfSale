@@ -15,7 +15,7 @@ interface Product {
     jumlah_restock: number;
     satuan: string;
     kategori?: {
-        nama_kategori: string;
+        nama: string;
     };
 }
 
@@ -42,7 +42,7 @@ const selectedProductId = ref<number | null>(null);
 const selectedQty = ref<number>(1);
 
 const form = useForm({
-    items: [] as Array<{ id_produk: number; qty_request: number }>,
+    items: [] as Array<{ id_produk: number; jumlah_dipesan: number }>,
 });
 
 const filteredProducts = computed(() => {
@@ -51,7 +51,7 @@ const filteredProducts = computed(() => {
     }
     const query = searchQuery.value.toLowerCase();
     return props.productsBelowROP.filter(
-        (p) => p.nama.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query) || p.kategori?.nama_kategori.toLowerCase().includes(query),
+        (p) => p.nama.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query) || p.kategori?.nama.toLowerCase().includes(query),
     );
 });
 
@@ -127,7 +127,7 @@ function submit() {
 
     form.items = cart.value.map((item) => ({
         id_produk: item.id_produk,
-        qty_request: item.qty_request,
+        jumlah_dipesan: item.qty_request,
     }));
 
     form.post('/kasir/goods-in', {
@@ -323,11 +323,11 @@ function getSuggestedQty(product: Product) {
                             <tr v-for="product in filteredProducts" :key="product.id_produk" class="transition-colors hover:bg-emerald-50">
                                 <td class="px-4 py-3 text-sm text-emerald-800">{{ product.nama }}</td>
                                 <td class="px-4 py-3 text-sm text-emerald-600">{{ product.sku }}</td>
-                                <td class="px-4 py-3 text-sm text-emerald-600">{{ product.kategori?.nama_kategori || '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-emerald-600">{{ product.kategori?.nama || '-' }}</td>
                                 <td class="px-4 py-3">
                                     <span class="text-sm font-medium text-red-600"> {{ product.stok }} {{ product.satuan }} </span>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-emerald-700">{{ product.rop }} {{ product.satuan }}</td>
+                                <td class="px-4 py-3 text-sm text-emerald-700">{{ product.batas_stok_minimum }} {{ product.satuan }}</td>
                                 <td class="px-4 py-3">
                                     <span class="text-sm font-medium text-emerald-700">{{ getSuggestedQty(product) }} {{ product.satuan }}</span>
                                 </td>

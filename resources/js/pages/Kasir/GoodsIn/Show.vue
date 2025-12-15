@@ -19,7 +19,7 @@ interface Produk {
 interface GoodsInDetail {
     id_goods_in_detail: number;
     id_produk: number;
-    qty_request: number;
+    jumlah_dipesan: number;
     qty_received: number;
     produk: Produk;
 }
@@ -64,7 +64,7 @@ const selectedQty = ref<number>(1);
 
 const addForm = useForm({
     id_produk: null as number | null,
-    qty_request: 1,
+    jumlah_dipesan: 1,
 });
 
 const selectedProduct = computed(() => {
@@ -120,14 +120,14 @@ function getStatusIcon(status: string) {
 }
 
 function getTotalItems() {
-    return props.goodsIn.details.reduce((sum, detail) => sum + detail.qty_request, 0);
+    return props.goodsIn.details.reduce((sum, detail) => sum + detail.jumlah_dipesan, 0);
 }
 
 function addItem() {
     if (!selectedProductId.value || selectedQty.value <= 0) return;
 
     addForm.id_produk = selectedProductId.value;
-    addForm.qty_request = selectedQty.value;
+    addForm.jumlah_dipesan = selectedQty.value;
 
     addForm.post(itemsRoutes.add(props.goodsIn.id_goods_in).url, {
         onSuccess: () => {
@@ -313,14 +313,14 @@ function submitPO() {
                                     <span class="font-medium">{{ detail.produk.stok }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-sm whitespace-nowrap text-emerald-700">
-                                    <span class="font-medium">{{ detail.qty_request }}</span> {{ detail.produk.satuan }}
+                                    <span class="font-medium">{{ detail.jumlah_dipesan }}</span> {{ detail.produk.satuan }}
                                 </td>
                                 <td v-if="goodsIn.status === 'received'" class="px-4 py-3 text-sm whitespace-nowrap text-emerald-700">
                                     <span class="font-medium">{{ detail.qty_received }}</span> {{ detail.produk.satuan }}
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
                                     <span
-                                        v-if="goodsIn.status === 'received' && detail.qty_received >= detail.qty_request"
+                                        v-if="goodsIn.status === 'received' && detail.qty_received >= detail.jumlah_dipesan"
                                         class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700"
                                     >
                                         <i class="fas fa-check"></i>
@@ -418,8 +418,8 @@ function submitPO() {
                                 class="w-full rounded-lg border border-emerald-300 px-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                                 placeholder="Masukkan kuantitas"
                             />
-                            <div v-if="(page.props.errors as any)?.qty_request" class="mt-1 text-sm text-red-600">
-                                {{ (page.props.errors as any)?.qty_request }}
+                            <div v-if="(page.props.errors as any)?.jumlah_dipesan" class="mt-1 text-sm text-red-600">
+                                {{ (page.props.errors as any)?.jumlah_dipesan }}
                             </div>
                         </div>
                     </div>
