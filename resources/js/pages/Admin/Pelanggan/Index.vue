@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
+import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, router, usePage } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
 interface Pelanggan {
     id_pelanggan: string;
@@ -43,6 +44,24 @@ const deleteTarget = ref<Pelanggan | null>(null);
 
 // Menu items dengan active state menggunakan composable
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pelanggan');
+
+// Notification system
+const { success, error } = useNotifications();
+const page = usePage();
+
+// Watch for flash messages from server
+watch(
+    () => page.props.flash,
+    (flash: any) => {
+        if (flash?.success) {
+            success('Berhasil', flash.success);
+        }
+        if (flash?.error) {
+            error('Gagal', flash.error);
+        }
+    },
+    { deep: true, immediate: true },
+);
 
 function confirmDelete(pelanggan: Pelanggan) {
     deleteTarget.value = pelanggan;
