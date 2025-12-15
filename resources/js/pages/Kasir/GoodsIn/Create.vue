@@ -11,8 +11,8 @@ interface Product {
     sku: string;
     nama: string;
     stok: number;
-    rop: number;
-    roq: number;
+    batas_stok_minimum: number;
+    jumlah_restock: number;
     satuan: string;
     kategori?: {
         nama_kategori: string;
@@ -103,7 +103,7 @@ function updateCartQty(index: number, qty: number) {
 }
 
 function quickAddFromROP(product: Product) {
-    const suggestedQty = product.roq || product.rop - product.stok;
+    const suggestedQty = product.jumlah_restock || product.batas_stok_minimum - product.stok;
     const existingItem = cart.value.find((item) => item.id_produk === product.id_produk);
 
     if (existingItem) {
@@ -139,11 +139,11 @@ function submit() {
 }
 
 function getStockDifference(product: Product) {
-    return product.rop - product.stok;
+    return product.batas_stok_minimum - product.stok;
 }
 
 function getSuggestedQty(product: Product) {
-    return product.roq || getStockDifference(product);
+    return product.jumlah_restock || getStockDifference(product);
 }
 </script>
 
@@ -185,7 +185,7 @@ function getSuggestedQty(product: Product) {
                             </select>
                             <p v-if="selectedProduct" class="mt-1 text-xs text-emerald-600">
                                 <i class="fas fa-info-circle"></i>
-                                ROP: {{ selectedProduct.rop }}, Stok Saat Ini: {{ selectedProduct.stok }}, Kekurangan:
+                                Batas Minimum: {{ selectedProduct.batas_stok_minimum }}, Stok Saat Ini: {{ selectedProduct.stok }}, Kekurangan:
                                 {{ getStockDifference(selectedProduct) }}
                             </p>
                         </div>
@@ -208,9 +208,9 @@ function getSuggestedQty(product: Product) {
                                     Tambah
                                 </BaseButton>
                             </div>
-                            <p v-if="selectedProduct && selectedProduct.roq" class="mt-1 text-xs text-emerald-600">
+                            <p v-if="selectedProduct && selectedProduct.jumlah_restock" class="mt-1 text-xs text-emerald-600">
                                 <i class="fas fa-lightbulb"></i>
-                                ROQ (Saran): {{ selectedProduct.roq }} {{ selectedProduct.satuan }}
+                                Jumlah Restock (Saran): {{ selectedProduct.jumlah_restock }} {{ selectedProduct.satuan }}
                             </p>
                         </div>
                     </div>
@@ -314,7 +314,7 @@ function getSuggestedQty(product: Product) {
                                 <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">SKU</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Kategori</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Stok</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">ROP</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Batas Minimum</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Saran Qty</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Aksi</th>
                             </tr>
