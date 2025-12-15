@@ -34,7 +34,7 @@ describe('Goods In Item Management', function () {
             $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
             $response->assertSessionHas('success', 'Item berhasil ditambahkan ke PO.');
 
-            $this->assertDatabaseHas('goods_in_details', [
+            $this->assertDatabaseHas('detail_pemesanan_barang', [
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk->id_produk,
                 'qty_request' => 10,
@@ -153,7 +153,7 @@ describe('Goods In Item Management', function () {
             $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
             $response->assertSessionHas('success', 'Kuantitas item berhasil diperbarui.');
 
-            $this->assertDatabaseHas('goods_in_details', [
+            $this->assertDatabaseHas('detail_pemesanan_barang', [
                 'id_goods_in_detail' => $detail->id_goods_in_detail,
                 'qty_request' => 20,
             ]);
@@ -209,7 +209,7 @@ describe('Goods In Item Management', function () {
             $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
             $response->assertSessionHas('success', 'Item berhasil dihapus dari PO.');
 
-            $this->assertDatabaseMissing('goods_in_details', [
+            $this->assertDatabaseMissing('detail_pemesanan_barang', [
                 'id_goods_in_detail' => $detail->id_goods_in_detail,
             ]);
         });
@@ -236,7 +236,7 @@ describe('Goods In Item Management', function () {
             $response->assertRedirect();
             $response->assertSessionHasErrors('error');
 
-            $this->assertDatabaseHas('goods_in_details', [
+            $this->assertDatabaseHas('detail_pemesanan_barang', [
                 'id_goods_in_detail' => $detail->id_goods_in_detail,
             ]);
         });
@@ -265,7 +265,7 @@ describe('Goods In Item Management', function () {
             $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
             $response->assertSessionHas('success', 'PO berhasil diajukan untuk persetujuan.');
 
-            $this->assertDatabaseHas('goods_ins', [
+            $this->assertDatabaseHas('pemesanan_barang', [
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'status' => GoodsInStatus::Submitted->value,
             ]);
@@ -285,7 +285,7 @@ describe('Goods In Item Management', function () {
             $response->assertRedirect();
             $response->assertSessionHasErrors('error');
 
-            $this->assertDatabaseHas('goods_ins', [
+            $this->assertDatabaseHas('pemesanan_barang', [
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'status' => GoodsInStatus::Draft->value,
             ]);

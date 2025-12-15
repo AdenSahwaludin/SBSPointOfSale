@@ -10,7 +10,7 @@ class GoodsInDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'goods_in_details';
+    protected $table = 'detail_pemesanan_barang';
 
     protected $primaryKey = 'id_goods_in_detail';
 

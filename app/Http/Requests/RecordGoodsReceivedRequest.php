@@ -23,7 +23,7 @@ class RecordGoodsReceivedRequest extends FormRequest
     {
         return [
             'items' => 'required|array|min:1',
-            'items.*.id_goods_in_detail' => 'required|integer|exists:goods_in_details,id_goods_in_detail',
+            'items.*.id_goods_in_detail' => 'required|integer|exists:detail_pemesanan_barang,id_goods_in_detail',
             'items.*.qty_received' => 'required|integer|min:1',
             'items.*.qty_damaged' => 'nullable|integer|min:0|lt:items.*.qty_received',
             'items.*.catatan' => 'nullable|string|max:500',

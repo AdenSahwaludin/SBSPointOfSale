@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GoodsReceived extends Model
 {
-    protected $table = 'goods_received';
+    protected $table = 'penerimaan_barang';
 
     protected $primaryKey = 'id_goods_received';
 

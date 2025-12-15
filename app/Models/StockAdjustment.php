@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockAdjustment extends Model
 {
-    protected $table = 'stock_adjustments';
+    protected $table = 'penyesuaian_stok';
 
     protected $primaryKey = 'id_adjustment';
 

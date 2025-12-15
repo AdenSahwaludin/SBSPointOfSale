@@ -103,7 +103,7 @@ it('can record received goods for approved PO', function () {
     $response->assertRedirect(route('kasir.goods-in.receiving-show', $po->id_goods_in));
 
     // Check goods received was created
-    $this->assertDatabaseHas('goods_received', [
+    $this->assertDatabaseHas('penerimaan_barang', [
         'id_goods_in' => $po->id_goods_in,
         'id_goods_in_detail' => $detail->id_goods_in_detail,
         'qty_received' => 5,
@@ -150,7 +150,7 @@ it('can record received goods for multiple items', function () {
     $response->assertRedirect();
 
     // Check both were created
-    $this->assertDatabaseCount('goods_received', 2);
+    $this->assertDatabaseCount('penerimaan_barang', 2);
     $detail1->refresh();
     $detail2->refresh();
     $this->assertEquals(10, $detail1->qty_received);
@@ -306,7 +306,7 @@ it('can track multiple receives for same item', function () {
     $detail->refresh();
     $this->assertEquals(25, $detail->qty_received);
 
-    // Should have 2 goods_received records
+    // Should have 2 penerimaan_barang records
     $receivedGoods = $this->service->getReceivedGoodsByPO($po);
     $this->assertCount(2, $receivedGoods);
 });
@@ -375,8 +375,8 @@ it('can record damaged goods and only increments stock with good items', functio
     $produk->refresh();
     expect($produk->stok)->toBe($initialStock + 17);
 
-    // Verify goods_received record has qty_damaged
-    $this->assertDatabaseHas('goods_received', [
+    // Verify penerimaan_barang record has qty_damaged
+    $this->assertDatabaseHas('penerimaan_barang', [
         'id_goods_in_detail' => $detail->id_goods_in_detail,
         'qty_received' => 20,
         'qty_damaged' => 3,
