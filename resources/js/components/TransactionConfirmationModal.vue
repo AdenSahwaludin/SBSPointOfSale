@@ -142,13 +142,7 @@
                         <i class="fas fa-print mr-2"></i>
                         Cetak Struk
                     </BaseButton>
-                    <BaseButton
-                        @click="handleConfirm"
-                        variant="primary"
-                        class="flex-1"
-                        :disabled="isSubmitting"
-                        :loading="isSubmitting"
-                    >
+                    <BaseButton @click="handleConfirm" variant="primary" class="flex-1" :disabled="isSubmitting" :loading="isSubmitting">
                         <i class="fas fa-check mr-2"></i>
                         {{ isSubmitting ? 'Memproses...' : 'Selesaikan' }}
                     </BaseButton>
@@ -256,7 +250,7 @@ watch(
             window.removeEventListener('keydown', handleKeyDown);
             isSubmitting.value = false;
         }
-    }
+    },
 );
 
 // Cleanup on component unmount

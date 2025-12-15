@@ -12,6 +12,7 @@ use App\Models\Pembayaran;
 use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
+use App\Services\CreditSyncService;
 use App\Services\CustomerCreditScoringService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -246,9 +247,7 @@ class TransaksiPOSController extends Controller
             ], 422);
         }
 
-        try {
-            DB::beginTransaction();
-
+        return DB::transaction(function () use ($request) {
             // Generate nomor transaksi
             $nomorTransaksi = Transaksi::generateNomorTransaksi($request->id_pelanggan);
 
@@ -260,6 +259,18 @@ class TransaksiPOSController extends Controller
 
             // Enforce credit limit rules for credit transactions
             if ($isCredit) {
+                $creditSyncService = new CreditSyncService;
+
+                // Validasi status kredit pelanggan
+                $eligibility = $creditSyncService->validateCreditEligibility($request->id_pelanggan);
+                if (! $eligibility['valid']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $eligibility['message'],
+                        'errors' => ['metode_bayar' => [$eligibility['message']]],
+                    ], 422);
+                }
+
                 $dp = (float) ($request->dp ?? 0);
                 $total = (float) $request->total;
                 $creditPortion = max(0.0, $total - $dp);
@@ -278,11 +289,8 @@ class TransaksiPOSController extends Controller
                     ], 422);
                 }
 
-                // Update credit: kurangi available limit, tambah saldo piutang, pastikan status aktif
-                $customer->credit_limit = $available - $creditPortion;
-                $customer->saldo_kredit = (float) ($customer->saldo_kredit ?? 0) + $creditPortion;
-                $customer->status_kredit = 'aktif';
-                $customer->save();
+                // Update credit menggunakan service untuk consistency
+                $creditSyncService->deductCreditFromNewTransaction($request->id_pelanggan, $creditPortion);
             }
 
             // Create transaksi (siapkan field Cicilan Pintar untuk implementasi nanti)
@@ -466,8 +474,6 @@ class TransaksiPOSController extends Controller
                 event(new PaymentReceived($pembayaran));
             }
 
-            DB::commit();
-
             // Auto-increase credit limit and saldo based on transaction activity
             $pelanggan = Pelanggan::find($request->id_pelanggan);
             if ($pelanggan && $pelanggan->trust_score >= 70) {
@@ -484,16 +490,7 @@ class TransaksiPOSController extends Controller
                     'metode_bayar' => $request->metode_bayar,
                 ],
             ]);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            $status = ($e instanceof \RuntimeException || $e instanceof \InvalidArgumentException) ? 422 : 500;
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menyimpan transaksi: '.$e->getMessage(),
-            ], $status);
-        }
+        });
     }
 
     /**

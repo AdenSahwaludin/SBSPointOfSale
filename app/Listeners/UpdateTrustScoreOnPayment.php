@@ -37,6 +37,17 @@ class UpdateTrustScoreOnPayment implements ShouldQueue
             return;
         }
 
+        // Skip credit limit recalculation for credit DP payments
+        // These are handled by deductCreditFromNewTransaction in the controller
+        if ($pembayaran->tipe_pembayaran === 'kredit') {
+            Log::info('Skipping credit limit update for credit DP payment', [
+                'payment_id' => $pembayaran->id_pembayaran,
+                'customer_id' => $pelanggan->id_pelanggan,
+            ]);
+
+            return;
+        }
+
         try {
             // Recalculate trust score
             $oldScore = $pelanggan->trust_score;
