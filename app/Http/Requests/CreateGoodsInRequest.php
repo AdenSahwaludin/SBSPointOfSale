@@ -24,7 +24,7 @@ class CreateGoodsInRequest extends FormRequest
         return [
             'items' => 'required|array|min:1',
             'items.*.id_produk' => 'required|exists:produk,id_produk',
-            'items.*.qty_request' => 'required|integer|min:1',
+            'items.*.jumlah_dipesan' => 'required|integer|min:1',
         ];
     }
 }

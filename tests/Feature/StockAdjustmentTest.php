@@ -22,7 +22,7 @@ describe('Stock Adjustment - Positive Adjustments', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => 'Customer returned unused items',
             ]);
 
@@ -33,7 +33,7 @@ describe('Stock Adjustment - Positive Adjustments', function () {
         $adjustment = StockAdjustment::where('id_produk', $produk->id_produk)->first();
         expect($adjustment)->not->toBeNull();
         expect($adjustment->tipe)->toBe(AdjustmentType::ReturPelanggan->value);
-        expect($adjustment->qty_adjustment)->toBe($qtyAdjustment);
+        expect($adjustment->jumlah_penyesuaian)->toBe($qtyAdjustment);
 
         // Verify stock was increased
         $produk->refresh();
@@ -49,7 +49,7 @@ describe('Stock Adjustment - Positive Adjustments', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturGudang->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => 'Returned from warehouse',
             ]);
 
@@ -68,7 +68,7 @@ describe('Stock Adjustment - Positive Adjustments', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::KoreksiPlus->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => 'Found additional stock during inventory check',
             ]);
 
@@ -93,7 +93,7 @@ describe('Stock Adjustment - Negative Adjustments', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::Expired->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => 'Products expired',
             ]);
 
@@ -114,7 +114,7 @@ describe('Stock Adjustment - Negative Adjustments', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::Rusak->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => 'Damaged packaging',
             ]);
 
@@ -133,7 +133,7 @@ describe('Stock Adjustment - Negative Adjustments', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::KoreksiMinus->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => 'Inventory correction - missing items',
             ]);
 
@@ -152,7 +152,7 @@ describe('Stock Adjustment - Negative Adjustments', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::Expired->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => 'Too many expired items',
             ]);
 
@@ -172,7 +172,7 @@ describe('Stock Adjustment - Negative Adjustments', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::Rusak->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => 'All items damaged',
             ]);
 
@@ -206,7 +206,7 @@ describe('Stock Adjustment - All Adjustment Types', function () {
                 ->post(route('kasir.stock-adjustment.store'), [
                     'id_produk' => $produk->id_produk,
                     'tipe' => $testCase['type']->value,
-                    'qty_adjustment' => $testCase['adjustment'],
+                    'jumlah_penyesuaian' => $testCase['adjustment'],
                     'alasan' => "Testing {$testCase['type']->label()}",
                 ]);
 
@@ -226,7 +226,7 @@ describe('Stock Adjustment - All Adjustment Types', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => 25,
+                'jumlah_penyesuaian' => 25,
                 'alasan' => $alasan,
             ]);
 
@@ -235,7 +235,7 @@ describe('Stock Adjustment - All Adjustment Types', function () {
         expect($adjustment)->not->toBeNull();
         expect($adjustment->id_produk)->toBe($produk->id_produk);
         expect($adjustment->tipe)->toBe(AdjustmentType::ReturPelanggan->value);
-        expect($adjustment->qty_adjustment)->toBe(25);
+        expect($adjustment->jumlah_penyesuaian)->toBe(25);
         expect($adjustment->alasan)->toBe($alasan);
         expect($adjustment->id_pengguna)->toBe($this->kasir->id_pengguna);
         expect($adjustment->tanggal_adjustment)->not->toBeNull();
@@ -254,46 +254,46 @@ describe('Stock Adjustment - Validation', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => 'invalid_type',
-                'qty_adjustment' => 10,
+                'jumlah_penyesuaian' => 10,
                 'alasan' => 'Testing invalid type',
             ]);
 
         $response->assertSessionHasErrors('tipe');
     });
 
-    it('validates that qty_adjustment must be at least 1', function () {
+    it('validates that jumlah_penyesuaian must be at least 1', function () {
         $produk = Produk::factory()->create(['stok' => 50]);
 
         $response = $this->actingAs($this->kasir)
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => 0,
+                'jumlah_penyesuaian' => 0,
                 'alasan' => 'Testing zero quantity',
             ]);
 
-        $response->assertSessionHasErrors('qty_adjustment');
+        $response->assertSessionHasErrors('jumlah_penyesuaian');
     });
 
-    it('validates that qty_adjustment cannot be negative', function () {
+    it('validates that jumlah_penyesuaian cannot be negative', function () {
         $produk = Produk::factory()->create(['stok' => 50]);
 
         $response = $this->actingAs($this->kasir)
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => -5,
+                'jumlah_penyesuaian' => -5,
                 'alasan' => 'Testing negative quantity',
             ]);
 
-        $response->assertSessionHasErrors('qty_adjustment');
+        $response->assertSessionHasErrors('jumlah_penyesuaian');
     });
 
     it('validates that id_produk is required', function () {
         $response = $this->actingAs($this->kasir)
             ->post(route('kasir.stock-adjustment.store'), [
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => 10,
+                'jumlah_penyesuaian' => 10,
                 'alasan' => 'Testing missing product ID',
             ]);
 
@@ -305,7 +305,7 @@ describe('Stock Adjustment - Validation', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => 999999,
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => 10,
+                'jumlah_penyesuaian' => 10,
                 'alasan' => 'Testing non-existent product',
             ]);
 
@@ -318,7 +318,7 @@ describe('Stock Adjustment - Validation', function () {
         $response = $this->actingAs($this->kasir)
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
-                'qty_adjustment' => 10,
+                'jumlah_penyesuaian' => 10,
                 'alasan' => 'Testing missing type',
             ]);
 
@@ -332,7 +332,7 @@ describe('Stock Adjustment - Validation', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => 10,
+                'jumlah_penyesuaian' => 10,
             ]);
 
         $response->assertRedirect(route('kasir.stock-adjustment.index'));
@@ -354,7 +354,7 @@ describe('Stock Adjustment - Stock Update Accuracy', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => 20,
+                'jumlah_penyesuaian' => 20,
                 'alasan' => 'First adjustment',
             ]);
 
@@ -366,7 +366,7 @@ describe('Stock Adjustment - Stock Update Accuracy', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::Expired->value,
-                'qty_adjustment' => 10,
+                'jumlah_penyesuaian' => 10,
                 'alasan' => 'Second adjustment',
             ]);
 
@@ -378,7 +378,7 @@ describe('Stock Adjustment - Stock Update Accuracy', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::KoreksiPlus->value,
-                'qty_adjustment' => 5,
+                'jumlah_penyesuaian' => 5,
                 'alasan' => 'Third adjustment',
             ]);
 
@@ -398,7 +398,7 @@ describe('Stock Adjustment - Stock Update Accuracy', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturPelanggan->value,
-                'qty_adjustment' => 10,
+                'jumlah_penyesuaian' => 10,
                 'alasan' => 'Kasir 1 adjustment',
             ]);
 
@@ -406,7 +406,7 @@ describe('Stock Adjustment - Stock Update Accuracy', function () {
             ->post(route('kasir.stock-adjustment.store'), [
                 'id_produk' => $produk->id_produk,
                 'tipe' => AdjustmentType::ReturGudang->value,
-                'qty_adjustment' => 15,
+                'jumlah_penyesuaian' => 15,
                 'alasan' => 'Kasir 2 adjustment',
             ]);
 

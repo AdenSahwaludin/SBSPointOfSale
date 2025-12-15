@@ -17,8 +17,8 @@ class GoodsInDetail extends Model
     protected $fillable = [
         'id_goods_in',
         'id_produk',
-        'qty_request',
-        'qty_received',
+        'jumlah_dipesan',
+        'jumlah_diterima',
     ];
 
     public function goodsIn(): BelongsTo

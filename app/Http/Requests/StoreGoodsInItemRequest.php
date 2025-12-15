@@ -23,7 +23,7 @@ class StoreGoodsInItemRequest extends FormRequest
     {
         return [
             'id_produk' => 'required|integer|exists:produk,id_produk',
-            'qty_request' => 'required|integer|min:1|max:9999',
+            'jumlah_dipesan' => 'required|integer|min:1|max:9999',
         ];
     }
 
@@ -37,10 +37,10 @@ class StoreGoodsInItemRequest extends FormRequest
         return [
             'id_produk.required' => 'Produk harus dipilih.',
             'id_produk.exists' => 'Produk yang dipilih tidak ditemukan.',
-            'qty_request.required' => 'Kuantitas harus diisi.',
-            'qty_request.integer' => 'Kuantitas harus berupa angka.',
-            'qty_request.min' => 'Kuantitas minimal adalah 1.',
-            'qty_request.max' => 'Kuantitas maksimal adalah 9999.',
+            'jumlah_dipesan.required' => 'Kuantitas harus diisi.',
+            'jumlah_dipesan.integer' => 'Kuantitas harus berupa angka.',
+            'jumlah_dipesan.min' => 'Kuantitas minimal adalah 1.',
+            'jumlah_dipesan.max' => 'Kuantitas maksimal adalah 9999.',
         ];
     }
 }

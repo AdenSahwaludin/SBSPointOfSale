@@ -99,7 +99,7 @@ class GoodsInController extends Controller
             $this->goodsInService->addItemToGoodsIn(
                 $goodsIn,
                 $validated['id_produk'],
-                $validated['qty_request']
+                $validated['jumlah_dipesan']
             );
 
             return redirect()
@@ -131,7 +131,7 @@ class GoodsInController extends Controller
                 ->firstOrFail();
 
             $validated = $request->validated();
-            $this->goodsInService->updateItemQty($detail, $validated['qty_request']);
+            $this->goodsInService->updateItemQty($detail, $validated['jumlah_dipesan']);
 
             return redirect()
                 ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
@@ -260,9 +260,9 @@ class GoodsInController extends Controller
                 'id_produk' => $detail->id_produk,
                 'nama_produk' => $detail->produk->nama,
                 'sku' => $detail->produk->sku,
-                'qty_request' => $detail->qty_request,
-                'qty_received' => $detail->qty_received,
-                'qty_remaining' => $detail->qty_request - $detail->qty_received,
+                'jumlah_dipesan' => $detail->jumlah_dipesan,
+                'jumlah_diterima' => $detail->jumlah_diterima,
+                'qty_remaining' => $detail->jumlah_dipesan - $detail->jumlah_diterima,
             ];
         });
 

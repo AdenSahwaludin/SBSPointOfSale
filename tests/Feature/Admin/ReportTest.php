@@ -1,16 +1,17 @@
 <?php
 
-use App\Models\User;
-use App\Models\Transaksi;
 use App\Models\Pelanggan;
+use App\Models\Transaksi;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function createPelanggan() {
+function createPelanggan()
+{
     return Pelanggan::create([
-        'id_pelanggan' => 'PLG-' . uniqid(),
+        'id_pelanggan' => 'PLG-'.uniqid(),
         'nama' => 'Test Pelanggan',
         'alamat' => 'Test Alamat',
         'telepon' => '08123456789',
@@ -18,12 +19,13 @@ function createPelanggan() {
     ]);
 }
 
-function createTransaksi($overrides = []) {
+function createTransaksi($overrides = [])
+{
     $user = User::factory()->create(['role' => 'kasir']);
     $pelanggan = Pelanggan::first() ?? createPelanggan();
-    
+
     return Transaksi::create(array_merge([
-        'nomor_transaksi' => 'TRX-' . uniqid(),
+        'nomor_transaksi' => 'TRX-'.uniqid(),
         'id_pelanggan' => $pelanggan->id_pelanggan,
         'id_kasir' => $user->id_pengguna,
         'tanggal' => Carbon::now(),
@@ -55,7 +57,7 @@ test('admin can view reports page', function () {
 
 test('reports page shows correct stats', function () {
     $admin = User::factory()->create(['role' => 'admin']);
-    
+
     createTransaksi(['status_pembayaran' => 'LUNAS', 'total' => 100000]);
     createTransaksi(['status_pembayaran' => 'LUNAS', 'total' => 100000]);
     createTransaksi(['status_pembayaran' => 'LUNAS', 'total' => 100000]);
@@ -77,24 +79,24 @@ test('reports page shows correct stats', function () {
 
 test('reports page can filter by date', function () {
     $admin = User::factory()->create(['role' => 'admin']);
-    
+
     // Transaction yesterday
     createTransaksi([
         'tanggal' => Carbon::yesterday(),
         'status_pembayaran' => 'LUNAS',
-        'total' => 50000
+        'total' => 50000,
     ]);
 
     // Transaction today
     createTransaksi([
         'tanggal' => Carbon::today(),
         'status_pembayaran' => 'LUNAS',
-        'total' => 100000
+        'total' => 100000,
     ]);
 
     // Filter for today
     $response = $this->actingAs($admin)
-        ->get('/admin/reports?start_date=' . Carbon::today()->format('Y-m-d') . '&end_date=' . Carbon::today()->format('Y-m-d'));
+        ->get('/admin/reports?start_date='.Carbon::today()->format('Y-m-d').'&end_date='.Carbon::today()->format('Y-m-d'));
 
     $response->assertInertia(fn ($page) => $page
         ->where('stats.total_transaksi', 1)
@@ -104,7 +106,7 @@ test('reports page can filter by date', function () {
 
 test('reports page can filter by status', function () {
     $admin = User::factory()->create(['role' => 'admin']);
-    
+
     createTransaksi(['status_pembayaran' => 'LUNAS']);
     createTransaksi(['status_pembayaran' => 'MENUNGGU']);
 

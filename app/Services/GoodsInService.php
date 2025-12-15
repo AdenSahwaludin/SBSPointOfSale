@@ -15,7 +15,7 @@ class GoodsInService
      * Create a new PO (Purchase Order) request
      *
      * @param  string  $kasirId  The ID of the kasir creating the PO
-     * @param  array  $items  Array of items with format: [['id_produk' => int, 'qty_request' => int], ...]
+     * @param  array  $items  Array of items with format: [['id_produk' => int, 'jumlah_dipesan' => int], ...]
      * @return GoodsIn The created PO with details
      *
      * @throws \Exception If validation or creation fails
@@ -41,19 +41,19 @@ class GoodsInService
 
             // Create PO details for each item
             foreach ($items as $item) {
-                if (! isset($item['id_produk']) || ! isset($item['qty_request'])) {
-                    throw new \InvalidArgumentException('Each item must have id_produk and qty_request');
+                if (! isset($item['id_produk']) || ! isset($item['jumlah_dipesan'])) {
+                    throw new \InvalidArgumentException('Each item must have id_produk and jumlah_dipesan');
                 }
 
-                if ($item['qty_request'] <= 0) {
+                if ($item['jumlah_dipesan'] <= 0) {
                     throw new \InvalidArgumentException('Quantity requested must be greater than 0');
                 }
 
                 GoodsInDetail::create([
                     'id_goods_in' => $goodsIn->id_goods_in,
                     'id_produk' => $item['id_produk'],
-                    'qty_request' => $item['qty_request'],
-                    'qty_received' => 0,
+                    'jumlah_dipesan' => $item['jumlah_dipesan'],
+                    'jumlah_diterima' => 0,
                 ]);
             }
 
@@ -158,13 +158,13 @@ class GoodsInService
      *
      * @param  GoodsIn  $goodsIn  The GoodsIn instance
      * @param  int  $id_produk  Product ID
-     * @param  int  $qty_request  Quantity requested
+     * @param  int  $jumlah_dipesan  Quantity requested
      * @return GoodsInDetail The created detail
      *
      * @throws \LogicException If PO is not in draft status
      * @throws \InvalidArgumentException If product already exists in this PO
      */
-    public function addItemToGoodsIn(GoodsIn $goodsIn, int $id_produk, int $qty_request): GoodsInDetail
+    public function addItemToGoodsIn(GoodsIn $goodsIn, int $id_produk, int $jumlah_dipesan): GoodsInDetail
     {
         // Only allow adding if PO status is 'draft'
         if ($goodsIn->status !== GoodsInStatus::Draft->value) {
@@ -178,12 +178,12 @@ class GoodsInService
             throw new \InvalidArgumentException("Produk {$produk->nama} sudah ada di PO ini. Ubah qty-nya jika ingin menambah.");
         }
 
-        return DB::transaction(function () use ($goodsIn, $id_produk, $qty_request) {
+        return DB::transaction(function () use ($goodsIn, $id_produk, $jumlah_dipesan) {
             return GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $id_produk,
-                'qty_request' => $qty_request,
-                'qty_received' => 0,
+                'jumlah_dipesan' => $jumlah_dipesan,
+                'jumlah_diterima' => 0,
             ]);
         });
     }
@@ -192,12 +192,12 @@ class GoodsInService
      * Update item quantity in GoodsIn
      *
      * @param  GoodsInDetail  $detail  The detail to update
-     * @param  int  $qty_request  New quantity
+     * @param  int  $jumlah_dipesan  New quantity
      * @return GoodsInDetail The updated detail
      *
      * @throws \LogicException If PO is not in draft status
      */
-    public function updateItemQty(GoodsInDetail $detail, int $qty_request): GoodsInDetail
+    public function updateItemQty(GoodsInDetail $detail, int $jumlah_dipesan): GoodsInDetail
     {
         $goodsIn = $detail->goodsIn;
 
@@ -206,8 +206,8 @@ class GoodsInService
             throw new \LogicException('Hanya PO dengan status draft yang dapat diubah.');
         }
 
-        return DB::transaction(function () use ($detail, $qty_request) {
-            $detail->update(['qty_request' => $qty_request]);
+        return DB::transaction(function () use ($detail, $jumlah_dipesan) {
+            $detail->update(['jumlah_dipesan' => $jumlah_dipesan]);
 
             return $detail;
         });
@@ -264,7 +264,7 @@ class GoodsInService
      * Record received goods for an approved PO
      *
      * @param  GoodsIn  $goodsIn  The PO to record received goods for
-     * @param  array  $items  Array of items with qty_received and notes
+     * @param  array  $items  Array of items with jumlah_diterima and notes
      * @param  string  $kasirId  The ID of the kasir recording the received goods
      * @return \Illuminate\Support\Collection Collection of created GoodsReceived records
      *
@@ -293,25 +293,25 @@ class GoodsInService
                 }
 
                 // Calculate damaged goods (default to 0 if not provided)
-                $qtyDamaged = $item['qty_damaged'] ?? 0;
-                $qtyGood = $item['qty_received'] - $qtyDamaged;
+                $qtyDamaged = $item['jumlah_rusak'] ?? 0;
+                $qtyGood = $item['jumlah_diterima'] - $qtyDamaged;
 
                 // Create the received goods record
                 $received = \App\Models\GoodsReceived::create([
                     'id_goods_in' => $goodsIn->id_goods_in,
                     'id_goods_in_detail' => $detail->id_goods_in_detail,
                     'id_produk' => $detail->id_produk,
-                    'qty_received' => $item['qty_received'],
-                    'qty_damaged' => $qtyDamaged,
+                    'jumlah_diterima' => $item['jumlah_diterima'],
+                    'jumlah_rusak' => $qtyDamaged,
                     'id_kasir' => $kasirId,
                     'catatan' => $item['catatan'] ?? null,
                     'status' => 'completed',
                 ]);
 
-                // Update the detail's qty_received
-                $detail->increment('qty_received', $item['qty_received']);
+                // Update the detail's jumlah_diterima
+                $detail->increment('jumlah_diterima', $item['jumlah_diterima']);
 
-                // Update the product stock only with good items (qty_received - qty_damaged)
+                // Update the product stock only with good items (jumlah_diterima - jumlah_rusak)
                 if ($qtyGood > 0) {
                     Produk::findOrFail($detail->id_produk)->increment('stok', $qtyGood);
                 }
@@ -324,7 +324,7 @@ class GoodsInService
             $allDetails = $goodsIn->details;
 
             $isFullyReceived = $allDetails->every(function ($detail) {
-                return $detail->qty_received >= $detail->qty_request;
+                return $detail->jumlah_diterima >= $detail->jumlah_dipesan;
             });
 
             // Update PO status based on receiving completeness

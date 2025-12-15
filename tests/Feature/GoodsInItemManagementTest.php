@@ -28,7 +28,7 @@ describe('Goods In Item Management', function () {
             $response = $this->actingAs($this->kasir)
                 ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
                     'id_produk' => $produk->id_produk,
-                    'qty_request' => 10,
+                    'jumlah_dipesan' => 10,
                 ]);
 
             $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
@@ -37,8 +37,8 @@ describe('Goods In Item Management', function () {
             $this->assertDatabaseHas('detail_pemesanan_barang', [
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk->id_produk,
-                'qty_request' => 10,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 10,
+                'jumlah_diterima' => 0,
             ]);
         });
 
@@ -55,15 +55,15 @@ describe('Goods In Item Management', function () {
             GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk->id_produk,
-                'qty_request' => 5,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 5,
+                'jumlah_diterima' => 0,
             ]);
 
             // Try to add same product again
             $response = $this->actingAs($this->kasir)
                 ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
                     'id_produk' => $produk->id_produk,
-                    'qty_request' => 10,
+                    'jumlah_dipesan' => 10,
                 ]);
 
             $response->assertRedirect();
@@ -83,14 +83,14 @@ describe('Goods In Item Management', function () {
             $response = $this->actingAs($this->kasir)
                 ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
                     'id_produk' => $produk->id_produk,
-                    'qty_request' => 10,
+                    'jumlah_dipesan' => 10,
                 ]);
 
             $response->assertRedirect();
             $response->assertSessionHasErrors('error');
         });
 
-        it('validates qty_request is required', function () {
+        it('validates jumlah_dipesan is required', function () {
             $produk = Produk::factory()->create();
             $goodsIn = GoodsIn::create([
                 'nomor_po' => GoodsIn::generateNomorPO(),
@@ -102,13 +102,13 @@ describe('Goods In Item Management', function () {
             $response = $this->actingAs($this->kasir)
                 ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
                     'id_produk' => $produk->id_produk,
-                    'qty_request' => null,
+                    'jumlah_dipesan' => null,
                 ]);
 
-            $response->assertSessionHasErrors('qty_request');
+            $response->assertSessionHasErrors('jumlah_dipesan');
         });
 
-        it('validates qty_request minimum is 1', function () {
+        it('validates jumlah_dipesan minimum is 1', function () {
             $produk = Produk::factory()->create();
             $goodsIn = GoodsIn::create([
                 'nomor_po' => GoodsIn::generateNomorPO(),
@@ -120,10 +120,10 @@ describe('Goods In Item Management', function () {
             $response = $this->actingAs($this->kasir)
                 ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
                     'id_produk' => $produk->id_produk,
-                    'qty_request' => 0,
+                    'jumlah_dipesan' => 0,
                 ]);
 
-            $response->assertSessionHasErrors('qty_request');
+            $response->assertSessionHasErrors('jumlah_dipesan');
         });
     });
 
@@ -140,14 +140,14 @@ describe('Goods In Item Management', function () {
             $detail = GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk->id_produk,
-                'qty_request' => 10,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 10,
+                'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
                 ->patch(route('kasir.goods-in.items.update', [$goodsIn->id_goods_in, $detail->id_goods_in_detail]), [
                     'id_produk' => $produk->id_produk,
-                    'qty_request' => 20,
+                    'jumlah_dipesan' => 20,
                 ]);
 
             $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
@@ -155,7 +155,7 @@ describe('Goods In Item Management', function () {
 
             $this->assertDatabaseHas('detail_pemesanan_barang', [
                 'id_goods_in_detail' => $detail->id_goods_in_detail,
-                'qty_request' => 20,
+                'jumlah_dipesan' => 20,
             ]);
         });
 
@@ -171,14 +171,14 @@ describe('Goods In Item Management', function () {
             $detail = GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk->id_produk,
-                'qty_request' => 10,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 10,
+                'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
                 ->patch(route('kasir.goods-in.items.update', [$goodsIn->id_goods_in, $detail->id_goods_in_detail]), [
                     'id_produk' => $produk->id_produk,
-                    'qty_request' => 20,
+                    'jumlah_dipesan' => 20,
                 ]);
 
             $response->assertRedirect();
@@ -199,8 +199,8 @@ describe('Goods In Item Management', function () {
             $detail = GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk->id_produk,
-                'qty_request' => 10,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 10,
+                'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
@@ -226,8 +226,8 @@ describe('Goods In Item Management', function () {
             $detail = GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk->id_produk,
-                'qty_request' => 10,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 10,
+                'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
@@ -255,8 +255,8 @@ describe('Goods In Item Management', function () {
             GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk->id_produk,
-                'qty_request' => 10,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 10,
+                'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
@@ -309,15 +309,15 @@ describe('Goods In Item Management', function () {
             GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk1->id_produk,
-                'qty_request' => 5,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 5,
+                'jumlah_diterima' => 0,
             ]);
 
             GoodsInDetail::create([
                 'id_goods_in' => $goodsIn->id_goods_in,
                 'id_produk' => $produk2->id_produk,
-                'qty_request' => 10,
-                'qty_received' => 0,
+                'jumlah_dipesan' => 10,
+                'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)

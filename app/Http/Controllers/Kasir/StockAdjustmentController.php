@@ -64,7 +64,7 @@ class StockAdjustmentController extends Controller
             $adjustment = $this->stockAdjustmentService->createAdjustment(
                 $validated['id_produk'],
                 $validated['tipe'],
-                $validated['qty_adjustment'],
+                $validated['jumlah_penyesuaian'],
                 $validated['alasan'] ?? '',
                 $kasirId
             );

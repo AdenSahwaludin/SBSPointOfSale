@@ -39,8 +39,8 @@ class Produk extends Model
         'stok' => 'integer',
         'sisa_pcs_terbuka' => 'integer',
         'isi_per_pack' => 'integer',
-        'rop' => 'integer',
-        'roq' => 'integer',
+        'batas_stok_minimum' => 'integer',
+        'jumlah_restock' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

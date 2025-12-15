@@ -21,7 +21,7 @@ test('can create PO request', function () {
     $produk = Produk::factory()->create();
 
     $items = [
-        ['id_produk' => $produk->id_produk, 'qty_request' => 10],
+        ['id_produk' => $produk->id_produk, 'jumlah_dipesan' => 10],
     ];
 
     $po = $this->service->createPORequest($kasir->id_pengguna, $items);
@@ -30,7 +30,7 @@ test('can create PO request', function () {
         ->and($po->status)->toBe(GoodsInStatus::Draft->value)
         ->and($po->id_kasir)->toBe($kasir->id_pengguna)
         ->and($po->details)->toHaveCount(1)
-        ->and($po->details->first()->qty_request)->toBe(10);
+        ->and($po->details->first()->jumlah_dipesan)->toBe(10);
 });
 
 test('can approve PO', function () {
@@ -51,7 +51,7 @@ test('can approve PO', function () {
     $produk = Produk::factory()->create();
 
     $items = [
-        ['id_produk' => $produk->id_produk, 'qty_request' => 10],
+        ['id_produk' => $produk->id_produk, 'jumlah_dipesan' => 10],
     ];
 
     $po = $this->service->createPORequest($kasir->id_pengguna, $items);
@@ -82,7 +82,7 @@ test('can reject PO', function () {
     $produk = Produk::factory()->create();
 
     $items = [
-        ['id_produk' => $produk->id_produk, 'qty_request' => 10],
+        ['id_produk' => $produk->id_produk, 'jumlah_dipesan' => 10],
     ];
 
     $po = $this->service->createPORequest($kasir->id_pengguna, $items);
@@ -105,7 +105,7 @@ test('can get pending POs', function () {
     $produk = Produk::factory()->create();
 
     $items = [
-        ['id_produk' => $produk->id_produk, 'qty_request' => 10],
+        ['id_produk' => $produk->id_produk, 'jumlah_dipesan' => 10],
     ];
 
     $po1 = $this->service->createPORequest($kasir->id_pengguna, $items);
@@ -137,7 +137,7 @@ test('can get POs by kasir', function () {
     $produk = Produk::factory()->create();
 
     $items = [
-        ['id_produk' => $produk->id_produk, 'qty_request' => 10],
+        ['id_produk' => $produk->id_produk, 'jumlah_dipesan' => 10],
     ];
 
     $this->service->createPORequest($kasir1->id_pengguna, $items);

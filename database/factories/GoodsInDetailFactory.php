@@ -17,8 +17,8 @@ class GoodsInDetailFactory extends Factory
     public function definition(): array
     {
         return [
-            'qty_request' => $this->faker->numberBetween(5, 50),
-            'qty_received' => 0,
+            'jumlah_dipesan' => $this->faker->numberBetween(5, 50),
+            'jumlah_diterima' => 0,
         ];
     }
 }

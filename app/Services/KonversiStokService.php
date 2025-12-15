@@ -82,7 +82,7 @@ class KonversiStokService
             $fromProduk->decrement('stok', $conversionData['packs_needed']);
 
             // Update buffer sisa PCS
-            $newSisaBuffer = $conversionData['sisa_buffer_after'];
+            $newSisaBuffer = $conversionData['stok_sisa_pcs'];
             $fromProduk->update(['sisa_pcs_terbuka' => $newSisaBuffer]);
 
             // Tambahkan stok produk tujuan (pcs)
@@ -98,8 +98,8 @@ class KonversiStokService
                 'mode' => $mode,
                 'keterangan' => $keterangan,
                 'packs_used' => $conversionData['packs_needed'],
-                'dari_buffer' => $conversionData['dari_buffer'],
-                'sisa_buffer_after' => $newSisaBuffer,
+                'stok_awal_pcs' => $conversionData['stok_awal_pcs'],
+                'stok_sisa_pcs' => $newSisaBuffer,
             ]);
 
             return $konversi;
@@ -117,7 +117,7 @@ class KonversiStokService
      * @param  int  $qtyTo  Jumlah PCS yang diminta
      * @param  string  $mode  Mode konversi
      * @param  int  $isiPerPack  Jumlah PCS per karton
-     * @return array Berisi: packs_needed, dari_buffer, sisa_buffer_after
+     * @return array Berisi: packs_needed, stok_awal_pcs, stok_sisa_pcs
      */
     private function calculateConversion(
         Produk $produk,
@@ -156,8 +156,8 @@ class KonversiStokService
 
         return [
             'packs_needed' => $packsNeeded,
-            'dari_buffer' => $dariBuffer,
-            'sisa_buffer_after' => $sisaBuffer,
+            'stok_awal_pcs' => $dariBuffer,
+            'stok_sisa_pcs' => $sisaBuffer,
         ];
     }
 
@@ -182,14 +182,14 @@ class KonversiStokService
 
             // Reverse buffer sisa PCS
             // Logika restore buffer:
-            // - Jika packs_used = 0, buffer asli = sisa_buffer_after + dari_buffer (ambil dari buffer saja)
-            // - Jika packs_used > 0, buffer asli = dari_buffer (buffer lama habis, karton baru dibuka)
+            // - Jika packs_used = 0, buffer asli = stok_sisa_pcs + stok_awal_pcs (ambil dari buffer saja)
+            // - Jika packs_used > 0, buffer asli = stok_awal_pcs (buffer lama habis, karton baru dibuka)
             if ($konversi->packs_used > 0) {
                 // Ada karton yang dibuka, buffer original adalah yang diambil dari buffer lama
-                $bufferOriginal = $konversi->dari_buffer;
+                $bufferOriginal = $konversi->stok_awal_pcs;
             } else {
                 // Tidak ada karton dibuka, semua dari buffer, restore buffer
-                $bufferOriginal = $konversi->sisa_buffer_after + $konversi->dari_buffer;
+                $bufferOriginal = $konversi->stok_sisa_pcs + $konversi->stok_awal_pcs;
             }
             $fromProduk->update(['sisa_pcs_terbuka' => $bufferOriginal]);
 

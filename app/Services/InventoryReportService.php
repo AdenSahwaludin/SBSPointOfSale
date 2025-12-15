@@ -17,9 +17,9 @@ class InventoryReportService
     public function getProductsBelowROP(): Collection
     {
         return Produk::with('kategori')
-            ->whereColumn('stok', '<=', 'rop')
-            ->whereNotNull('rop')
-            ->where('rop', '>', 0)
+            ->whereColumn('stok', '<=', 'batas_stok_minimum')
+            ->whereNotNull('batas_stok_minimum')
+            ->where('batas_stok_minimum', '>', 0)
             ->orderBy('stok', 'asc')
             ->get();
     }
@@ -46,9 +46,9 @@ class InventoryReportService
                         'sku' => $produk->sku,
                         'nama' => $produk->nama,
                         'stok' => $produk->stok,
-                        'rop' => $produk->rop,
-                        'roq' => $produk->roq,
-                        'difference' => $produk->rop - $produk->stok,
+                        'batas_stok_minimum' => $produk->batas_stok_minimum,
+                        'jumlah_restock' => $produk->jumlah_restock,
+                        'difference' => $produk->batas_stok_minimum - $produk->stok,
                     ];
                 }),
             ];
@@ -156,7 +156,7 @@ class InventoryReportService
                 'cumulative_percentage' => $item['cumulative_percentage'],
                 'abc_class' => $item['abc_class'],
                 'current_stock' => $produk->stok,
-                'rop' => $produk->rop,
+                'batas_stok_minimum' => $produk->batas_stok_minimum,
             ];
         })->filter()->values();
     }

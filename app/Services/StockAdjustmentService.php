@@ -60,7 +60,7 @@ class StockAdjustmentService
             $adjustment = StockAdjustment::create([
                 'id_produk' => $produkId,
                 'tipe' => $adjustmentType->value,
-                'qty_adjustment' => $qtyAdjustment,
+                'jumlah_penyesuaian' => $qtyAdjustment,
                 'alasan' => $alasan,
                 'id_pengguna' => $penggunaId,
                 'tanggal_adjustment' => now(),

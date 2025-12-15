@@ -30,7 +30,7 @@ it('can show list of approved POs for receiving', function () {
     GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 10, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 10, 'jumlah_diterima' => 0]);
 
     $response = $this->actingAs($this->kasir)
         ->get(route('kasir.goods-in-receiving.index'));
@@ -52,7 +52,7 @@ it('can show receiving form for approved PO', function () {
     GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 10, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 10, 'jumlah_diterima' => 0]);
 
     $response = $this->actingAs($this->kasir)
         ->get(route('kasir.goods-in.receiving-show', $po->id_goods_in));
@@ -87,14 +87,14 @@ it('can record received goods for approved PO', function () {
     $detail = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 10, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 10, 'jumlah_diterima' => 0]);
 
     $response = $this->actingAs($this->kasir)
         ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
             'items' => [
                 [
                     'id_goods_in_detail' => $detail->id_goods_in_detail,
-                    'qty_received' => 5,
+                    'jumlah_diterima' => 5,
                     'catatan' => 'Sebagian barang diterima',
                 ],
             ],
@@ -106,13 +106,13 @@ it('can record received goods for approved PO', function () {
     $this->assertDatabaseHas('penerimaan_barang', [
         'id_goods_in' => $po->id_goods_in,
         'id_goods_in_detail' => $detail->id_goods_in_detail,
-        'qty_received' => 5,
+        'jumlah_diterima' => 5,
         'id_kasir' => $this->kasir->id_pengguna,
     ]);
 
-    // Check qty_received was updated
+    // Check jumlah_diterima was updated
     $detail->refresh();
-    $this->assertEquals(5, $detail->qty_received);
+    $this->assertEquals(5, $detail->jumlah_diterima);
 });
 
 it('can record received goods for multiple items', function () {
@@ -125,23 +125,23 @@ it('can record received goods for multiple items', function () {
     $detail1 = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 10, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 10, 'jumlah_diterima' => 0]);
 
     $detail2 = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk2, 'produk')
-        ->create(['qty_request' => 20, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 20, 'jumlah_diterima' => 0]);
 
     $response = $this->actingAs($this->kasir)
         ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
             'items' => [
                 [
                     'id_goods_in_detail' => $detail1->id_goods_in_detail,
-                    'qty_received' => 10,
+                    'jumlah_diterima' => 10,
                 ],
                 [
                     'id_goods_in_detail' => $detail2->id_goods_in_detail,
-                    'qty_received' => 15,
+                    'jumlah_diterima' => 15,
                     'catatan' => 'Sisa 5 akan datang minggu depan',
                 ],
             ],
@@ -153,8 +153,8 @@ it('can record received goods for multiple items', function () {
     $this->assertDatabaseCount('penerimaan_barang', 2);
     $detail1->refresh();
     $detail2->refresh();
-    $this->assertEquals(10, $detail1->qty_received);
-    $this->assertEquals(15, $detail2->qty_received);
+    $this->assertEquals(10, $detail1->jumlah_diterima);
+    $this->assertEquals(15, $detail2->jumlah_diterima);
 });
 
 it('cannot record received goods for draft PO', function () {
@@ -173,7 +173,7 @@ it('cannot record received goods for draft PO', function () {
             'items' => [
                 [
                     'id_goods_in_detail' => $detail->id_goods_in_detail,
-                    'qty_received' => 5,
+                    'jumlah_diterima' => 5,
                 ],
             ],
         ]);
@@ -182,7 +182,7 @@ it('cannot record received goods for draft PO', function () {
     $response->assertSessionHasErrors('error');
 });
 
-it('validates required qty_received field', function () {
+it('validates required jumlah_diterima field', function () {
     $po = GoodsIn::factory()
         ->for($this->kasir, 'kasir')
         ->for($this->admin, 'admin')
@@ -199,15 +199,15 @@ it('validates required qty_received field', function () {
             'items' => [
                 [
                     'id_goods_in_detail' => $detail->id_goods_in_detail,
-                    // qty_received missing
+                    // jumlah_diterima missing
                 ],
             ],
         ]);
 
-    $response->assertInvalid('items.0.qty_received');
+    $response->assertInvalid('items.0.jumlah_diterima');
 });
 
-it('validates qty_received is at least 1', function () {
+it('validates jumlah_diterima is at least 1', function () {
     $po = GoodsIn::factory()
         ->for($this->kasir, 'kasir')
         ->for($this->admin, 'admin')
@@ -224,12 +224,12 @@ it('validates qty_received is at least 1', function () {
             'items' => [
                 [
                     'id_goods_in_detail' => $detail->id_goods_in_detail,
-                    'qty_received' => 0,
+                    'jumlah_diterima' => 0,
                 ],
             ],
         ]);
 
-    $response->assertInvalid('items.0.qty_received');
+    $response->assertInvalid('items.0.jumlah_diterima');
 });
 
 it('requires at least one item to record', function () {
@@ -257,19 +257,19 @@ it('can retrieve received goods for a PO', function () {
     $detail = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 10]);
+        ->create(['jumlah_dipesan' => 10]);
 
     $this->service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 5,
+            'jumlah_diterima' => 5,
         ],
     ], $this->kasir->id_pengguna);
 
     $receivedGoods = $this->service->getReceivedGoodsByPO($po);
 
     $this->assertCount(1, $receivedGoods);
-    $this->assertEquals(5, $receivedGoods[0]->qty_received);
+    $this->assertEquals(5, $receivedGoods[0]->jumlah_diterima);
 });
 
 it('can track multiple receives for same item', function () {
@@ -282,29 +282,29 @@ it('can track multiple receives for same item', function () {
     $detail = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 30, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 30, 'jumlah_diterima' => 0]);
 
     // First receive
     $this->service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 10,
+            'jumlah_diterima' => 10,
         ],
     ], $this->kasir->id_pengguna);
 
     $detail->refresh();
-    $this->assertEquals(10, $detail->qty_received);
+    $this->assertEquals(10, $detail->jumlah_diterima);
 
     // Second receive
     $this->service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 15,
+            'jumlah_diterima' => 15,
         ],
     ], $this->kasir->id_pengguna);
 
     $detail->refresh();
-    $this->assertEquals(25, $detail->qty_received);
+    $this->assertEquals(25, $detail->jumlah_diterima);
 
     // Should have 2 penerimaan_barang records
     $receivedGoods = $this->service->getReceivedGoodsByPO($po);
@@ -326,7 +326,7 @@ it('increments product stock when recording received goods', function () {
     $detail = GoodsInDetail::factory()
         ->for($po)
         ->for($produk, 'produk')
-        ->create(['qty_request' => 20, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 20, 'jumlah_diterima' => 0]);
 
     $initialStock = $produk->stok;
 
@@ -334,7 +334,7 @@ it('increments product stock when recording received goods', function () {
     $service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 20,
+            'jumlah_diterima' => 20,
         ],
     ], $kasir->id_pengguna);
 
@@ -358,7 +358,7 @@ it('can record damaged goods and only increments stock with good items', functio
     $detail = GoodsInDetail::factory()
         ->for($po)
         ->for($produk, 'produk')
-        ->create(['qty_request' => 20, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 20, 'jumlah_diterima' => 0]);
 
     $initialStock = $produk->stok;
 
@@ -366,8 +366,8 @@ it('can record damaged goods and only increments stock with good items', functio
     $service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 20,
-            'qty_damaged' => 3, // 3 damaged
+            'jumlah_diterima' => 20,
+            'jumlah_rusak' => 3, // 3 damaged
         ],
     ], $kasir->id_pengguna);
 
@@ -375,11 +375,11 @@ it('can record damaged goods and only increments stock with good items', functio
     $produk->refresh();
     expect($produk->stok)->toBe($initialStock + 17);
 
-    // Verify penerimaan_barang record has qty_damaged
+    // Verify penerimaan_barang record has jumlah_rusak
     $this->assertDatabaseHas('penerimaan_barang', [
         'id_goods_in_detail' => $detail->id_goods_in_detail,
-        'qty_received' => 20,
-        'qty_damaged' => 3,
+        'jumlah_diterima' => 20,
+        'jumlah_rusak' => 3,
     ]);
 });
 
@@ -393,13 +393,13 @@ it('updates PO status to partial_received when not all items fully received', fu
     $detail = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 20, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 20, 'jumlah_diterima' => 0]);
 
     // Receive only 10 out of 20
     $this->service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 10,
+            'jumlah_diterima' => 10,
         ],
     ], $this->kasir->id_pengguna);
 
@@ -418,22 +418,22 @@ it('updates PO status to received when all items fully received', function () {
     $detail1 = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 20, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 20, 'jumlah_diterima' => 0]);
 
     $detail2 = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk2, 'produk')
-        ->create(['qty_request' => 15, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 15, 'jumlah_diterima' => 0]);
 
     // Receive all items
     $this->service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail1->id_goods_in_detail,
-            'qty_received' => 20,
+            'jumlah_diterima' => 20,
         ],
         [
             'id_goods_in_detail' => $detail2->id_goods_in_detail,
-            'qty_received' => 15,
+            'jumlah_diterima' => 15,
         ],
     ], $this->kasir->id_pengguna);
 
@@ -452,13 +452,13 @@ it('allows multiple partial receives until completion', function () {
     $detail = GoodsInDetail::factory()
         ->for($po)
         ->for($this->produk1, 'produk')
-        ->create(['qty_request' => 30, 'qty_received' => 0]);
+        ->create(['jumlah_dipesan' => 30, 'jumlah_diterima' => 0]);
 
     // First partial receive - 10 items
     $this->service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 10,
+            'jumlah_diterima' => 10,
         ],
     ], $this->kasir->id_pengguna);
 
@@ -469,7 +469,7 @@ it('allows multiple partial receives until completion', function () {
     $this->service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 15,
+            'jumlah_diterima' => 15,
         ],
     ], $this->kasir->id_pengguna);
 
@@ -480,12 +480,12 @@ it('allows multiple partial receives until completion', function () {
     $this->service->recordReceivedGoods($po, [
         [
             'id_goods_in_detail' => $detail->id_goods_in_detail,
-            'qty_received' => 5,
+            'jumlah_diterima' => 5,
         ],
     ], $this->kasir->id_pengguna);
 
     $po->refresh();
     $detail->refresh();
     expect($po->status)->toBe('received');
-    expect($detail->qty_received)->toBe(30);
+    expect($detail->jumlah_diterima)->toBe(30);
 });

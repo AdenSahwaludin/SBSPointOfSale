@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 /**
  * Comprehensive customer credit scoring and credit limit management service.
- * 
+ *
  * Handles:
  * - Auto-increase trust score based on transaction history
  * - Auto-update credit limit based on transaction activity
@@ -19,19 +19,18 @@ class CustomerCreditScoringService
 {
     /**
      * Auto-increase credit limit and saldo kredit after a transaction.
-     * 
+     *
      * Rules:
      * - Credit limit increases based on transaction frequency and total value
      * - Saldo kredit (available balance) increases when credit is fully paid
      * - Increase happens only if customer is eligible (trust_score >= 70)
-     * 
-     * @param Pelanggan $pelanggan
+     *
      * @return array ['limit_increased' => bool, 'new_limit' => int, 'increase_amount' => int]
      */
     public static function autoIncreaseCredit(Pelanggan $pelanggan): array
     {
         $originalLimit = (int) $pelanggan->credit_limit;
-        
+
         // Only eligible customers can get credit limit increase
         if ($pelanggan->trust_score < 70) {
             return [
@@ -72,12 +71,12 @@ class CustomerCreditScoringService
         // Update if there's an increase
         if ($newLimit > $originalLimit) {
             $pelanggan->forceFill(['credit_limit' => $newLimit])->save();
-            
+
             return [
                 'limit_increased' => true,
                 'new_limit' => $newLimit,
                 'increase_amount' => $newLimit - $originalLimit,
-                'reason' => "Activity bonus: {$transactionCount} transactions in 6 months (Total: Rp ".number_format($totalSpending, 0, ',', '.').")",
+                'reason' => "Activity bonus: {$transactionCount} transactions in 6 months (Total: Rp ".number_format($totalSpending, 0, ',', '.').')',
             ];
         }
 
@@ -91,21 +90,16 @@ class CustomerCreditScoringService
 
     /**
      * Calculate credit increase amount based on transaction activity.
-     * 
+     *
      * Rules:
      * - 1-2 transactions: +0 (no bonus)
      * - 3-5 transactions: +10% of total spending in 6 months
      * - 6-10 transactions: +15% of total spending in 6 months
      * - 11+ transactions: +20% of total spending in 6 months
-     * 
-     * Additional: 
+     *
+     * Additional:
      * - Trust score 75-89: 1.2x multiplier
      * - Trust score 90+: 1.5x multiplier
-     * 
-     * @param int $transactionCount
-     * @param int $totalSpending
-     * @param int $trustScore
-     * @return int
      */
     private static function calculateCreditIncreaseAmount(
         int $transactionCount,
@@ -142,24 +136,22 @@ class CustomerCreditScoringService
 
     /**
      * Restore saldo kredit when a credit transaction is fully paid.
-     * 
+     *
      * When a customer pays off their credit, their available credit balance
      * (saldo_kredit) is restored, allowing them to make new credit transactions.
-     * 
-     * @param Pelanggan $pelanggan
-     * @param int $paidAmount
+     *
      * @return array ['saldo_restored' => bool, 'new_saldo' => int]
      */
     public static function restoreCreditBalance(Pelanggan $pelanggan, int $paidAmount): array
     {
         $originalSaldo = (int) $pelanggan->saldo_kredit;
-        
+
         // Restore saldo (reduce outstanding debt)
         $newSaldo = max(0, $originalSaldo - $paidAmount);
 
         if ($newSaldo !== $originalSaldo) {
             $pelanggan->forceFill(['saldo_kredit' => $newSaldo])->save();
-            
+
             return [
                 'saldo_restored' => true,
                 'original_saldo' => $originalSaldo,
@@ -178,16 +170,13 @@ class CustomerCreditScoringService
 
     /**
      * Get comprehensive credit score breakdown for customer.
-     * 
+     *
      * Includes:
      * - Current trust score and factors
      * - Credit limit information
      * - Available saldo kredit
      * - Recent transaction activity
      * - Eligibility status
-     * 
-     * @param Pelanggan $pelanggan
-     * @return array
      */
     public static function getDetailedScoreBreakdown(Pelanggan $pelanggan): array
     {
@@ -219,8 +208,7 @@ class CustomerCreditScoringService
 
     /**
      * Check if customer is eligible for credit transaction.
-     * 
-     * @param Pelanggan $pelanggan
+     *
      * @return array ['eligible' => bool, 'available_limit' => int, 'message' => string]
      */
     public static function isCreditEligible(Pelanggan $pelanggan): array

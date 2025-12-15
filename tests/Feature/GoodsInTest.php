@@ -25,11 +25,11 @@ describe('Goods In - Kasir Operations', function () {
                 'items' => [
                     [
                         'id_produk' => $produk1->id_produk,
-                        'qty_request' => 10,
+                        'jumlah_dipesan' => 10,
                     ],
                     [
                         'id_produk' => $produk2->id_produk,
-                        'qty_request' => 20,
+                        'jumlah_dipesan' => 20,
                     ],
                 ],
             ]);
@@ -45,8 +45,8 @@ describe('Goods In - Kasir Operations', function () {
 
         // Check details were created
         expect($goodsIn->details)->toHaveCount(2);
-        expect($goodsIn->details[0]->qty_request)->toBe(10);
-        expect($goodsIn->details[1]->qty_request)->toBe(20);
+        expect($goodsIn->details[0]->jumlah_dipesan)->toBe(10);
+        expect($goodsIn->details[1]->jumlah_dipesan)->toBe(20);
     });
 
     it('allows kasir to view their own POs', function () {
@@ -124,7 +124,7 @@ describe('Goods In - Kasir Operations', function () {
         $response->assertSessionHasErrors('items');
     });
 
-    it('validates that qty_request must be at least 1', function () {
+    it('validates that jumlah_dipesan must be at least 1', function () {
         $produk = Produk::factory()->create();
 
         $response = $this->actingAs($this->kasir)
@@ -132,12 +132,12 @@ describe('Goods In - Kasir Operations', function () {
                 'items' => [
                     [
                         'id_produk' => $produk->id_produk,
-                        'qty_request' => 0,
+                        'jumlah_dipesan' => 0,
                     ],
                 ],
             ]);
 
-        $response->assertSessionHasErrors('items.0.qty_request');
+        $response->assertSessionHasErrors('items.0.jumlah_dipesan');
     });
 
     it('validates that id_produk must exist', function () {
@@ -146,7 +146,7 @@ describe('Goods In - Kasir Operations', function () {
                 'items' => [
                     [
                         'id_produk' => 999999,
-                        'qty_request' => 10,
+                        'jumlah_dipesan' => 10,
                     ],
                 ],
             ]);
@@ -209,8 +209,8 @@ describe('Goods In - Admin Approval Operations', function () {
         GoodsInDetail::create([
             'id_goods_in' => $goodsIn->id_goods_in,
             'id_produk' => $produk->id_produk,
-            'qty_request' => 50,
-            'qty_received' => 0,
+            'jumlah_dipesan' => 50,
+            'jumlah_diterima' => 0,
         ]);
 
         $catatan = 'PO approved for processing';

@@ -24,7 +24,7 @@ class CreateStockAdjustmentRequest extends FormRequest
         return [
             'id_produk' => 'required|exists:produk,id_produk',
             'tipe' => 'required|in:retur_pelanggan,retur_gudang,koreksi_plus,koreksi_minus,penyesuaian_opname,expired,rusak',
-            'qty_adjustment' => 'required|integer|min:1',
+            'jumlah_penyesuaian' => 'required|integer|min:1',
             'alasan' => 'nullable|string|max:500',
         ];
     }
