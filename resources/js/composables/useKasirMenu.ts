@@ -40,6 +40,7 @@ export function useKasirMenuItems(): MenuItem[] {
             children: [
                 { name: 'Buat Purchase Order', href: '/kasir/goods-in', icon: 'fas fa-plus-circle' },
                 { name: 'Penerimaan Barang', href: '/kasir/goods-in-receiving', icon: 'fas fa-box-open' },
+                { name: 'Riwayat Purchase Order', href: '/admin/goods-in-history', icon: 'fas fa-history' },
             ],
         },
         {
