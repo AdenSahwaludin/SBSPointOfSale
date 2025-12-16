@@ -23,7 +23,7 @@ class RecordGoodsReceivedRequest extends FormRequest
     {
         return [
             'items' => 'required|array|min:1',
-            'items.*.id_goods_in_detail' => 'required|integer|exists:detail_pemesanan_barang,id_goods_in_detail',
+            'items.*.id_detail_pemesanan_barang' => 'required|integer|exists:detail_pemesanan_barang,id_detail_pemesanan_barang',
             'items.*.jumlah_diterima' => 'required|integer|min:1',
             'items.*.jumlah_rusak' => 'nullable|integer|min:0|lt:items.*.jumlah_diterima',
             'items.*.catatan' => 'nullable|string|max:500',
@@ -35,8 +35,8 @@ class RecordGoodsReceivedRequest extends FormRequest
         return [
             'items.required' => 'Minimal 1 item harus dicatat.',
             'items.min' => 'Minimal 1 item harus dicatat.',
-            'items.*.id_goods_in_detail.required' => 'Item detail tidak ditemukan.',
-            'items.*.id_goods_in_detail.exists' => 'Item detail tidak valid.',
+            'items.*.id_detail_pemesanan_barang.required' => 'Item detail tidak ditemukan.',
+            'items.*.id_detail_pemesanan_barang.exists' => 'Item detail tidak valid.',
             'items.*.jumlah_diterima.required' => 'Jumlah diterima harus diisi.',
             'items.*.jumlah_diterima.min' => 'Jumlah diterima minimal 1.',
             'items.*.jumlah_rusak.min' => 'Jumlah rusak tidak boleh negatif.',

@@ -46,7 +46,7 @@ class CreditValidationTest extends TestCase
                 [
                     'id_produk' => $produk->id_produk,
                     'jumlah' => 1,
-                    'jenis_satuan' => 'unit',
+                    'mode_qty' => 'unit',
                     'harga_satuan' => 100000,
                 ],
             ],
@@ -89,7 +89,7 @@ class CreditValidationTest extends TestCase
                 [
                     'id_produk' => $produk->id_produk,
                     'jumlah' => 1,
-                    'jenis_satuan' => 'unit',
+                    'mode_qty' => 'unit',
                     'harga_satuan' => 100000,
                 ],
             ],
@@ -132,7 +132,7 @@ class CreditValidationTest extends TestCase
                 [
                     'id_produk' => $produk->id_produk,
                     'jumlah' => 1,
-                    'jenis_satuan' => 'unit',
+                    'mode_qty' => 'unit',
                     'harga_satuan' => 1000000,
                 ],
             ],
@@ -270,7 +270,7 @@ class CreditValidationTest extends TestCase
                 [
                     'id_produk' => $produk->id_produk,
                     'jumlah' => 1,
-                    'jenis_satuan' => 'unit',
+                    'mode_qty' => 'unit',
                     'harga_satuan' => 1500000,
                 ],
             ],
@@ -314,7 +314,7 @@ class CreditValidationTest extends TestCase
                 [
                     'id_produk' => $produk->id_produk,
                     'jumlah' => 1,
-                    'jenis_satuan' => 'unit',
+                    'mode_qty' => 'unit',
                     'harga_satuan' => 1000000,
                 ],
             ],

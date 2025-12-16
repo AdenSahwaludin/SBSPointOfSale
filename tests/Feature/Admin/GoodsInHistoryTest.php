@@ -14,7 +14,7 @@ it('displays goods in history index with pagination', function () {
         ->create(['id_kasir' => User::factory()->create()->id_pengguna, 'status' => 'approved']);
 
     GoodsInDetail::factory()
-        ->create(['id_goods_in' => $goodsIn->id_goods_in, 'id_produk' => $produk->id_produk]);
+        ->create(['id_pemesanan_barang' => $goodsIn->id_pemesanan_barang, 'id_produk' => $produk->id_produk]);
 
     $response = $this->actingAs($admin)->get('/admin/goods-in-history');
 
@@ -34,7 +34,7 @@ it('filters goods in history by search query', function () {
         ->create(['id_kasir' => User::factory()->create()->id_pengguna, 'nomor_po' => 'PO-001', 'status' => 'approved']);
 
     GoodsInDetail::factory()
-        ->create(['id_goods_in' => $goodsIn->id_goods_in, 'id_produk' => $produk->id_produk]);
+        ->create(['id_pemesanan_barang' => $goodsIn->id_pemesanan_barang, 'id_produk' => $produk->id_produk]);
 
     $response = $this->actingAs($admin)
         ->get('/admin/goods-in-history?search=PO-001');
@@ -53,7 +53,7 @@ it('filters goods in history by status', function () {
         ->create(['id_kasir' => User::factory()->create()->id_pengguna, 'status' => 'received']);
 
     GoodsInDetail::factory()
-        ->create(['id_goods_in' => $goodsIn->id_goods_in, 'id_produk' => $produk->id_produk]);
+        ->create(['id_pemesanan_barang' => $goodsIn->id_pemesanan_barang, 'id_produk' => $produk->id_produk]);
 
     $response = $this->actingAs($admin)
         ->get('/admin/goods-in-history?status=received');
@@ -72,7 +72,7 @@ it('filters goods in history by date range', function () {
         ->create(['id_kasir' => User::factory()->create()->id_pengguna, 'status' => 'approved', 'tanggal_request' => now()]);
 
     GoodsInDetail::factory()
-        ->create(['id_goods_in' => $goodsIn->id_goods_in, 'id_produk' => $produk->id_produk]);
+        ->create(['id_pemesanan_barang' => $goodsIn->id_pemesanan_barang, 'id_produk' => $produk->id_produk]);
 
     $startDate = now()->subDays(5)->format('Y-m-d');
     $endDate = now()->addDays(5)->format('Y-m-d');
@@ -96,14 +96,14 @@ it('displays goods in history show page with details', function () {
 
     GoodsInDetail::factory()
         ->count(3)
-        ->create(['id_goods_in' => $goodsIn->id_goods_in, 'id_produk' => $produk->id_produk]);
+        ->create(['id_pemesanan_barang' => $goodsIn->id_pemesanan_barang, 'id_produk' => $produk->id_produk]);
 
-    $response = $this->actingAs($admin)->get("/admin/goods-in-history/{$goodsIn->id_goods_in}");
+    $response = $this->actingAs($admin)->get("/admin/goods-in-history/{$goodsIn->id_pemesanan_barang}");
 
     $response->assertSuccessful();
     $response->assertInertia(fn (AssertableInertia $page) => $page
         ->component('Admin/GoodsInHistory/Show')
-        ->where('po.id_goods_in', $goodsIn->id_goods_in)
+        ->where('po.id_pemesanan_barang', $goodsIn->id_pemesanan_barang)
         ->where('po.nomor_po', $goodsIn->nomor_po)
         ->where('po.status', 'received')
         ->has('po.details', 3)

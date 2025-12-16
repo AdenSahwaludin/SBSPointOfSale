@@ -12,34 +12,41 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Determine table name - could be English or Indonesian depending on migration order
+        $tableName = Schema::hasTable('pemesanan_barang') ? 'pemesanan_barang' : 'goods_ins';
+        
+        if (!Schema::hasTable($tableName)) {
+            return; // Skip if table doesn't exist
+        }
+
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'sqlite') {
             // SQLite: Use temp column approach
-            Schema::table('goods_ins', function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->string('status_temp', 20)->default('draft')->after('status');
             });
 
-            DB::statement('UPDATE goods_ins SET status_temp = status');
+            DB::statement("UPDATE {$tableName} SET status_temp = status");
 
-            Schema::table('goods_ins', function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->dropIndex(['status']);
                 $table->dropColumn('status');
             });
 
-            Schema::table('goods_ins', function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'partial_received', 'received'])->default('draft')->after('nomor_po');
                 $table->index('status');
             });
 
-            DB::statement('UPDATE goods_ins SET status = status_temp');
+            DB::statement("UPDATE {$tableName} SET status = status_temp");
 
-            Schema::table('goods_ins', function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->dropColumn('status_temp');
             });
         } else {
             // MySQL: Use MODIFY COLUMN
-            DB::statement("ALTER TABLE goods_ins MODIFY COLUMN status ENUM('draft', 'submitted', 'approved', 'rejected', 'partial_received', 'received') DEFAULT 'draft'");
+            DB::statement("ALTER TABLE {$tableName} MODIFY COLUMN status ENUM('draft', 'submitted', 'approved', 'rejected', 'partial_received', 'received') DEFAULT 'draft'");
         }
     }
 
@@ -48,34 +55,41 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Determine table name - could be English or Indonesian depending on migration order
+        $tableName = Schema::hasTable('pemesanan_barang') ? 'pemesanan_barang' : 'goods_ins';
+        
+        if (!Schema::hasTable($tableName)) {
+            return; // Skip if table doesn't exist
+        }
+
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'sqlite') {
             // SQLite: Use temp column approach
-            Schema::table('goods_ins', function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->string('status_temp', 20)->default('draft')->after('status');
             });
 
-            DB::statement('UPDATE goods_ins SET status_temp = status');
+            DB::statement("UPDATE {$tableName} SET status_temp = status");
 
-            Schema::table('goods_ins', function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->dropIndex(['status']);
                 $table->dropColumn('status');
             });
 
-            Schema::table('goods_ins', function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'received'])->default('draft')->after('nomor_po');
                 $table->index('status');
             });
 
-            DB::statement('UPDATE goods_ins SET status = status_temp');
+            DB::statement("UPDATE {$tableName} SET status = status_temp");
 
-            Schema::table('goods_ins', function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->dropColumn('status_temp');
             });
         } else {
             // MySQL: Use MODIFY COLUMN
-            DB::statement("ALTER TABLE goods_ins MODIFY COLUMN status ENUM('draft', 'submitted', 'approved', 'rejected', 'received') DEFAULT 'draft'");
+            DB::statement("ALTER TABLE {$tableName} MODIFY COLUMN status ENUM('draft', 'submitted', 'approved', 'rejected', 'received') DEFAULT 'draft'");
         }
     }
 };

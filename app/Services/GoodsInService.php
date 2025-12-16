@@ -50,7 +50,7 @@ class GoodsInService
                 }
 
                 GoodsInDetail::create([
-                    'id_goods_in' => $goodsIn->id_goods_in,
+                    'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                     'id_produk' => $item['id_produk'],
                     'jumlah_dipesan' => $item['jumlah_dipesan'],
                     'jumlah_diterima' => 0,
@@ -180,7 +180,7 @@ class GoodsInService
 
         return DB::transaction(function () use ($goodsIn, $id_produk, $jumlah_dipesan) {
             return GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $id_produk,
                 'jumlah_dipesan' => $jumlah_dipesan,
                 'jumlah_diterima' => 0,
@@ -285,10 +285,10 @@ class GoodsInService
             $receivedRecords = collect();
 
             foreach ($items as $item) {
-                $detail = GoodsInDetail::findOrFail($item['id_goods_in_detail']);
+                $detail = GoodsInDetail::findOrFail($item['id_detail_pemesanan_barang']);
 
                 // Verify the detail belongs to this PO
-                if ($detail->id_goods_in !== $goodsIn->id_goods_in) {
+                if ($detail->id_pemesanan_barang !== $goodsIn->id_pemesanan_barang) {
                     throw new \InvalidArgumentException('Item tidak sesuai dengan PO.');
                 }
 
@@ -298,8 +298,8 @@ class GoodsInService
 
                 // Create the received goods record
                 $received = \App\Models\GoodsReceived::create([
-                    'id_goods_in' => $goodsIn->id_goods_in,
-                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
+                    'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
                     'id_produk' => $detail->id_produk,
                     'jumlah_diterima' => $item['jumlah_diterima'],
                     'jumlah_rusak' => $qtyDamaged,
@@ -339,7 +339,7 @@ class GoodsInService
 
             // Reload with relationships
             return \App\Models\GoodsReceived::with(['produk', 'kasir'])
-                ->whereIn('id_goods_received', $receivedRecords->pluck('id_goods_received'))
+                ->whereIn('id_penerimaan_barang', $receivedRecords->pluck('id_penerimaan_barang'))
                 ->get();
         });
     }
@@ -353,7 +353,7 @@ class GoodsInService
     public function getReceivedGoodsByPO(GoodsIn $goodsIn): \Illuminate\Support\Collection
     {
         return \App\Models\GoodsReceived::with(['produk', 'kasir'])
-            ->where('id_goods_in', $goodsIn->id_goods_in)
+            ->where('id_pemesanan_barang', $goodsIn->id_pemesanan_barang)
             ->orderBy('created_at', 'desc')
             ->get();
     }

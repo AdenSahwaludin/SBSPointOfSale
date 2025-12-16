@@ -54,7 +54,6 @@ class ProdukController extends Controller
 
         return Inertia::render('Admin/Produk/Create', [
             'kategori' => $kategori,
-            'nextPrefix' => 'PDK', // Simple prefix
         ]);
     }
 
@@ -64,10 +63,9 @@ class ProdukController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'suffix' => 'required|string|max:4',
             'nama' => 'required|string|max:255',
             'id_kategori' => 'required|exists:kategori,id_kategori',
-            'barcode' => 'nullable|string|max:13',
+            'barcode' => 'nullable|string|max:13|unique:produk,barcode',
             'no_bpom' => 'nullable|string|max:18',
             'satuan' => 'required|in:pcs,karton,pack',
             'isi_per_pack' => 'required|integer|min:1',
@@ -76,27 +74,27 @@ class ProdukController extends Controller
             'stok' => 'required|integer|min:0',
             'sisa_pcs_terbuka' => 'required|integer|min:0',
             'batas_stok_minimum' => 'required|integer|min:0',
-            'jumlah_restock' => 'required|integer|min:0',
+            'jumlah_restock' => 'required|integer|min:1',
+            'sku' => 'required|string|max:32|unique:produk,sku',
         ]);
 
-        // Generate ID
-        $id_produk = 'PDK-'.$request->suffix;
-
-        // Check if ID already exists
-        if (Produk::where('id_produk', $id_produk)->exists()) {
-            return back()->withErrors(['suffix' => 'ID Produk sudah ada, gunakan suffix yang lain.'])->withInput();
+        // Generate SKU otomatis jika user belum override
+        $sku = $request->sku;
+        if (empty($sku)) {
+            $sku = SKUGenerator::generate(
+                $request->nama,
+                $request->id_kategori,
+                $request->satuan,
+                $request->isi_per_pack
+            );
         }
 
-        // Generate SKU berdasarkan nama, kategori, dan satuan
-        $sku = SKUGenerator::generate(
-            $request->nama,
-            $request->id_kategori,
-            $request->satuan,
-            $request->isi_per_pack
-        );
+        // Validasi SKU unik
+        if (Produk::where('sku', $sku)->exists()) {
+            return back()->withErrors(['sku' => 'SKU sudah digunakan, gunakan SKU yang lain.'])->withInput();
+        }
 
         Produk::create([
-            'id_produk' => $id_produk,
             'sku' => $sku,
             'nama' => $request->nama,
             'id_kategori' => $request->id_kategori,
@@ -152,7 +150,7 @@ class ProdukController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'id_kategori' => 'required|exists:kategori,id_kategori',
-            'barcode' => 'nullable|string|max:13',
+            'barcode' => 'nullable|string|max:13|unique:produk,barcode,'.$produk->id_produk.',id_produk',
             'no_bpom' => 'nullable|string|max:18',
             'satuan' => 'required|in:pcs,karton,pack',
             'isi_per_pack' => 'required|integer|min:1',
@@ -161,10 +159,12 @@ class ProdukController extends Controller
             'stok' => 'required|integer|min:0',
             'sisa_pcs_terbuka' => 'required|integer|min:0',
             'batas_stok_minimum' => 'required|integer|min:0',
-            'jumlah_restock' => 'required|integer|min:0',
+            'jumlah_restock' => 'required|integer|min:1',
+            'sku' => 'required|string|max:32|unique:produk,sku,'.$produk->id_produk.',id_produk',
         ]);
 
         $produk->update([
+            'sku' => $request->sku,
             'nama' => $request->nama,
             'id_kategori' => $request->id_kategori,
             'barcode' => $request->barcode,

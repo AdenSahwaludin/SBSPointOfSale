@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('goods_ins', function (Blueprint $table) {
-            $table->id('id_goods_in');
+        Schema::create('pemesanan_barang', function (Blueprint $table) {
+            $table->id('id_pemesanan_barang');
             $table->string('nomor_po', 32)->unique();
             $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'received'])->default('draft');
             $table->dateTime('tanggal_request');
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('goods_ins');
+        Schema::dropIfExists('pemesanan_barang');
     }
 };

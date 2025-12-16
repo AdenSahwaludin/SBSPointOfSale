@@ -61,7 +61,7 @@ class GoodsInController extends Controller
             );
 
             return redirect()
-                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang)
                 ->with('success', 'Purchase Order berhasil dibuat dengan nomor: '.$goodsIn->nomor_po);
         } catch (\Exception $e) {
             return back()
@@ -103,7 +103,7 @@ class GoodsInController extends Controller
             );
 
             return redirect()
-                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang)
                 ->with('success', 'Item berhasil ditambahkan ke PO.');
         } catch (\InvalidArgumentException $e) {
             return back()
@@ -126,15 +126,15 @@ class GoodsInController extends Controller
     public function updateItem(StoreGoodsInItemRequest $request, GoodsIn $goodsIn, $id_detail)
     {
         try {
-            $detail = GoodsInDetail::where('id_goods_in_detail', $id_detail)
-                ->where('id_goods_in', $goodsIn->id_goods_in)
+            $detail = GoodsInDetail::where('id_detail_pemesanan_barang', $id_detail)
+                ->where('id_pemesanan_barang', $goodsIn->id_pemesanan_barang)
                 ->firstOrFail();
 
             $validated = $request->validated();
             $this->goodsInService->updateItemQty($detail, $validated['jumlah_dipesan']);
 
             return redirect()
-                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang)
                 ->with('success', 'Kuantitas item berhasil diperbarui.');
         } catch (\LogicException $e) {
             return back()
@@ -153,14 +153,14 @@ class GoodsInController extends Controller
     public function removeItem(GoodsIn $goodsIn, $id_detail)
     {
         try {
-            $detail = GoodsInDetail::where('id_goods_in_detail', $id_detail)
-                ->where('id_goods_in', $goodsIn->id_goods_in)
+            $detail = GoodsInDetail::where('id_detail_pemesanan_barang', $id_detail)
+                ->where('id_pemesanan_barang', $goodsIn->id_pemesanan_barang)
                 ->firstOrFail();
 
             $this->goodsInService->removeItemFromGoodsIn($detail);
 
             return redirect()
-                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang)
                 ->with('success', 'Item berhasil dihapus dari PO.');
         } catch (\LogicException $e) {
             return back()
@@ -182,7 +182,7 @@ class GoodsInController extends Controller
             $this->goodsInService->submitGoodsIn($goodsIn);
 
             return redirect()
-                ->route('kasir.goods-in.show', $goodsIn->id_goods_in)
+                ->route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang)
                 ->with('success', 'PO berhasil diajukan untuk persetujuan.');
         } catch (\LogicException $e) {
             return back()
@@ -256,7 +256,7 @@ class GoodsInController extends Controller
         // Get items that haven't been fully received yet
         $pendingItems = $goodsIn->details()->with('produk')->get()->map(function ($detail) {
             return [
-                'id_goods_in_detail' => $detail->id_goods_in_detail,
+                'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
                 'id_produk' => $detail->id_produk,
                 'nama_produk' => $detail->produk->nama,
                 'sku' => $detail->produk->sku,
@@ -297,7 +297,7 @@ class GoodsInController extends Controller
             $this->goodsInService->recordReceivedGoods($goodsIn, $validated['items'], $kasirId);
 
             return redirect()
-                ->route('kasir.goods-in.receiving-show', $goodsIn->id_goods_in)
+                ->route('kasir.goods-in.receiving-show', $goodsIn->id_pemesanan_barang)
                 ->with('success', 'Barang berhasil dicatat.');
         } catch (\InvalidArgumentException $e) {
             return back()

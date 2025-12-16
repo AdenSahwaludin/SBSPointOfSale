@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('goods_in_details', function (Blueprint $table) {
-            $table->id('id_goods_in_detail');
-            $table->unsignedBigInteger('id_goods_in');
+        Schema::create('detail_pemesanan_barang', function (Blueprint $table) {
+            $table->id('id_detail_pemesanan_barang');
+            $table->unsignedBigInteger('id_pemesanan_barang');
             $table->unsignedBigInteger('id_produk');
-            $table->integer('qty_request');
-            $table->integer('qty_received')->default(0);
+            $table->integer('jumlah_dipesan');
+            $table->integer('jumlah_diterima')->default(0);
             $table->timestamps();
 
-            $table->foreign('id_goods_in')->references('id_goods_in')->on('goods_ins')->cascadeOnDelete();
+            $table->foreign('id_pemesanan_barang')->references('id_pemesanan_barang')->on('pemesanan_barang')->cascadeOnDelete();
             $table->foreign('id_produk')->references('id_produk')->on('produk')->restrictOnDelete();
-            $table->index('id_goods_in');
+            $table->index('id_pemesanan_barang');
             $table->index('id_produk');
         });
     }
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('goods_in_details');
+        Schema::dropIfExists('detail_pemesanan_barang');
     }
 };

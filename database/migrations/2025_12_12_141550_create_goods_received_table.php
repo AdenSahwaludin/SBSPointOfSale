@@ -11,26 +11,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('goods_received', function (Blueprint $table) {
-            $table->id('id_goods_received');
-            $table->unsignedBigInteger('id_goods_in');
-            $table->unsignedBigInteger('id_goods_in_detail');
+        Schema::create('penerimaan_barang', function (Blueprint $table) {
+            $table->id('id_penerimaan_barang');
+            $table->unsignedBigInteger('id_pemesanan_barang');
+            $table->unsignedBigInteger('id_detail_pemesanan_barang');
             $table->unsignedBigInteger('id_produk');
-            $table->integer('qty_received'); // Qty diterima oleh kasir
+            $table->integer('jumlah_diterima'); // Qty diterima oleh kasir
+            $table->integer('jumlah_rusak')->default(0); // Qty rusak
             $table->string('id_kasir', 8)->nullable();
             $table->text('catatan')->nullable();
             $table->enum('status', ['pending', 'completed'])->default('completed'); // pending = belum selesai, completed = selesai
             $table->timestamps();
 
             // Foreign keys
-            $table->foreign('id_goods_in')
-                ->references('id_goods_in')
-                ->on('goods_ins')
+            $table->foreign('id_pemesanan_barang')
+                ->references('id_pemesanan_barang')
+                ->on('pemesanan_barang')
                 ->onDelete('cascade');
 
-            $table->foreign('id_goods_in_detail')
-                ->references('id_goods_in_detail')
-                ->on('goods_in_details')
+            $table->foreign('id_detail_pemesanan_barang')
+                ->references('id_detail_pemesanan_barang')
+                ->on('detail_pemesanan_barang')
                 ->onDelete('cascade');
 
             $table->foreign('id_produk')
@@ -44,7 +45,7 @@ return new class extends Migration
                 ->onDelete('set null');
 
             // Indexes
-            $table->index('id_goods_in');
+            $table->index('id_pemesanan_barang');
             $table->index('id_kasir');
             $table->index('status');
         });
@@ -55,6 +56,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('goods_received');
+        Schema::dropIfExists('penerimaan_barang');
     }
 };

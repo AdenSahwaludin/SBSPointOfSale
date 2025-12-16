@@ -55,7 +55,7 @@ it('can show receiving form for approved PO', function () {
         ->create(['jumlah_dipesan' => 10, 'jumlah_diterima' => 0]);
 
     $response = $this->actingAs($this->kasir)
-        ->get(route('kasir.goods-in.receiving-show', $po->id_goods_in));
+        ->get(route('kasir.goods-in.receiving-show', $po->id_pemesanan_barang));
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
@@ -72,7 +72,7 @@ it('cannot show receiving form if PO is not approved', function () {
         ->create();
 
     $response = $this->actingAs($this->kasir)
-        ->get(route('kasir.goods-in.receiving-show', $po->id_goods_in));
+        ->get(route('kasir.goods-in.receiving-show', $po->id_pemesanan_barang));
 
     $response->assertStatus(403);
 });
@@ -90,22 +90,22 @@ it('can record received goods for approved PO', function () {
         ->create(['jumlah_dipesan' => 10, 'jumlah_diterima' => 0]);
 
     $response = $this->actingAs($this->kasir)
-        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+        ->post(route('kasir.goods-in.record-received', $po->id_pemesanan_barang), [
             'items' => [
                 [
-                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
                     'jumlah_diterima' => 5,
                     'catatan' => 'Sebagian barang diterima',
                 ],
             ],
         ]);
 
-    $response->assertRedirect(route('kasir.goods-in.receiving-show', $po->id_goods_in));
+    $response->assertRedirect(route('kasir.goods-in.receiving-show', $po->id_pemesanan_barang));
 
     // Check goods received was created
     $this->assertDatabaseHas('penerimaan_barang', [
-        'id_goods_in' => $po->id_goods_in,
-        'id_goods_in_detail' => $detail->id_goods_in_detail,
+        'id_pemesanan_barang' => $po->id_pemesanan_barang,
+        'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
         'jumlah_diterima' => 5,
         'id_kasir' => $this->kasir->id_pengguna,
     ]);
@@ -133,14 +133,14 @@ it('can record received goods for multiple items', function () {
         ->create(['jumlah_dipesan' => 20, 'jumlah_diterima' => 0]);
 
     $response = $this->actingAs($this->kasir)
-        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+        ->post(route('kasir.goods-in.record-received', $po->id_pemesanan_barang), [
             'items' => [
                 [
-                    'id_goods_in_detail' => $detail1->id_goods_in_detail,
+                    'id_detail_pemesanan_barang' => $detail1->id_detail_pemesanan_barang,
                     'jumlah_diterima' => 10,
                 ],
                 [
-                    'id_goods_in_detail' => $detail2->id_goods_in_detail,
+                    'id_detail_pemesanan_barang' => $detail2->id_detail_pemesanan_barang,
                     'jumlah_diterima' => 15,
                     'catatan' => 'Sisa 5 akan datang minggu depan',
                 ],
@@ -169,10 +169,10 @@ it('cannot record received goods for draft PO', function () {
         ->create();
 
     $response = $this->actingAs($this->kasir)
-        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+        ->post(route('kasir.goods-in.record-received', $po->id_pemesanan_barang), [
             'items' => [
                 [
-                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
                     'jumlah_diterima' => 5,
                 ],
             ],
@@ -195,10 +195,10 @@ it('validates required jumlah_diterima field', function () {
         ->create();
 
     $response = $this->actingAs($this->kasir)
-        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+        ->post(route('kasir.goods-in.record-received', $po->id_pemesanan_barang), [
             'items' => [
                 [
-                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
                     // jumlah_diterima missing
                 ],
             ],
@@ -220,10 +220,10 @@ it('validates jumlah_diterima is at least 1', function () {
         ->create();
 
     $response = $this->actingAs($this->kasir)
-        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+        ->post(route('kasir.goods-in.record-received', $po->id_pemesanan_barang), [
             'items' => [
                 [
-                    'id_goods_in_detail' => $detail->id_goods_in_detail,
+                    'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
                     'jumlah_diterima' => 0,
                 ],
             ],
@@ -240,7 +240,7 @@ it('requires at least one item to record', function () {
         ->create();
 
     $response = $this->actingAs($this->kasir)
-        ->post(route('kasir.goods-in.record-received', $po->id_goods_in), [
+        ->post(route('kasir.goods-in.record-received', $po->id_pemesanan_barang), [
             'items' => [],
         ]);
 
@@ -261,7 +261,7 @@ it('can retrieve received goods for a PO', function () {
 
     $this->service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 5,
         ],
     ], $this->kasir->id_pengguna);
@@ -287,7 +287,7 @@ it('can track multiple receives for same item', function () {
     // First receive
     $this->service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 10,
         ],
     ], $this->kasir->id_pengguna);
@@ -298,7 +298,7 @@ it('can track multiple receives for same item', function () {
     // Second receive
     $this->service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 15,
         ],
     ], $this->kasir->id_pengguna);
@@ -333,7 +333,7 @@ it('increments product stock when recording received goods', function () {
     // Record received goods
     $service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 20,
         ],
     ], $kasir->id_pengguna);
@@ -365,7 +365,7 @@ it('can record damaged goods and only increments stock with good items', functio
     // Record received goods with damaged items
     $service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 20,
             'jumlah_rusak' => 3, // 3 damaged
         ],
@@ -377,7 +377,7 @@ it('can record damaged goods and only increments stock with good items', functio
 
     // Verify penerimaan_barang record has jumlah_rusak
     $this->assertDatabaseHas('penerimaan_barang', [
-        'id_goods_in_detail' => $detail->id_goods_in_detail,
+        'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
         'jumlah_diterima' => 20,
         'jumlah_rusak' => 3,
     ]);
@@ -398,7 +398,7 @@ it('updates PO status to partial_received when not all items fully received', fu
     // Receive only 10 out of 20
     $this->service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 10,
         ],
     ], $this->kasir->id_pengguna);
@@ -428,11 +428,11 @@ it('updates PO status to received when all items fully received', function () {
     // Receive all items
     $this->service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail1->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail1->id_detail_pemesanan_barang,
             'jumlah_diterima' => 20,
         ],
         [
-            'id_goods_in_detail' => $detail2->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail2->id_detail_pemesanan_barang,
             'jumlah_diterima' => 15,
         ],
     ], $this->kasir->id_pengguna);
@@ -457,7 +457,7 @@ it('allows multiple partial receives until completion', function () {
     // First partial receive - 10 items
     $this->service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 10,
         ],
     ], $this->kasir->id_pengguna);
@@ -468,7 +468,7 @@ it('allows multiple partial receives until completion', function () {
     // Second partial receive - 15 more items (total 25)
     $this->service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 15,
         ],
     ], $this->kasir->id_pengguna);
@@ -479,7 +479,7 @@ it('allows multiple partial receives until completion', function () {
     // Final receive - 5 more items (total 30 = complete)
     $this->service->recordReceivedGoods($po, [
         [
-            'id_goods_in_detail' => $detail->id_goods_in_detail,
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             'jumlah_diterima' => 5,
         ],
     ], $this->kasir->id_pengguna);

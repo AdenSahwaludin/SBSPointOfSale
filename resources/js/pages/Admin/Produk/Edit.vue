@@ -37,7 +37,7 @@ const props = defineProps<Props>();
 // Menu items dengan active state
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/produk');
 
-// Form initialization with all 13 fields
+// Form initialization with all fields
 const form = useForm({
     nama: props.produk.nama,
     id_kategori: props.produk.id_kategori,
@@ -51,6 +51,7 @@ const form = useForm({
     sisa_pcs_terbuka: props.produk.sisa_pcs_terbuka,
     batas_stok_minimum: props.produk.batas_stok_minimum,
     jumlah_restock: props.produk.jumlah_restock,
+    sku: props.produk.sku,
 });
 
 function submit() {
@@ -90,15 +91,21 @@ function submit() {
                                 />
                             </div>
 
-                            <!-- SKU (Read Only) -->
+                            <!-- SKU (Editable) -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-emerald-700"> SKU (Auto Generated) </label>
+                                <label class="mb-2 block text-sm font-medium text-emerald-700"> SKU * </label>
                                 <input
-                                    :value="props.produk.sku"
+                                    v-model="form.sku"
                                     type="text"
-                                    disabled
-                                    class="w-full rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-700"
+                                    maxlength="32"
+                                    class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    placeholder="Contoh: HB-MKP120-KRT12"
+                                    required
                                 />
+                                <p class="mt-1 text-xs text-emerald-600">Format: KODE-NAMA-KEMASAN (max 32 karakter)</p>
+                                <div v-if="form.errors.sku" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.sku }}
+                                </div>
                             </div>
 
                             <!-- Nama -->

@@ -100,7 +100,7 @@ describe('Goods In - Kasir Operations', function () {
 
         // Try to approve PO
         $response = $this->actingAs($this->kasir)
-            ->post(route('admin.goods-in-approval.approve', $goodsIn->id_goods_in), [
+            ->post(route('admin.goods-in-approval.approve', $goodsIn->id_pemesanan_barang), [
                 'catatan' => 'Approved',
             ]);
 
@@ -108,7 +108,7 @@ describe('Goods In - Kasir Operations', function () {
 
         // Try to reject PO
         $response = $this->actingAs($this->kasir)
-            ->post(route('admin.goods-in-approval.reject', $goodsIn->id_goods_in), [
+            ->post(route('admin.goods-in-approval.reject', $goodsIn->id_pemesanan_barang), [
                 'catatan' => 'Rejected',
             ]);
 
@@ -207,7 +207,7 @@ describe('Goods In - Admin Approval Operations', function () {
         ]);
 
         GoodsInDetail::create([
-            'id_goods_in' => $goodsIn->id_goods_in,
+            'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
             'id_produk' => $produk->id_produk,
             'jumlah_dipesan' => 50,
             'jumlah_diterima' => 0,
@@ -216,7 +216,7 @@ describe('Goods In - Admin Approval Operations', function () {
         $catatan = 'PO approved for processing';
 
         $response = $this->actingAs($this->admin)
-            ->post(route('admin.goods-in-approval.approve', $goodsIn->id_goods_in), [
+            ->post(route('admin.goods-in-approval.approve', $goodsIn->id_pemesanan_barang), [
                 'catatan' => $catatan,
             ]);
 
@@ -243,7 +243,7 @@ describe('Goods In - Admin Approval Operations', function () {
         $catatan = 'Items not available in budget';
 
         $response = $this->actingAs($this->admin)
-            ->post(route('admin.goods-in-approval.reject', $goodsIn->id_goods_in), [
+            ->post(route('admin.goods-in-approval.reject', $goodsIn->id_pemesanan_barang), [
                 'catatan' => $catatan,
             ]);
 
@@ -269,7 +269,7 @@ describe('Goods In - Admin Approval Operations', function () {
         ]);
 
         $response = $this->actingAs($this->admin)
-            ->post(route('admin.goods-in-approval.approve', $goodsIn->id_goods_in), [
+            ->post(route('admin.goods-in-approval.approve', $goodsIn->id_pemesanan_barang), [
                 'catatan' => 'Trying to approve again',
             ]);
 
@@ -287,7 +287,7 @@ describe('Goods In - Admin Approval Operations', function () {
         ]);
 
         $response = $this->actingAs($this->admin)
-            ->post(route('admin.goods-in-approval.reject', $goodsIn->id_goods_in), [
+            ->post(route('admin.goods-in-approval.reject', $goodsIn->id_pemesanan_barang), [
                 'catatan' => 'Trying to reject again',
             ]);
 

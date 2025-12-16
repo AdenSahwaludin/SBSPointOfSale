@@ -9,11 +9,11 @@ class GoodsReceived extends Model
 {
     protected $table = 'penerimaan_barang';
 
-    protected $primaryKey = 'id_goods_received';
+    protected $primaryKey = 'id_penerimaan_barang';
 
     protected $fillable = [
-        'id_goods_in',
-        'id_goods_in_detail',
+        'id_pemesanan_barang',
+        'id_detail_pemesanan_barang',
         'id_produk',
         'jumlah_diterima',
         'jumlah_rusak',
@@ -29,12 +29,12 @@ class GoodsReceived extends Model
 
     public function goodsIn(): BelongsTo
     {
-        return $this->belongsTo(GoodsIn::class, 'id_goods_in');
+        return $this->belongsTo(GoodsIn::class, 'id_pemesanan_barang');
     }
 
     public function goodsInDetail(): BelongsTo
     {
-        return $this->belongsTo(GoodsInDetail::class, 'id_goods_in_detail');
+        return $this->belongsTo(GoodsInDetail::class, 'id_detail_pemesanan_barang');
     }
 
     public function produk(): BelongsTo

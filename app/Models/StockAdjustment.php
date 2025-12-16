@@ -9,7 +9,7 @@ class StockAdjustment extends Model
 {
     protected $table = 'penyesuaian_stok';
 
-    protected $primaryKey = 'id_adjustment';
+    protected $primaryKey = 'id_penyesuaian';
 
     protected $fillable = [
         'id_produk',

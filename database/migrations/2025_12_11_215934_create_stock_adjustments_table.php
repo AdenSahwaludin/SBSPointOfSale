@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stock_adjustments', function (Blueprint $table) {
-            $table->id('id_adjustment');
+        Schema::create('penyesuaian_stok', function (Blueprint $table) {
+            $table->id('id_penyesuaian');
             $table->unsignedBigInteger('id_produk');
             $table->enum('tipe', [
                 'retur_pelanggan',
@@ -41,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stock_adjustments');
+        Schema::dropIfExists('penyesuaian_stok');
     }
 };

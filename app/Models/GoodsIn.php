@@ -13,7 +13,7 @@ class GoodsIn extends Model
 
     protected $table = 'pemesanan_barang';
 
-    protected $primaryKey = 'id_goods_in';
+    protected $primaryKey = 'id_pemesanan_barang';
 
     protected $fillable = [
         'nomor_po',
@@ -42,19 +42,19 @@ class GoodsIn extends Model
 
     public function details(): HasMany
     {
-        return $this->hasMany(GoodsInDetail::class, 'id_goods_in');
+        return $this->hasMany(GoodsInDetail::class, 'id_pemesanan_barang');
     }
 
     public function receivedGoods(): HasMany
     {
-        return $this->hasMany(GoodsReceived::class, 'id_goods_in');
+        return $this->hasMany(GoodsReceived::class, 'id_pemesanan_barang');
     }
 
     public static function generateNomorPO(): string
     {
         $prefix = 'PO-'.now()->format('Y-m');
         $lastPO = static::where('nomor_po', 'like', "$prefix-%")
-            ->latest('id_goods_in')
+            ->latest('id_pemesanan_barang')
             ->first();
 
         $number = $lastPO ? (int) substr($lastPO->nomor_po, -5) + 1 : 1;

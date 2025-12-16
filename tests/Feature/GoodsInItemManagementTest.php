@@ -26,16 +26,16 @@ describe('Goods In Item Management', function () {
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
+                ->post(route('kasir.goods-in.items.add', $goodsIn->id_pemesanan_barang), [
                     'id_produk' => $produk->id_produk,
                     'jumlah_dipesan' => 10,
                 ]);
 
-            $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
+            $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang));
             $response->assertSessionHas('success', 'Item berhasil ditambahkan ke PO.');
 
             $this->assertDatabaseHas('detail_pemesanan_barang', [
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk->id_produk,
                 'jumlah_dipesan' => 10,
                 'jumlah_diterima' => 0,
@@ -53,7 +53,7 @@ describe('Goods In Item Management', function () {
 
             // Add first item
             GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk->id_produk,
                 'jumlah_dipesan' => 5,
                 'jumlah_diterima' => 0,
@@ -61,7 +61,7 @@ describe('Goods In Item Management', function () {
 
             // Try to add same product again
             $response = $this->actingAs($this->kasir)
-                ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
+                ->post(route('kasir.goods-in.items.add', $goodsIn->id_pemesanan_barang), [
                     'id_produk' => $produk->id_produk,
                     'jumlah_dipesan' => 10,
                 ]);
@@ -81,7 +81,7 @@ describe('Goods In Item Management', function () {
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
+                ->post(route('kasir.goods-in.items.add', $goodsIn->id_pemesanan_barang), [
                     'id_produk' => $produk->id_produk,
                     'jumlah_dipesan' => 10,
                 ]);
@@ -100,7 +100,7 @@ describe('Goods In Item Management', function () {
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
+                ->post(route('kasir.goods-in.items.add', $goodsIn->id_pemesanan_barang), [
                     'id_produk' => $produk->id_produk,
                     'jumlah_dipesan' => null,
                 ]);
@@ -118,7 +118,7 @@ describe('Goods In Item Management', function () {
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->post(route('kasir.goods-in.items.add', $goodsIn->id_goods_in), [
+                ->post(route('kasir.goods-in.items.add', $goodsIn->id_pemesanan_barang), [
                     'id_produk' => $produk->id_produk,
                     'jumlah_dipesan' => 0,
                 ]);
@@ -138,23 +138,23 @@ describe('Goods In Item Management', function () {
             ]);
 
             $detail = GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk->id_produk,
                 'jumlah_dipesan' => 10,
                 'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->patch(route('kasir.goods-in.items.update', [$goodsIn->id_goods_in, $detail->id_goods_in_detail]), [
+                ->patch(route('kasir.goods-in.items.update', [$goodsIn->id_pemesanan_barang, $detail->id_detail_pemesanan_barang]), [
                     'id_produk' => $produk->id_produk,
                     'jumlah_dipesan' => 20,
                 ]);
 
-            $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
+            $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang));
             $response->assertSessionHas('success', 'Kuantitas item berhasil diperbarui.');
 
             $this->assertDatabaseHas('detail_pemesanan_barang', [
-                'id_goods_in_detail' => $detail->id_goods_in_detail,
+                'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
                 'jumlah_dipesan' => 20,
             ]);
         });
@@ -169,14 +169,14 @@ describe('Goods In Item Management', function () {
             ]);
 
             $detail = GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk->id_produk,
                 'jumlah_dipesan' => 10,
                 'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->patch(route('kasir.goods-in.items.update', [$goodsIn->id_goods_in, $detail->id_goods_in_detail]), [
+                ->patch(route('kasir.goods-in.items.update', [$goodsIn->id_pemesanan_barang, $detail->id_detail_pemesanan_barang]), [
                     'id_produk' => $produk->id_produk,
                     'jumlah_dipesan' => 20,
                 ]);
@@ -197,20 +197,20 @@ describe('Goods In Item Management', function () {
             ]);
 
             $detail = GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk->id_produk,
                 'jumlah_dipesan' => 10,
                 'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->delete(route('kasir.goods-in.items.remove', [$goodsIn->id_goods_in, $detail->id_goods_in_detail]));
+                ->delete(route('kasir.goods-in.items.remove', [$goodsIn->id_pemesanan_barang, $detail->id_detail_pemesanan_barang]));
 
-            $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
+            $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang));
             $response->assertSessionHas('success', 'Item berhasil dihapus dari PO.');
 
             $this->assertDatabaseMissing('detail_pemesanan_barang', [
-                'id_goods_in_detail' => $detail->id_goods_in_detail,
+                'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             ]);
         });
 
@@ -224,20 +224,20 @@ describe('Goods In Item Management', function () {
             ]);
 
             $detail = GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk->id_produk,
                 'jumlah_dipesan' => 10,
                 'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->delete(route('kasir.goods-in.items.remove', [$goodsIn->id_goods_in, $detail->id_goods_in_detail]));
+                ->delete(route('kasir.goods-in.items.remove', [$goodsIn->id_pemesanan_barang, $detail->id_detail_pemesanan_barang]));
 
             $response->assertRedirect();
             $response->assertSessionHasErrors('error');
 
             $this->assertDatabaseHas('detail_pemesanan_barang', [
-                'id_goods_in_detail' => $detail->id_goods_in_detail,
+                'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
             ]);
         });
     });
@@ -253,20 +253,20 @@ describe('Goods In Item Management', function () {
             ]);
 
             GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk->id_produk,
                 'jumlah_dipesan' => 10,
                 'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->post(route('kasir.goods-in.submit', $goodsIn->id_goods_in));
+                ->post(route('kasir.goods-in.submit', $goodsIn->id_pemesanan_barang));
 
-            $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_goods_in));
+            $response->assertRedirect(route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang));
             $response->assertSessionHas('success', 'PO berhasil diajukan untuk persetujuan.');
 
             $this->assertDatabaseHas('pemesanan_barang', [
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'status' => GoodsInStatus::Submitted->value,
             ]);
         });
@@ -280,13 +280,13 @@ describe('Goods In Item Management', function () {
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->post(route('kasir.goods-in.submit', $goodsIn->id_goods_in));
+                ->post(route('kasir.goods-in.submit', $goodsIn->id_pemesanan_barang));
 
             $response->assertRedirect();
             $response->assertSessionHasErrors('error');
 
             $this->assertDatabaseHas('pemesanan_barang', [
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'status' => GoodsInStatus::Draft->value,
             ]);
         });
@@ -307,21 +307,21 @@ describe('Goods In Item Management', function () {
 
             // Add produk1 and produk2 to PO
             GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk1->id_produk,
                 'jumlah_dipesan' => 5,
                 'jumlah_diterima' => 0,
             ]);
 
             GoodsInDetail::create([
-                'id_goods_in' => $goodsIn->id_goods_in,
+                'id_pemesanan_barang' => $goodsIn->id_pemesanan_barang,
                 'id_produk' => $produk2->id_produk,
                 'jumlah_dipesan' => 10,
                 'jumlah_diterima' => 0,
             ]);
 
             $response = $this->actingAs($this->kasir)
-                ->get(route('kasir.goods-in.show', $goodsIn->id_goods_in));
+                ->get(route('kasir.goods-in.show', $goodsIn->id_pemesanan_barang));
 
             $response->assertSuccessful();
 

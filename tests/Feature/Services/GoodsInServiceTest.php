@@ -56,7 +56,7 @@ test('can approve PO', function () {
 
     $po = $this->service->createPORequest($kasir->id_pengguna, $items);
     $submittedPO = $this->service->submitGoodsIn($po);
-    $approvedPO = $this->service->approvePO($submittedPO->id_goods_in, $admin->id_pengguna, 'Approved');
+    $approvedPO = $this->service->approvePO($submittedPO->id_pemesanan_barang, $admin->id_pengguna, 'Approved');
 
     expect($approvedPO->status)->toBe(GoodsInStatus::Approved->value)
         ->and($approvedPO->id_admin)->toBe($admin->id_pengguna)
@@ -87,7 +87,7 @@ test('can reject PO', function () {
 
     $po = $this->service->createPORequest($kasir->id_pengguna, $items);
     $submittedPO = $this->service->submitGoodsIn($po);
-    $rejectedPO = $this->service->rejectPO($submittedPO->id_goods_in, $admin->id_pengguna, 'Out of budget');
+    $rejectedPO = $this->service->rejectPO($submittedPO->id_pemesanan_barang, $admin->id_pengguna, 'Out of budget');
 
     expect($rejectedPO->status)->toBe(GoodsInStatus::Rejected->value)
         ->and($rejectedPO->id_admin)->toBe($admin->id_pengguna)

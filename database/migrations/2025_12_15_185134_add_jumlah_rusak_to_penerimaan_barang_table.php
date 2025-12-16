@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('penerimaan_barang', function (Blueprint $table) {
-            $table->integer('jumlah_rusak')->default(0)->after('jumlah_diterima');
-        });
+        // Only add if jumlah_rusak doesn't exist (CREATE migration already includes it)
+        if (!Schema::hasColumn('penerimaan_barang', 'jumlah_rusak')) {
+            Schema::table('penerimaan_barang', function (Blueprint $table) {
+                $table->integer('jumlah_rusak')->default(0)->after('jumlah_diterima');
+            });
+        }
     }
 
     /**
@@ -21,8 +24,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('penerimaan_barang', function (Blueprint $table) {
-            $table->dropColumn('jumlah_rusak');
-        });
+        // Only drop if column exists
+        if (Schema::hasColumn('penerimaan_barang', 'jumlah_rusak')) {
+            Schema::table('penerimaan_barang', function (Blueprint $table) {
+                $table->dropColumn('jumlah_rusak');
+            });
+        }
     }
 };

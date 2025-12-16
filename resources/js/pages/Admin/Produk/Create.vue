@@ -12,7 +12,6 @@ interface Kategori {
 
 interface Props {
     kategori: Kategori[];
-    nextPrefix: string;
 }
 
 const props = defineProps<Props>();
@@ -22,27 +21,51 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/produk');
 
 // Form state
 const form = useForm({
-    suffix: '',
     nama: '',
     id_kategori: '',
     barcode: '',
     no_bpom: '',
     satuan: 'pcs',
-    isi_per_pack: '',
+    isi_per_pack: 1,
     harga: '',
     harga_pack: '',
-    stok: '',
-    sisa_pcs_terbuka: '',
-    batas_stok_minimum: '',
-    jumlah_restock: '',
+    stok: 0,
+    sisa_pcs_terbuka: 0,
+    batas_stok_minimum: 0,
+    jumlah_restock: 0,
+    sku: '',
 });
 
+// Computed SKU preview berdasarkan input user
+function generateSkuPreview(): string {
+    if (!form.nama || !form.id_kategori || !form.satuan) {
+        return '';
+    }
+
+    // Ambil kode kategori dari props
+    const kategori = props.kategori.find((k) => k.id_kategori === form.id_kategori);
+    if (!kategori) return '';
+
+    const kodeKategori = kategori.id_kategori;
+    const namaToken = form.nama
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .substring(0, 6)
+        .toUpperCase();
+
+    const kemasan = form.satuan === 'pcs' ? 'PCS' : form.satuan === 'karton' ? `KRT${form.isi_per_pack}` : `PCK${form.isi_per_pack}`;
+
+    return `${kodeKategori}-${namaToken}-${kemasan}`;
+}
+
+// Auto-set SKU dari preview jika user belum manual override
+function autoSetSku() {
+    if (!form.sku) {
+        form.sku = generateSkuPreview();
+    }
+}
+
 function submit() {
-    form.post('/admin/produk', {
-        onSuccess: () => {
-            // Redirect handled by controller
-        },
-    });
+    form.post('/admin/produk');
 }
 </script>
 
@@ -67,36 +90,33 @@ function submit() {
                     <div>
                         <h3 class="mb-4 text-lg font-semibold text-emerald-800">Identitas Produk</h3>
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            <!-- ID Produk -->
+                            <!-- SKU (Editable dengan Auto Generate) -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-emerald-700"> ID Produk * </label>
-                                <div class="flex items-center">
-                                    <span class="mr-2 rounded border border-emerald-200 bg-emerald-50 px-3 py-2 font-mono">
-                                        {{ props.nextPrefix }}-
-                                    </span>
+                                <label class="mb-2 block text-sm font-medium text-emerald-700"> SKU * </label>
+                                <div class="flex items-center gap-2">
                                     <input
-                                        v-model="form.suffix"
+                                        v-model="form.sku"
                                         type="text"
-                                        maxlength="4"
+                                        maxlength="32"
+                                        placeholder="Contoh: HB-MKP120-KRT12"
                                         class="flex-1 rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                                        placeholder="4 alfanumerik"
                                         required
                                     />
+                                    <BaseButton
+                                        type="button"
+                                        @click="autoSetSku"
+                                        variant="secondary"
+                                        size="sm"
+                                        icon="fas fa-magic"
+                                        title="Generate SKU otomatis"
+                                    >
+                                        Auto
+                                    </BaseButton>
                                 </div>
-                                <div v-if="form.errors.suffix" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.suffix }}
+                                <p class="mt-1 text-xs text-emerald-600">Format: KODE-NAMA-KEMASAN (max 32 karakter)</p>
+                                <div v-if="form.errors.sku" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.sku }}
                                 </div>
-                            </div>
-
-                            <!-- SKU (Auto) -->
-                            <div>
-                                <label class="mb-2 block text-sm font-medium text-emerald-700"> SKU (Auto Generated) </label>
-                                <input
-                                    type="text"
-                                    disabled
-                                    :value="props.nextPrefix + '-' + form.suffix"
-                                    class="w-full rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-700"
-                                />
                             </div>
 
                             <!-- Nama -->
