@@ -27,11 +27,11 @@ class TransaksiDetail extends Model
     ];
 
     protected $casts = [
-        'harga_satuan' => 'decimal:0',
+        'harga_satuan' => 'decimal:2',
         'jumlah' => 'integer',
-        'isi_pack_saat_transaksi' => 'integer', // 1️⃣ Cast sebagai integer
-        'diskon_item' => 'decimal:0',
-        'subtotal' => 'decimal:0',
+        'isi_pack_saat_transaksi' => 'integer',
+        'diskon_item' => 'decimal:2',
+        'subtotal' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

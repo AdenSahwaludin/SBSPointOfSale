@@ -33,10 +33,10 @@ class KontrakKredit extends Model
     protected $casts = [
         'mulai_kontrak' => 'date',
         'tenor_bulan' => 'integer',
-        'pokok_pinjaman' => 'decimal:0',
-        'dp' => 'decimal:0',
+        'pokok_pinjaman' => 'decimal:2',
+        'dp' => 'decimal:2',
         'bunga_persen' => 'decimal:2',
-        'cicilan_bulanan' => 'decimal:0',
+        'cicilan_bulanan' => 'decimal:2',
         'score_snapshot' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

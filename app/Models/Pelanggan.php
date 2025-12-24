@@ -35,8 +35,8 @@ class Pelanggan extends Model
     protected $casts = [
         'aktif' => 'boolean',
         'trust_score' => 'integer',
-        'credit_limit' => 'decimal:0',
-        'saldo_kredit' => 'decimal:0',
+        'credit_limit' => 'decimal:2',
+        'saldo_kredit' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

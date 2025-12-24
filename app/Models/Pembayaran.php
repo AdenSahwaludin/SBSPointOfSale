@@ -34,7 +34,7 @@ class Pembayaran extends Model
 
     protected $casts = [
         'id_angsuran' => 'integer',
-        'jumlah' => 'decimal:0',
+        'jumlah' => 'decimal:2',
         'tanggal' => 'datetime',
         'tipe_pembayaran' => 'string',
     ];

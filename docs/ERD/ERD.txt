@@ -1,116 +1,192 @@
-1.	Tabel Pengguna
-id_pengguna dibentuk dari nomor urut + inisial nama, misal: 001-ADN. kata_sandi menggunakan hashing bcrypt dengan panjang tetap 60 karakter.
-Tabel 4. 1 Tabel Pengguna
-No.	Nama Field	Tipe Data	Constraint
-1	id_pengguna	VARCHAR(8)	PK
-2	nama	VARCHAR(100)	NOT NULL
-3	email	VARCHAR(100)	UNIQUE, NULLABLE
-4	telepon	VARCHAR(15)	NULLABLE
-5	password	VARCHAR(60)	NULLABLE, bcrypt
-6	role	ENUM	'kasir', 'admin'
-7	terakhir_login	TIMESTAMP	NULLABLE
-8	remember_token	VARCHAR(100)	NULLABLE
-9	created_at	TIMESTAMP	auto-generated
-10	updated_at	TIMESTAMP	auto-updated
+## DATABASE SCHEMA - SOPS (SBS Point of Sale)
 
-2.	Tabel Pelanggan
-id_pelanggan diformat sebagai P001, P002, dst sampai P999999, karena disiapkan untuk tampilan terurut rapi dan cocok digunakan sebagai bagian dari ID Transaksi.
-Tabel 4. 2 Tabel Pelanggan
-No.	Nama Field	Tipe Data	Constraint
-1	id_pelanggan	VARCHAR(7)	PK
-2	nama	VARCHAR(100)	NOT NULL
-3	email	VARCHAR(100)	UNIQUE, NULLABLE
-4	telepon	VARCHAR(15)	NULLABLE
-5	kota	VARCHAR(50)	NULLABLE
-6	alamat	TEXT	NULLABLE
-7	aktif	BOOLEAN	default: 1
-8	trust_score	TINYINT UNSIGNED	default: 50 (0-100)
-9	credit_limit	DECIMAL(12,0)	default: 0
-10	status_kredit	ENUM	'aktif', 'nonaktif'
-11	saldo_kredit	DECIMAL(12,0)	default: 0
-12	created_at	TIMESTAMP	auto-generated
-13	updated_at	TIMESTAMP	auto-updated
+---
 
-3.	Tabel Kategori
-id_kategori menggunakan auto increment karena cukup berbentuk angka dan tidak memerlukan struktur khusus.
-Tabel 4. 3 Tabel Kategori
-No.	Nama Field	Tipe Data	Constraint
-1	id_kategori	TINYINT	PK, AUTO_INCREMENT, UNSIGNED
-2	nama	VARCHAR(100)	
+## 1. Kategori
+1.1 id_kategori | VARCHAR(4) | PK
+1.2 nama | VARCHAR(50) | UNIQUE NOT NULL
 
-4.	Tabel Produk
-id_produk menggunakan BIGINT auto-increment. Produk mendukung multiple satuan dengan isi_per_pack untuk konversi stok dan buffer untuk sisa PCS.
-Tabel 4. 4 Tabel Produk
-No.	Nama Field	Tipe Data	Constraint
-1	id_produk	BIGINT	PK, AUTO_INCREMENT
-2	sku	VARCHAR(32)	UNIQUE, NOT NULL
-3	barcode	VARCHAR(13)	UNIQUE, NULLABLE (EAN-13)
-4	no_bpom	VARCHAR(18)	NULLABLE
-5	nama	VARCHAR(100)	NOT NULL
-6	id_kategori	TINYINT UNSIGNED	FK
-7	satuan	ENUM	'pcs', 'karton', 'pack'
-8	isi_per_pack	INTEGER	default: 1, > 0
-9	stok	INTEGER	default: 0
-10	sisa_pcs_terbuka	INTEGER	default: 0 (buffer PCS)
-11	harga	DECIMAL(18,0)	NOT NULL, >= 0
-12	harga_pack	DECIMAL(18,0)	NULLABLE (harga grosir)
-13	created_at	TIMESTAMP	auto-generated
-14	updated_at	TIMESTAMP	auto-updated
+---
 
-5.	Tabel Transaksi
-nomor_transaksi memakai format: INV-YYYY-MM-NNN-PXXXXXX dengan struktur dinamis. Diperluas dengan fields cicilan untuk mendukung kredit.
-Tabel 4. 5 Tabel Transaksi
-No.	Nama Field	Tipe Data	Constraint
-1	nomor_transaksi	VARCHAR(40)	PK
-2	id_pelanggan	VARCHAR(7)	FK
-3	id_kasir	VARCHAR(8)	FK
-4	tanggal	TIMESTAMP	default: CURRENT_TIMESTAMP
-5	total_item	INTEGER	default: 0
-6	subtotal	DECIMAL(18,0)	default: 0
-7	diskon	DECIMAL(18,0)	default: 0
-8	pajak	DECIMAL(18,0)	default: 0
-9	biaya_pengiriman	DECIMAL(18,0)	default: 0
-10	total	DECIMAL(18,0)	default: 0
-11	metode_bayar	ENUM	'TUNAI','QRIS','TRANSFER BCA','KREDIT'
-12	status_pembayaran	ENUM	'MENUNGGU','LUNAS','BATAL'
-13	paid_at	TIMESTAMP	NULLABLE
-14	jenis_transaksi	ENUM	'TUNAI','KREDIT'
-15	dp	DECIMAL(12,0)	default: 0
-16	tenor_bulan	TINYINT UNSIGNED	NULLABLE
-17	bunga_persen	DECIMAL(5,0)	default: 0
-18	cicilan_bulanan	DECIMAL(12,0)	NULLABLE
-19	ar_status	ENUM	'NA','AKTIF','LUNAS','GAGAL','BATAL'
-20	id_kontrak	BIGINT UNSIGNED	NULLABLE, FK
-21	created_at	TIMESTAMP	auto-generated
-22	updated_at	TIMESTAMP	auto-updated
+## 2. Produk
+2.1 id_produk | BIGINT | PK AUTO_INCREMENT
+2.2 sku | VARCHAR(20) | UNIQUE NOT NULL
+2.3 barcode | VARCHAR(50)
+2.4 no_bpom | VARCHAR(50)
+2.5 nama | VARCHAR(100) | NOT NULL
+2.6 id_kategori | VARCHAR(4) | FK, NOT NULL
+2.7 satuan | VARCHAR(20) | NOT NULL
+2.8 isi_per_pack | INT | DEFAULT 1
+2.9 stok | INT | NOT NULL
+2.10 sisa_pcs_terbuka | INT | DEFAULT 0
+2.11 harga | BIGINT | NOT NULL
+2.12 harga_pack | BIGINT
+2.13 batas_stok_minimum | INT | DEFAULT 0
+2.14 jumlah_restock | INT | DEFAULT 0
 
-6.	Tabel Detail Transaksi
-Digunakan untuk mencatat daftar produk dalam 1 transaksi. ID-nya menggunakan auto increment karena tidak butuh format khusus.
-Tabel 4. 6 Tabel Detail Transaksi
-No.	Nama Field	Tipe Data	Constraint
-1	id_detail	BIGINT	PK, AUTO_INCREMENT, UNSIGNED
-2	nomor_transaksi	VARCHAR(40)	FK
-3	id_produk	BIGINT	FK
-4	jumlah	INTEGER	NOT NULL, > 0
-5	harga_satuan	DECIMAL(18,0)	NOT NULL
-6	diskon_item	DECIMAL(18,0)	default: 0
-7	subtotal_item	DECIMAL(18,0)	calculated
-8	created_at	TIMESTAMP	auto-generated
-9	updated_at	TIMESTAMP	auto-updated
+---
 
-7.	Tabel Pembayaran
-id_pembayaran menggunakan format PAY-YYYYMMDD-0000001, digenerate dari aplikasi saat insert. Mendukung pembayaran transaksi dan pembayaran kredit (cicilan).
-Tabel 4. 7 Tabel Pembayaran
-No.	Nama Field	Tipe Data	Constraint
-1	id_pembayaran	VARCHAR(32)	PK
-2	id_transaksi	VARCHAR(40)	FK, NULLABLE
-3	id_angsuran	BIGINT	FK, NULLABLE
-4	metode	ENUM	'TUNAI','QRIS','TRANSFER BCA','KREDIT'
-5	jumlah	DECIMAL(18,0)	NOT NULL, > 0
-6	tanggal	TIMESTAMP	default: CURRENT_TIMESTAMP
-7	keterangan	VARCHAR(255)	NULLABLE
-8	id_pelanggan	VARCHAR(7)	FK, NULLABLE
-9	id_kasir	VARCHAR(8)	FK, NULLABLE
-10	tipe_pembayaran	ENUM	'transaksi','kredit'
-11	created_at	TIMESTAMP	auto-generated
-12	updated_at	TIMESTAMP	auto-updated	
+## 3. Konversi Stok
+3.1 id_konversi | BIGINT | PK AUTO_INCREMENT
+3.2 from_produk_id | BIGINT | FK NOT NULL
+3.3 to_produk_id | BIGINT | FK NOT NULL
+3.4 rasio | DECIMAL(5,2) | NOT NULL
+3.5 qty_from | INT | NOT NULL
+3.6 qty_to | INT | NOT NULL
+3.7 mode | ENUM('partial','full') | NOT NULL
+3.8 packs_used | INT | DEFAULT 0
+3.9 stok_awal_pcs | INT | DEFAULT 0
+3.10 stok_sisa_pcs | INT | DEFAULT 0
+3.11 keterangan | TEXT
+
+---
+
+## 4. Pemesanan Barang
+4.1 id_pemesanan_barang | BIGINT | PK AUTO_INCREMENT
+4.2 nomor_po | VARCHAR(30) | UNIQUE NOT NULL
+4.3 status | ENUM('draft','submitted','approved','rejected','received','partial_received') | DEFAULT 'draft'
+4.4 tanggal_request | TIMESTAMP | NOT NULL
+4.5 tanggal_approval | TIMESTAMP
+4.6 catatan_approval | TEXT
+4.7 id_kasir | VARCHAR(8) | FK NOT NULL
+4.8 id_admin | VARCHAR(8) | FK
+
+---
+
+## 5. Detail Pemesanan Barang
+5.1 id_detail_pemesanan_barang | BIGINT | PK AUTO_INCREMENT
+5.2 id_pemesanan_barang | BIGINT | FK NOT NULL
+5.3 id_produk | BIGINT | FK NOT NULL
+5.4 jumlah_dipesan | INT | NOT NULL
+5.5 jumlah_diterima | INT | DEFAULT 0
+
+---
+
+## 6. Penerimaan Barang
+6.1 id_penerimaan_barang | BIGINT | PK AUTO_INCREMENT
+6.2 id_pemesanan_barang | BIGINT | FK NOT NULL
+6.3 id_detail_pemesanan_barang | BIGINT | FK NOT NULL
+6.4 id_produk | BIGINT | FK NOT NULL
+6.5 jumlah_diterima | INT | NOT NULL
+6.6 jumlah_rusak | INT | DEFAULT 0
+6.7 id_kasir | VARCHAR(8) | FK
+6.8 catatan | TEXT
+6.9 status | ENUM('pending','completed') | DEFAULT 'completed'
+
+---
+
+## 7. Penyesuaian Stok
+7.1 id_penyesuaian | BIGINT | PK AUTO_INCREMENT
+7.2 id_produk | BIGINT | FK NOT NULL
+7.3 tipe | ENUM('retur_pelanggan','retur_gudang','koreksi_plus','expired','rusak','koreksi_minus','lainnya') | NOT NULL
+7.4 jumlah_penyesuaian | INT | NOT NULL
+7.5 alasan | TEXT
+7.6 id_pengguna | VARCHAR(8) | FK NOT NULL
+7.7 tanggal_adjustment | TIMESTAMP | NOT NULL
+
+---
+
+## 8. Pengguna
+8.1 id_pengguna | VARCHAR(8) | PK
+8.2 nama | VARCHAR(100) | NOT NULL
+8.3 email | VARCHAR(100) | UNIQUE NOT NULL
+8.4 telepon | VARCHAR(20)
+8.5 password | VARCHAR(255) | NOT NULL
+8.6 role | ENUM('admin','kasir') | NOT NULL
+8.7 terakhir_login | TIMESTAMP
+8.8 remember_token | VARCHAR(100)
+
+---
+
+## 9. Pelanggan
+9.1 id_pelanggan | BIGINT | PK AUTO_INCREMENT
+9.2 nama | VARCHAR(100) | NOT NULL
+9.3 email | VARCHAR(100)
+9.4 telepon | VARCHAR(20) | UNIQUE NOT NULL
+9.5 kota | VARCHAR(50)
+9.6 alamat | TEXT
+9.7 aktif | TINYINT(1) | DEFAULT 1
+9.8 trust_score | INT | DEFAULT 50
+9.9 credit_limit | BIGINT | DEFAULT 0
+9.10 status_kredit | ENUM('inactive','active','suspended') | DEFAULT 'inactive'
+9.11 saldo_kredit | BIGINT | DEFAULT 0
+
+---
+
+## 10. Transaksi
+10.1 nomor_transaksi | VARCHAR(20) | PK
+10.2 id_pelanggan | BIGINT | FK NOT NULL
+10.3 id_kasir | VARCHAR(8) | FK NOT NULL
+10.4 tanggal | TIMESTAMP | NOT NULL
+10.5 total_item | INT | NOT NULL
+10.6 subtotal | BIGINT | NOT NULL
+10.7 diskon | BIGINT | DEFAULT 0
+10.8 pajak | BIGINT | DEFAULT 0
+10.9 biaya_pengiriman | BIGINT | DEFAULT 0
+10.10 total | BIGINT | NOT NULL
+10.11 metode_bayar | VARCHAR(50) | NOT NULL
+10.12 status_pembayaran | ENUM('pending','paid','partially_paid') | DEFAULT 'pending'
+10.13 paid_at | TIMESTAMP
+10.14 jenis_transaksi | ENUM('tunai','kredit') | NOT NULL
+10.15 dp | BIGINT | DEFAULT 0
+10.16 tenor_bulan | INT
+10.17 bunga_persen | DECIMAL(5,2)
+10.18 cicilan_bulanan | BIGINT
+10.19 ar_status | ENUM('draft','verified','done') | DEFAULT 'draft'
+10.20 id_kontrak | BIGINT | FK
+
+---
+
+## 11. Transaksi Detail
+11.1 id_detail | BIGINT | PK AUTO_INCREMENT
+11.2 nomor_transaksi | VARCHAR(20) | FK NOT NULL
+11.3 id_produk | BIGINT | FK NOT NULL
+11.4 nama_produk | VARCHAR(100) | NOT NULL
+11.5 harga_satuan | BIGINT | NOT NULL
+11.6 jumlah | INT | NOT NULL
+11.7 jenis_satuan | VARCHAR(20) | NOT NULL
+11.8 isi_pack_saat_transaksi | INT
+11.9 diskon_item | BIGINT | DEFAULT 0
+11.10 subtotal | BIGINT | NOT NULL
+
+---
+
+## 12. Kontrak Kredit
+12.1 id_kontrak | BIGINT | PK AUTO_INCREMENT
+12.2 nomor_kontrak | VARCHAR(30) | UNIQUE NOT NULL
+12.3 id_pelanggan | BIGINT | FK NOT NULL
+12.4 nomor_transaksi | VARCHAR(20) | FK
+12.5 mulai_kontrak | DATE | NOT NULL
+12.6 tenor_bulan | INT | NOT NULL
+12.7 pokok_pinjaman | BIGINT | NOT NULL
+12.8 dp | BIGINT | NOT NULL
+12.9 bunga_persen | DECIMAL(5,2) | NOT NULL
+12.10 cicilan_bulanan | BIGINT | NOT NULL
+12.11 status | ENUM('active','settled','default') | NOT NULL
+12.12 score_snapshot | INT
+
+---
+
+## 13. Jadwal Angsuran
+13.1 id_angsuran | BIGINT | PK AUTO_INCREMENT
+13.2 id_kontrak | BIGINT | FK NOT NULL
+13.3 periode_ke | INT | NOT NULL
+13.4 jatuh_tempo | DATE | NOT NULL
+13.5 jumlah_tagihan | BIGINT | NOT NULL
+13.6 jumlah_dibayar | BIGINT | DEFAULT 0
+13.7 status | ENUM('due','late','paid') | DEFAULT 'due'
+13.8 paid_at | TIMESTAMP
+
+---
+
+## 14. Pembayaran
+14.1 id_pembayaran | BIGINT | PK AUTO_INCREMENT
+14.2 id_transaksi | VARCHAR(20) | FK
+14.3 id_angsuran | BIGINT | FK
+14.4 metode | VARCHAR(50) | NOT NULL
+14.5 jumlah | BIGINT | NOT NULL
+14.6 tanggal | TIMESTAMP | NOT NULL
+14.7 keterangan | TEXT
+14.8 id_pelanggan | BIGINT | FK NOT NULL
+14.9 id_kasir | VARCHAR(8) | FK NOT NULL
+14.10 tipe_pembayaran | ENUM('tunai','transfer','kredit') | NOT NULL

@@ -103,6 +103,17 @@ function getPaymentMethodLabel(metode: string): string {
     return labels[metode] || metode;
 }
 
+function formatChartLabel(amount: number): string {
+    if (amount === 0) return '';
+    if (amount >= 1_000_000) {
+        return `${(amount / 1_000_000).toFixed(1)}jt`;
+    }
+    if (amount >= 1_000) {
+        return `${(amount / 1_000).toFixed(0)}k`;
+    }
+    return formatCurrency(amount);
+}
+
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
 </script>
 
@@ -206,7 +217,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                         <div v-for="(data, index) in salesByHour" :key="index" class="flex flex-1 flex-col items-center gap-1">
                             <div class="flex w-full flex-col items-center">
                                 <span v-if="data.amount > 0" class="mb-1 text-xs font-medium text-gray-900">
-                                    {{ formatCurrency(data.amount).replace('Rp ', '').substring(0, 4) }}
+                                    {{ formatChartLabel(data.amount) }}
                                 </span>
                                 <div class="relative w-full bg-gray-100">
                                     <div
