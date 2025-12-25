@@ -13,18 +13,20 @@ interface Kasir {
 interface ProdukDetail {
     id_produk: string;
     nama: string;
+    satuan: string;
+    sku: string;
 }
 
 interface GoodsInDetail {
     id_goods_in_detail: number;
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     id_produk: string;
-    qty_request: number;
+    jumlah_dipesan: number;
     produk: ProdukDetail;
 }
 
 interface PoHistory {
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     nomor_po: string;
     status: string;
     tanggal_request: string;
@@ -116,7 +118,7 @@ function formatShortDate(dateString: string) {
 }
 
 function getTotalItems(details: GoodsInDetail[]) {
-    return details.reduce((sum, detail) => sum + detail.qty_request, 0);
+    return details.reduce((sum, detail) => sum + detail.jumlah_dipesan, 0);
 }
 
 function getStatusBadgeClass(status: string) {
@@ -272,7 +274,7 @@ function getStatusLabel(status: string) {
                         <tbody class="divide-y divide-emerald-100 bg-white-emerald">
                             <tr
                                 v-for="po in poHistory.data"
-                                :key="po.id_goods_in"
+                                :key="po.id_pemesanan_barang"
                                 class="emerald-transition transition-all duration-200 hover:bg-emerald-25"
                             >
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -311,7 +313,7 @@ function getStatusLabel(status: string) {
                                 </td>
                                 <td class="px-6 py-4 text-right whitespace-nowrap">
                                     <BaseButton
-                                        @click="$inertia.visit(`/admin/goods-in-history/${po.id_goods_in}`)"
+                                        @click="$inertia.visit(`/admin/goods-in-history/${po.id_pemesanan_barang}`)"
                                         variant="primary"
                                         size="sm"
                                         icon="fas fa-eye"

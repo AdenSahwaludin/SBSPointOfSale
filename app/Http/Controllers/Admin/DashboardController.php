@@ -47,9 +47,12 @@ class DashboardController extends Controller
         ];
 
         // Hitung pertumbuhan
-        $salesStats['growth'] = $salesStats['last_month']['total'] > 0
-         ? (($salesStats['this_month']['total'] - $salesStats['last_month']['total']) / $salesStats['last_month']['total']) * 100
-         : 0;
+        if ($salesStats['last_month']['total'] > 0) {
+            $salesStats['growth'] = (($salesStats['this_month']['total'] - $salesStats['last_month']['total']) / $salesStats['last_month']['total']) * 100;
+        } else {
+            // Jika bulan lalu tidak ada data, hitung berdasarkan apakah bulan ini ada data atau tidak
+            $salesStats['growth'] = $salesStats['this_month']['total'] > 0 ? 100 : 0;
+        }
 
         // ========================================
         // STATUS STOK PRODUK

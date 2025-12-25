@@ -114,19 +114,29 @@ class TransaksiController extends Controller
             ->values();
 
         // Get hourly breakdown for chart
-        $hourlyData = $dayTransactions->where('status_pembayaran', 'LUNAS')
+        $hourlyRaw = $dayTransactions->where('status_pembayaran', 'LUNAS')
             ->groupBy(function ($transaction) {
-                return Carbon::parse($transaction->tanggal)->format('H:00');
+                return (int) Carbon::parse($transaction->tanggal)->format('H');
             })
             ->map(function ($group) {
                 return [
-                    'jam' => $group->keys()->first(),
                     'total' => $group->sum('total'),
                     'count' => $group->count(),
                 ];
-            })
-            ->values()
-            ->sortBy('jam');
+            });
+
+        // Fill missing hours with 0 and filter
+        $hourlyData = [];
+        for ($h = 0; $h < 24; $h++) {
+            $data = $hourlyRaw->get($h);
+            if ($data && ($data['total'] > 0 || $data['count'] > 0)) {
+                $hourlyData[] = [
+                    'jam' => str_pad($h, 2, '0', STR_PAD_LEFT).':00',
+                    'total' => $data['total'],
+                    'count' => $data['count'],
+                ];
+            }
+        }
 
         return Inertia::render('Admin/Transactions/DailyReport', [
             'tanggal' => $tanggal->format('Y-m-d'),

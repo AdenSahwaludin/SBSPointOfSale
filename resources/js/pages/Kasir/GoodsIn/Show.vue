@@ -37,7 +37,7 @@ interface Admin {
 }
 
 interface GoodsIn {
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     nomor_po: string;
     status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'received';
     tanggal_request: string;
@@ -129,7 +129,7 @@ function addItem() {
     addForm.id_produk = selectedProductId.value;
     addForm.jumlah_dipesan = selectedQty.value;
 
-    addForm.post(itemsRoutes.add(props.goodsIn.id_goods_in).url, {
+    addForm.post(itemsRoutes.add({ goodsIn: props.goodsIn.id_pemesanan_barang }).url, {
         onSuccess: () => {
             selectedProductId.value = null;
             selectedQty.value = 1;
@@ -142,14 +142,14 @@ function removeItem(detailId: number) {
     if (!confirm('Yakin ingin menghapus item ini dari PO?')) return;
 
     const form = useForm({});
-    form.delete(itemsRoutes.remove([props.goodsIn.id_goods_in, detailId]).url);
+    form.delete(itemsRoutes.remove([{ goodsIn: props.goodsIn.id_pemesanan_barang }, detailId]).url);
 }
 
 function submitPO() {
     if (!confirm('Yakin ingin mengajukan PO ini untuk persetujuan? PO tidak dapat diubah setelah diajukan.')) return;
 
     const form = useForm({});
-    form.post(goodsInRoutes.submit(props.goodsIn.id_goods_in).url);
+    form.post(goodsInRoutes.submit({ id_pemesanan_barang: props.goodsIn.id_pemesanan_barang }).url);
 }
 </script>
 

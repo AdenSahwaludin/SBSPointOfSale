@@ -12,18 +12,20 @@ interface Kasir {
 interface ProdukDetail {
     id_produk: string;
     nama: string;
+    satuan: string;
+    sku: string;
 }
 
 interface GoodsInDetail {
     id_goods_in_detail: number;
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     id_produk: string;
-    qty_request: number;
+    jumlah_dipesan: number;
     produk: ProdukDetail;
 }
 
 interface PoHistory {
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     nomor_po: string;
     status: string;
     tanggal_request: string;
@@ -56,7 +58,7 @@ function formatDate(dateString: string) {
 }
 
 function getTotalQuantity() {
-    return props.po.details.reduce((sum, detail) => sum + detail.qty_request, 0);
+    return props.po.details.reduce((sum, detail) => sum + detail.jumlah_dipesan, 0);
 }
 
 function getStatusBadgeClass(status: string) {
@@ -251,7 +253,7 @@ function getStatusDescription(status: string) {
                                 </td>
                                 <td class="px-6 py-4 text-right whitespace-nowrap">
                                     <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">
-                                        {{ detail.qty_request }}
+                                        {{ detail.jumlah_dipesan }}
                                     </span>
                                 </td>
                             </tr>

@@ -2,39 +2,41 @@
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 interface DetailItem {
     id_goods_in_detail: number;
     id_produk: number;
     nama_produk: string;
     sku: string;
-    qty_request: number;
-    qty_received: number;
+    jumlah_dipesan: number;
+    jumlah_diterima: number;
     qty_remaining: number;
 }
 
 interface ReceivedGood {
     id_goods_received: number;
     id_goods_in_detail: number;
-    qty_received: number;
+    jumlah_diterima: number;
     catatan: string | null;
     created_at: string;
     produk: {
         nama: string;
         sku: string;
     };
-    kasir: {
-        name: string;
+    kasir?: {
+        name?: string;
+        nama?: string;
     };
 }
 
 interface GoodsInData {
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     nomor_po: string;
     status: string;
-    kasir: {
-        name: string;
+    kasir?: {
+        name?: string;
+        nama?: string;
     };
     tanggal_approval: string;
 }
@@ -48,6 +50,7 @@ const props = defineProps<{
 const page = usePage();
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/goods-in-receiving');
 const showForm = ref(false);
+const selectedIds = ref<number[]>([]);
 const selectedItems = ref<Record<number, number>>({});
 const selectedDamaged = ref<Record<number, number>>({});
 const selectedNotes = ref<Record<number, string>>({});
@@ -60,45 +63,62 @@ const allItemsReceived = computed(() => {
     return props.pendingItems.every((item) => item.qty_remaining === 0);
 });
 
-const itemsWithRemaining = computed(() => {
-    return props.pendingItems.filter((item) => item.qty_remaining > 0);
-});
+const itemsWithRemaining = computed(() => props.pendingItems.filter((item) => item.qty_remaining > 0));
 
-const toggleItemSelection = (detailId: number) => {
-    if (selectedItems.value[detailId] !== undefined) {
-        delete selectedItems.value[detailId];
-        delete selectedDamaged.value[detailId];
-        delete selectedNotes.value[detailId];
-    } else {
-        selectedItems.value[detailId] = 1;
-        selectedDamaged.value[detailId] = 0;
-        selectedNotes.value[detailId] = '';
-    }
+// Derived list of items currently selected to render forms
+const selectedFormItems = computed(() =>
+    itemsWithRemaining.value.filter((item) => selectedIds.value.includes(item.id_goods_in_detail)),
+);
+
+const resetSelections = () => {
+    selectedIds.value = [];
+    selectedItems.value = {};
+    selectedDamaged.value = {};
+    selectedNotes.value = {};
 };
 
-const isItemSelected = (detailId: number) => {
-    return selectedItems.value[detailId] !== undefined;
-};
+// Ensure qty/damaged/notes maps stay in sync with selected ids
+watch(
+    selectedIds,
+    (newIds, oldIds) => {
+        // added ids
+        newIds.forEach((id) => {
+            if (selectedItems.value[id] === undefined) {
+                const item = props.pendingItems.find((i) => i.id_goods_in_detail === id);
+                const defaultQty = item?.qty_remaining ?? 1;
+                selectedItems.value[id] = defaultQty;
+                selectedDamaged.value[id] = 0;
+                selectedNotes.value[id] = '';
+            }
+        });
 
-const getSelectedCount = computed(() => {
-    return Object.keys(selectedItems.value).length;
-});
+        // removed ids
+        oldIds
+            .filter((id) => !newIds.includes(id))
+            .forEach((id) => {
+                delete selectedItems.value[id];
+                delete selectedDamaged.value[id];
+                delete selectedNotes.value[id];
+            });
+    },
+    { deep: false },
+);
+
+const getSelectedCount = computed(() => selectedIds.value.length);
 
 const submitForm = () => {
-    const items = Object.entries(selectedItems.value).map(([detailId, qty]) => ({
-        id_goods_in_detail: parseInt(detailId),
-        qty_received: qty,
-        qty_damaged: selectedDamaged.value[parseInt(detailId)] || 0,
-        catatan: selectedNotes.value[parseInt(detailId)] || undefined,
+    const items = selectedIds.value.map((detailId) => ({
+        id_goods_in_detail: detailId,
+        qty_received: selectedItems.value[detailId],
+        qty_damaged: selectedDamaged.value[detailId] || 0,
+        catatan: selectedNotes.value[detailId] || undefined,
     }));
 
     form.items = items;
-    form.post(`/kasir/goods-in/${props.goodsIn.id_goods_in}/record-received`, {
+    form.post(`/kasir/goods-in/${props.goodsIn.id_pemesanan_barang}/record-received`, {
         preserveScroll: true,
         onSuccess: () => {
-            selectedItems.value = {};
-            selectedDamaged.value = {};
-            selectedNotes.value = {};
+            resetSelections();
             showForm.value = false;
         },
     });
@@ -130,7 +150,7 @@ const goBack = () => {
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <p class="text-sm text-emerald-600">Diminta oleh</p>
-                            <p class="mt-1 font-semibold text-emerald-950">{{ goodsIn.kasir.name }}</p>
+                            <p class="mt-1 font-semibold text-emerald-950">{{ goodsIn.kasir?.name || goodsIn.kasir?.nama || '-' }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-emerald-600">Tanggal Persetujuan</p>
@@ -153,7 +173,7 @@ const goBack = () => {
                                 <div class="text-sm text-emerald-600">SKU: {{ received.produk.sku }}</div>
                             </div>
                             <div class="text-right">
-                                <div class="font-semibold text-emerald-950">{{ received.qty_received }} pcs</div>
+                                <div class="font-semibold text-emerald-950">{{ received.jumlah_diterima }} pcs</div>
                                 <div class="text-xs text-emerald-600">{{ new Date(received.created_at).toLocaleDateString('id-ID') }}</div>
                             </div>
                         </div>
@@ -190,10 +210,10 @@ const goBack = () => {
                                 <div class="text-sm text-emerald-600">SKU: {{ item.sku }}</div>
                                 <div class="mt-1 flex gap-6 text-xs text-emerald-700">
                                     <span
-                                        >Diminta: <span class="font-semibold">{{ item.qty_request }}</span></span
+                                        >Diminta: <span class="font-semibold">{{ item.jumlah_dipesan }}</span></span
                                     >
                                     <span
-                                        >Diterima: <span class="font-semibold">{{ item.qty_received }}</span></span
+                                        >Diterima: <span class="font-semibold">{{ item.jumlah_diterima }}</span></span
                                     >
                                     <span class="font-semibold text-amber-600">Sisa: {{ item.qty_remaining }}</span>
                                 </div>
@@ -201,8 +221,8 @@ const goBack = () => {
                             <label class="flex items-center gap-2">
                                 <input
                                     type="checkbox"
-                                    :checked="isItemSelected(item.id_goods_in_detail)"
-                                    @change="toggleItemSelection(item.id_goods_in_detail)"
+                                    v-model="selectedIds"
+                                    :value="item.id_goods_in_detail"
                                     class="h-4 w-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
                                 />
                                 <span class="text-sm text-emerald-700">Pilih</span>
@@ -213,9 +233,8 @@ const goBack = () => {
                     <!-- Form View -->
                     <form v-if="showForm" @submit.prevent="submitForm" class="space-y-4 rounded-lg border border-emerald-200 bg-white p-6">
                         <div
-                            v-for="item in itemsWithRemaining"
+                            v-for="item in selectedFormItems"
                             :key="item.id_goods_in_detail"
-                            v-show="isItemSelected(item.id_goods_in_detail)"
                             class="space-y-3 border-b border-emerald-100 pb-4 last:border-0"
                         >
                             <div class="font-semibold text-emerald-950">{{ item.nama_produk }}</div>
@@ -225,14 +244,13 @@ const goBack = () => {
                                 <label class="block text-sm font-medium text-emerald-700">Qty Diterima (Maks: {{ item.qty_remaining }})</label>
                                 <input
                                     type="number"
-                                    :value="selectedItems[item.id_goods_in_detail] || 1"
+                                    :value="selectedItems[item.id_goods_in_detail]"
                                     @input="
-                                        (e) => {
-                                            selectedItems[item.id_goods_in_detail] = Math.min(
-                                                parseInt((e.target as HTMLInputElement).value) || 1,
+                                        (e) =>
+                                            (selectedItems[item.id_goods_in_detail] = Math.min(
+                                                Math.max(parseInt((e.target as HTMLInputElement).value) || 1, 1),
                                                 item.qty_remaining,
-                                            );
-                                        }
+                                            ))
                                     "
                                     :max="item.qty_remaining"
                                     min="1"
@@ -248,21 +266,21 @@ const goBack = () => {
                                 </label>
                                 <input
                                     type="number"
-                                    :value="selectedDamaged[item.id_goods_in_detail] || 0"
+                                    :value="selectedDamaged[item.id_goods_in_detail]"
                                     @input="
-                                        (e) => {
-                                            const damagedQty = Math.max(0, parseInt((e.target as HTMLInputElement).value) || 0);
-                                            const receivedQty = selectedItems[item.id_goods_in_detail] || 1;
-                                            selectedDamaged[item.id_goods_in_detail] = Math.min(damagedQty, receivedQty - 1);
-                                        }
+                                        (e) =>
+                                            (selectedDamaged[item.id_goods_in_detail] = Math.min(
+                                                Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0),
+                                                Math.max(selectedItems[item.id_goods_in_detail] - 1, 0),
+                                            ))
                                     "
-                                    :max="(selectedItems[item.id_goods_in_detail] || 1) - 1"
+                                    :max="Math.max(selectedItems[item.id_goods_in_detail] - 1, 0)"
                                     min="0"
                                     class="mt-1 w-full rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-950 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
                                     placeholder="0"
                                 />
                                 <p class="mt-1 text-xs text-amber-700">
-                                    Barang rusak tidak akan menambah stok. Maks: {{ (selectedItems[item.id_goods_in_detail] || 1) - 1 }}
+                                    Barang rusak tidak akan menambah stok. Maks: {{ Math.max(selectedItems[item.id_goods_in_detail] - 1, 0) }}
                                 </p>
                             </div>
 
@@ -270,12 +288,8 @@ const goBack = () => {
                             <div>
                                 <label class="block text-sm font-medium text-emerald-700">Catatan (Opsional)</label>
                                 <textarea
-                                    :value="selectedNotes[item.id_goods_in_detail] || ''"
-                                    @input="
-                                        (e) => {
-                                            selectedNotes[item.id_goods_in_detail] = (e.target as HTMLTextAreaElement).value;
-                                        }
-                                    "
+                                    :value="selectedNotes[item.id_goods_in_detail]"
+                                    @input="(e) => (selectedNotes[item.id_goods_in_detail] = (e.target as HTMLTextAreaElement).value)"
                                     maxlength="500"
                                     rows="2"
                                     class="mt-1 w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-emerald-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
@@ -296,7 +310,7 @@ const goBack = () => {
                             </button>
                             <button
                                 type="button"
-                                @click="showForm = false"
+                                @click="() => { resetSelections(); showForm = false; }"
                                 class="rounded-lg border border-emerald-300 bg-white px-4 py-2 font-semibold text-emerald-700 transition hover:bg-emerald-50 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none"
                             >
                                 Batal

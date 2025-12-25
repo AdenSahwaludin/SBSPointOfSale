@@ -16,14 +16,14 @@ interface ProdukDetail {
 
 interface GoodsInDetail {
     id_goods_in_detail: number;
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     id_produk: string;
     qty_request: number;
     produk: ProdukDetail;
 }
 
 interface PendingPO {
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     nomor_po: string;
     status: string;
     tanggal_request: string;
@@ -96,7 +96,7 @@ function getTotalItems(details: GoodsInDetail[]) {
                         <tbody class="divide-y divide-emerald-100 bg-white-emerald">
                             <tr
                                 v-for="po in pendingPOs"
-                                :key="po.id_goods_in"
+                                :key="po.id_pemesanan_barang"
                                 class="emerald-transition transition-all duration-200 hover:bg-emerald-25"
                             >
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -134,7 +134,7 @@ function getTotalItems(details: GoodsInDetail[]) {
                                 </td>
                                 <td class="px-6 py-4 text-right whitespace-nowrap">
                                     <BaseButton
-                                        @click="$inertia.visit(`/admin/goods-in-approval/${po.id_goods_in}`)"
+                                        @click="$inertia.visit(`/admin/goods-in-approval/${po.id_pemesanan_barang}`)"
                                         variant="primary"
                                         size="sm"
                                         icon="fas fa-eye"

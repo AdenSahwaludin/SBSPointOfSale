@@ -16,7 +16,7 @@ interface GoodsInDetail {
 }
 
 interface GoodsIn {
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     nomor_po: string;
     status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'received';
     tanggal_request: string;
@@ -70,7 +70,7 @@ function deletePO(goodsIn: GoodsIn) {
     if (!confirm(`Yakin ingin menghapus PO ${goodsIn.nomor_po}? Tindakan ini tidak bisa dibatalkan.`)) return;
 
     const form = useForm({});
-    form.delete(`/kasir/goods-in/${goodsIn.id_goods_in}`);
+    form.delete(`/kasir/goods-in/${goodsIn.id_pemesanan_barang}`);
 }
 </script>
 
@@ -154,7 +154,7 @@ function deletePO(goodsIn: GoodsIn) {
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <BaseButton
-                                        @click="$inertia.visit(`/kasir/goods-in/${po.id_goods_in}`)"
+                                        @click="$inertia.visit(`/kasir/goods-in/${po.id_pemesanan_barang}`)"
                                         variant="outline"
                                         size="sm"
                                         icon="fas fa-eye"

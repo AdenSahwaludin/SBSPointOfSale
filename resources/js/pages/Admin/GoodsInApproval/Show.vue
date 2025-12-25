@@ -19,18 +19,19 @@ interface ProdukDetail {
     id_produk: string;
     nama: string;
     satuan: string;
+    sku: string;
 }
 
 interface GoodsInDetail {
     id_goods_in_detail: number;
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     id_produk: string;
-    qty_request: number;
+    jumlah_dipesan: number;
     produk: ProdukDetail;
 }
 
 interface GoodsIn {
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     nomor_po: string;
     status: string;
     tanggal_request: string;
@@ -73,7 +74,7 @@ function formatDate(dateString: string) {
 }
 
 function getTotalItems() {
-    return props.goodsIn.details.reduce((sum, detail) => sum + detail.qty_request, 0);
+    return props.goodsIn.details.reduce((sum, detail) => sum + detail.jumlah_dipesan, 0);
 }
 
 function getStatusBadgeClass(status: string) {
@@ -124,7 +125,7 @@ function openRejectModal() {
 }
 
 function handleApprove() {
-    approveForm.post(`/admin/goods-in-approval/${props.goodsIn.id_goods_in}/approve`, {
+    approveForm.post(`/admin/goods-in-approval/${props.goodsIn.id_pemesanan_barang}/approve`, {
         onSuccess: () => {
             showApproveModal.value = false;
         },
@@ -132,7 +133,7 @@ function handleApprove() {
 }
 
 function handleReject() {
-    rejectForm.post(`/admin/goods-in-approval/${props.goodsIn.id_goods_in}/reject`, {
+    rejectForm.post(`/admin/goods-in-approval/${props.goodsIn.id_pemesanan_barang}/reject`, {
         onSuccess: () => {
             showRejectModal.value = false;
         },
@@ -214,7 +215,7 @@ function handleReject() {
                         <thead class="border-b border-emerald-200 bg-emerald-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">No</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">ID Produk</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">SKU</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Nama Produk</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Satuan</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-emerald-600 uppercase">Qty Request</th>
@@ -224,7 +225,7 @@ function handleReject() {
                             <tr v-for="(detail, index) in goodsIn.details" :key="detail.id_goods_in_detail" class="hover:bg-emerald-25">
                                 <td class="px-6 py-4 text-sm whitespace-nowrap text-emerald-800">{{ index + 1 }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-emerald-800">{{ detail.id_produk }}</div>
+                                    <div class="text-sm font-medium text-emerald-800">{{ detail.produk.sku }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-emerald-800">{{ detail.produk.nama }}</div>
@@ -233,7 +234,7 @@ function handleReject() {
                                     <div class="text-sm text-emerald-800">{{ detail.produk.satuan }}</div>
                                 </td>
                                 <td class="px-6 py-4 text-right whitespace-nowrap">
-                                    <div class="text-sm font-medium text-emerald-800">{{ detail.qty_request }}</div>
+                                    <div class="text-sm font-medium text-emerald-800">{{ detail.jumlah_dipesan }}</div>
                                 </td>
                             </tr>
                         </tbody>

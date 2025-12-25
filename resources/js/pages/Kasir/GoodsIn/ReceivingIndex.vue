@@ -5,7 +5,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed, onMounted } from 'vue';
 
 interface GoodsInData {
-    id_goods_in: number;
+    id_pemesanan_barang: number;
     nomor_po: string;
     status: string;
     tanggal_approval: string;
@@ -14,8 +14,8 @@ interface GoodsInData {
     };
     details?: Array<{
         id_goods_in_detail: number;
-        qty_request: number;
-        qty_received: number;
+        jumlah_dipesan: number;
+        jumlah_diterima: number;
         produk?: {
             nama: string;
         };
@@ -64,7 +64,7 @@ const safeApprovedPOs = computed(() => props.approvedPOs ?? []);
                 <div v-else class="space-y-4">
                     <div
                         v-for="po in safeApprovedPOs"
-                        :key="po.id_goods_in"
+                        :key="po.id_pemesanan_barang"
                         class="rounded-lg border border-emerald-200 bg-white p-6 shadow-sm transition hover:shadow-md"
                     >
                         <div class="flex items-start justify-between">
@@ -90,7 +90,7 @@ const safeApprovedPOs = computed(() => props.approvedPOs ?? []);
                                     <div v-for="detail in po.details" :key="detail.id_goods_in_detail" class="flex items-center justify-between">
                                         <span class="truncate">{{ detail.produk?.nama }}</span>
                                         <span class="ml-2 whitespace-nowrap">
-                                            <span class="font-semibold">{{ detail.qty_received }}</span> / {{ detail.qty_request }}
+                                            <span class="font-semibold">{{ detail.jumlah_diterima }}</span> / {{ detail.jumlah_dipesan }}
                                         </span>
                                     </div>
                                 </div>
@@ -106,7 +106,7 @@ const safeApprovedPOs = computed(() => props.approvedPOs ?? []);
 
                             <!-- Action Button -->
                             <Link
-                                :href="`/kasir/goods-in/${po.id_goods_in}/receiving`"
+                                :href="`/kasir/goods-in/${po.id_pemesanan_barang}/receiving`"
                                 class="ml-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white transition hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none"
                             >
                                 <i class="fas fa-arrow-right"></i>
