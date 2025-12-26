@@ -56,7 +56,7 @@ const selectedDamaged = ref<Record<number, number>>({});
 const selectedNotes = ref<Record<number, string>>({});
 
 const form = useForm({
-    items: [] as Array<{ id_goods_in_detail: number; qty_received: number; qty_damaged?: number; catatan?: string }>,
+    items: [] as Array<{ id_detail_pemesanan_barang: number; jumlah_diterima: number; jumlah_rusak?: number; catatan?: string }>,
 });
 
 const allItemsReceived = computed(() => {
@@ -107,10 +107,11 @@ watch(
 const getSelectedCount = computed(() => selectedIds.value.length);
 
 const submitForm = () => {
+    // Map Vue field names to backend field names
     const items = selectedIds.value.map((detailId) => ({
-        id_goods_in_detail: detailId,
-        qty_received: selectedItems.value[detailId],
-        qty_damaged: selectedDamaged.value[detailId] || 0,
+        id_detail_pemesanan_barang: detailId, // Backend expects this field name
+        jumlah_diterima: selectedItems.value[detailId], // Backend expects this field name
+        jumlah_rusak: selectedDamaged.value[detailId] || 0, // Backend expects this field name
         catatan: selectedNotes.value[detailId] || undefined,
     }));
 
@@ -120,6 +121,9 @@ const submitForm = () => {
         onSuccess: () => {
             resetSelections();
             showForm.value = false;
+        },
+        onError: (errors) => {
+            console.error('Form submission errors:', errors);
         },
     });
 };
@@ -246,11 +250,10 @@ const goBack = () => {
                                     type="number"
                                     :value="selectedItems[item.id_goods_in_detail]"
                                     @input="
-                                        (e) =>
-                                            (selectedItems[item.id_goods_in_detail] = Math.min(
-                                                Math.max(parseInt((e.target as HTMLInputElement).value) || 1, 1),
-                                                item.qty_remaining,
-                                            ))
+                                        (e) => {
+                                            const val = parseInt((e.target as HTMLInputElement).value) || 1;
+                                            selectedItems[item.id_goods_in_detail] = Math.min(Math.max(val, 1), item.qty_remaining);
+                                        }
                                     "
                                     :max="item.qty_remaining"
                                     min="1"
@@ -268,11 +271,11 @@ const goBack = () => {
                                     type="number"
                                     :value="selectedDamaged[item.id_goods_in_detail]"
                                     @input="
-                                        (e) =>
-                                            (selectedDamaged[item.id_goods_in_detail] = Math.min(
-                                                Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0),
-                                                Math.max(selectedItems[item.id_goods_in_detail] - 1, 0),
-                                            ))
+                                        (e) => {
+                                            const val = parseInt((e.target as HTMLInputElement).value) || 0;
+                                            const maxDamaged = Math.max(selectedItems[item.id_goods_in_detail] - 1, 0);
+                                            selectedDamaged[item.id_goods_in_detail] = Math.min(Math.max(val, 0), maxDamaged);
+                                        }
                                     "
                                     :max="Math.max(selectedItems[item.id_goods_in_detail] - 1, 0)"
                                     min="0"
@@ -289,7 +292,7 @@ const goBack = () => {
                                 <label class="block text-sm font-medium text-emerald-700">Catatan (Opsional)</label>
                                 <textarea
                                     :value="selectedNotes[item.id_goods_in_detail]"
-                                    @input="(e) => (selectedNotes[item.id_goods_in_detail] = (e.target as HTMLTextAreaElement).value)"
+                                    @input="(e) => { selectedNotes[item.id_goods_in_detail] = (e.target as HTMLTextAreaElement).value; }"
                                     maxlength="500"
                                     rows="2"
                                     class="mt-1 w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-emerald-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
