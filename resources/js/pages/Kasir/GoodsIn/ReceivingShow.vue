@@ -66,9 +66,7 @@ const allItemsReceived = computed(() => {
 const itemsWithRemaining = computed(() => props.pendingItems.filter((item) => item.qty_remaining > 0));
 
 // Derived list of items currently selected to render forms
-const selectedFormItems = computed(() =>
-    itemsWithRemaining.value.filter((item) => selectedIds.value.includes(item.id_goods_in_detail)),
-);
+const selectedFormItems = computed(() => itemsWithRemaining.value.filter((item) => selectedIds.value.includes(item.id_goods_in_detail)));
 
 const resetSelections = () => {
     selectedIds.value = [];
@@ -292,7 +290,11 @@ const goBack = () => {
                                 <label class="block text-sm font-medium text-emerald-700">Catatan (Opsional)</label>
                                 <textarea
                                     :value="selectedNotes[item.id_goods_in_detail]"
-                                    @input="(e) => { selectedNotes[item.id_goods_in_detail] = (e.target as HTMLTextAreaElement).value; }"
+                                    @input="
+                                        (e) => {
+                                            selectedNotes[item.id_goods_in_detail] = (e.target as HTMLTextAreaElement).value;
+                                        }
+                                    "
                                     maxlength="500"
                                     rows="2"
                                     class="mt-1 w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-emerald-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
@@ -313,7 +315,12 @@ const goBack = () => {
                             </button>
                             <button
                                 type="button"
-                                @click="() => { resetSelections(); showForm = false; }"
+                                @click="
+                                    () => {
+                                        resetSelections();
+                                        showForm = false;
+                                    }
+                                "
                                 class="rounded-lg border border-emerald-300 bg-white px-4 py-2 font-semibold text-emerald-700 transition hover:bg-emerald-50 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none"
                             >
                                 Batal
