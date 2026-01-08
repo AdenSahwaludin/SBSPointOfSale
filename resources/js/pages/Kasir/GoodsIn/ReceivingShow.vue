@@ -2,10 +2,10 @@
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 interface DetailItem {
-    id_goods_in_detail: number;
+    id_detail_pemesanan_barang: number;
     id_produk: number;
     nama_produk: string;
     sku: string;
@@ -16,7 +16,7 @@ interface DetailItem {
 
 interface ReceivedGood {
     id_goods_received: number;
-    id_goods_in_detail: number;
+    id_detail_pemesanan_barang: number;
     jumlah_diterima: number;
     catatan: string | null;
     created_at: string;
@@ -50,68 +50,93 @@ const props = defineProps<{
 const page = usePage();
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/goods-in-receiving');
 const showForm = ref(false);
-const selectedIds = ref<number[]>([]);
-const selectedItems = ref<Record<number, number>>({});
-const selectedDamaged = ref<Record<number, number>>({});
-const selectedNotes = ref<Record<number, string>>({});
 
 const form = useForm({
     items: [] as Array<{ id_detail_pemesanan_barang: number; jumlah_diterima: number; jumlah_rusak?: number; catatan?: string }>,
 });
 
-const allItemsReceived = computed(() => {
-    return props.pendingItems.every((item) => item.qty_remaining === 0);
-});
+const allItemsReceived = computed(() => props.pendingItems.every((item) => item.qty_remaining === 0));
 
 const itemsWithRemaining = computed(() => props.pendingItems.filter((item) => item.qty_remaining > 0));
 
-// Derived list of items currently selected to render forms
-const selectedFormItems = computed(() => itemsWithRemaining.value.filter((item) => selectedIds.value.includes(item.id_goods_in_detail)));
+interface ItemState {
+    checked: boolean;
+    qty: number;
+    damaged: number;
+    note: string;
+}
 
-const resetSelections = () => {
-    selectedIds.value = [];
-    selectedItems.value = {};
-    selectedDamaged.value = {};
-    selectedNotes.value = {};
+const itemsState = reactive<Record<number, ItemState>>({});
+
+const buildItemState = (item: DetailItem): ItemState => ({
+    checked: false,
+    qty: Math.max(1, item.qty_remaining),
+    damaged: 0,
+    note: '',
+});
+
+const ensureState = (item: DetailItem): ItemState => {
+    const id = item.id_detail_pemesanan_barang;
+
+    if (!itemsState[id]) {
+        itemsState[id] = buildItemState(item);
+    }
+
+    return itemsState[id];
 };
 
-// Ensure qty/damaged/notes maps stay in sync with selected ids
-watch(
-    selectedIds,
-    (newIds, oldIds) => {
-        // added ids
-        newIds.forEach((id) => {
-            if (selectedItems.value[id] === undefined) {
-                const item = props.pendingItems.find((i) => i.id_goods_in_detail === id);
-                const defaultQty = item?.qty_remaining ?? 1;
-                selectedItems.value[id] = defaultQty;
-                selectedDamaged.value[id] = 0;
-                selectedNotes.value[id] = '';
-            }
-        });
+const resetSelections = () => {
+    const allowedIds = new Set(itemsWithRemaining.value.map((item) => item.id_detail_pemesanan_barang));
 
-        // removed ids
-        oldIds
-            .filter((id) => !newIds.includes(id))
-            .forEach((id) => {
-                delete selectedItems.value[id];
-                delete selectedDamaged.value[id];
-                delete selectedNotes.value[id];
-            });
-    },
-    { deep: false },
-);
+    Object.keys(itemsState).forEach((key) => {
+        const numericKey = Number(key);
+        if (!allowedIds.has(numericKey)) {
+            delete itemsState[numericKey];
+        }
+    });
 
-const getSelectedCount = computed(() => selectedIds.value.length);
+    itemsWithRemaining.value.forEach((item) => {
+        itemsState[item.id_detail_pemesanan_barang] = buildItemState(item);
+    });
+};
+
+resetSelections();
+
+const selectedFormItems = computed(() => itemsWithRemaining.value.filter((item) => ensureState(item).checked));
+
+const getSelectedCount = computed(() => selectedFormItems.value.length);
+
+const clampQty = (value: number, max: number): number => {
+    const numericValue = Number.isNaN(value) ? 1 : value;
+    return Math.min(Math.max(numericValue, 1), Math.max(max, 1));
+};
+
+const clampDamaged = (value: number, max: number): number => {
+    const numericValue = Number.isNaN(value) ? 0 : value;
+    return Math.min(Math.max(numericValue, 0), Math.max(max, 0));
+};
 
 const submitForm = () => {
+    if (getSelectedCount.value === 0) {
+        return;
+    }
+
     // Map Vue field names to backend field names
-    const items = selectedIds.value.map((detailId) => ({
-        id_detail_pemesanan_barang: detailId, // Backend expects this field name
-        jumlah_diterima: selectedItems.value[detailId], // Backend expects this field name
-        jumlah_rusak: selectedDamaged.value[detailId] || 0, // Backend expects this field name
-        catatan: selectedNotes.value[detailId] || undefined,
-    }));
+    const items = selectedFormItems.value.map((item) => {
+        const state = ensureState(item);
+        const qty = clampQty(state.qty, item.qty_remaining);
+        const maxDamaged = Math.max(qty - 1, 0);
+
+        state.qty = qty;
+        state.damaged = clampDamaged(state.damaged, maxDamaged);
+
+        return {
+            id_detail_pemesanan_barang: item.id_detail_pemesanan_barang, // Backend expects this field name
+            jumlah_diterima: state.qty, // Backend expects this field name
+            jumlah_rusak: state.damaged || 0, // Backend expects this field name
+            catatan: state.note || undefined,
+        };
+    });
 
     form.items = items;
     form.post(`/kasir/goods-in/${props.goodsIn.id_pemesanan_barang}/record-received`, {
@@ -204,7 +229,7 @@ const goBack = () => {
                     <div v-if="!showForm" class="space-y-3 rounded-lg border border-emerald-200 bg-white p-4">
                         <div
                             v-for="item in itemsWithRemaining"
-                            :key="item.id_goods_in_detail"
+                            :key="`list-${item.id_detail_pemesanan_barang}`"
                             class="flex items-center justify-between border-b border-emerald-100 py-3 last:border-0"
                         >
                             <div class="flex-1">
@@ -223,8 +248,7 @@ const goBack = () => {
                             <label class="flex items-center gap-2">
                                 <input
                                     type="checkbox"
-                                    v-model="selectedIds"
-                                    :value="item.id_goods_in_detail"
+                                    v-model="ensureState(item).checked"
                                     class="h-4 w-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
                                 />
                                 <span class="text-sm text-emerald-700">Pilih</span>
@@ -236,7 +260,7 @@ const goBack = () => {
                     <form v-if="showForm" @submit.prevent="submitForm" class="space-y-4 rounded-lg border border-emerald-200 bg-white p-6">
                         <div
                             v-for="item in selectedFormItems"
-                            :key="item.id_goods_in_detail"
+                            :key="`form-${item.id_detail_pemesanan_barang}`"
                             class="space-y-3 border-b border-emerald-100 pb-4 last:border-0"
                         >
                             <div class="font-semibold text-emerald-950">{{ item.nama_produk }}</div>
@@ -246,12 +270,10 @@ const goBack = () => {
                                 <label class="block text-sm font-medium text-emerald-700">Qty Diterima (Maks: {{ item.qty_remaining }})</label>
                                 <input
                                     type="number"
-                                    :value="selectedItems[item.id_goods_in_detail]"
+                                    v-model.number="ensureState(item).qty"
                                     @input="
-                                        (e) => {
-                                            const val = parseInt((e.target as HTMLInputElement).value) || 1;
-                                            selectedItems[item.id_goods_in_detail] = Math.min(Math.max(val, 1), item.qty_remaining);
-                                        }
+                                        ensureState(item).qty = clampQty(ensureState(item).qty, item.qty_remaining);
+                                        ensureState(item).damaged = clampDamaged(ensureState(item).damaged, Math.max(ensureState(item).qty - 1, 0));
                                     "
                                     :max="item.qty_remaining"
                                     min="1"
@@ -267,21 +289,17 @@ const goBack = () => {
                                 </label>
                                 <input
                                     type="number"
-                                    :value="selectedDamaged[item.id_goods_in_detail]"
+                                    v-model.number="ensureState(item).damaged"
                                     @input="
-                                        (e) => {
-                                            const val = parseInt((e.target as HTMLInputElement).value) || 0;
-                                            const maxDamaged = Math.max(selectedItems[item.id_goods_in_detail] - 1, 0);
-                                            selectedDamaged[item.id_goods_in_detail] = Math.min(Math.max(val, 0), maxDamaged);
-                                        }
+                                        ensureState(item).damaged = clampDamaged(ensureState(item).damaged, Math.max(ensureState(item).qty - 1, 0))
                                     "
-                                    :max="Math.max(selectedItems[item.id_goods_in_detail] - 1, 0)"
+                                    :max="Math.max(ensureState(item).qty - 1, 0)"
                                     min="0"
                                     class="mt-1 w-full rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-950 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
                                     placeholder="0"
                                 />
                                 <p class="mt-1 text-xs text-amber-700">
-                                    Barang rusak tidak akan menambah stok. Maks: {{ Math.max(selectedItems[item.id_goods_in_detail] - 1, 0) }}
+                                    Barang rusak tidak akan menambah stok. Maks: {{ Math.max(ensureState(item).qty - 1, 0) }}
                                 </p>
                             </div>
 
@@ -289,12 +307,7 @@ const goBack = () => {
                             <div>
                                 <label class="block text-sm font-medium text-emerald-700">Catatan (Opsional)</label>
                                 <textarea
-                                    :value="selectedNotes[item.id_goods_in_detail]"
-                                    @input="
-                                        (e) => {
-                                            selectedNotes[item.id_goods_in_detail] = (e.target as HTMLTextAreaElement).value;
-                                        }
-                                    "
+                                    v-model="ensureState(item).note"
                                     maxlength="500"
                                     rows="2"
                                     class="mt-1 w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-emerald-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
@@ -332,7 +345,8 @@ const goBack = () => {
                     <button
                         v-if="!showForm && itemsWithRemaining.length > 0"
                         @click="showForm = true"
-                        class="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none"
+                        :disabled="getSelectedCount === 0"
+                        class="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                     >
                         <i class="fas fa-plus"></i>
                         Catat Barang Diterima
