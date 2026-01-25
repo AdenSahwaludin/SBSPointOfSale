@@ -15,7 +15,7 @@ class JadwalAngsuranSeeder extends Seeder
     public function run(): void
     {
         // Get the first credit contract
-        $kontrak = KontrakKredit::where('nomor_kontrak', 'KRD-202510-0001')->first();
+        $kontrak = KontrakKredit::where('nomor_kontrak', 'KRD-202601-0001')->first();
 
         if ($kontrak) {
             // Create installment schedules based on contract tenor

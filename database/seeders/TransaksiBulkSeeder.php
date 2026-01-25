@@ -25,11 +25,20 @@ class TransaksiBulkSeeder extends Seeder
             $customers = ['P002', 'P003'];
         }
 
-        $now = Carbon::now();
+        $now = Carbon::create(2026, 1, 26, 23, 59, 59);
 
         for ($i = 1; $i <= 50; $i++) {
             $idPelanggan = $customers[array_rand($customers)];
-            $tanggal = $now->copy()->subDays(random_int(0, 60))->setTime(random_int(9, 20), random_int(0, 59));
+            // Distribute transactions: 70% on 25-26, 30% on other dates (1-24)
+            $randomDate = random_int(1, 100);
+            if ($randomDate <= 70) {
+                // 70% on 25-26
+                $day = random_int(0, 1) === 0 ? 25 : 26;
+            } else {
+                // 30% on dates 1-24
+                $day = random_int(1, 24);
+            }
+            $tanggal = Carbon::create(2026, 1, $day)->setTime(random_int(9, 20), random_int(0, 59));
             $metode = (random_int(0, 100) < 35) ? 'KREDIT' : (random_int(0, 1) ? 'TUNAI' : 'TRANSFER BCA');
 
             $itemsCount = random_int(1, 4);
@@ -62,7 +71,7 @@ class TransaksiBulkSeeder extends Seeder
             $total = $subtotal - $diskon + $pajak;
 
             $sequence = sprintf('%03d', $i + 2); // avoid clashing with existing seeders 001..002
-            $nomorTransaksi = sprintf('INV-%s-%s-%s-%s', $tanggal->format('Y'), $tanggal->format('m'), $sequence, $idPelanggan);
+            $nomorTransaksi = sprintf('INV-2026-01-%s-%s', $sequence, $idPelanggan);
 
             $isKredit = $metode === 'KREDIT';
             $dp = $isKredit ? (int) round($total * [0, 0.1, 0.2, 0.3][random_int(0, 3)]) : 0;

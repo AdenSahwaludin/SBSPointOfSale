@@ -6,6 +6,7 @@ use App\Helpers\SKUGenerator;
 use App\Http\Controllers\Controller;
 use App\Models\Kategori;
 use App\Models\Produk;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -189,10 +190,68 @@ class ProdukController extends Controller
     public function destroy(string $id)
     {
         $produk = Produk::where('id_produk', $id)->firstOrFail();
-        $produk->delete();
 
-        return redirect()->route('admin.produk.index')
-            ->with('message', 'Produk berhasil dihapus.');
+        // Check for related data before deletion
+        $relations = $this->checkProductRelations($produk);
+        if (! empty($relations)) {
+            $relationMessage = implode(', ', $relations);
+
+            return back()->with('warning', "Produk tidak dapat dihapus karena masih berelasi dengan: {$relationMessage}");
+        }
+
+        try {
+            $produk->delete();
+
+            return redirect()->route('admin.produk.index')
+                ->with('message', 'Produk berhasil dihapus.');
+        } catch (QueryException $e) {
+            // Handle foreign key constraint violation
+            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'foreign key constraint')) {
+                return back()->with('warning', 'Produk tidak dapat dihapus karena masih berelasi dengan data lain. Silakan periksa transaksi, barang masuk, atau konversi stok yang menggunakan produk ini.');
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Check if product has any relations
+     */
+    private function checkProductRelations(Produk $produk): array
+    {
+        $relations = [];
+
+        // Check goods in details (detail pemesanan barang)
+        if ($produk->goodsInDetails()->exists()) {
+            $count = $produk->goodsInDetails()->count();
+            $relations[] = "Detail Pemesanan Barang ({$count})";
+        }
+
+        // Check transaction details
+        if ($produk->transaksiDetail()->exists()) {
+            $count = $produk->transaksiDetail()->count();
+            $relations[] = "Detail Transaksi ({$count})";
+        }
+
+        // Check stock conversions (from)
+        if ($produk->konversiFrom()->exists()) {
+            $count = $produk->konversiFrom()->count();
+            $relations[] = "Konversi Stok - Produk Sumber ({$count})";
+        }
+
+        // Check stock conversions (to)
+        if ($produk->konversiTo()->exists()) {
+            $count = $produk->konversiTo()->count();
+            $relations[] = "Konversi Stok - Produk Tujuan ({$count})";
+        }
+
+        // Check stock adjustments
+        if ($produk->adjustments()->exists()) {
+            $count = $produk->adjustments()->count();
+            $relations[] = "Penyesuaian Stok ({$count})";
+        }
+
+        return $relations;
     }
 
     /**

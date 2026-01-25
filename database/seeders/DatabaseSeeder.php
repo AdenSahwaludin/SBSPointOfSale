@@ -18,10 +18,11 @@ class DatabaseSeeder extends Seeder
             PenggunaSeeder::class,
             ProdukSeeder::class,
             // KonversiStokSeeder::class,
-            // TransaksiSeeder::class,
-            // TransaksiBulkSeeder::class,
-            // KontrakKreditSeeder::class,
-            // JadwalAngsuranSeeder::class,
+            TransaksiSeeder::class,
+            TransaksiBulkSeeder::class,
+            KontrakKreditSeeder::class,
+            JadwalAngsuranSeeder::class,
+            TransaksiSeederRandom::class,
         ]);
     }
 }

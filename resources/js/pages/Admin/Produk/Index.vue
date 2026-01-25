@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
+import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Kategori {
@@ -60,6 +61,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { warning } = useNotifications();
+const page = usePage();
 
 const showDeleteModal = ref(false);
 const deleteTarget = ref<Produk | null>(null);
@@ -156,6 +160,13 @@ function deleteProduk() {
             onSuccess: () => {
                 showDeleteModal.value = false;
                 deleteTarget.value = null;
+            },
+            onFinish: () => {
+                // Check for warning flash message and show as notification
+                if (page.props.flash?.warning) {
+                    warning('Tidak Dapat Menghapus', page.props.flash.warning);
+                    showDeleteModal.value = false;
+                }
             },
         });
     }

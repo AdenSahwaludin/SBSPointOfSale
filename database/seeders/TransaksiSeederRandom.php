@@ -19,9 +19,18 @@ class TransaksiSeederRandom extends Seeder
         $id_kasir = $kasir ? $kasir->id_pengguna : '001-ADMI';
 
         for ($i = 400; $i <= 414; $i++) {
-            $tanggal = Carbon::create(2025, 12, rand(17, 25), rand(8, 17), rand(0, 59), 0);
+            // Distribute transactions: 70% on 25-26, 30% on other dates (1-24)
+            $randomDate = rand(1, 100);
+            if ($randomDate <= 70) {
+                // 70% on 25-26
+                $day = rand(0, 1) === 0 ? 25 : 26;
+            } else {
+                // 30% on dates 1-24
+                $day = rand(1, 24);
+            }
+            $tanggal = Carbon::create(2026, 1, $day, rand(8, 17), rand(0, 59), 0);
             $pelangganId = $pelangganIds[array_rand($pelangganIds)];
-            $nomorTransaksi = 'INV-2025-12-' . $i . '-' . $pelangganId;
+            $nomorTransaksi = 'INV-2026-01-' . $i . '-' . $pelangganId;
             
             // Hitung subtotal dari items
             $jumlahItem = rand(2, 5);

@@ -26,10 +26,10 @@ class TransaksiSeeder extends Seeder
 
         // Sample cash transaction
         $transaksiTunai = Transaksi::create([
-            'nomor_transaksi' => 'INV-2025-10-001-P002',
+            'nomor_transaksi' => 'INV-2026-01-001-P002',
             'id_pelanggan' => 'P002',
             'id_kasir' => '001-ADEN',
-            'tanggal' => Carbon::now(),
+            'tanggal' => Carbon::create(2026, 1, 25, 10, 0, 0),
             'total_item' => 2,
             'subtotal' => 32000,
             'diskon' => 0,
@@ -38,7 +38,7 @@ class TransaksiSeeder extends Seeder
             'total' => 32000,
             'metode_bayar' => 'TUNAI',
             'status_pembayaran' => 'LUNAS',
-            'paid_at' => Carbon::now(),
+            'paid_at' => Carbon::create(2026, 1, 25, 10, 0, 0),
             'jenis_transaksi' => 'TUNAI',
             'dp' => 0,
             'tenor_bulan' => null,
@@ -62,21 +62,21 @@ class TransaksiSeeder extends Seeder
 
         // Payment for cash transaction
         Pembayaran::create([
-            'id_pembayaran' => 'PAY-'.Carbon::now()->format('Ymd').'-0000001',
+            'id_pembayaran' => 'PAY-20260125-0000001',
             'id_transaksi' => $transaksiTunai->nomor_transaksi,
             'id_angsuran' => null,
             'metode' => 'TUNAI',
             'jumlah' => 32000,
-            'tanggal' => Carbon::now(),
+            'tanggal' => Carbon::create(2026, 1, 25, 10, 0, 0),
             'keterangan' => 'Pembayaran tunai',
         ]);
 
         // Sample credit transaction
         $transaksiKredit = Transaksi::create([
-            'nomor_transaksi' => 'INV-2025-10-002-P003',
+            'nomor_transaksi' => 'INV-2026-01-002-P003',
             'id_pelanggan' => 'P003',
             'id_kasir' => '001-ADEN',
-            'tanggal' => Carbon::now(),
+            'tanggal' => Carbon::create(2026, 1, 26, 14, 0, 0),
             'total_item' => 10,
             'subtotal' => 140000,
             'diskon' => 0,
@@ -109,12 +109,12 @@ class TransaksiSeeder extends Seeder
 
         // DP Payment for credit transaction
         Pembayaran::create([
-            'id_pembayaran' => 'PAY-'.Carbon::now()->format('Ymd').'-0000002',
+            'id_pembayaran' => 'PAY-20260126-0000002',
             'id_transaksi' => $transaksiKredit->nomor_transaksi,
             'id_angsuran' => null,
             'metode' => 'TRANSFER BCA',
             'jumlah' => 50000,
-            'tanggal' => Carbon::now(),
+            'tanggal' => Carbon::create(2026, 1, 26, 14, 0, 0),
             'keterangan' => 'Pembayaran DP cicilan via Transfer BCA',
         ]);
     }
