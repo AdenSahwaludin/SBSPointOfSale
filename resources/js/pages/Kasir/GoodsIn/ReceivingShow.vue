@@ -142,8 +142,7 @@ const submitForm = () => {
     form.post(`/kasir/goods-in/${props.goodsIn.id_pemesanan_barang}/record-received`, {
         preserveScroll: true,
         onSuccess: () => {
-            resetSelections();
-            showForm.value = false;
+            router.visit('/kasir/goods-in-receiving');
         },
         onError: (errors) => {
             console.error('Form submission errors:', errors);

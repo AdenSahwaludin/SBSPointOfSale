@@ -246,8 +246,8 @@ class GoodsInController extends Controller
      */
     public function receivingShow(GoodsIn $goodsIn): Response
     {
-        // Only show if PO is approved or partially received
-        if (! in_array($goodsIn->status, ['approved', 'partial_received'])) {
+        // Only show if PO is approved, partially received, or already received
+        if (! in_array($goodsIn->status, ['approved', 'partial_received', 'received'])) {
             abort(403, 'Hanya PO dengan status approved atau partial_received yang dapat dicatat barangnya.');
         }
 
@@ -285,8 +285,8 @@ class GoodsInController extends Controller
             // Reload PO to get fresh status from DB
             $goodsIn->refresh();
 
-            // Only allow recording if PO is approved or partially received
-            if (! in_array($goodsIn->status, ['approved', 'partial_received'])) {
+            // Only allow recording if PO is approved, partially received, or already received
+            if (! in_array($goodsIn->status, ['approved', 'partial_received', 'received'])) {
                 return back()
                     ->withErrors(['error' => 'Hanya PO dengan status approved atau partial_received yang dapat dicatat barangnya.']);
             }
@@ -312,5 +312,42 @@ class GoodsInController extends Controller
                 ->withErrors(['error' => 'Gagal mencatat barang: '.$e->getMessage()])
                 ->withInput();
         }
+    }
+
+    /**
+     * Display history of POs created by current kasir.
+     */
+    public function history(): Response
+    {
+        $kasirId = Auth::user()->id_pengguna;
+        
+        $pos = GoodsIn::with(['details.produk', 'kasir'])
+            ->where('id_kasir', $kasirId)
+            ->whereNotIn('status', ['draft'])
+            ->orderBy('tanggal_request', 'desc')
+            ->paginate(10);
+
+        return Inertia::render('Kasir/GoodsIn/History', [
+            'pos' => $pos,
+        ]);
+    }
+
+    /**
+     * Display detail of a specific PO history.
+     */
+    public function historyShow(GoodsIn $goodsIn): Response
+    {
+        $kasirId = Auth::user()->id_pengguna;
+        
+        // Ensure kasir can only view their own PO history
+        if ($goodsIn->id_kasir !== $kasirId) {
+            abort(403, 'Unauthorized');
+        }
+
+        $goodsIn->load(['details.produk', 'kasir', 'receivedGoods']);
+
+        return Inertia::render('Kasir/GoodsIn/HistoryShow', [
+            'po' => $goodsIn,
+        ]);
     }
 }

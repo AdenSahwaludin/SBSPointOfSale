@@ -15,10 +15,10 @@ interface ProdukDetail {
 }
 
 interface GoodsInDetail {
-    id_goods_in_detail: number;
+    id_detail_pemesanan_barang: number;
     id_pemesanan_barang: number;
     id_produk: string;
-    qty_request: number;
+    jumlah_dipesan: number;
     produk: ProdukDetail;
 }
 
@@ -51,7 +51,7 @@ function formatDate(dateString: string) {
 }
 
 function getTotalItems(details: GoodsInDetail[]) {
-    return details.reduce((sum, detail) => sum + detail.qty_request, 0);
+    return details.reduce((sum, detail) => sum + detail.jumlah_dipesan, 0);
 }
 </script>
 

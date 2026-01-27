@@ -119,6 +119,12 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
     Route::post('goods-in/{goodsIn}/record-received', [\App\Http\Controllers\Kasir\GoodsInController::class, 'recordReceived'])
         ->name('goods-in.record-received');
 
+    // Goods In History (Riwayat PO)
+    Route::get('goods-in-history', [\App\Http\Controllers\Kasir\GoodsInController::class, 'history'])
+        ->name('goods-in.history');
+    Route::get('goods-in-history/{goodsIn}', [\App\Http\Controllers\Kasir\GoodsInController::class, 'historyShow'])
+        ->name('goods-in.history-show');
+
     // ==========================================
     // STOCK ADJUSTMENT (Penyesuaian Stok & Retur)
     // ==========================================

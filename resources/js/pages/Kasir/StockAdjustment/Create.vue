@@ -46,10 +46,30 @@ const showProductDropdown = ref(false);
 
 const filteredProducts = computed(() => {
     if (!searchQuery.value) return props.produk;
-    const query = searchQuery.value.toLowerCase();
-    return props.produk.filter(
+    const query = searchQuery.value.toLowerCase().trim();
+    
+    // Filter products that match the query
+    const matches = props.produk.filter(
         (p) => p.nama.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query) || p.kategori?.nama_kategori.toLowerCase().includes(query),
     );
+    
+    // Sort: prioritize exact matches and start-with matches
+    return matches.sort((a, b) => {
+        const aNameLower = a.nama.toLowerCase();
+        const bNameLower = b.nama.toLowerCase();
+        const aSkuLower = a.sku.toLowerCase();
+        const bSkuLower = b.sku.toLowerCase();
+        
+        // Exact match priority
+        if (aNameLower === query || aSkuLower === query) return -1;
+        if (bNameLower === query || bSkuLower === query) return 1;
+        
+        // Start-with priority
+        if (aNameLower.startsWith(query) || aSkuLower.startsWith(query)) return -1;
+        if (bNameLower.startsWith(query) || bSkuLower.startsWith(query)) return 1;
+        
+        return 0;
+    });
 });
 
 const selectedProduct = computed(() => {
@@ -63,13 +83,17 @@ const selectedType = computed(() => {
 });
 
 const isPositiveAdjustment = computed(() => {
-    const positiveTypes = ['retur_pelanggan', 'retur_gudang', 'koreksi_plus'];
+    const positiveTypes = ['retur_pelanggan', 'retur_gudang', 'koreksi_plus', 'penyesuaian_opname'];
     return positiveTypes.includes(form.tipe);
 });
 
 const isNegativeAdjustment = computed(() => {
     const negativeTypes = ['koreksi_minus', 'expired', 'rusak'];
     return negativeTypes.includes(form.tipe);
+});
+
+const isOpnameAdjustment = computed(() => {
+    return form.tipe === 'penyesuaian_opname';
 });
 
 const maxNegativeQty = computed(() => {
@@ -241,13 +265,22 @@ function submit() {
                                 :disabled="!form.tipe"
                                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:bg-gray-50"
                             />
-                            <div class="absolute top-2.5 right-3">
-                                <span v-if="isPositiveAdjustment" class="font-semibold text-emerald-600">+</span>
-                                <span v-if="isNegativeAdjustment" class="font-semibold text-red-600">-</span>
+                            <div v-if="isPositiveAdjustment && !isOpnameAdjustment" class="absolute top-2.5 right-3">
+                                <span class="font-semibold text-emerald-600">+</span>
+                            </div>
+                            <div v-if="isNegativeAdjustment" class="absolute top-2.5 right-3">
+                                <span class="font-semibold text-red-600">-</span>
+                            </div>
+                            <div v-if="isOpnameAdjustment" class="absolute top-2.5 right-3 flex gap-2">
+                                <span class="font-semibold text-emerald-600">+</span>
+                                <span class="font-semibold text-red-600">-</span>
                             </div>
                         </div>
                         <p v-if="isNegativeAdjustment && selectedProduct" class="mt-1 text-xs text-gray-500">
                             Maksimal pengurangan: {{ maxNegativeQty }} {{ selectedProduct.satuan }}
+                        </p>
+                        <p v-if="isOpnameAdjustment" class="mt-1 text-xs text-gray-500">
+                            Opname: Gunakan + untuk penambahan atau - untuk pengurangan
                         </p>
                         <p v-if="form.errors.qty_adjustment" class="mt-1 text-sm text-red-600">{{ form.errors.qty_adjustment }}</p>
                     </div>
