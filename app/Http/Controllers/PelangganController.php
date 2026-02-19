@@ -224,13 +224,22 @@ class PelangganController extends Controller
     protected function filterFieldsByRole(array $data): array
     {
         if ($this->userRole === 'kasir') {
-            return [
-                'id_pelanggan' => $data['id_pelanggan'] ?? null,
-                'nama' => $data['nama'] ?? null,
-                'email' => $data['email'] ?? null,
-                'telepon' => $data['telepon'] ?? null,
-                'alamat' => $data['alamat'] ?? null,
-            ];
+            $filtered = [];
+            
+            // Only include id_pelanggan if it exists in the data (for create operations)
+            if (array_key_exists('id_pelanggan', $data)) {
+                $filtered['id_pelanggan'] = $data['id_pelanggan'];
+            }
+            
+            // Kasir can only edit these fields
+            $allowed = ['nama', 'email', 'telepon', 'alamat'];
+            foreach ($allowed as $field) {
+                if (array_key_exists($field, $data)) {
+                    $filtered[$field] = $data[$field];
+                }
+            }
+            
+            return $filtered;
         }
 
         return $data;
