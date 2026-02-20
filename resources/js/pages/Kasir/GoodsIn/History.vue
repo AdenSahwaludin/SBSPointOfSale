@@ -116,7 +116,8 @@ function getStatusLabel(status: string) {
     }
 }
 
-function goToPage(url: string) {
+function goToPage(url: string | null) {
+    if (!url) return;
     router.get(url);
 }
 

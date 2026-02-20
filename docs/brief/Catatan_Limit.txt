@@ -1,13 +1,13 @@
 Screening Cicilan Pintar (berdasar trust_score)
 TS < 50 → Ditolak
-TS 50–69 → Tinjau manual (misalnya minta DP lebih besar)
-TS ≥ 70 → Layak (lanjut proses cicilan)
+TS ≥ 50–70 → Tinjau manual (misalnya minta DP lebih besar)
+TS ≥ 71 → Layak (lanjut proses cicilan)
 
 Menghitung Trust Score (0–100)
 Mulai dari baseline 50, lalu tambah/kurangi poin:
 – Umur akun
 ≥ 30 hari → +10
-≥ 180 hari → +20
+≥ 180 hari → +10
 
 – Riwayat angsuran
 Tepat waktu → +2 per transaksi

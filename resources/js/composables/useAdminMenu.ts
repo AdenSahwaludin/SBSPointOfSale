@@ -62,7 +62,7 @@ export function setActiveMenuItem(menuItems: any[], activePath: string) {
                 if (child.href === activePath) return true;
                 // Only match sub-paths if the child href doesn't match exactly with another child
                 // This prevents /admin/transactions/kredit from matching /admin/transactions
-                const isExactMatch = item.children.some((c) => c.href === activePath);
+                const isExactMatch = item.children.some((c: any) => c.href === activePath);
                 if (isExactMatch) return false;
                 // Match patterns like /admin/transactions/123 but not /admin/transactions/kredit
                 return activePath.startsWith(child.href + '/') && !child.href.endsWith('/');
@@ -76,7 +76,7 @@ export function setActiveMenuItem(menuItems: any[], activePath: string) {
                         // Exact match
                         if (child.href === activePath) return true;
                         // Only check startsWith if no exact match exists
-                        const exactMatches = item.children.filter((c) => c.href === activePath);
+                        const exactMatches = item.children.filter((c: any) => c.href === activePath);
                         if (exactMatches.length > 0) return false;
                         // For patterns like /admin/transactions/123
                         return activePath.startsWith(child.href + '/');
