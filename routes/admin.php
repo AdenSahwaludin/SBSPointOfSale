@@ -84,6 +84,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     // ==========================================
     Route::prefix('transactions')->name('transactions.')->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('index');
+        Route::get('/kredit', [TransaksiController::class, 'creditTransactions'])->name('credit');
         Route::get('/laporan-mingguan', [TransaksiController::class, 'weeklyReport'])->name('weekly-report');
         Route::get('/laporan-harian', [TransaksiController::class, 'dailyReport'])->name('daily-report');
         Route::get('/laporan-bulanan', [TransaksiController::class, 'monthlyReport'])->name('monthly-report');

@@ -79,6 +79,71 @@ class TransaksiController extends Controller
     }
 
     /**
+     * Display a listing of credit transactions (jenis_transaksi = KREDIT)
+     */
+    public function creditTransactions(Request $request): Response
+    {
+        $perPage = $request->get('per_page', 15);
+        $search = $request->get('search');
+        $status = $request->get('status');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        $query = Transaksi::with(['pelanggan', 'kasir', 'detail', 'kontrakKredit.jadwalAngsuran'])
+            ->where('jenis_transaksi', Transaksi::JENIS_KREDIT)
+            ->orderBy('tanggal', 'desc');
+
+        // Search by nomor_transaksi, pelanggan nama
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_transaksi', 'like', "%{$search}%")
+                    ->orWhereHas('pelanggan', function ($q2) use ($search) {
+                        $q2->where('nama', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filter by status
+        if ($status && $status !== 'all') {
+            $query->where('status_pembayaran', $status);
+        }
+
+        // Filter by date range
+        if ($startDate) {
+            $query->whereDate('tanggal', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->whereDate('tanggal', '<=', $endDate);
+        }
+
+        $transaksi = $query->paginate($perPage)->withQueryString();
+
+        // Calculate stats for credit transactions only
+        $creditStats = [
+            'total_transaksi' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)->count(),
+            'total_lunas' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)
+                ->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)
+                ->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)
+                ->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)
+                ->where('status_pembayaran', 'LUNAS')->sum('total'),
+        ];
+
+        return Inertia::render('Admin/Transactions/CreditIndex', [
+            'transaksi' => $transaksi,
+            'stats' => $creditStats,
+            'filters' => [
+                'search' => $search,
+                'status' => $status,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+        ]);
+    }
+
+    /**
      * Display daily report
      */
     public function dailyReport(Request $request): Response

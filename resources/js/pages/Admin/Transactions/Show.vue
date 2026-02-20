@@ -76,7 +76,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pelanggan');
+const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/transactions');
 
 function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('id-ID', {
