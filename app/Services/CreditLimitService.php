@@ -137,6 +137,11 @@ class CreditLimitService
     /**
      * Determine credit eligibility based on trust score.
      *
+     * Screening Cicilan Pintar tiers:
+     * - TS < 50  → REJECTED (cannot apply for credit)
+     * - TS 50-70 → MANUAL_REVIEW (requires DP minimum 20%)
+     * - TS >= 71 → APPROVED (credit approved)
+     *
      * @return array ['eligible' => bool, 'status' => string, 'message' => string]
      */
     public static function checkEligibility(int $trustScore): array
@@ -147,13 +152,13 @@ class CreditLimitService
                 'status' => 'REJECTED',
                 'message' => 'Trust score terlalu rendah. Tidak memenuhi syarat cicilan.',
             ];
-        } elseif ($trustScore >= 50 && $trustScore <= 69) {
+        } elseif ($trustScore >= 50 && $trustScore <= 70) {
             return [
                 'eligible' => true,
                 'status' => 'MANUAL_REVIEW',
-                'message' => 'Memerlukan peninjauan manual. Pertimbangkan untuk meminta DP lebih besar.',
+                'message' => 'Memerlukan peninjauan manual. Pertimbangkan untuk meminta DP lebih besar (minimal 20%).',
             ];
-        } else { // >= 70
+        } else { // >= 71
             return [
                 'eligible' => true,
                 'status' => 'APPROVED',

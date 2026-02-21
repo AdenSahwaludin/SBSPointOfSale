@@ -33,6 +33,8 @@ interface Pelanggan {
     email?: string;
     telepon?: string;
     credit_limit?: number; // sisa limit tersedia
+    trust_score?: number; // trust score untuk screening cicilan
+    status_kredit?: string; // status kredit customer
 }
 
 interface CartItem {
@@ -150,6 +152,65 @@ const minimalDp = computed<number>(() => {
     const t = Number(total.value || 0);
     const avail = availableCredit.value;
     return Math.max(0, t - avail);
+});
+
+// Credit screening based on trust score (Screening Cicilan Pintar)
+const creditScreening = computed(() => {
+    const trustScore = Number(selectedCustomer.value?.trust_score || 50);
+    const total_val = Number(total.value || 0);
+    const dpVal = Number(dpBayar.value || 0);
+    const minDp20 = total_val * 0.2;
+
+    // If not credit payment method, return inactive state
+    if (metodeBayar.value !== 'KREDIT') {
+        return {
+            status: 'INACTIVE',
+            shouldDisable: false,
+            title: '',
+            message: '',
+            iconClass: '',
+            badgeClass: '',
+            minDp20Persen: 0,
+        };
+    }
+
+    // Trust score < 50: REJECTED
+    if (trustScore < 50) {
+        return {
+            status: 'REJECTED',
+            shouldDisable: true,
+            title: 'Pengajuan Cicilan Ditolak',
+            message:
+                'Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah. Apakah ingin melanjutkan dengan metode pembayaran lain?',
+            iconClass: 'fas fa-times-circle',
+            badgeClass: 'bg-red-100 text-red-800 border-red-200',
+            minDp20Persen: 0,
+        };
+    }
+
+    // Trust score 50-70: MANUAL_REVIEW
+    if (trustScore >= 50 && trustScore <= 70) {
+        return {
+            status: 'MANUAL_REVIEW',
+            shouldDisable: dpVal < minDp20,
+            title: 'Memerlukan DP Minimal',
+            message: `Trust score berada pada kategori menengah (${trustScore}). Diperlukan DP minimal 20% dari total belanja untuk melanjutkan cicilan. Apakah ingin melanjutkan dengan ketentuan ini?`,
+            iconClass: 'fas fa-exclamation-triangle',
+            badgeClass: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            minDp20Persen: minDp20,
+        };
+    }
+
+    // Trust score >= 71: APPROVED
+    return {
+        status: 'APPROVED',
+        shouldDisable: false,
+        title: 'Cicilan Disetujui',
+        message: 'Customer layak untuk cicilan berdasarkan trust score. Apakah ingin melanjutkan proses cicilan sekarang?',
+        iconClass: 'fas fa-check-circle',
+        badgeClass: 'bg-green-100 text-green-800 border-green-200',
+        minDp20Persen: 0,
+    };
 });
 
 const filteredPelanggan = computed(() => {
@@ -474,7 +535,31 @@ function processTransaction() {
         return;
     }
 
-    // Kredit: DP boleh 0, biarkan server validasi limit dan kondisi lainnya
+    // Credit screening validation (Screening Cicilan Pintar)
+    if (metodeBayar.value === 'KREDIT') {
+        const screening = creditScreening.value;
+
+        if (screening.status === 'REJECTED') {
+            addNotification({
+                type: 'error',
+                title: 'Pengajuan Cicilan Ditolak',
+                message: 'Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah.',
+            });
+            return;
+        }
+
+        if (screening.status === 'MANUAL_REVIEW') {
+            const minDp = total.value * 0.2;
+            if (dpBayar.value < minDp) {
+                addNotification({
+                    type: 'warning',
+                    title: 'DP Kurang',
+                    message: `DP minimal 20% dari total Rp ${formatCurrency(minDp)}. DP saat ini Rp ${formatCurrency(dpBayar.value || 0)}.`,
+                });
+                return;
+            }
+        }
+    }
 
     // Prepare transaction data
     const selectedPelangganObj = props.pelanggan.find((p) => p.id_pelanggan === selectedPelanggan.value);
@@ -884,6 +969,17 @@ function resetForm() {
 // Format currency
 function formatCurrency(amount: number): string {
     return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+}
+
+// Get trust score tier and badge class
+function getTrustScoreTier(trustScore: number): { tier: string; badgeClass: string } {
+    if (trustScore < 50) {
+        return { tier: 'Ditolak', badgeClass: 'bg-red-100 text-red-800' };
+    } else if (trustScore >= 50 && trustScore <= 70) {
+        return { tier: 'Tinjau Manual', badgeClass: 'bg-yellow-100 text-yellow-800' };
+    } else {
+        return { tier: 'Layak', badgeClass: 'bg-green-100 text-green-800' };
+    }
 }
 
 // Auto focus barcode input on mount
@@ -1296,6 +1392,19 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                         </select>
                     </div>
 
+                    <!-- Credit Screening Banner -->
+                    <div v-if="creditScreening.status !== 'INACTIVE'" :class="['rounded-lg border-2 p-4', creditScreening.badgeClass]">
+                        <div class="mb-2 flex items-center gap-2">
+                            <i :class="['text-lg', creditScreening.iconClass]"></i>
+                            <h3 class="font-semibold">{{ creditScreening.title }}</h3>
+                        </div>
+                        <p class="text-sm">{{ creditScreening.message }}</p>
+                        <div v-if="creditScreening.minDp20Persen > 0" class="mt-2 rounded bg-white/40 p-2 text-xs font-medium">
+                            <i class="fas fa-info-circle mr-1"></i>DP minimal 20%:
+                            <span class="font-bold">{{ formatCurrency(creditScreening.minDp20Persen) }}</span>
+                        </div>
+                    </div>
+
                     <!-- Cash Payment -->
                     <div v-if="metodeBayar === 'TUNAI'">
                         <label class="mb-2 block text-sm font-medium text-gray-700">Jumlah Bayar</label>
@@ -1355,7 +1464,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     <div class="space-y-2">
                         <BaseButton
                             @click="processTransaction"
-                            :disabled="cart.length === 0 || transactionForm.processing"
+                            :disabled="cart.length === 0 || transactionForm.processing || creditScreening.shouldDisable"
                             variant="primary"
                             class="w-full"
                             :loading="transactionForm.processing"
@@ -1446,6 +1555,25 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                         <div class="flex-1">
                             <p class="font-medium text-gray-500">Telepon</p>
                             <p class="text-gray-900">{{ selectedCustomer.telepon }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Trust Score -->
+                    <div v-if="selectedCustomer.trust_score !== undefined" class="flex items-start gap-2">
+                        <i class="fas fa-chart-line mt-0.5 flex-shrink-0 text-emerald-600"></i>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-500">Trust Score</p>
+                            <div class="mt-1 flex items-center gap-2">
+                                <span class="text-lg font-bold text-gray-900">{{ selectedCustomer.trust_score }}</span>
+                                <span
+                                    :class="[
+                                        'rounded px-2 py-0.5 text-xs font-semibold',
+                                        getTrustScoreTier(selectedCustomer.trust_score || 50).badgeClass,
+                                    ]"
+                                >
+                                    {{ getTrustScoreTier(selectedCustomer.trust_score || 50).tier }}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
