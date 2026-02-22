@@ -1,350 +1,164 @@
-# 🏪 SBS Point of Sale (POS) System# 🏪 SBS Point of Sale (POS) System
+# 🏪 SBS Point of Sale (POS) System
 
-**Modern POS system untuk penjualan, inventory, kredit & cicilan dengan stock conversion buffer-based.\*\***Sistem Point of Sale modern untuk manajemen penjualan, inventory, dan kredit dengan dukungan partial stock conversion.\*\*
+**Sistem Point of Sale modern untuk manajemen penjualan, inventory, dan kredit dengan dukungan partial stock conversion dan screening cicilan pintar berbasis trust score.**
 
 ---
 
-## ✨ Fitur## 📋 Daftar Isi
+## 📋 Daftar Isi
 
-- **Manajemen Produk** - CRUD, SKU, tracking stok real-time- [Fitur Utama](#fitur-utama)
-
-- **Sistem Kasir** - Shopping cart, diskon, multiple payment methods- [Stack Teknologi](#stack-teknologi)
-
-- **Kredit & Cicilan** - Kontrak, jadwal angsuran, trust score auto-calculation- [Instalasi](#instalasi)
-
-- **Stock Conversion** - Buffer-based system untuk partial conversions (INT-only)- [Konfigurasi Database](#konfigurasi-database)
-
-- **Dashboard & Reports** - Real-time sales, inventory analytics- [Menjalankan Aplikasi](#menjalankan-aplikasi)
-
-- [Fitur Stock Conversion](#-fitur-stock-conversion)
-
----- [API Documentation](#api-documentation)
-
+- [Fitur Utama](#fitur-utama)
+- [Stack Teknologi](#stack-teknologi)
+- [Instalasi](#instalasi)
+- [Menjalankan Aplikasi](#menjalankan-aplikasi)
+- [Fitur Stock Conversion](#fitur-stock-conversion)
+- [Screening Cicilan Pintar](#screening-cicilan-pintar)
 - [Testing](#testing)
-
-## 🛠️ Stack- [Struktur Project](#struktur-project)
-
+- [Struktur Project](#struktur-project)
+- [Dokumentasi API](#dokumentasi-api)
 - [Kontribusi](#kontribusi)
 
-- **Backend:** Laravel 11, PHP 8.3, MySQL 8.0, Pest PHP
-
-- **Frontend:** Vue 3, TypeScript, Inertia.js, Tailwind CSS, Vite---
-
-- **Tools:** Composer, NPM/Bun, Git
+---
 
 ## ✨ Fitur Utama
 
----
-
 ### 1. **Manajemen Produk**
 
-## 🚀 Quick Start
-
 - ✅ CRUD produk dengan kategori
-
-### Prerequisites- ✅ Tracking stok real-time
-
-- PHP 8.3+, MySQL 8.0+, Node.js 18+, Composer, Git- ✅ Harga jual dan harga grosir (pack)
-
+- ✅ Tracking stok real-time
+- ✅ Harga jual dan harga grosir (pack)
 - ✅ SKU dan barcode support
+- ✅ Status produk (aktif/non-aktif)
 
-### Setup- ✅ Status produk (aktif/non-aktif)
+### 2. **Sistem Point of Sale (Kasir)**
 
-````bash### 2. **Sistem Point of Sale (Kasir)**
-
-git clone https://github.com/AdenSahwaludin/SBSPointOfSale.git
-
-cd pos-sbs- ✅ Interface kasir modern dan intuitif
-
+- ✅ Interface kasir modern dan intuitif
 - ✅ Search produk dengan filter real-time
-
-# Backend setup- ✅ Shopping cart dengan edit/delete
-
-composer install- ✅ Diskon per item dan total
-
-cp .env.example .env- ✅ Multiple payment methods (TUNAI, TRANSFER, CICILAN)
-
-php artisan key:generate- ✅ Receipt printing
-
+- ✅ Shopping cart dengan edit/delete
+- ✅ Diskon per item dan total
+- ✅ Multiple payment methods (TUNAI, TRANSFER, CICILAN)
+- ✅ Receipt printing
 - ✅ Transaction history
 
-# Database setup
+### 3. **Manajemen Kredit & Cicilan**
 
-# Edit .env with DB_CONNECTION=mysql, DB_DATABASE=sbs### 3. **Manajemen Kredit & Cicilan**
-
-php artisan migrate
-
-php artisan db:seed- ✅ Kontrak kredit dengan terms
-
+- ✅ Kontrak kredit dengan terms
 - ✅ Sistem cicilan pintar dengan pembulatan
-
-# Frontend setup- ✅ Jadwal angsuran otomatis
-
-npm install- ✅ Payment tracking dan due date management
-
-npm run build- ✅ Trust score untuk pelanggan
-
+- ✅ Jadwal angsuran otomatis
+- ✅ Payment tracking dan due date management
+- ✅ Trust score untuk pelanggan
 - ✅ Credit limit auto-calculation
+- ✅ **🆕 Screening Cicilan Pintar** - 3-tier validation berbasis trust score (REJECTED/MANUAL_REVIEW/APPROVED)
 
-# Run
+### 4. **Stock Conversion System (Buffer-Based)**
 
-php artisan serve          # Terminal 1### 4. **🆕 Stock Conversion System (Buffer-Based)**
-
-npm run dev               # Terminal 2
-
-# Access: http://localhost:8000- ✅ **Partial stock conversion** tanpa decimal storage
-
-```- ✅ **Smart buffer management** - auto-open karton jika buffer kurang
-
+- ✅ **Partial stock conversion** tanpa decimal storage
+- ✅ **Smart buffer management** - auto-open karton jika buffer kurang
 - ✅ **INT-only calculations** - hanya gunakan integer
-
----- ✅ **Complete audit trail** - track packs_used, dari_buffer, sisa_buffer_after
-
+- ✅ **Complete audit trail** - track packs_used, dari_buffer, sisa_buffer_after
 - ✅ **Mode PENUH & PARSIAL** - fleksibel sesuai kebutuhan
-
-## 📖 Usage- ✅ **Undo/Reverse** - revert konversi dengan restoration penuh
-
+- ✅ **Undo/Reverse** - revert konversi dengan restoration penuh
 - ✅ **Bulk operations** - proses banyak konversi sekaligus
+- ✅ **Race condition safe** - DB transactions + pessimistic locking
 
-### Testing- ✅ **Race condition safe** - DB transactions + pessimistic locking
+### 5. **Dashboard & Reporting**
 
-
-
-```bash### 5. **Dashboard & Reporting**
-
-php artisan test
-
-php artisan test --coverage- ✅ Real-time sales dashboard
-
-```- ✅ Inventory analytics
-
+- ✅ Real-time sales dashboard
+- ✅ Inventory analytics
 - ✅ Revenue reports
+- ✅ Customer insights
 
-### Stock Conversion Service- ✅ Customer insights
-
-
-
-```php---
-
-use App\Services\KonversiStokService;
+---
 
 ## 🛠️ Stack Teknologi
 
-$service = new KonversiStokService();
-
 ### Backend
 
-// Convert 100 pcs (partial - uses buffer + opens boxes if needed)
+- **PHP 8.3** dengan Laravel 12
+- **MySQL 8.0** (Database)
+- **Eloquent ORM** untuk database abstraction
+- **Pest PHP** untuk testing
 
-$konversi = $service->convert(- **PHP 8.3** dengan Laravel 11
-
-    fromProdukId: 1,- **MySQL 8.0** (Database)
-
-    toProdukId: 2,- **Eloquent ORM** untuk database abstraction
-
-    qtyTo: 100,- **Pest PHP** untuk testing
-
-    mode: 'parsial',
-
-    rasio: 120### Frontend
-
-);
+### Frontend
 
 - **Vue 3** dengan Composition API
-
-// Reverse conversion- **TypeScript** untuk type safety
-
-$service->reverse($konversi->id_konversi);- **Inertia.js** untuk server-side rendering
-
-```- **Tailwind CSS** untuk styling
-
+- **TypeScript** untuk type safety
+- **Inertia.js** untuk server-side rendering
+- **Tailwind CSS** untuk styling
 - **Vite** untuk bundling
 
-**Buffer Logic:**
+### Tools
 
-- Keeps leftover PCS in buffer (`sisa_pcs_terbuka`) instead of creating decimals### Tools
-
-- Auto-opens boxes when buffer insufficient
-
-- Complete audit trail: `packs_used`, `dari_buffer`, `sisa_buffer_after`- **Composer** untuk PHP dependencies
-
+- **Composer** untuk PHP dependencies
 - **NPM/Bun** untuk JavaScript dependencies
+- **Git** untuk version control
 
-### Admin Endpoints- **Git** untuk version control
+---
 
+## 🚀 Instalasi
 
+### Prerequisites
 
-```---
-
-GET    /admin/trust-score/{id}              - View trust score & credit limit
-
-POST   /admin/trust-score/{id}/recalculate  - Recalculate single customer## 🚀 Instalasi
-
-POST   /admin/trust-score/recalculate-all   - Batch recalculate all
-
-```### Prerequisites
-
-
-
----- PHP 8.3+
-
+- PHP 8.3+
 - MySQL 8.0+
-
-## 📁 Key Files- Node.js 18+ atau Bun
-
+- Node.js 18+ atau Bun
 - Composer
+- Git
 
-```- Git
-
-app/Services/
-
-├── KonversiStokService.php      - Stock conversion logic### Step 1: Clone Repository
-
-├── TrustScoreService.php        - Trust score calculation
-
-└── CreditLimitService.php       - Credit limit auto-update```bash
-
-git clone https://github.com/AdenSahwaludin/SBSPointOfSale.git
-
-app/Console/Commands/cd pos-sbs
-
-└── RecalculateTrustScores.php   - Batch recalculation command```
-
-
-
-app/Events/Listeners/### Step 2: Install PHP Dependencies
-
-├── PaymentReceived.php
-
-└── UpdateTrustScoreOnPayment.php```bash
-
-composer install
-
-database/migrations/```
-
-├── *create_*_table.php          - All schema in create tables (consolidated)
-
-└── 2025_10_30_000000_add_indexes_to_pelanggan_table.php### Step 3: Setup Environment
-
-
-
-tests/```bash
-
-├── Unit/KonversiStokServiceTest.php  - 6 comprehensive testscp .env.example .env
-
-└── Feature/CreditLimitCalculationTest.php - 16 credit testsphp artisan key:generate
-
-````
-
----### Step 4: Configure Database
-
-## 🧪 Testing StatusEdit `.env`:
-
-✅ **Stock Conversion:** 6 tests (29 assertions) - PASSING ```env
-
-✅ **Credit Limit:** 16 tests (31 assertions) - PASSING DB_CONNECTION=mysql
-
-✅ **Trust Score:** 14 tests - PASSINGDB_HOST=127.0.0.1
-
-DB_PORT=3306
-
-Run all: `php artisan test`DB_DATABASE=sbs
-
-DB_USERNAME=root
-
----DB_PASSWORD=
-
-`````
-
-## 📋 Git Workflow
-
-### Step 5: Install JavaScript Dependencies
+### Step 1: Clone Repository
 
 ```bash
+git clone https://github.com/AdenSahwaludin/SBSPointOfSale.git
+cd pos-sbs
+```
 
-git checkout -b feature/nama-fitur```bash
+### Step 2: Install PHP Dependencies
 
-# Make changes + testnpm install
+```bash
+composer install
+```
 
-php artisan test# atau
+### Step 3: Setup Environment
 
-git add .bun install
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-git commit -m "feat(module): description"```
+### Step 4: Configure Database
 
-git push origin feature/nama-fitur
+Edit `.env`:
 
-```### Step 6: Run Migrations & Seeders
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sbs
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
+### Step 5: Run Migrations & Seeders
 
-
-**Commit format:** `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:````bash
-
+```bash
 php artisan migrate
+php artisan db:seed
+```
 
----php artisan db:seed
+### Step 6: Install JavaScript Dependencies
 
-`````
-
-## 📄 License
+```bash
+npm install
+# atau
+bun install
+```
 
 ### Step 7: Build Frontend Assets
 
-Proprietary - SBS Point of Sale System
-
 ```bash
-
-## 👨‍💻 Authornpm run build
+npm run build
 
 # untuk development:
-
-**Aden Sahwaludin** | [GitHub](https://github.com/AdenSahwaludin/SBSPointOfSale)npm run dev
-
-```
-
----
-
----
-
-_Updated: Nov 9, 2025 | Version: 2.0.0_
-
-## 🗄️ Konfigurasi Database
-
-### Setup MySQL Database
-
-```sql
-CREATE DATABASE sbs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### Struktur Database Utama
-
-#### Tabel `produk`
-
-```sql
-- id_produk (PK)
-- sku (UNIQUE)
-- nama
-- satuan (pcs, karton, pack)
-- isi_per_pack
-- harga (decimal 18,0)
-- stok (integer) - jumlah karton/pack
-- sisa_pcs_terbuka (integer) - buffer PCS dari karton terbuka ⭐ NEW
-- created_at, updated_at
-```
-
-#### Tabel `konversi_stok`
-
-```sql
-- id_konversi (PK)
-- from_produk_id (FK)
-- to_produk_id (FK)
-- qty_from, qty_to
-- rasio
-- mode (enum: penuh, parsial)
-- packs_used (integer) ⭐ NEW - audit: karton dibuka
-- dari_buffer (integer) ⭐ NEW - audit: PCS dari buffer
-- sisa_buffer_after (integer) ⭐ NEW - audit: buffer sisa
-- created_at, updated_at
+npm run dev
 ```
 
 ---
@@ -376,7 +190,7 @@ npm run build
 php artisan test
 
 # Run specific test file
-php artisan test tests/Unit/KonversiStokServiceTest.php
+php artisan test tests/Feature/CreditScreeningTest.php
 
 # With coverage
 php artisan test --coverage
@@ -429,124 +243,133 @@ AFTER:
    └─ sisa_buffer_after: 50
 ```
 
-### API Endpoints
+---
 
-#### Kasir Routes
+## 🆕 Screening Cicilan Pintar
 
-```
-POST   /kasir/konversi-stok/store          - Create conversion
-GET    /kasir/konversi-stok/{id}/destroy   - Delete (reverse) conversion
-POST   /kasir/konversi-stok/bulkDelete     - Bulk delete conversions
-```
+### Penjelasan Fitur
 
-#### Admin Routes
+**Screening Cicilan Pintar** adalah sistem automatisasi untuk mengevaluasi kelayakan transaksi kredit pelanggan berdasarkan trust score mereka. Sistem ini memiliki 3 tier yang jelas dengan validasi otomatis di frontend dan backend.
 
-```
-GET    /admin/konversi-stok                - List conversions
-POST   /admin/konversi-stok                - Create
-GET    /admin/konversi-stok/{id}/edit      - Edit form
-PUT    /admin/konversi-stok/{id}           - Update
-DELETE /admin/konversi-stok/{id}           - Delete (reverse)
-POST   /admin/konversi-stok/bulkDelete     - Bulk delete
-```
+### 3-Tier Screening System
 
-### Service Layer
+#### 1. **REJECTED** (Trust Score < 50) - ❌ Merah
 
-**File:** `app/Services/KonversiStokService.php`
+**Status:** Pengajuan cicilan tidak diperbolehkan
 
-#### Method: `convert()`
+**Kondisi:**
+- Trust score pelanggan kurang dari 50
+- Sistem secara otomatis menolak semua transaksi kredit
 
-```php
-$konversi = $service->convert(
-    fromProdukId: 1,
-    toProdukId: 2,
-    qtyTo: 100,           // PCS yang mau dikonversi
-    mode: 'parsial',      // atau 'penuh'
-    rasio: 120,           // isi_per_pack
-    keterangan: 'desc'
-);
+**UI Feedback:**
+- ❌ Pesan error: "Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah"
+- 🔴 Badge merah (bg-red-100)
+- 🚫 Tombol "Bayar" otomatis disable
 
-// Return: KonversiStok model dengan audit data
-// $konversi->packs_used        - karton dibuka
-// $konversi->dari_buffer       - PCS dari buffer
-// $konversi->sisa_buffer_after - buffer sisa
-```
+**Validasi:**
+- Frontend: Real-time banner warning
+- Backend: 422 Unprocessable Entity response
 
-#### Method: `reverse()`
+#### 2. **MANUAL_REVIEW** (Trust Score 50-70) - ⚠️ Kuning
 
-```php
-$service->reverse($konversiId);
-// Undo conversion, restore stok & buffer ke kondisi semula
-```
+**Status:** Memerlukan peninjauan manual dengan DP minimal 20%
 
-#### Method: `bulkReverse()`
+**Kondisi:**
+- Trust score pelanggan antara 50-70
+- Wajib ada Down Payment (DP) minimum 20% dari total belanja
 
-```php
-$service->bulkReverse([$id1, $id2, $id3]);
-// Undo multiple conversions dengan error handling
-```
+**UI Feedback:**
+- ⚠️ Pesan warning: "Trust score berada pada kategori menengah. Diperlukan DP minimal 20% dari total belanja untuk melanjutkan cicilan."
+- 🟡 Badge kuning (bg-yellow-100)
+- DP input field wajib diisi
+- Info: "DP minimal 20% = Rp X"
 
-### Database Safety
+**Validasi:**
+- Frontend: Real-time validation saat DP berubah, tombol disable jika DP < 20%
+- Backend: 422 jika DP < 20% dari total
 
-- ✅ **Transactions:** Semua operasi dalam `DB::transaction()`
-- ✅ **Locking:** `lockForUpdate()` pada produk untuk race condition prevention
-- ✅ **Validation:** Cek stok, mode, qty, rasio
-- ✅ **Exception Handling:** Custom exceptions untuk error cases
+#### 3. **APPROVED** (Trust Score ≥ 71) - ✅ Hijau
+
+**Status:** Customer layak untuk proses cicilan normal
+
+**Kondisi:**
+- Trust score pelanggan 71 atau lebih
+- Tidak ada persyaratan DP minimum tambahan
+
+**UI Feedback:**
+- ✅ Pesan sukses: "Customer layak untuk cicilan berdasarkan trust score. Apakah ingin melanjutkan proses cicilan sekarang?"
+- 🟢 Badge hijau (bg-green-100)
+- Tombol "Bayar" aktif normal
+
+**Validasi:**
+- Frontend: Banner info saja, no blocking
+- Backend: Proceed normal credit validation
+
+### Implementasi Frontend
+
+**File:** `resources/js/pages/Kasir/POS/Index.vue`
+
+Credit screening computed property menentukan status tier dan validasi realtime untuk DP 20%.
+
+### Implementasi Backend
+
+**File:** `app/Http/Controllers/Kasir/TransaksiPOSController.php`
+
+Validasi screening dilakukan sebelum proses kredit dengan response 422 jika tidak lolos.
+
+### Service: CreditLimitService
+
+**File:** `app/Services/CreditLimitService.php`
+
+Method `checkEligibility()` menentukan tier berdasarkan trust score:
+- `< 50` → REJECTED
+- `50-70` → MANUAL_REVIEW (DP min 20%)
+- `≥ 71` → APPROVED
+
+### Trust Score Display
+
+Customer info modal menampilkan trust score dengan badge warna sesuai tier.
 
 ---
 
 ## 🧪 Testing
 
-### Unit Tests untuk Stock Conversion
+### Testing Status
 
-**File:** `tests/Unit/KonversiStokServiceTest.php`
+✅ **Stock Conversion:** 6 tests (29 assertions) - PASSING  
+✅ **Credit Limit Calculation:** 16 tests (31 assertions) - PASSING  
+✅ **Trust Score:** 14 tests - PASSING  
+✅ **Credit Screening (Cicilan Pintar):** 6 tests (21 assertions) - PASSING
 
-Menjalankan 6 comprehensive tests:
+**Total:** 42+ tests, 95+ assertions → ALL PASSING ✅
+
+### Screening Tests
+
+**File:** `tests/Feature/CreditScreeningTest.php`
+
+```php
+✓ Rejects credit transaction when trust_score < 50
+✓ Rejects credit transaction when trust_score 50-70 without sufficient DP
+✓ Accepts credit transaction when trust_score 50-70 with >= 20% DP
+✓ Accepts credit transaction when trust_score >= 71
+✓ Validates screening at trust_score boundary (49, 50, 70, 71)
+✓ Allows manual review tier with exactly 20% DP
+```
+
+### Running Tests
 
 ```bash
-✓ partial conversion uses buffer
-✓ partial conversion auto opens box
-✓ full conversion
-✓ reverse conversion
-✓ insufficient stock throws exception
-✓ bulk reverse conversions
+# Run all tests
+php artisan test
 
-Tests: 6 passed (29 assertions)
-```
+# Run screening tests only
+php artisan test tests/Feature/CreditScreeningTest.php
 
-### Manual Testing
+# Run with output
+php artisan test --testdox
 
-```bash
-php test-konversi.php
-```
-
-Output:
-
-```
-=== Test Konversi Stok dengan MySQL ===
-
-Produk Karton: Minyak Gandarpura Cap Daun Karton 144 pcs (60 mL)
-  - SKU: DA-GDP-KRT144
-  - Stok: 8 karton
-  - Buffer: 0 pcs
-  - Isi per pack: 144 pcs
-
---- Test 1: Konversi 100 PCS (Parsial) ---
-✓ Konversi berhasil!
-  - Karton dipakai: 1
-  - Dari buffer: 0 pcs
-  - Buffer setelahnya: 44 pcs
-
-Setelah konversi:
-  - Karton stok: 7
-  - Karton buffer: 44 pcs
-  - PCS stok: 300 pcs
-
---- Test 2: Reverse (Undo) Konversi ---
-✓ Reverse berhasil!
-  - Stok kembali ke kondisi semula
-
-=== SEMUA TEST BERHASIL! ===
+# Run with coverage
+php artisan test --coverage
 ```
 
 ---
@@ -559,67 +382,63 @@ pos-sbs/
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   ├── Admin/
-│   │   │   │   ├── KonversiStokController.php    ⭐ NEW
-│   │   │   │   └── ...
 │   │   │   ├── Kasir/
-│   │   │   │   ├── KonversiStokController.php    ⭐ NEW
+│   │   │   │   ├── TransaksiPOSController.php    ✏️ UPDATED
 │   │   │   │   └── ...
 │   │   │   └── ...
 │   │   └── ...
 │   ├── Models/
-│   │   ├── Produk.php                          ✏️ UPDATED
-│   │   ├── KonversiStok.php                    ✏️ UPDATED
+│   │   ├── Pelanggan.php
+│   │   ├── Produk.php
+│   │   ├── Transaksi.php
+│   │   ├── KontrakKredit.php
 │   │   └── ...
 │   ├── Services/
-│   │   ├── KonversiStokService.php             ⭐ NEW (227 lines)
+│   │   ├── CreditLimitService.php          ✏️ UPDATED
+│   │   ├── CreditSyncService.php
+│   │   ├── TrustScoreService.php
+│   │   ├── KonversiStokService.php
 │   │   └── ...
 │   └── ...
 ├── database/
 │   ├── migrations/
-│   │   ├── 2025_10_28_012152_add_sisa_pcs_terbuka_to_produk_table.php  ⭐ NEW
-│   │   ├── 2025_10_28_012247_update_konversi_stok_table.php           ⭐ NEW
-│   │   └── ...
 │   ├── seeders/
-│   │   ├── KategoriSeeder.php
-│   │   ├── PenggunaSeeder.php
-│   │   └── ...
-│   └── ...
+│   └── factories/
 ├── resources/
 │   ├── js/
 │   │   ├── pages/
-│   │   │   ├── Admin/
-│   │   │   │   ├── KonversiStok/
-│   │   │   │   │   ├── Index.vue      ✏️ UPDATED
-│   │   │   │   │   ├── Create.vue     ✏️ UPDATED
-│   │   │   │   │   └── Edit.vue       ✏️ UPDATED
-│   │   │   │   └── ...
 │   │   │   ├── Kasir/
-│   │   │   │   ├── KonversiStok/
-│   │   │   │   │   ├── Index.vue      ✏️ UPDATED
-│   │   │   │   │   └── Create.vue     ✏️ UPDATED
+│   │   │   │   ├── POS/
+│   │   │   │   │   └── Index.vue          ✏️ UPDATED
 │   │   │   │   └── ...
 │   │   │   └── ...
+│   │   ├── components/
+│   │   ├── composables/
 │   │   └── ...
 │   └── ...
 ├── routes/
-│   ├── admin.php                              ✏️ UPDATED
+│   ├── web.php
+│   ├── api.php
+│   ├── admin.php
 │   ├── kasir.php
-│   └── ...
+│   └── auth.php
 ├── tests/
-│   ├── Unit/
-│   │   ├── KonversiStokServiceTest.php         ⭐ NEW (367 lines)
-│   │   └── ExampleTest.php
 │   ├── Feature/
-│   │   └── ExampleTest.php
+│   │   ├── CreditScreeningTest.php       ⭐ NEW
+│   │   └── ...
+│   ├── Unit/
+│   │   └── ...
 │   └── ...
-├── test-konversi.php                          ⭐ NEW (Manual test script)
 ├── .env
 ├── .env.example
 ├── composer.json
 ├── package.json
 ├── phpunit.xml
 ├── vite.config.ts
-└── README.md                                  ⭐ THIS FILE
+├── tsconfig.json
+├── eslint.config.js
+├── README.md
+└── ...
 
 Legend:
 ⭐ NEW    - File baru
@@ -630,56 +449,31 @@ Legend:
 
 ## 📊 Dokumentasi API
 
-### Stock Conversion Endpoints
+### POS Endpoints
 
-#### 1. Create Conversion (Kasir)
+#### 1. Create Transaction
 
 ```http
-POST /kasir/konversi-stok/store
+POST /kasir/pos
 Content-Type: application/json
 
 {
-  "from_produk_id": 1,
-  "to_produk_id": 2,
-  "qty_to": 100,
-  "mode": "parsial",
-  "rasio": 120,
-  "keterangan": "Pembukaan stok mingguan"
+  "id_pelanggan": "P002",
+  "items": [...],
+  "metode_bayar": "KREDIT",
+  "subtotal": 200000,
+  "diskon": 0,
+  "pajak": 10000,
+  "total": 210000,
+  "dp": 42000,
+  "tenor_bulan": 12,
+  "bunga_persen": 10,
+  "cicilan_bulanan": 17500,
+  "mulai_kontrak": "2025-02-22"
 }
 
-Response 200:
-{
-  "success": true,
-  "message": "Konversi stok (parsial) berhasil! 1 karton Minyak Karton → 100 pcs Minyak PCS",
-  "data": {
-    "id_konversi": 42,
-    "from_produk_id": 1,
-    "to_produk_id": 2,
-    "qty_to": 100,
-    "mode": "parsial",
-    "packs_used": 1,
-    "dari_buffer": 30,
-    "sisa_buffer_after": 50,
-    "created_at": "2025-10-31T10:30:00Z"
-  }
-}
-```
-
-#### 2. Reverse Conversion (Delete)
-
-```http
-DELETE /kasir/konversi-stok/42
-```
-
-#### 3. Bulk Delete
-
-```http
-POST /kasir/konversi-stok/bulkDelete
-Content-Type: application/json
-
-{
-  "ids": [42, 43, 44]
-}
+Response 200: Transaction success
+Response 422: Screening REJECTED or MANUAL_REVIEW with DP < 20%
 ```
 
 ---
@@ -688,60 +482,25 @@ Content-Type: application/json
 
 ### Development Workflow
 
-1. **Create Feature Branch**
+1. Create feature branch: `git checkout -b feature/nama-fitur`
+2. Make changes and test: `php artisan test`
+3. Commit: `git commit -m "feat(module): description"`
+4. Push: `git push origin feature/nama-fitur`
 
-    ```bash
-    git checkout -b feature/nama-fitur
-    ```
-
-2. **Make Changes**
-
-    ```bash
-    # Edit files
-    # Run tests
-    php artisan test
-    ```
-
-3. **Commit dengan Conventional Commits**
-
-    ```bash
-    git add .
-    git commit -m "feat(module): description
-
-    Details about the change..."
-    ```
-
-4. **Push & Create Pull Request**
-    ```bash
-    git push origin feature/nama-fitur
-    ```
-
-### Commit Message Convention
+### Commit Convention
 
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `refactor:` - Code refactoring
-- `style:` - Styling changes
-- `test:` - Test additions/updates
+- `test:` - Test additions
 - `docs:` - Documentation
-- `chore:` - Build/dependency updates
-
-Contoh:
-
-```
-feat(stock-conversion): implement buffer-based partial conversion
-
-- Add sisa_pcs_terbuka column to produk table
-- Implement KonversiStokService with smart buffer logic
-- Add comprehensive unit tests
-```
+- `chore:` - Build/dependencies
 
 ---
 
 ## 📞 Dukungan
 
 - **Issues:** [GitHub Issues](https://github.com/AdenSahwaludin/SBSPointOfSale/issues)
-- **Email:** aden.sahwaludin@example.com
 - **Documentation:** Lihat folder `/docs` untuk panduan lebih detail
 
 ---
@@ -759,5 +518,5 @@ Repository: [SBSPointOfSale](https://github.com/AdenSahwaludin/SBSPointOfSale)
 
 ---
 
-**Terakhir diupdate:** 31 Oktober 2025  
-**Version:** 2.0.0 (Stock Conversion Release)
+**Terakhir diupdate:** 22 Februari 2026  
+**Version:** 2.1.0 (Screening Cicilan Pintar Release)
