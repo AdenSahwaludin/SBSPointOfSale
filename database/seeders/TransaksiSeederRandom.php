@@ -18,19 +18,27 @@ class TransaksiSeederRandom extends Seeder
         $kasir = User::where('role', 'kasir')->first();
         $id_kasir = $kasir ? $kasir->id_pengguna : '001-ADMI';
 
+        // Get current date for dynamic monthly distribution
+        $now = Carbon::now();
+        $currentMonth = $now->month;
+        $currentYear = $now->year;
+        $daysInMonth = $now->daysInMonth; // Dynamically calculate days in current month
+        $currentDay = $now->day;
+        $lastSevenDaysStart = max(1, $currentDay - 6); // Last 7 days (day-6 to day, floored at 1)
+
         for ($i = 400; $i <= 414; $i++) {
-            // Distribute transactions: 70% on 25-26, 30% on other dates (1-24)
+            // Distribute transactions: 70% on last 7 days, 30% across entire month
             $randomDate = rand(1, 100);
             if ($randomDate <= 70) {
-                // 70% on 25-26
-                $day = rand(0, 1) === 0 ? 25 : 26;
+                // 70% on last 7 days of current month
+                $day = rand($lastSevenDaysStart, $currentDay);
             } else {
-                // 30% on dates 1-24
-                $day = rand(1, 24);
+                // 30% across entire current month (1 to end of month)
+                $day = rand(1, $daysInMonth);
             }
-            $tanggal = Carbon::create(2026, 1, $day, rand(8, 17), rand(0, 59), 0);
+            $tanggal = Carbon::create($currentYear, $currentMonth, $day, rand(8, 17), rand(0, 59), 0);
             $pelangganId = $pelangganIds[array_rand($pelangganIds)];
-            $nomorTransaksi = 'INV-2026-01-' . $i . '-' . $pelangganId;
+            $nomorTransaksi = 'INV-' . $currentYear . '-' . str_pad($currentMonth, 2, '0', STR_PAD_LEFT) . '-' . $i . '-' . $pelangganId;
             
             // Hitung subtotal dari items
             $jumlahItem = rand(2, 5);
