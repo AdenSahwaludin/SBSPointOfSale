@@ -258,15 +258,18 @@ AFTER:
 **Status:** Pengajuan cicilan tidak diperbolehkan
 
 **Kondisi:**
+
 - Trust score pelanggan kurang dari 50
 - Sistem secara otomatis menolak semua transaksi kredit
 
 **UI Feedback:**
+
 - ❌ Pesan error: "Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah"
 - 🔴 Badge merah (bg-red-100)
 - 🚫 Tombol "Bayar" otomatis disable
 
 **Validasi:**
+
 - Frontend: Real-time banner warning
 - Backend: 422 Unprocessable Entity response
 
@@ -275,16 +278,19 @@ AFTER:
 **Status:** Memerlukan peninjauan manual dengan DP minimal 20%
 
 **Kondisi:**
+
 - Trust score pelanggan antara 50-70
 - Wajib ada Down Payment (DP) minimum 20% dari total belanja
 
 **UI Feedback:**
+
 - ⚠️ Pesan warning: "Trust score berada pada kategori menengah. Diperlukan DP minimal 20% dari total belanja untuk melanjutkan cicilan."
 - 🟡 Badge kuning (bg-yellow-100)
 - DP input field wajib diisi
 - Info: "DP minimal 20% = Rp X"
 
 **Validasi:**
+
 - Frontend: Real-time validation saat DP berubah, tombol disable jika DP < 20%
 - Backend: 422 jika DP < 20% dari total
 
@@ -293,15 +299,18 @@ AFTER:
 **Status:** Customer layak untuk proses cicilan normal
 
 **Kondisi:**
+
 - Trust score pelanggan 71 atau lebih
 - Tidak ada persyaratan DP minimum tambahan
 
 **UI Feedback:**
+
 - ✅ Pesan sukses: "Customer layak untuk cicilan berdasarkan trust score. Apakah ingin melanjutkan proses cicilan sekarang?"
 - 🟢 Badge hijau (bg-green-100)
 - Tombol "Bayar" aktif normal
 
 **Validasi:**
+
 - Frontend: Banner info saja, no blocking
 - Backend: Proceed normal credit validation
 
@@ -322,6 +331,7 @@ Validasi screening dilakukan sebelum proses kredit dengan response 422 jika tida
 **File:** `app/Services/CreditLimitService.php`
 
 Method `checkEligibility()` menentukan tier berdasarkan trust score:
+
 - `< 50` → REJECTED
 - `50-70` → MANUAL_REVIEW (DP min 20%)
 - `≥ 71` → APPROVED
