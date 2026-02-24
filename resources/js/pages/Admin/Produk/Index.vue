@@ -198,14 +198,6 @@ function getStockStatus(stok: number) {
     return 'Stok Habis';
 }
 
-function formatPrice(price: number) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(price);
-}
-
 function formatCurrency(amount: number): string {
     return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
 }
@@ -546,10 +538,15 @@ function goToPage(url: string | null) {
                         <i class="fas fa-box mb-4 text-5xl text-gray-300"></i>
                         <p class="text-lg font-medium text-gray-900">Belum ada produk</p>
                         <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan produk pertama</p>
-                        <BaseButton @click="$inertia.visit('/admin/produk/create')" variant="primary" icon="fas fa-plus" class="mt-4"> Tambah Produk </BaseButton>
+                        <BaseButton @click="$inertia.visit('/admin/produk/create')" variant="primary" icon="fas fa-plus" class="mt-4">
+                            Tambah Produk
+                        </BaseButton>
                     </div>
 
-                    <div v-else-if="displayedProduk.length === 0 && searchQuery && !isSearching" class="flex flex-col items-center justify-center py-12">
+                    <div
+                        v-else-if="displayedProduk.length === 0 && searchQuery && !isSearching"
+                        class="flex flex-col items-center justify-center py-12"
+                    >
                         <i class="fas fa-search mb-4 text-5xl text-gray-300"></i>
                         <p class="text-lg font-medium text-gray-900">Produk tidak ditemukan</p>
                         <p class="mt-1 text-sm text-gray-500">Coba gunakan kata kunci yang berbeda</p>
@@ -612,18 +609,13 @@ function goToPage(url: string | null) {
                                         <p class="text-xs text-gray-500">Stok</p>
                                         <p class="text-base font-bold text-gray-900">{{ item.stok }}</p>
                                     </div>
-                                    <span
-                                        :class="[
-                                            'inline-flex rounded-full px-3 py-1 text-xs font-bold',
-                                            getStockBadgeClass(item.stok),
-                                        ]"
-                                    >
+                                    <span :class="['inline-flex rounded-full px-3 py-1 text-xs font-bold', getStockBadgeClass(item.stok)]">
                                         {{ getStockStatus(item.stok) }}
                                     </span>
                                 </div>
 
                                 <!-- Action Buttons -->
-                                <div class="flex gap-2 pt-3 border-t border-gray-100">
+                                <div class="flex gap-2 border-t border-gray-100 pt-3">
                                     <BaseButton
                                         @click="$inertia.visit(`/admin/produk/${item.id_produk}`)"
                                         variant="outline"
