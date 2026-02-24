@@ -291,6 +291,17 @@ onMounted(() => {
                                     </Link>
                                 </template>
 
+                                <template v-if="userRole === 'admin'">
+                                    <Link
+                                        href="/admin/settings"
+                                        class="emerald-transition flex items-center px-4 py-2 text-sm text-emerald-700 transition-all duration-200 hover:translate-x-1 hover:bg-emerald-50 hover:text-emerald-600"
+                                        @click="isProfileDropdownOpen = false"
+                                    >
+                                        <i class="fas fa-cog mr-3 h-4 w-4 transition-all duration-200"></i>
+                                        Pengaturan Akun
+                                    </Link>
+                                </template>
+
                                 <hr class="my-2 border-emerald-200" />
 
                                 <button
