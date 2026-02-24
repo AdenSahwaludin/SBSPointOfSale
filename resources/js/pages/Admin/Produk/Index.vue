@@ -185,9 +185,15 @@ function formatDate(dateString: string) {
 }
 
 function getStockBadgeClass(stok: number) {
-    if (stok > 10) return 'bg-green-100 text-green-700 border-green-200';
+    if (stok > 10) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
     if (stok > 0) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
     return 'bg-red-100 text-red-700 border-red-200';
+}
+
+function getStockStatus(stok: number) {
+    if (stok > 10) return 'Stok Tersedia';
+    if (stok > 0) return 'Stok Rendah';
+    return 'Stok Habis';
 }
 
 function handleSearch() {
@@ -488,182 +494,186 @@ function goToPage(url: string | null) {
                 </div>
             </div>
 
-            <!-- Table -->
-            <div class="card-emerald overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="border-b border-emerald-200 bg-emerald-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Produk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Kategori</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Harga</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Stok</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Tanggal Dibuat</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-emerald-600 uppercase">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-emerald-100 bg-white-emerald">
-                            <tr
-                                v-for="item in displayedProduk"
-                                :key="item.id_produk"
-                                class="emerald-transition transition-all duration-200 hover:bg-emerald-25"
-                            >
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="h-10 w-10 flex-shrink-0">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-                                                <i class="fas fa-box text-emerald-600"></i>
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-emerald-800">{{ item.nama }}</div>
-                                            <div class="text-sm text-emerald-500">ID: {{ item.id_produk }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        v-if="item.kategori"
-                                        class="inline-flex rounded-full border border-blue-200 bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700"
-                                    >
-                                        {{ item.kategori.nama }}
-                                    </span>
-                                    <span v-else class="text-emerald-500">-</span>
-                                </td>
-                                <td class="px-6 py-4 text-sm whitespace-nowrap text-emerald-800">
-                                    {{ formatPrice(item.harga) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        :class="getStockBadgeClass(item.stok)"
-                                        class="inline-flex rounded-full border px-2 py-1 text-xs font-semibold"
-                                    >
-                                        {{ item.stok }} {{ item.satuan }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-sm whitespace-nowrap text-emerald-600">
-                                    {{ formatDate(item.created_at) }}
-                                </td>
-                                <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <BaseButton
-                                            @click="$inertia.visit(`/admin/produk/${item.id_produk}`)"
-                                            variant="outline"
-                                            size="xs"
-                                            icon="fas fa-eye"
-                                            custom-class="rounded-lg p-2"
-                                            title="Lihat Detail"
-                                        />
-                                        <BaseButton
-                                            @click="$inertia.visit(`/admin/produk/${item.id_produk}/edit`)"
-                                            variant="secondary"
-                                            size="xs"
-                                            icon="fas fa-edit"
-                                            custom-class="rounded-lg p-2"
-                                            title="Edit"
-                                        />
-                                        <BaseButton
-                                            @click="confirmDelete(item)"
-                                            variant="danger"
-                                            size="xs"
-                                            icon="fas fa-trash"
-                                            custom-class="rounded-lg p-2"
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Products Grid -->
+            <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+                <div class="p-6">
+                    <div v-if="displayedProduk.length === 0 && !searchQuery" class="flex flex-col items-center justify-center py-12">
+                        <i class="fas fa-box mb-4 text-5xl text-gray-300"></i>
+                        <p class="text-lg font-medium text-gray-900">Belum ada produk</p>
+                        <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan produk pertama</p>
+                        <BaseButton @click="$inertia.visit('/admin/produk/create')" variant="primary" icon="fas fa-plus" class="mt-4"> Tambah Produk </BaseButton>
+                    </div>
 
-                <!-- Empty State -->
-                <div v-if="displayedProduk.length === 0 && !searchQuery" class="py-12 text-center">
-                    <i class="fas fa-box mb-4 text-4xl text-emerald-300"></i>
-                    <h3 class="mb-2 text-lg font-medium text-emerald-800">Belum ada produk</h3>
-                    <p class="mb-4 text-emerald-600">Mulai dengan menambahkan produk pertama</p>
-                    <BaseButton @click="$inertia.visit('/admin/produk/create')" variant="primary" icon="fas fa-plus"> Tambah Produk </BaseButton>
-                </div>
+                    <div v-else-if="displayedProduk.length === 0 && searchQuery && !isSearching" class="flex flex-col items-center justify-center py-12">
+                        <i class="fas fa-search mb-4 text-5xl text-gray-300"></i>
+                        <p class="text-lg font-medium text-gray-900">Produk tidak ditemukan</p>
+                        <p class="mt-1 text-sm text-gray-500">Coba gunakan kata kunci yang berbeda</p>
+                        <BaseButton @click="clearSearch" variant="secondary" icon="fas fa-times" class="mt-4"> Clear Search </BaseButton>
+                    </div>
 
-                <!-- Search Empty State -->
-                <div v-if="displayedProduk.length === 0 && searchQuery && !isSearching" class="py-12 text-center">
-                    <i class="fas fa-search mb-4 text-4xl text-emerald-300"></i>
-                    <h3 class="mb-2 text-lg font-medium text-emerald-800">Produk tidak ditemukan</h3>
-                    <p class="mb-4 text-emerald-600">Coba gunakan kata kunci yang berbeda</p>
-                    <BaseButton @click="clearSearch" variant="secondary" icon="fas fa-times"> Clear Search </BaseButton>
+                    <div v-else class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        <div
+                            v-for="item in displayedProduk"
+                            :key="item.id_produk"
+                            class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:border-emerald-400 hover:shadow-lg"
+                        >
+                            <!-- Gradient overlay on hover -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                            ></div>
+
+                            <div class="relative p-5">
+                                <!-- Product Header with SKU -->
+                                <div class="mb-3 flex items-start justify-between gap-2">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                                            {{ item.sku || item.id_produk }}
+                                        </p>
+                                        <h3 class="mt-1 line-clamp-2 text-sm font-bold text-gray-900">{{ item.nama }}</h3>
+                                    </div>
+                                </div>
+
+                                <!-- Category & Barcode -->
+                                <div class="mb-4 space-y-2 border-b border-gray-100 pb-3">
+                                    <div class="flex items-center text-xs text-gray-600">
+                                        <i class="fas fa-tag mr-2 w-4 text-emerald-500"></i>
+                                        <span class="font-medium">{{ item.kategori?.nama || '-' }}</span>
+                                    </div>
+                                    <div v-if="item.barcode" class="flex items-center text-xs text-gray-600">
+                                        <i class="fas fa-barcode mr-2 w-4 text-blue-500"></i>
+                                        <span class="font-mono text-xs">{{ item.barcode }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Price Section -->
+                                <div class="mb-4 rounded-lg bg-gradient-to-br from-emerald-50 to-green-50 p-3">
+                                    <p class="text-xl font-bold text-emerald-700">{{ formatPrice(item.harga) }}</p>
+                                    <p class="text-xs text-emerald-600">per {{ item.satuan }}</p>
+                                </div>
+
+                                <!-- Stock Status -->
+                                <div class="mb-4 flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs text-gray-500">Stok</p>
+                                        <p class="text-base font-bold text-gray-900">{{ item.stok }}</p>
+                                    </div>
+                                    <span
+                                        :class="[
+                                            'inline-flex rounded-full px-3 py-1 text-xs font-bold',
+                                            getStockBadgeClass(item.stok),
+                                        ]"
+                                    >
+                                        {{ getStockStatus(item.stok) }}
+                                    </span>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex gap-2 pt-3 border-t border-gray-100">
+                                    <BaseButton
+                                        @click="$inertia.visit(`/admin/produk/${item.id_produk}`)"
+                                        variant="outline"
+                                        size="sm"
+                                        icon="fas fa-eye"
+                                        custom-class="flex-1 rounded-lg text-xs"
+                                        title="Lihat Detail"
+                                    >
+                                        Lihat
+                                    </BaseButton>
+                                    <BaseButton
+                                        @click="$inertia.visit(`/admin/produk/${item.id_produk}/edit`)"
+                                        variant="secondary"
+                                        size="sm"
+                                        icon="fas fa-edit"
+                                        custom-class="flex-1 rounded-lg text-xs"
+                                        title="Edit"
+                                    >
+                                        Edit
+                                    </BaseButton>
+                                    <BaseButton
+                                        @click="confirmDelete(item)"
+                                        variant="danger"
+                                        size="sm"
+                                        icon="fas fa-trash"
+                                        custom-class="flex-1 rounded-lg text-xs"
+                                        title="Hapus"
+                                    >
+                                        Hapus
+                                    </BaseButton>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Pagination Section -->
-                <div v-if="!searchQuery && produk.total > 0" class="border-t border-emerald-100 bg-emerald-50/50 px-6 py-4">
-                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <!-- Per Page Selector -->
+                <div v-if="!searchQuery && produk.last_page > 1" class="border-t border-gray-200 bg-gradient-to-r from-white to-gray-50 px-6 py-5">
+                    <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                        <!-- Items per page selector -->
                         <div class="flex items-center gap-3">
-                            <label class="text-sm text-emerald-700">
-                                <i class="fas fa-list mr-1"></i>
-                                Items per page:
-                            </label>
+                            <span class="text-sm font-medium text-gray-700">Tampilkan:</span>
                             <select
                                 :value="perPage"
                                 @change="changePerPage(parseInt(($event.target as HTMLSelectElement).value))"
-                                class="rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                                class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:border-emerald-400 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
                             >
-                                <option :value="5">5</option>
-                                <option :value="10">10</option>
-                                <option :value="25">25</option>
-                                <option :value="50">50</option>
-                                <option :value="100">100</option>
+                                <option :value="12">12 per halaman</option>
+                                <option :value="20">20 per halaman</option>
+                                <option :value="40">40 per halaman</option>
+                                <option :value="60">60 per halaman</option>
+                                <option :value="100">100 per halaman</option>
                             </select>
-                            <span class="text-sm text-emerald-600">
-                                Showing <strong>{{ produk.from }}</strong> to <strong>{{ produk.to }}</strong> of
-                                <strong>{{ produk.total }}</strong> results
+                            <span class="text-sm text-gray-600">
+                                <span class="font-semibold">{{ produk.from }}</span> - <span class="font-semibold">{{ produk.to }}</span> dari
+                                <span class="font-semibold text-emerald-600">{{ produk.total }}</span>
                             </span>
                         </div>
 
-                        <!-- Pagination Links -->
-                        <div class="flex items-center gap-1">
+                        <!-- Page info and pagination buttons -->
+                        <div class="flex items-center gap-2">
                             <!-- Previous Button -->
                             <button
                                 @click="goToPage(produk.prev_page_url)"
                                 :disabled="!produk.prev_page_url"
-                                class="flex h-9 w-9 items-center justify-center rounded-lg border transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                                :class="
+                                :class="[
+                                    'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all',
                                     produk.prev_page_url
-                                        ? 'border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50'
-                                        : 'border-emerald-100 bg-emerald-50 text-emerald-300'
-                                "
+                                        ? 'border border-gray-300 bg-white text-gray-700 hover:border-emerald-400 hover:text-emerald-600'
+                                        : 'cursor-not-allowed border border-gray-200 bg-gray-50 text-gray-400',
+                                ]"
                             >
-                                <i class="fas fa-chevron-left text-xs"></i>
+                                <i class="fas fa-chevron-left"></i>
+                                <span class="hidden sm:inline">Sebelumnya</span>
                             </button>
 
                             <!-- Page Numbers -->
-                            <template v-for="(link, index) in produk.links" :key="index">
+                            <div class="flex items-center gap-1">
                                 <button
-                                    v-if="link.label !== '&laquo; Previous' && link.label !== 'Next &raquo;'"
+                                    v-for="(link, index) in produk.links.slice(1, -1)"
+                                    :key="index"
                                     @click="goToPage(link.url)"
-                                    :disabled="!link.url"
-                                    class="flex h-9 min-w-[36px] items-center justify-center rounded-lg border px-2 text-sm transition-colors"
-                                    :class="
+                                    :class="[
+                                        'rounded-lg px-3 py-2 text-sm font-medium transition-all',
                                         link.active
-                                            ? 'border-emerald-600 bg-emerald-600 font-semibold text-white'
-                                            : link.url
-                                              ? 'border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50'
-                                              : 'border-emerald-100 bg-emerald-50 text-emerald-300'
-                                    "
+                                            ? 'bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-md'
+                                            : 'border border-gray-300 bg-white text-gray-700 hover:border-emerald-400 hover:text-emerald-600',
+                                    ]"
                                     v-html="link.label"
                                 ></button>
-                            </template>
+                            </div>
 
                             <!-- Next Button -->
                             <button
                                 @click="goToPage(produk.next_page_url)"
                                 :disabled="!produk.next_page_url"
-                                class="flex h-9 w-9 items-center justify-center rounded-lg border transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                                :class="
+                                :class="[
+                                    'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all',
                                     produk.next_page_url
-                                        ? 'border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50'
-                                        : 'border-emerald-100 bg-emerald-50 text-emerald-300'
-                                "
+                                        ? 'border border-gray-300 bg-white text-gray-700 hover:border-emerald-400 hover:text-emerald-600'
+                                        : 'cursor-not-allowed border border-gray-200 bg-gray-50 text-gray-400',
+                                ]"
                             >
-                                <i class="fas fa-chevron-right text-xs"></i>
+                                <span class="hidden sm:inline">Selanjutnya</span>
+                                <i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
                     </div>
@@ -699,3 +709,13 @@ function goToPage(url: string | null) {
         </div>
     </BaseLayout>
 </template>
+
+<style scoped>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>

@@ -18,6 +18,10 @@ interface Produk {
     kategori?: Kategori;
     created_at: string;
     updated_at: string;
+    sku?: string;
+    barcode?: string;
+    isi_per_pack?: number;
+    deskripsi?: string;
 }
 
 interface Props {
@@ -42,9 +46,15 @@ function formatDate(dateString: string) {
 }
 
 function getStockBadgeClass(stok: number) {
-    if (stok > 10) return 'bg-green-100 text-green-700 border-green-200';
+    if (stok > 10) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
     if (stok > 0) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
     return 'bg-red-100 text-red-700 border-red-200';
+}
+
+function getStockStatus(stok: number) {
+    if (stok > 10) return 'Stok Tersedia';
+    if (stok > 0) return 'Stok Rendah';
+    return 'Stok Habis';
 }
 </script>
 
@@ -67,122 +77,86 @@ function getStockBadgeClass(stok: number) {
                 </div>
             </div>
 
-            <!-- Product Profile Card -->
-            <div class="shadow-emerald overflow-hidden rounded-lg border border-emerald-200 bg-white-emerald">
-                <!-- Header Profile -->
-                <div class="bg-emerald-gradient-subtle-2 px-6 py-8">
-                    <div class="flex items-center gap-6">
-                        <div class="shadow-emerald flex h-20 w-20 items-center justify-center rounded-full bg-white-emerald">
-                            <i class="fas fa-box text-3xl text-emerald-600"></i>
-                        </div>
-                        <div class="text-white">
-                            <h2 class="text-2xl font-bold drop-shadow-sm">{{ produk.nama }}</h2>
-                            <p class="mb-2 text-emerald-100 drop-shadow-sm">{{ produk.id_produk }}</p>
-                            <span
-                                v-if="produk.kategori"
-                                class="shadow-emerald-sm inline-flex rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700"
-                            >
-                                {{ produk.kategori.nama }}
-                            </span>
-                        </div>
+            <!-- Product Detail Card -->
+            <div class="max-w-4xl space-y-4">
+                <!-- SKU & Product Header -->
+                <div class="rounded-lg border border-blue-100 bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
+                    <p class="text-xs font-semibold tracking-wide text-blue-600 uppercase">
+                        {{ produk.sku || produk.id_produk }}
+                    </p>
+                    <h3 class="mt-2 text-base font-bold text-gray-900">{{ produk.nama }}</h3>
+                </div>
+
+                <!-- Basic Info Grid -->
+                <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Kategori</p>
+                        <p class="mt-1 text-sm font-semibold text-gray-900">{{ produk.kategori?.nama || '-' }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Satuan</p>
+                        <p class="mt-1 text-sm font-semibold text-gray-900">{{ produk.satuan }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Barcode</p>
+                        <p class="mt-1 font-mono text-sm text-gray-900">{{ produk.barcode || '-' }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Isi Per Pack</p>
+                        <p class="mt-1 text-sm font-semibold text-gray-900">{{ produk.isi_per_pack || '-' }}</p>
                     </div>
                 </div>
 
-                <!-- Product Details -->
-                <div class="bg-white-emerald p-6">
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <!-- Basic Information -->
-                        <div class="space-y-4">
-                            <h3 class="border-b border-emerald-200 pb-2 text-lg font-semibold text-emerald-800">Informasi Dasar</h3>
+                <!-- Pricing Section -->
+                <div class="rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+                    <p class="text-xs font-semibold text-emerald-700 uppercase">Harga</p>
+                    <div class="mt-3 flex items-center justify-between">
+                        <span class="text-sm text-emerald-700">Per {{ produk.satuan }}</span>
+                        <span class="text-lg font-bold text-emerald-700">{{ formatPrice(produk.harga) }}</span>
+                    </div>
+                </div>
 
-                            <div class="space-y-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                                        <i class="fas fa-barcode text-emerald-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-emerald-500">ID Produk</p>
-                                        <p class="font-medium text-emerald-800">{{ produk.id_produk }}</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-200">
-                                        <i class="fas fa-box text-emerald-700"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-emerald-500">Nama Produk</p>
-                                        <p class="font-medium text-emerald-800">{{ produk.nama }}</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-300">
-                                        <i class="fas fa-tags text-emerald-800"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-emerald-500">Kategori</p>
-                                        <p class="font-medium text-emerald-800">{{ produk.kategori?.nama || 'Tidak ada kategori' }}</p>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- Stock Section -->
+                <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <p class="text-xs font-semibold text-gray-700 uppercase">Ketersediaan</p>
+                    <div class="mt-3 flex items-center justify-between">
+                        <div>
+                            <p class="text-2xl font-bold text-gray-900">{{ produk.stok }}</p>
+                            <p class="mt-1 text-xs text-gray-600">{{ produk.satuan }} tersedia</p>
                         </div>
+                        <span :class="['inline-flex rounded-full px-4 py-2 text-xs font-bold', getStockBadgeClass(produk.stok)]">
+                            {{ getStockStatus(produk.stok) }}
+                        </span>
+                    </div>
+                </div>
 
-                        <!-- Price & Stock Information -->
-                        <div class="space-y-4">
-                            <h3 class="border-b border-emerald-200 pb-2 text-lg font-semibold text-emerald-800">Harga & Stok</h3>
+                <!-- Description -->
+                <div v-if="produk.deskripsi" class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <p class="text-xs font-semibold text-gray-700 uppercase">Deskripsi</p>
+                    <p class="mt-2 text-sm leading-relaxed text-gray-700">{{ produk.deskripsi }}</p>
+                </div>
 
-                            <div class="space-y-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                                        <i class="fas fa-money-bill text-emerald-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-emerald-500">Harga</p>
-                                        <p class="font-medium text-emerald-800">{{ formatPrice(produk.harga) }}</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-200">
-                                        <i class="fas fa-cubes text-emerald-700"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-emerald-500">Stok</p>
-                                        <div class="flex items-center gap-2">
-                                            <span
-                                                :class="getStockBadgeClass(produk.stok)"
-                                                class="inline-flex rounded-full border px-2 py-1 text-xs font-semibold"
-                                            >
-                                                {{ produk.stok }} {{ produk.satuan }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-300">
-                                        <i class="fas fa-balance-scale text-emerald-800"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-emerald-500">Satuan</p>
-                                        <p class="font-medium text-emerald-800">{{ produk.satuan }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Timestamps -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Dibuat Pada</p>
+                        <p class="mt-1 text-sm font-semibold text-gray-900">{{ formatDate(produk.created_at) }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Diupdate Pada</p>
+                        <p class="mt-1 text-sm font-semibold text-gray-900">{{ formatDate(produk.updated_at) }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="shadow-emerald rounded-lg border border-emerald-200 bg-white-emerald p-6">
-                <h3 class="mb-4 text-lg font-semibold text-emerald-800">Aksi</h3>
-                <div class="flex gap-3">
-                    <BaseButton @click="$inertia.visit(`/admin/produk/${produk.id_produk}/edit`)" variant="primary" icon="fas fa-edit">
-                        Edit Produk
-                    </BaseButton>
-                </div>
+            <div class="flex gap-3 pt-4">
+                <BaseButton @click="$inertia.visit(`/admin/produk/${produk.id_produk}/edit`)" variant="primary" icon="fas fa-edit">
+                    Edit Produk
+                </BaseButton>
+                <BaseButton @click="$inertia.visit('/admin/produk')" variant="secondary" icon="fas fa-arrow-left">
+                    Kembali
+                </BaseButton>
             </div>
         </div>
     </BaseLayout>
