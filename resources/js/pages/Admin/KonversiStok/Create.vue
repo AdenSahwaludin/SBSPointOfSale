@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
+import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
@@ -20,43 +21,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const adminMenuItems = [
-    {
-        name: 'Dashboard',
-        href: '/admin',
-        icon: 'fas fa-tachometer-alt',
-    },
-    {
-        name: 'Manajemen Data',
-        icon: 'fas fa-database',
-        children: [
-            { name: 'Pengguna', href: '/admin/pengguna', icon: 'fas fa-users' },
-            { name: 'Produk', href: '/admin/produk', icon: 'fas fa-boxes' },
-            { name: 'Kategori', href: '/admin/kategori', icon: 'fas fa-tags' },
-            { name: 'Pelanggan', href: '/admin/pelanggan', icon: 'fas fa-user-friends' },
-            { name: 'Konversi Stok', href: '/admin/konversi-stok', icon: 'fas fa-exchange-alt', active: true },
-        ],
-    },
-    {
-        name: 'Transaksi',
-        icon: 'fas fa-cash-register',
-        children: [
-            { name: 'Semua Transaksi', href: '/admin/transactions', icon: 'fas fa-receipt' },
-            { name: 'Laporan Harian', href: '/admin/reports/daily', icon: 'fas fa-calendar-day' },
-            { name: 'Laporan Bulanan', href: '/admin/reports/monthly', icon: 'fas fa-calendar-alt' },
-        ],
-    },
-    {
-        name: 'Laporan',
-        href: '/admin/reports',
-        icon: 'fas fa-chart-bar',
-    },
-    {
-        name: 'Pengaturan',
-        href: '/admin/settings',
-        icon: 'fas fa-cog',
-    },
-];
+const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/konversi-stok');
 
 const form = useForm({
     from_produk_id: null as number | null,
