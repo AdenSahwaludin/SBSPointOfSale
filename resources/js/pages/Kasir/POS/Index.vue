@@ -324,12 +324,13 @@ function getEffectiveUnitPiecePrice(produk: Produk, qtyPieces: number): number {
 }
 
 function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
-    const existingItemIndex = cart.value.findIndex((item) => item.id_produk === produk.id_produk && item.mode_qty === mode);
-
     // Untuk produk satuan karton/pack, paksa mode = 'pack'
+    // HARUS dilakukan SEBELUM findIndex agar bisa menemukan item yang sudah ada
     if ((produk.satuan === 'karton' || produk.satuan === 'pack') && mode === 'unit') {
         mode = 'pack';
     }
+
+    const existingItemIndex = cart.value.findIndex((item) => item.id_produk === produk.id_produk && item.mode_qty === mode);
 
     const isiPerPack = Math.max(1, toNumber(produk.isi_per_pack));
     const initialQty = 1;

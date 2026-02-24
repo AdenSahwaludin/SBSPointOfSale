@@ -26,13 +26,6 @@ function submit() {
     <div class="relative min-h-screen overflow-hidden bg-cover bg-center bg-no-repeat" style="background-image: url('/assets/images/Bg_Login.png')">
         <!-- Dark overlay untuk readability -->
         <div class="absolute inset-0 bg-black/40"></div>
-
-        <!-- Subtle animated elements -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute -top-40 -right-40 h-80 w-80 animate-pulse rounded-full bg-white/5 blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 h-96 w-96 animate-pulse rounded-full bg-white/5 blur-3xl delay-1000"></div>
-        </div>
-
         <!-- Main content -->
         <div class="relative z-10 flex min-h-screen items-center justify-center p-4">
             <!-- Glassmorphism card -->
