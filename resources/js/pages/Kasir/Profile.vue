@@ -1,42 +1,13 @@
 <script lang="ts" setup>
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
+import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 
-const kasirMenuItems = [
-    {
-        name: 'Dashboard',
-        href: '/kasir',
-        icon: 'fas fa-tachometer-alt',
-    },
-    {
-        name: 'Point of Sale',
-        href: '/kasir/pos',
-        icon: 'fas fa-cash-register',
-    },
-    {
-        name: 'Transaksi',
-        icon: 'fas fa-receipt',
-        children: [
-            { name: 'Riwayat Transaksi', href: '/kasir/transactions', icon: 'fas fa-history' },
-            { name: 'Transaksi Hari Ini', href: '/kasir/transactions/today', icon: 'fas fa-calendar-day' },
-        ],
-    },
-    {
-        name: 'Produk',
-        href: '/kasir/products',
-        icon: 'fas fa-boxes',
-    },
-    {
-        name: 'Profile',
-        href: '/kasir/profile',
-        icon: 'fas fa-user-circle',
-        active: true,
-    },
-];
+const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/profile');
 
 const activeTab = ref('profile');
 const showChangePassword = ref(false);
