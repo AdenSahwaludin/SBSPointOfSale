@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\KategoriController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\ReportController;
@@ -20,6 +21,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::inertia('/produk', 'Admin/Produk')->name('produk');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports');
     Route::inertia('/settings', 'Admin/Settings')->name('settings');
+
+    // ==========================================
+    // ADMIN SETTINGS & PROFILE
+    // ==========================================
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::patch('/', [SettingsController::class, 'update'])->name('update');
+        Route::patch('/password', [SettingsController::class, 'updatePassword'])->name('password');
+    });
 
     // ==========================================
     // MANAJEMEN PENGGUNA
