@@ -17,15 +17,22 @@ export function useAdminMenuItems() {
                 { name: 'Pelanggan', href: '/admin/pelanggan', icon: 'fas fa-user-friends' },
             ],
         },
+
         {
-            name: 'Persetujuan PO',
-            href: '/admin/goods-in-approval',
+            name: 'Pre Order',
             icon: 'fas fa-file-invoice',
-        },
-        {
-            name: 'Riwayat PO',
-            href: '/admin/goods-in-history',
-            icon: 'fas fa-history',
+            children: [
+                {
+                    name: 'Persetujuan PO',
+                    href: '/admin/goods-in-approval',
+                    icon: 'fas fa-file-invoice',
+                },
+                {
+                    name: 'Riwayat PO',
+                    href: '/admin/goods-in-history',
+                    icon: 'fas fa-history',
+                },
+            ],
         },
         {
             name: 'Transaksi',
@@ -46,9 +53,14 @@ export function useAdminMenuItems() {
             ],
         },
         {
-            name: 'Pengaturan',
-            href: '/admin/settings',
-            icon: 'fas fa-cog',
+            name: 'Profile',
+            href: '/admin/profile',
+            icon: 'fas fa-user-circle',
+        },
+        {
+            name: 'Profile',
+            href: '/kasir/profile',
+            icon: 'fas fa-user-circle',
         },
     ];
 }

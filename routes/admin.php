@@ -20,12 +20,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::inertia('/users', 'Admin/Users')->name('users');
     Route::inertia('/produk', 'Admin/Produk')->name('produk');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports');
-    Route::inertia('/settings', 'Admin/Settings')->name('settings');
+    Route::inertia('/profile', 'Admin/Settings')->name('profile');
 
     // ==========================================
-    // ADMIN SETTINGS & PROFILE
+    // ADMIN PROFILE
     // ==========================================
-    Route::prefix('settings')->name('settings.')->group(function () {
+    Route::prefix('profile')->name('profile.')->group(function () {
         Route::patch('/', [SettingsController::class, 'update'])->name('update');
         Route::patch('/password', [SettingsController::class, 'updatePassword'])->name('password');
     });

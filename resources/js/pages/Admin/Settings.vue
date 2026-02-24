@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
+import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 
-const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/settings');
+const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/profile');
 
 const activeTab = ref('profile');
 const showChangePassword = ref(false);
@@ -25,7 +25,7 @@ const passwordForm = useForm({
 });
 
 function updateProfile() {
-    profileForm.patch('/admin/settings', {
+    profileForm.patch('/admin/profile', {
         preserveScroll: true,
         onSuccess: () => {
             // Show success message
@@ -34,7 +34,7 @@ function updateProfile() {
 }
 
 function updatePassword() {
-    passwordForm.patch('/admin/settings/password', {
+    passwordForm.patch('/admin/profile/password', {
         preserveScroll: true,
         onSuccess: () => {
             passwordForm.reset();
@@ -49,10 +49,10 @@ function setActiveTab(tab: string) {
 </script>
 
 <template>
-    <BaseLayout title="Pengaturan - Sari Bumi Sakti" :menuItems="adminMenuItems" userRole="admin">
-        <template #header> Pengaturan Akun </template>
+    <BaseLayout title="Profile - Sari Bumi Sakti" :menuItems="adminMenuItems" userRole="admin">
+        <template #header> Profile Saya </template>
 
-        <Head title="Pengaturan" />
+        <Head title="Profile" />
 
         <div class="mx-auto max-w-6xl">
             <!-- Profile Header -->
