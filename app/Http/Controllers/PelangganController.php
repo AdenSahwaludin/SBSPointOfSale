@@ -81,12 +81,12 @@ class PelangganController extends Controller
             'nama' => 'required|string|max:100',
             'email' => 'nullable|email|max:100|unique:pelanggan,email',
             'telepon' => 'nullable|numeric|digits_between:1,15',
+            'kota' => 'nullable|string|max:50',
             'alamat' => 'nullable|string',
         ];
 
         // Admin can set additional fields
         if ($this->userRole === 'admin') {
-            $rules['kota'] = 'nullable|string|max:50';
             $rules['aktif'] = 'boolean';
             $rules['trust_score'] = 'integer|min:0|max:100';
             $rules['credit_limit'] = 'numeric|min:0';
@@ -151,12 +151,12 @@ class PelangganController extends Controller
             'nama' => 'required|string|max:100',
             'email' => 'nullable|email|max:100|unique:pelanggan,email,'.$id.',id_pelanggan',
             'telepon' => 'nullable|numeric|digits_between:1,15',
+            'kota' => 'nullable|string|max:50',
             'alamat' => 'nullable|string',
         ];
 
         // Admin can update additional fields
         if ($this->userRole === 'admin') {
-            $rules['kota'] = 'nullable|string|max:50';
             $rules['aktif'] = 'boolean';
             $rules['trust_score'] = 'integer|min:0|max:100';
             $rules['credit_limit'] = 'numeric|min:0';
@@ -231,8 +231,8 @@ class PelangganController extends Controller
                 $filtered['id_pelanggan'] = $data['id_pelanggan'];
             }
             
-            // Kasir can only edit these fields
-            $allowed = ['nama', 'email', 'telepon', 'alamat'];
+            // Kasir can only edit these fields (including kota)
+            $allowed = ['nama', 'email', 'telepon', 'kota', 'alamat'];
             foreach ($allowed as $field) {
                 if (array_key_exists($field, $data)) {
                     $filtered[$field] = $data[$field];

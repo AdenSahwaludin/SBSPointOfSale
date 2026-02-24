@@ -158,8 +158,6 @@ const minimalDp = computed<number>(() => {
 const creditScreening = computed(() => {
     const trustScore = Number(selectedCustomer.value?.trust_score || 50);
     const total_val = Number(total.value || 0);
-    const dpVal = Number(dpBayar.value || 0);
-    const minDp20 = total_val * 0.2;
 
     // If not credit payment method, return inactive state
     if (metodeBayar.value !== 'KREDIT') {
@@ -170,46 +168,45 @@ const creditScreening = computed(() => {
             message: '',
             iconClass: '',
             badgeClass: '',
-            minDp20Persen: 0,
         };
     }
 
-    // Trust score < 50: REJECTED
-    if (trustScore < 50) {
+    // NEW RULES: Screening Cicilan Pintar
+    // TS < 50         → REJECTED
+    // TS == 50        → BASELINE (but rejected)
+    // TS 51-69        → REJECTED
+    // TS >= 70        → APPROVED
+
+    if (trustScore < 70) {
+        // Rejected (includes: TS < 50, TS == 50 baseline, TS 51-69)
+        let detailMessage = '';
+        if (trustScore < 50) {
+            detailMessage = 'Trust score terlalu rendah. Tidak memenuhi syarat cicilan.';
+        } else if (trustScore === 50) {
+            detailMessage = 'Trust score berada pada baseline minimum. Pengajuan cicilan otomatis ditolak.';
+        } else {
+            // Trust score 51-69
+            detailMessage = `Trust score ${trustScore} belum mencapai threshold minimum 70 untuk approval.`;
+        }
+
         return {
             status: 'REJECTED',
             shouldDisable: true,
             title: 'Pengajuan Cicilan Ditolak',
-            message:
-                'Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah. Apakah ingin melanjutkan dengan metode pembayaran lain?',
+            message: detailMessage,
             iconClass: 'fas fa-times-circle',
             badgeClass: 'bg-red-100 text-red-800 border-red-200',
-            minDp20Persen: 0,
         };
     }
 
-    // Trust score 50-70: MANUAL_REVIEW
-    if (trustScore >= 50 && trustScore <= 70) {
-        return {
-            status: 'MANUAL_REVIEW',
-            shouldDisable: dpVal < minDp20,
-            title: 'Memerlukan DP Minimal',
-            message: `Trust score berada pada kategori menengah (${trustScore}). Diperlukan DP minimal 20% dari total belanja untuk melanjutkan cicilan. Apakah ingin melanjutkan dengan ketentuan ini?`,
-            iconClass: 'fas fa-exclamation-triangle',
-            badgeClass: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-            minDp20Persen: minDp20,
-        };
-    }
-
-    // Trust score >= 71: APPROVED
+    // Trust score >= 70: APPROVED
     return {
         status: 'APPROVED',
         shouldDisable: false,
         title: 'Cicilan Disetujui',
-        message: 'Customer layak untuk cicilan berdasarkan trust score. Apakah ingin melanjutkan proses cicilan sekarang?',
+        message: 'Customer layak untuk cicilan. Apakah ingin melanjutkan proses cicilan sekarang?',
         iconClass: 'fas fa-check-circle',
         badgeClass: 'bg-green-100 text-green-800 border-green-200',
-        minDp20Persen: 0,
     };
 });
 
@@ -544,21 +541,9 @@ function processTransaction() {
             addNotification({
                 type: 'error',
                 title: 'Pengajuan Cicilan Ditolak',
-                message: 'Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah.',
+                message: screening.message || 'Pengajuan cicilan tidak diperbolehkan karena trust score tidak memenuhi persyaratan.',
             });
             return;
-        }
-
-        if (screening.status === 'MANUAL_REVIEW') {
-            const minDp = total.value * 0.2;
-            if (dpBayar.value < minDp) {
-                addNotification({
-                    type: 'warning',
-                    title: 'DP Kurang',
-                    message: `DP minimal 20% dari total Rp ${formatCurrency(minDp)}. DP saat ini Rp ${formatCurrency(dpBayar.value || 0)}.`,
-                });
-                return;
-            }
         }
     }
 

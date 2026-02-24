@@ -137,10 +137,13 @@ class CreditLimitService
     /**
      * Determine credit eligibility based on trust score.
      *
-     * Screening Cicilan Pintar tiers:
-     * - TS < 50  → REJECTED (cannot apply for credit)
-     * - TS 50-70 → MANUAL_REVIEW (requires DP minimum 20%)
-     * - TS >= 71 → APPROVED (credit approved)
+     * Screening Cicilan Pintar - NEW RULES:
+     * - TS < 50         → REJECTED (tidak layak cicilan)
+     * - TS == 50        → BASELINE (nilai default/threshold minimum, otomatis ditolak)
+     * - TS 51-69        → REJECTED (pengajuan otomatis ditolak)
+     * - TS >= 70        → APPROVED (pelanggan layak/approved)
+     *
+     * Validasi screening ini berjalan SEBELUM penghitungan credit limit.
      *
      * @return array ['eligible' => bool, 'status' => string, 'message' => string]
      */
@@ -150,19 +153,25 @@ class CreditLimitService
             return [
                 'eligible' => false,
                 'status' => 'REJECTED',
-                'message' => 'Trust score terlalu rendah. Tidak memenuhi syarat cicilan.',
+                'message' => 'Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah.',
             ];
-        } elseif ($trustScore >= 50 && $trustScore <= 70) {
+        } elseif ($trustScore == 50) {
             return [
-                'eligible' => true,
-                'status' => 'MANUAL_REVIEW',
-                'message' => 'Memerlukan peninjauan manual. Pertimbangkan untuk meminta DP lebih besar (minimal 20%).',
+                'eligible' => false,
+                'status' => 'BASELINE',
+                'message' => 'Trust score berada pada baseline minimum. Pengajuan cicilan otomatis ditolak. Tingkatkan trust score untuk qualify.',
             ];
-        } else { // >= 71
+        } elseif ($trustScore >= 51 && $trustScore <= 69) {
+            return [
+                'eligible' => false,
+                'status' => 'REJECTED',
+                'message' => 'Pengajuan cicilan otomatis ditolak. Trust score belum mencapai threshold minimum 70.',
+            ];
+        } else { // >= 70
             return [
                 'eligible' => true,
                 'status' => 'APPROVED',
-                'message' => 'Layak untuk cicilan. Proses dapat dilanjutkan.',
+                'message' => 'Customer layak untuk cicilan berdasarkan trust score. Proses dapat dilanjutkan.',
             ];
         }
     }

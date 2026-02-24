@@ -273,33 +273,19 @@ class TransaksiPOSController extends Controller
                 }
 
                 // Screening Cicilan Pintar - Check eligibility based on trust score
+                // Rules: TS<50=REJECTED, TS==50=BASELINE, TS51-69=REJECTED, TS>=70=APPROVED
+                // Validation runs BEFORE credit limit calculation
                 $customer = \App\Models\Pelanggan::find($request->id_pelanggan);
                 $trustScore = (int) ($customer->trust_score ?? 50);
                 $screeningResult = CreditLimitService::checkEligibility($trustScore);
 
-                if ($screeningResult['status'] === 'REJECTED') {
+                if ($screeningResult['eligible'] === false) {
+                    // REJECTED or BASELINE - both are not eligible for credit
                     return response()->json([
                         'success' => false,
-                        'message' => 'Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah.',
-                        'errors' => ['metode_bayar' => ['Screening cicilan: '.$screeningResult['message']]],
+                        'message' => $screeningResult['message'],
+                        'errors' => ['metode_bayar' => [$screeningResult['message']]],
                     ], 422);
-                }
-
-                // For MANUAL_REVIEW: validate that DP is at least 20% of total
-                if ($screeningResult['status'] === 'MANUAL_REVIEW') {
-                    $totalAmount = (float) $request->total;
-                    $dpAmount = (float) ($request->dp ?? 0);
-                    $minimalDp20Persen = $totalAmount * 0.2;
-
-                    if ($dpAmount < $minimalDp20Persen) {
-                        $formattedMinDp = number_format($minimalDp20Persen, 0, ',', '.');
-
-                        return response()->json([
-                            'success' => false,
-                            'message' => "DP minimal 20% dari total cicilan adalah Rp {$formattedMinDp}.",
-                            'errors' => ['dp' => ["DP minimal Rp {$formattedMinDp} diperlukan untuk screening manual review"]],
-                        ], 422);
-                    }
                 }
 
                 $dp = (float) ($request->dp ?? 0);
