@@ -17,7 +17,7 @@ class ProdukController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->get('per_page', 10); // Default 10 items per page
+        $perPage = $request->get('per_page', 12); // Default 12 items per page
         $page = $request->get('page', 1);
 
         $produk = Produk::with('kategori')

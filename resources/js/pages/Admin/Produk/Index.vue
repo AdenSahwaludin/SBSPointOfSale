@@ -80,7 +80,7 @@ const selectedStokStatus = ref<string>('all');
 const showFilters = ref(false);
 
 // Pagination states
-const perPage = ref(props.filters?.per_page || 10);
+const perPage = ref(props.filters?.per_page || 12);
 
 // Menu items dengan active state menggunakan composable
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/produk');
