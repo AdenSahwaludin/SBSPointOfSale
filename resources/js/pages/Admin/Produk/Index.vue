@@ -21,6 +21,8 @@ interface Produk {
     created_at: string;
     sku?: string;
     barcode?: string;
+    harga_pack?: number;
+    isi_per_pack?: number;
 }
 
 interface PaginationLink {
@@ -194,6 +196,49 @@ function getStockStatus(stok: number) {
     if (stok > 10) return 'Stok Tersedia';
     if (stok > 0) return 'Stok Rendah';
     return 'Stok Habis';
+}
+
+function formatPrice(price: number) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(price);
+}
+
+function formatCurrency(amount: number): string {
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+}
+
+function getPackPrice(p: Produk): number {
+    const hargaPack = Number(p.harga_pack || 0);
+    if (hargaPack > 0) return hargaPack;
+    const unit = String(p.satuan || '').toLowerCase();
+    if ((unit === 'karton' || unit === 'pack') && p.harga) return Number(p.harga);
+    return 0;
+}
+
+function getPerUnitPrice(p: Produk): number {
+    const unit = String(p.satuan || '').toLowerCase();
+    const isi = Number(p.isi_per_pack || 0);
+    const harga = Number(p.harga || 0);
+    if ((unit === 'karton' || unit === 'pack') && isi > 0) {
+        const packPrice = getPackPrice(p);
+        return packPrice > 0 ? Math.round(packPrice / isi) : 0;
+    }
+    if (harga > 0) return harga;
+    if (isi > 0) {
+        const packPrice = getPackPrice(p);
+        if (packPrice > 0) return Math.round(packPrice / isi);
+    }
+    return 0;
+}
+
+function hasPack(p: Produk): boolean {
+    const unit = String(p.satuan || '').toLowerCase();
+    const isi = Number(p.isi_per_pack || 0);
+    const packPrice = getPackPrice(p);
+    return Boolean(isi > 1 && packPrice > 0 && (unit === 'karton' || unit === 'pack' || p.harga_pack));
 }
 
 function handleSearch() {
@@ -547,8 +592,18 @@ function goToPage(url: string | null) {
 
                                 <!-- Price Section -->
                                 <div class="mb-4 rounded-lg bg-gradient-to-br from-emerald-50 to-green-50 p-3">
-                                    <p class="text-xl font-bold text-emerald-700">{{ formatPrice(item.harga) }}</p>
-                                    <p class="text-xs text-emerald-600">per {{ item.satuan }}</p>
+                                    <div v-if="hasPack(item)">
+                                        <p class="text-xl font-bold text-emerald-700">{{ formatCurrency(getPackPrice(item)) }}</p>
+                                        <p class="text-xs text-emerald-600">per pack ({{ item.isi_per_pack }} satuan)</p>
+                                        <p class="mt-2 text-xs text-blue-700">
+                                            <span class="font-semibold">{{ formatCurrency(getPerUnitPrice(item)) }}</span>
+                                            <span class="text-blue-600"> per satuan</span>
+                                        </p>
+                                    </div>
+                                    <div v-else>
+                                        <p class="text-xl font-bold text-emerald-700">{{ formatCurrency(getPerUnitPrice(item)) }}</p>
+                                        <p class="text-xs text-emerald-600">per {{ item.satuan }}</p>
+                                    </div>
                                 </div>
 
                                 <!-- Stock Status -->

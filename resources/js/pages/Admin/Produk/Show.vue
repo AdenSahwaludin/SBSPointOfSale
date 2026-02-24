@@ -56,6 +56,41 @@ function getStockStatus(stok: number) {
     if (stok > 0) return 'Stok Rendah';
     return 'Stok Habis';
 }
+
+function formatCurrency(amount: number): string {
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+}
+
+function getPackPrice(p: Produk): number {
+    const hargaPack = Number(p.harga_pack || 0);
+    if (hargaPack > 0) return hargaPack;
+    const unit = String(p.satuan || '').toLowerCase();
+    if ((unit === 'karton' || unit === 'pack') && p.harga) return Number(p.harga);
+    return 0;
+}
+
+function getPerUnitPrice(p: Produk): number {
+    const unit = String(p.satuan || '').toLowerCase();
+    const isi = Number(p.isi_per_pack || 0);
+    const harga = Number(p.harga || 0);
+    if ((unit === 'karton' || unit === 'pack') && isi > 0) {
+        const packPrice = getPackPrice(p);
+        return packPrice > 0 ? Math.round(packPrice / isi) : 0;
+    }
+    if (harga > 0) return harga;
+    if (isi > 0) {
+        const packPrice = getPackPrice(p);
+        if (packPrice > 0) return Math.round(packPrice / isi);
+    }
+    return 0;
+}
+
+function hasPack(p: Produk): boolean {
+    const unit = String(p.satuan || '').toLowerCase();
+    const isi = Number(p.isi_per_pack || 0);
+    const packPrice = getPackPrice(p);
+    return Boolean(isi > 1 && packPrice > 0 && (unit === 'karton' || unit === 'pack' || p.harga_pack));
+}
 </script>
 
 <template>
@@ -110,9 +145,19 @@ function getStockStatus(stok: number) {
                 <!-- Pricing Section -->
                 <div class="rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
                     <p class="text-xs font-semibold text-emerald-700 uppercase">Harga</p>
-                    <div class="mt-3 flex items-center justify-between">
-                        <span class="text-sm text-emerald-700">Per {{ produk.satuan }}</span>
-                        <span class="text-lg font-bold text-emerald-700">{{ formatPrice(produk.harga) }}</span>
+                    <div class="mt-3 space-y-2">
+                        <div v-if="hasPack(produk)" class="flex items-center justify-between">
+                            <span class="text-sm text-emerald-700">Per Pack ({{ produk.isi_per_pack }})</span>
+                            <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(getPackPrice(produk)) }}</span>
+                        </div>
+                        <div v-if="hasPack(produk)" class="flex items-center justify-between border-t border-emerald-200 pt-2">
+                            <span class="text-sm text-emerald-700">Per Satuan</span>
+                            <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(getPerUnitPrice(produk)) }}</span>
+                        </div>
+                        <div v-else class="flex items-center justify-between">
+                            <span class="text-sm text-emerald-700">Per {{ produk.satuan }}</span>
+                            <span class="text-lg font-bold text-emerald-700">{{ formatCurrency(getPerUnitPrice(produk)) }}</span>
+                        </div>
                     </div>
                 </div>
 
