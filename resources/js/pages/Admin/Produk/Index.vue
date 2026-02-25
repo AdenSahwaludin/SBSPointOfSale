@@ -165,8 +165,9 @@ function deleteProduk() {
             },
             onFinish: () => {
                 // Check for warning flash message and show as notification
-                if (page.props.flash?.warning) {
-                    warning('Tidak Dapat Menghapus', page.props.flash.warning);
+                const flash = (page.props as any).flash;
+                if (flash?.warning) {
+                    warning('Tidak Dapat Menghapus', flash.warning);
                     showDeleteModal.value = false;
                 }
             },
@@ -557,7 +558,7 @@ function goToPage(url: string | null) {
                         <div
                             v-for="item in displayedProduk"
                             :key="item.id_produk"
-                            class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:border-emerald-400 hover:shadow-lg"
+                            class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:border-emerald-200 hover:shadow-md"
                         >
                             <!-- Gradient overlay on hover -->
                             <div
