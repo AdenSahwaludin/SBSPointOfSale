@@ -15,12 +15,16 @@ interface Produk {
     id_produk: string;
     sku?: string;
     barcode?: string;
+    no_bpom?: string;
     nama: string;
     harga: number;
     harga_pack?: number;
     stok: number;
     satuan: string;
     isi_per_pack: number;
+    sisa_pcs_terbuka?: number;
+    batas_stok_minimum?: number;
+    jumlah_restock?: number;
     kategori: Kategori;
     deskripsi?: string;
 }
@@ -584,6 +588,26 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/products')
                                 <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
                                     <p class="text-xs font-medium text-gray-600">Isi Per Pack</p>
                                     <p class="mt-1 text-sm font-semibold text-gray-900">{{ selectedProduk.isi_per_pack }}</p>
+                                </div>
+                            </div>
+
+                            <!-- BPOM & Additional Info -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                    <p class="text-xs font-medium text-gray-600">No. BPOM</p>
+                                    <p class="mt-1 font-mono text-sm text-gray-900">{{ selectedProduk.no_bpom || '-' }}</p>
+                                </div>
+                                <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                    <p class="text-xs font-medium text-gray-600">Sisa Pcs Terbuka</p>
+                                    <p class="mt-1 text-sm font-semibold text-gray-900">{{ selectedProduk.sisa_pcs_terbuka ?? '-' }}</p>
+                                </div>
+                                <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                    <p class="text-xs font-medium text-gray-600">Batas Stok Min</p>
+                                    <p class="mt-1 text-sm font-semibold text-gray-900">{{ selectedProduk.batas_stok_minimum ?? '-' }}</p>
+                                </div>
+                                <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                    <p class="text-xs font-medium text-gray-600">Jumlah Restock</p>
+                                    <p class="mt-1 text-sm font-semibold text-gray-900">{{ selectedProduk.jumlah_restock ?? '-' }}</p>
                                 </div>
                             </div>
 

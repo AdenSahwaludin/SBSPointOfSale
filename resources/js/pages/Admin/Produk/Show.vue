@@ -20,8 +20,13 @@ interface Produk {
     updated_at: string;
     sku?: string;
     barcode?: string;
+    no_bpom?: string;
     isi_per_pack?: number;
+    sisa_pcs_terbuka?: number;
+    batas_stok_minimum?: number;
+    jumlah_restock?: number;
     deskripsi?: string;
+    harga_pack?: number;
 }
 
 interface Props {
@@ -142,6 +147,26 @@ function hasPack(p: Produk): boolean {
                     </div>
                 </div>
 
+                <!-- BPOM & Additional Info -->
+                <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">No. BPOM</p>
+                        <p class="mt-1 font-mono text-sm text-gray-900">{{ produk.no_bpom || '-' }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Sisa Pcs Terbuka</p>
+                        <p class="mt-1 text-sm font-semibold text-gray-900">{{ produk.sisa_pcs_terbuka ?? '-' }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Batas Stok Minimum</p>
+                        <p class="mt-1 text-sm font-semibold text-gray-900">{{ produk.batas_stok_minimum ?? '-' }}</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <p class="text-xs font-medium text-gray-600">Jumlah Restock</p>
+                        <p class="mt-1 text-sm font-semibold text-gray-900">{{ produk.jumlah_restock ?? '-' }}</p>
+                    </div>
+                </div>
+
                 <!-- Pricing Section -->
                 <div class="rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
                     <p class="text-xs font-semibold text-emerald-700 uppercase">Harga</p>
@@ -199,9 +224,7 @@ function hasPack(p: Produk): boolean {
                 <BaseButton @click="$inertia.visit(`/admin/produk/${produk.id_produk}/edit`)" variant="primary" icon="fas fa-edit">
                     Edit Produk
                 </BaseButton>
-                <BaseButton @click="$inertia.visit('/admin/produk')" variant="secondary" icon="fas fa-arrow-left">
-                    Kembali
-                </BaseButton>
+                <BaseButton @click="$inertia.visit('/admin/produk')" variant="secondary" icon="fas fa-arrow-left"> Kembali </BaseButton>
             </div>
         </div>
     </BaseLayout>
