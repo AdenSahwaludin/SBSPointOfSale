@@ -19,8 +19,8 @@ export function useAdminMenuItems() {
         },
 
         {
-            name: 'Pre Order',
-            icon: 'fas fa-file-invoice',
+            name: 'Purchase Order',
+            icon: 'fas fa-file-contract',
             children: [
                 {
                     name: 'Persetujuan PO',
@@ -55,11 +55,6 @@ export function useAdminMenuItems() {
         {
             name: 'Profile',
             href: '/admin/profile',
-            icon: 'fas fa-user-circle',
-        },
-        {
-            name: 'Profile',
-            href: '/kasir/profile',
             icon: 'fas fa-user-circle',
         },
     ];

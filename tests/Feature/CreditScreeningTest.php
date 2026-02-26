@@ -586,5 +586,5 @@ describe('Credit Screening (Cicilan Pintar)', function () {
         // Should succeed with exactly 20% DP
         $response->assertStatus(200);
         $response->assertJsonPath('success', true);
-    });
 });
+

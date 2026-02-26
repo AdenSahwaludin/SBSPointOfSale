@@ -959,10 +959,8 @@ function formatCurrency(amount: number): string {
 
 // Get trust score tier and badge class
 function getTrustScoreTier(trustScore: number): { tier: string; badgeClass: string } {
-    if (trustScore < 50) {
+    if (trustScore < 70) {
         return { tier: 'Ditolak', badgeClass: 'bg-red-100 text-red-800' };
-    } else if (trustScore >= 50 && trustScore <= 70) {
-        return { tier: 'Tinjau Manual', badgeClass: 'bg-yellow-100 text-yellow-800' };
     } else {
         return { tier: 'Layak', badgeClass: 'bg-green-100 text-green-800' };
     }
@@ -1376,19 +1374,6 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                 {{ label }}
                             </option>
                         </select>
-                    </div>
-
-                    <!-- Credit Screening Banner -->
-                    <div v-if="creditScreening.status !== 'INACTIVE'" :class="['rounded-lg border-2 p-4', creditScreening.badgeClass]">
-                        <div class="mb-2 flex items-center gap-2">
-                            <i :class="['text-lg', creditScreening.iconClass]"></i>
-                            <h3 class="font-semibold">{{ creditScreening.title }}</h3>
-                        </div>
-                        <p class="text-sm">{{ creditScreening.message }}</p>
-                        <div v-if="creditScreening.minDp20Persen > 0" class="mt-2 rounded bg-white/40 p-2 text-xs font-medium">
-                            <i class="fas fa-info-circle mr-1"></i>DP minimal 20%:
-                            <span class="font-bold">{{ formatCurrency(creditScreening.minDp20Persen) }}</span>
-                        </div>
                     </div>
 
                     <!-- Cash Payment -->

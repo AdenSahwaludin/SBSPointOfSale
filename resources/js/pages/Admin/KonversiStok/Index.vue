@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
+import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
