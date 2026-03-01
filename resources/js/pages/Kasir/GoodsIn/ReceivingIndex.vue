@@ -55,7 +55,7 @@ const safeApprovedPOs = computed(() => props.approvedPOs ?? []);
 
                 <!-- Empty State -->
                 <div v-if="!hasApprovedPOs" class="rounded-lg border border-dashed border-emerald-300 bg-emerald-50 px-6 py-12 text-center">
-                    <div class="mb-4 text-4xl">📦</div>
+                    <div class="mb-2 text-4xl text-emerald-900"><i class="fa-solid fa-box-open"></i></div>
                     <h3 class="text-lg font-semibold text-emerald-900">Tidak ada PO yang sedang diproses</h3>
                     <p class="mt-2 text-emerald-700">Semua PO yang disetujui telah selesai atau tidak ada PO yang menunggu penerimaan barang.</p>
                 </div>

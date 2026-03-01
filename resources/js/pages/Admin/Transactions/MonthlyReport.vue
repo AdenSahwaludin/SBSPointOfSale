@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import ExportDropdown from '@/components/ExportDropdown.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface TopPerformer {
     nama: string;
@@ -47,6 +48,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/reports/mo
 const selectedMonth = ref(String(props.bulan).padStart(2, '0'));
 const selectedYear = ref(String(props.tahun));
 
+const exportPdfUrl = computed(() => `/admin/reports/monthly/export/pdf?bulan=${selectedMonth.value}&tahun=${selectedYear.value}`);
+const exportCsvUrl = computed(() => `/admin/reports/monthly/export/csv?bulan=${selectedMonth.value}&tahun=${selectedYear.value}`);
+
 function handleDateChange() {
     router.get(`/admin/transactions/laporan-bulanan?bulan=${selectedMonth.value}&tahun=${selectedYear.value}`);
 }
@@ -89,7 +93,10 @@ const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
                     <h1 class="text-3xl font-bold text-emerald-800">Laporan Bulanan</h1>
                     <p class="text-emerald-600">{{ bulan_display }}</p>
                 </div>
-                <BaseButton @click="router.visit('/admin/transactions')" variant="secondary" icon="fas fa-arrow-left"> Kembali </BaseButton>
+                <div class="flex gap-2">
+                    <ExportDropdown :pdf-url="exportPdfUrl" :csv-url="exportCsvUrl" />
+                    <BaseButton @click="router.visit('/admin/reports')" variant="secondary" icon="fas fa-arrow-left"> Kembali </BaseButton>
+                </div>
             </div>
 
             <!-- Month & Year Picker -->

@@ -59,7 +59,7 @@ function setActiveTab(tab: string) {
             <div class="mb-6 rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
                 <div class="flex items-center space-x-6">
                     <div
-                        class="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-2xl font-bold text-white"
+                        class="bg-emerald-gradient-subtle-1 hover:shadow-emerald emerald-hover-glow flex h-20 w-20 items-center justify-center rounded-full text-2xl font-semibold text-white transition-all duration-300"
                     >
                         {{ user?.nama?.charAt(0).toUpperCase() }}
                     </div>

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Transaksi;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -462,5 +464,457 @@ class TransaksiController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Export daily report as PDF
+     */
+    public function exportDailyPdf(Request $request): HttpResponse
+    {
+        $tanggal = $request->get('tanggal') ? Carbon::parse($request->get('tanggal')) : Carbon::today();
+
+        $dayTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereDate('tanggal', $tanggal)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // Calculate stats
+        $stats = [
+            'total_transaksi' => $dayTransactions->count(),
+            'total_lunas' => $dayTransactions->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => $dayTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => $dayTransactions->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => $dayTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_item' => $dayTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
+        ];
+
+        $paymentMethods = $dayTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy('metode_bayar')
+            ->map(function ($group) {
+                return [
+                    'metode' => $group->first()->metode_bayar,
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        $transaksi = $dayTransactions->map(function ($t) {
+            return [
+                'nomor_transaksi' => $t->nomor_transaksi,
+                'tanggal' => $t->tanggal,
+                'pelanggan' => ['nama' => $t->pelanggan ? $t->pelanggan->nama : '-'],
+                'kasir' => ['nama' => $t->kasir ? $t->kasir->nama : '-'],
+                'metode_bayar' => $t->metode_bayar,
+                'total' => $t->total,
+                'status_pembayaran' => $t->status_pembayaran,
+            ];
+        })->toArray();
+
+        $pdf = Pdf::loadView('exports.reports.daily', [
+            'tanggal' => $tanggal->format('Y-m-d'),
+            'stats' => $stats,
+            'paymentMethods' => $paymentMethods,
+            'transaksi' => $transaksi,
+        ])
+            ->setPaper('a4')
+            ->setOption('margin-top', 10)
+            ->setOption('margin-bottom', 10);
+
+        return $pdf->download('laporan-harian-'.$tanggal->format('Y-m-d').'.pdf');
+    }
+
+    /**
+     * Export daily report as CSV
+     */
+    public function exportDailyCsv(Request $request): HttpResponse
+    {
+        $tanggal = $request->get('tanggal') ? Carbon::parse($request->get('tanggal')) : Carbon::today();
+
+        $dayTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereDate('tanggal', $tanggal)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $filename = 'laporan-harian-'.$tanggal->format('Y-m-d').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $output = fopen('php://output', 'w');
+        // BOM for Excel UTF-8
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        fputcsv($output, ['Laporan Harian - '.$tanggal->translatedFormat('l, d F Y')]);
+        fputcsv($output, ['']);
+
+        // Stats
+        fputcsv($output, ['STATISTIK']);
+        fputcsv($output, [
+            'Total Transaksi',
+            'Total Lunas',
+            'Total Menunggu',
+            'Total Batal',
+            'Total Nilai',
+            'Total Item',
+        ]);
+        fputcsv($output, [
+            $dayTransactions->count(),
+            $dayTransactions->where('status_pembayaran', 'LUNAS')->count(),
+            $dayTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
+            $dayTransactions->where('status_pembayaran', 'BATAL')->count(),
+            $dayTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
+            $dayTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
+        ]);
+        fputcsv($output, ['']);
+
+        // Data
+        fputcsv($output, [
+            'No. Transaksi',
+            'Jam',
+            'Pelanggan',
+            'Kasir',
+            'Metode',
+            'Total',
+            'Status',
+        ]);
+
+        foreach ($dayTransactions as $t) {
+            fputcsv($output, [
+                $t->nomor_transaksi,
+                date('H:i', strtotime($t->tanggal)),
+                $t->pelanggan ? $t->pelanggan->nama : '-',
+                $t->kasir ? $t->kasir->nama : '-',
+                $t->metode_bayar,
+                $t->total,
+                $t->status_pembayaran,
+            ]);
+        }
+
+        fputcsv($output, ['']);
+        fputcsv($output, ['Generated at: '.date('d F Y H:i:s')]);
+
+        fclose($output);
+
+        return response()->streamDownload(function () {}, $filename, $headers);
+    }
+
+    /**
+     * Export weekly report as PDF
+     */
+    public function exportWeeklyPdf(Request $request): HttpResponse
+    {
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::today()->startOfWeek();
+        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : $startDate->copy()->endOfWeek();
+
+        $weekTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // Calculate stats
+        $stats = [
+            'total_transaksi' => $weekTransactions->count(),
+            'total_lunas' => $weekTransactions->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => $weekTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => $weekTransactions->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => $weekTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_item' => $weekTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
+        ];
+
+        // Daily breakdown
+        $dailyData = $weekTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy(function ($t) {
+                return Carbon::parse($t->tanggal)->format('Y-m-d');
+            })
+            ->map(function ($group) {
+                return [
+                    'tanggal' => $group->first()->tanggal,
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        // Payment methods
+        $paymentMethods = $weekTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy('metode_bayar')
+            ->map(function ($group) {
+                return [
+                    'metode' => $group->first()->metode_bayar,
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        // Top kasir
+        $topKasir = $weekTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy('id_kasir')
+            ->map(function ($group) {
+                return [
+                    'nama' => $group->first()->kasir->nama ?? '-',
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->sortByDesc('total')
+            ->take(5)
+            ->values()
+            ->toArray();
+
+        // Top pelanggan
+        $topPelanggan = $weekTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy('id_pelanggan')
+            ->map(function ($group) {
+                return [
+                    'nama' => $group->first()->pelanggan->nama ?? '-',
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->sortByDesc('total')
+            ->take(5)
+            ->values()
+            ->toArray();
+
+        $pdf = Pdf::loadView('exports.reports.weekly', [
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d'),
+            'stats' => $stats,
+            'dailyData' => $dailyData,
+            'paymentMethods' => $paymentMethods,
+            'topKasir' => $topKasir,
+            'topPelanggan' => $topPelanggan,
+        ])
+            ->setPaper('a4')
+            ->setOption('margin-top', 10)
+            ->setOption('margin-bottom', 10);
+
+        return $pdf->download('laporan-mingguan-'.$startDate->format('Y-m-d').'.pdf');
+    }
+
+    /**
+     * Export weekly report as CSV
+     */
+    public function exportWeeklyCsv(Request $request): HttpResponse
+    {
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::today()->startOfWeek();
+        $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : $startDate->copy()->endOfWeek();
+
+        $weekTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->get();
+
+        $filename = 'laporan-mingguan-'.$startDate->format('Y-m-d').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        fputcsv($output, ['Laporan Mingguan - '.$startDate->format('d F Y').' hingga '.$endDate->format('d F Y')]);
+        fputcsv($output, ['']);
+
+        // Stats
+        fputcsv($output, ['STATISTIK']);
+        fputcsv($output, [
+            'Total Transaksi',
+            'Total Lunas',
+            'Total Menunggu',
+            'Total Batal',
+            'Total Nilai',
+            'Total Item',
+        ]);
+        fputcsv($output, [
+            $weekTransactions->count(),
+            $weekTransactions->where('status_pembayaran', 'LUNAS')->count(),
+            $weekTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
+            $weekTransactions->where('status_pembayaran', 'BATAL')->count(),
+            $weekTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
+            $weekTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
+        ]);
+        fputcsv($output, ['']);
+        fputcsv($output, ['Generated at: '.date('d F Y H:i:s')]);
+
+        fclose($output);
+
+        return response()->streamDownload(function () {}, $filename, $headers);
+    }
+
+    /**
+     * Export monthly report as PDF
+     */
+    public function exportMonthlyPdf(Request $request): HttpResponse
+    {
+        $bulan = $request->get('bulan', now()->month);
+        $tahun = $request->get('tahun', now()->year);
+
+        $startDate = Carbon::createFromDate($tahun, $bulan, 1);
+        $endDate = $startDate->copy()->endOfMonth();
+
+        $monthTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->get();
+
+        // Calculate stats
+        $stats = [
+            'total_transaksi' => $monthTransactions->count(),
+            'total_lunas' => $monthTransactions->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => $monthTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => $monthTransactions->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => $monthTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_item' => $monthTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
+        ];
+
+        // Daily breakdown
+        $dailyData = $monthTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy(function ($t) {
+                return Carbon::parse($t->tanggal)->format('Y-m-d');
+            })
+            ->map(function ($group) {
+                return [
+                    'tanggal' => $group->first()->tanggal,
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        // Payment methods
+        $paymentMethods = $monthTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy('metode_bayar')
+            ->map(function ($group) {
+                return [
+                    'metode' => $group->first()->metode_bayar,
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        // Top kasir
+        $topKasir = $monthTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy('id_kasir')
+            ->map(function ($group) {
+                return [
+                    'nama' => $group->first()->kasir->nama ?? '-',
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->sortByDesc('total')
+            ->take(5)
+            ->values()
+            ->toArray();
+
+        // Top pelanggan
+        $topPelanggan = $monthTransactions->where('status_pembayaran', 'LUNAS')
+            ->groupBy('id_pelanggan')
+            ->map(function ($group) {
+                return [
+                    'nama' => $group->first()->pelanggan->nama ?? '-',
+                    'total' => $group->sum('total'),
+                    'count' => $group->count(),
+                ];
+            })
+            ->sortByDesc('total')
+            ->take(5)
+            ->values()
+            ->toArray();
+
+        $months = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
+        $bulan_display = $months[$bulan].' '.$tahun;
+
+        $pdf = Pdf::loadView('exports.reports.monthly', [
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'bulan_display' => $bulan_display,
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d'),
+            'stats' => $stats,
+            'dailyData' => $dailyData,
+            'paymentMethods' => $paymentMethods,
+            'topKasir' => $topKasir,
+            'topPelanggan' => $topPelanggan,
+        ])
+            ->setPaper('a4')
+            ->setOption('margin-top', 10)
+            ->setOption('margin-bottom', 10);
+
+        return $pdf->download('laporan-bulanan-'.$startDate->format('Y-m-d').'.pdf');
+    }
+
+    /**
+     * Export monthly report as CSV
+     */
+    public function exportMonthlyCsv(Request $request): HttpResponse
+    {
+        $bulan = $request->get('bulan', now()->month);
+        $tahun = $request->get('tahun', now()->year);
+
+        $startDate = Carbon::createFromDate($tahun, $bulan, 1);
+        $endDate = $startDate->copy()->endOfMonth();
+
+        $monthTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->get();
+
+        $months = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
+        $bulan_display = $months[$bulan].' '.$tahun;
+        $filename = 'laporan-bulanan-'.$startDate->format('Y-m-d').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        fputcsv($output, ['Laporan Bulanan - '.$bulan_display]);
+        fputcsv($output, ['']);
+
+        // Stats
+        fputcsv($output, ['STATISTIK']);
+        fputcsv($output, [
+            'Total Transaksi',
+            'Total Lunas',
+            'Total Menunggu',
+            'Total Batal',
+            'Total Nilai',
+            'Total Item',
+        ]);
+        fputcsv($output, [
+            $monthTransactions->count(),
+            $monthTransactions->where('status_pembayaran', 'LUNAS')->count(),
+            $monthTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
+            $monthTransactions->where('status_pembayaran', 'BATAL')->count(),
+            $monthTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
+            $monthTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
+        ]);
+        fputcsv($output, ['']);
+        fputcsv($output, ['Generated at: '.date('d F Y H:i:s')]);
+
+        fclose($output);
+
+        return response()->streamDownload(function () {}, $filename, $headers);
     }
 }

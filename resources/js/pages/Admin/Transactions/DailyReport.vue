@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import ExportDropdown from '@/components/ExportDropdown.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Kasir {
     id_pengguna: string;
@@ -59,6 +60,9 @@ const props = defineProps<Props>();
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/reports/daily');
 const selectedDate = ref(props.tanggal);
 
+const exportPdfUrl = computed(() => `/admin/reports/daily/export/pdf?tanggal=${selectedDate.value}`);
+const exportCsvUrl = computed(() => `/admin/reports/daily/export/csv?tanggal=${selectedDate.value}`);
+
 function handleDateChange() {
     router.get(`/admin/transactions/laporan-harian?tanggal=${selectedDate.value}`);
 }
@@ -94,7 +98,10 @@ function formatDateTime(dateString: string): string {
                     <h1 class="text-3xl font-bold text-emerald-800">Laporan Harian</h1>
                     <p class="text-emerald-600">{{ tanggal_display }}</p>
                 </div>
-                <BaseButton @click="router.visit('/admin/transactions')" variant="secondary" icon="fas fa-arrow-left"> Kembali </BaseButton>
+                <div class="flex gap-2">
+                    <ExportDropdown :pdf-url="exportPdfUrl" :csv-url="exportCsvUrl" />
+                    <BaseButton @click="router.visit('/admin/reports')" variant="secondary" icon="fas fa-arrow-left"> Kembali </BaseButton>
+                </div>
             </div>
 
             <!-- Date Picker -->

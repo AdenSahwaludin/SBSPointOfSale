@@ -2,10 +2,10 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\KategoriController;
-use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Admin\TrustScoreController;
 use App\Http\Controllers\PelangganController;
@@ -107,6 +107,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
         Route::get('/daily', [TransaksiController::class, 'dailyReport'])->name('daily');
         Route::get('/weekly', [TransaksiController::class, 'weeklyReport'])->name('weekly');
         Route::get('/monthly', [TransaksiController::class, 'monthlyReport'])->name('monthly');
+
+        // Export routes
+        Route::get('/export/pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/export/csv', [ReportController::class, 'exportCsv'])->name('export-csv');
+        Route::get('/daily/export/pdf', [TransaksiController::class, 'exportDailyPdf'])->name('daily-export-pdf');
+        Route::get('/daily/export/csv', [TransaksiController::class, 'exportDailyCsv'])->name('daily-export-csv');
+        Route::get('/weekly/export/pdf', [TransaksiController::class, 'exportWeeklyPdf'])->name('weekly-export-pdf');
+        Route::get('/weekly/export/csv', [TransaksiController::class, 'exportWeeklyCsv'])->name('weekly-export-csv');
+        Route::get('/monthly/export/pdf', [TransaksiController::class, 'exportMonthlyPdf'])->name('monthly-export-pdf');
+        Route::get('/monthly/export/csv', [TransaksiController::class, 'exportMonthlyCsv'])->name('monthly-export-csv');
     });
 
     // ==========================================

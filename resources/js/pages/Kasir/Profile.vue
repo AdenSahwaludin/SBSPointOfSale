@@ -59,7 +59,7 @@ function setActiveTab(tab: string) {
             <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex items-center space-x-6">
                     <div
-                        class="bg-emerald-gradient-subtle-1 hover:shadow-emerald emerald-hover-glow flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white transition-all duration-300"
+                        class="bg-emerald-gradient-subtle-1 hover:shadow-emerald emerald-hover-glow flex h-20 w-20 items-center justify-center rounded-full text-2xl font-semibold text-white transition-all duration-300"
                     >
                         {{ user?.nama?.charAt(0).toUpperCase() }}
                     </div>
@@ -84,7 +84,7 @@ function setActiveTab(tab: string) {
                             class="border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap focus:outline-none"
                         >
                             <i class="fas fa-user mr-2"></i>
-                            Informasi Profile
+                            Informasi Profil
                         </button>
                         <button
                             @click="setActiveTab('security')"

@@ -19,6 +19,14 @@ export function useAdminMenuItems() {
         },
 
         {
+            name: 'Transaksi',
+            icon: 'fas fa-cash-register',
+            children: [
+                { name: 'Semua Transaksi', href: '/admin/transactions', icon: 'fas fa-receipt' },
+                { name: 'Transaksi Kredit', href: '/admin/transactions/kredit', icon: 'fas fa-credit-card' },
+            ],
+        },
+        {
             name: 'Purchase Order',
             icon: 'fas fa-file-contract',
             children: [
@@ -32,14 +40,6 @@ export function useAdminMenuItems() {
                     href: '/admin/goods-in-history',
                     icon: 'fas fa-history',
                 },
-            ],
-        },
-        {
-            name: 'Transaksi',
-            icon: 'fas fa-cash-register',
-            children: [
-                { name: 'Semua Transaksi', href: '/admin/transactions', icon: 'fas fa-receipt' },
-                { name: 'Transaksi Kredit', href: '/admin/transactions/kredit', icon: 'fas fa-credit-card' },
             ],
         },
         {

@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import BaseButton from '@/components/BaseButton.vue';
+import ExportDropdown from '@/components/ExportDropdown.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 interface Kasir {
     id_pengguna: string;
@@ -62,11 +63,29 @@ interface Props {
 
 const props = defineProps<Props>();
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/reports');
+const page = usePage();
 
 const startDate = ref(props.filters.start_date || '');
 const endDate = ref(props.filters.end_date || '');
 const selectedStatus = ref(props.filters.status || 'all');
 const perPage = ref(String(props.transaksi?.meta?.per_page || 15));
+
+// Computed export URLs
+const exportPdfUrl = computed(() => {
+    const params = new URLSearchParams();
+    if (startDate.value) params.append('start_date', startDate.value);
+    if (endDate.value) params.append('end_date', endDate.value);
+    if (selectedStatus.value !== 'all') params.append('status', selectedStatus.value);
+    return `/admin/reports/export/pdf?${params.toString()}`;
+});
+
+const exportCsvUrl = computed(() => {
+    const params = new URLSearchParams();
+    if (startDate.value) params.append('start_date', startDate.value);
+    if (endDate.value) params.append('end_date', endDate.value);
+    if (selectedStatus.value !== 'all') params.append('status', selectedStatus.value);
+    return `/admin/reports/export/csv?${params.toString()}`;
+});
 
 function handleFilter() {
     router.get(
@@ -124,6 +143,7 @@ function formatDateTime(dateString: string): string {
                     <p class="text-emerald-600">Ringkasan dan detail laporan transaksi</p>
                 </div>
                 <div class="flex gap-2">
+                    <ExportDropdown :pdf-url="exportPdfUrl" :csv-url="exportCsvUrl" />
                     <BaseButton @click="router.visit('/admin/reports/daily')" variant="secondary" icon="fas fa-calendar-day"> Harian </BaseButton>
                     <BaseButton @click="router.visit('/admin/reports/weekly')" variant="secondary" icon="fas fa-calendar-week"> Mingguan </BaseButton>
                     <BaseButton @click="router.visit('/admin/reports/monthly')" variant="secondary" icon="fas fa-calendar-alt"> Bulanan </BaseButton>

@@ -305,7 +305,10 @@ function getStatusLabel(status: string) {
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
-                                        :class="['inline-flex rounded-full border px-3 py-1 text-xs font-semibold', getStatusBadgeClass(po.status)]"
+                                        :class="[
+                                            'm-auto inline-flex rounded-full border px-3 py-1 text-xs font-semibold',
+                                            getStatusBadgeClass(po.status),
+                                        ]"
                                     >
                                         <i :class="['mr-1.5', getStatusIcon(po.status)]"></i>
                                         {{ getStatusLabel(po.status) }}
