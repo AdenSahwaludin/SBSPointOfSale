@@ -1,237 +1,237 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan Harian - {{ date('d F Y', strtotime($tanggal)) }}</title>
+    <title>Laporan Harian</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Helvetica', 'Arial', sans-serif;
             color: #333;
             line-height: 1.6;
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #10b981;
-            padding-bottom: 20px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 10px;
         }
-        .header h1 {
-            font-size: 24px;
+        .company-name {
+            font-size: 22px;
+            font-weight: bold;
             color: #10b981;
+            text-transform: uppercase;
             margin-bottom: 5px;
         }
-        .header h2 {
-            font-size: 18px;
-            color: #666;
+        .report-title {
+            font-size: 16px;
             font-weight: 600;
-            margin-top: 10px;
+            color: #555;
+            margin-bottom: 5px;
         }
-        .date-info {
-            background-color: #f0fdf4;
-            padding: 10px 15px;
-            border-left: 4px solid #10b981;
+        .period-info {
+            font-size: 12px;
+            color: #777;
+        }
+        .stats-container {
+            width: 100%;
             margin-bottom: 20px;
-            font-size: 13px;
-        }
-        .stats-grid {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
         }
         .stat-card {
-            flex: 1;
-            min-width: 130px;
-            border: 1px solid #e5e7eb;
-            padding: 12px;
-            border-radius: 8px;
-            background-color: #f9fafb;
-            font-size: 11px;
+            display: inline-block;
+            width: 14%;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px 5px;
+            border-radius: 4px;
+            text-align: center;
+            margin-right: 0.5%;
+            margin-bottom: 10px;
+            vertical-align: top;
         }
         .stat-label {
+            display: block;
             font-size: 10px;
-            color: #999;
             text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 5px;
             font-weight: 600;
-            margin-bottom: 6px;
+            letter-spacing: 0.5px;
         }
         .stat-value {
-            font-size: 18px;
+            display: block;
+            font-size: 16px;
             font-weight: bold;
-            color: #10b981;
+            color: #333;
         }
+        .highlight-green { color: #10b981; }
+        .highlight-red { color: #ef4444; }
+        
         .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #10b981;
+            font-size: 13px;
+            color: #374151;
+            margin-bottom: 10px;
             margin-top: 25px;
-            margin-bottom: 12px;
             border-left: 4px solid #10b981;
             padding-left: 10px;
+            font-weight: bold;
+            clear: both;
         }
+        
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 20px;
             font-size: 11px;
         }
-        thead {
-            background-color: #10b981;
-            color: white;
-        }
         th {
-            padding: 10px;
-            text-align: left;
+            background-color: #f3f4f6;
+            color: #374151;
             font-weight: 600;
-            border: 1px solid #ddd;
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
         }
         td {
-            padding: 8px 10px;
-            border: 1px solid #ddd;
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #4b5563;
         }
-        tbody tr:nth-child(even) {
+        tr:nth-child(even) {
             background-color: #f9fafb;
         }
-        .status {
+        .text-right { text-align: right; }
+        
+        .badge {
             display: inline-block;
             padding: 3px 6px;
-            border-radius: 3px;
-            font-size: 10px;
+            border-radius: 4px;
+            font-size: 9px;
             font-weight: 600;
+            text-transform: uppercase;
         }
-        .status.lunas {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-        .status.menunggu {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        .status.batal {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
+        .badge-lunas { background-color: #d1fae5; color: #065f46; }
+        .badge-menunggu { background-color: #fef3c7; color: #92400e; }
+        .badge-batal { background-color: #fee2e2; color: #991b1b; }
+        
         .footer {
-            margin-top: 40px;
-            text-align: right;
-            font-size: 10px;
-            color: #999;
-            border-top: 1px solid #e5e7eb;
+            margin-top: 30px;
             padding-top: 15px;
-        }
-        .text-right {
+            border-top: 1px solid #e5e7eb;
+            font-size: 10px;
+            color: #9ca3af;
             text-align: right;
         }
-        .two-column {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        .col {
-            flex: 1;
+        .payment-summary {
+            width: 50%;
+            margin-bottom: 20px;
+            display: inline-block;
+            vertical-align: top;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>📅 Laporan Harian</h1>
-        <h2>{{ date('l, d F Y', strtotime($tanggal)) }}</h2>
-        <p>Sari Bumi Sakti POS System</p>
+        <div class="company-name">Sari Bumi Sakti</div>
+        <div class="report-title">Laporan Harian</div>
+        <div class="period-info">{{ date('l, d F Y', strtotime($tanggal)) }}</div>
     </div>
 
-    <div class="date-info">
-        <strong>Tanggal:</strong> {{ date('d F Y', strtotime($tanggal)) }} | <strong>Hari:</strong> {{ date('l', strtotime($tanggal)) }}
-    </div>
-
-    <div class="stats-grid">
+    <!-- 6-Col Stats -->
+    <div class="stats-container">
         <div class="stat-card">
-            <div class="stat-label">Total Transaksi</div>
-            <div class="stat-value">{{ $stats['total_transaksi'] }}</div>
+            <span class="stat-label">Transaksi</span>
+            <span class="stat-value">{{ number_format($stats['total_transaksi'], 0, ',', '.') }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Lunas</div>
-            <div class="stat-value" style="color: #059669;">{{ $stats['total_lunas'] }}</div>
+            <span class="stat-label">Lunas</span>
+            <span class="stat-value highlight-green">{{ number_format($stats['total_lunas'], 0, ',', '.') }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Menunggu</div>
-            <div class="stat-value" style="color: #d97706;">{{ $stats['total_menunggu'] }}</div>
+            <span class="stat-label">Menunggu</span>
+            <span class="stat-value">{{ number_format($stats['total_menunggu'], 0, ',', '.') }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Batal</div>
-            <div class="stat-value" style="color: #dc2626;">{{ $stats['total_batal'] }}</div>
+            <span class="stat-label">Batal</span>
+            <span class="stat-value highlight-red">{{ number_format($stats['total_batal'], 0, ',', '.') }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Nilai</div>
-            <div class="stat-value">Rp {{ number_format($stats['total_nilai'], 0, ',', '.') }}</div>
+            <span class="stat-label">Pendapatan</span>
+            <span class="stat-value highlight-green">{{ number_format($stats['total_nilai'], 0, ',', '.') }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Item</div>
-            <div class="stat-value">{{ $stats['total_item'] }}</div>
+            <span class="stat-label">Item Terjual</span>
+            <span class="stat-value">{{ number_format($stats['total_item'], 0, ',', '.') }}</span>
         </div>
     </div>
 
-    @if($paymentMethods && count($paymentMethods) > 0)
-    <div class="section-title">💳 Metode Pembayaran</div>
+    <!-- Payment Methods -->
+    <div class="payment-summary">
+        <div class="section-title">Metode Pembayaran</div>
+        <table style="width: 95%;">
+            <thead>
+                <tr>
+                    <th>Metode</th>
+                    <th class="text-right">Transaksi</th>
+                    <th class="text-right">Nilai</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($paymentMethods as $pm)
+                <tr>
+                    <td>{{ $pm['metode'] }}</td>
+                    <td class="text-right">{{ $pm['count'] }}</td>
+                    <td class="text-right">Rp {{ number_format($pm['total'], 0, ',', '.') }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Transaction List -->
+    <div style="clear: both;"></div>
+    <div class="section-title">Detail Transaksi</div>
+
     <table>
         <thead>
             <tr>
-                <th style="width: 40%;">Metode</th>
-                <th style="width: 35%; text-align: right;">Total</th>
-                <th style="width: 25%; text-align: center;">Jumlah Transaksi</th>
+                <th width="12%">Jam</th>
+                <th width="15%">No. Transaksi</th>
+                <th width="18%">Pelanggan</th>
+                <th width="15%">Kasir</th>
+                <th width="15%">Metode</th>
+                <th width="15%" class="text-right">Total</th>
+                <th width="10%" class="text-right">Status</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($paymentMethods as $method)
-            <tr>
-                <td><strong>{{ $method['metode'] }}</strong></td>
-                <td class="text-right">Rp {{ number_format($method['total'], 0, ',', '.') }}</td>
-                <td style="text-align: center;">{{ $method['count'] }}</td>
-            </tr>
-            @endforeach
+            @forelse($transaksi as $t)
+                <tr>
+                    <td>{{ date('H:i', strtotime($t['tanggal'])) }}</td>
+                    <td style="font-family: monospace; font-weight: bold;">{{ $t['nomor_transaksi'] }}</td>
+                    <td>{{ $t['pelanggan']['nama'] ?? '-' }}</td>
+                    <td>{{ $t['kasir']['nama'] ?? '-' }}</td>
+                    <td>{{ $t['metode_bayar'] }}</td>
+                    <td class="text-right">Rp {{ number_format($t['total'], 0, ',', '.') }}</td>
+                    <td class="text-right">
+                        <span class="badge badge-{{ strtolower($t['status_pembayaran']) }}">
+                            {{ $t['status_pembayaran'] }}
+                        </span>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px;">Tidak ada transaksi hari ini</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
-    @endif
-
-    @if($transaksi && count($transaksi) > 0)
-    <div class="section-title">📝 Detail Transaksi</div>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 12%;">No. Transaksi</th>
-                <th style="width: 10%;">Jam</th>
-                <th style="width: 15%;">Pelanggan</th>
-                <th style="width: 15%;">Kasir</th>
-                <th style="width: 12%;">Metode</th>
-                <th style="width: 20%; text-align: right;">Total</th>
-                <th style="width: 12%;">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($transaksi as $t)
-            <tr>
-                <td><strong>{{ $t['nomor_transaksi'] }}</strong></td>
-                <td>{{ date('H:i', strtotime($t['tanggal'])) }}</td>
-                <td>{{ $t['pelanggan']['nama'] ?? '-' }}</td>
-                <td>{{ $t['kasir']['nama'] ?? '-' }}</td>
-                <td>{{ $t['metode_bayar'] }}</td>
-                <td class="text-right">Rp {{ number_format($t['total'], 0, ',', '.') }}</td>
-                <td>
-                    <span class="status {{ strtolower($t['status_pembayaran']) }}">
-                        {{ $t['status_pembayaran'] }}
-                    </span>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
 
     <div class="footer">
-        <p>Laporan ini dihasilkan pada: {{ date('d F Y H:i:s') }}</p>
+        Generated on {{ date('d F Y H:i') }} | Sari Bumi Sakti POS System
     </div>
 </body>
 </html>

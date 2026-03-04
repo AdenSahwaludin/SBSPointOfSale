@@ -31,7 +31,7 @@ function toggleDropdown() {
         <button
             @click="toggleDropdown"
             :disabled="isLoading"
-            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
             <i class="fas fa-download"></i>
             <span>{{ isLoading ? 'Mengunduh...' : 'Export' }}</span>
@@ -40,22 +40,15 @@ function toggleDropdown() {
 
         <!-- Dropdown Menu -->
         <Teleport to="body">
-            <div
-                v-if="isOpen"
-                @click="isOpen = false"
-                class="fixed inset-0 z-40"
-            ></div>
+            <div v-if="isOpen" @click="isOpen = false" class="fixed inset-0 z-40"></div>
         </Teleport>
 
-        <div
-            v-if="isOpen"
-            class="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-xl"
-        >
+        <div v-if="isOpen" class="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-xl">
             <!-- PDF Option -->
             <button
                 @click="handleExport(pdfUrl)"
                 :disabled="isLoading"
-                class="w-full px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 disabled:opacity-50 border-b border-gray-100 flex items-center gap-3"
+                class="flex w-full items-center gap-3 border-b border-gray-100 px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 disabled:opacity-50"
             >
                 <i class="fas fa-file-pdf text-red-500"></i>
                 <div>
@@ -68,7 +61,7 @@ function toggleDropdown() {
             <button
                 @click="handleExport(csvUrl)"
                 :disabled="isLoading"
-                class="w-full px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 disabled:opacity-50 flex items-center gap-3"
+                class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 disabled:opacity-50"
             >
                 <i class="fas fa-file-csv text-green-500"></i>
                 <div>
@@ -80,5 +73,4 @@ function toggleDropdown() {
     </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

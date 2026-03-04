@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Rename remaining English field names to Indonesian for better understanding
      */
     public function up(): void
@@ -24,7 +24,7 @@ return new class extends Migration
         });
 
         // Penyesuaian Stok (stock_adjustments) - rename primary key
-        if (Schema::hasColumn('penyesuaian_stok', 'id_adjustment') && !Schema::hasColumn('penyesuaian_stok', 'id_penyesuaian')) {
+        if (Schema::hasColumn('penyesuaian_stok', 'id_adjustment') && ! Schema::hasColumn('penyesuaian_stok', 'id_penyesuaian')) {
             Schema::table('penyesuaian_stok', function (Blueprint $table) {
                 $table->renameColumn('id_adjustment', 'id_penyesuaian');
             });
@@ -37,7 +37,7 @@ return new class extends Migration
     public function down(): void
     {
         // Reverse Penyesuaian Stok
-        if (Schema::hasColumn('penyesuaian_stok', 'id_penyesuaian') && !Schema::hasColumn('penyesuaian_stok', 'id_adjustment')) {
+        if (Schema::hasColumn('penyesuaian_stok', 'id_penyesuaian') && ! Schema::hasColumn('penyesuaian_stok', 'id_adjustment')) {
             Schema::table('penyesuaian_stok', function (Blueprint $table) {
                 $table->renameColumn('id_penyesuaian', 'id_adjustment');
             });
@@ -45,7 +45,7 @@ return new class extends Migration
 
         // Re-add qty_damaged column to penerimaan_barang (for backwards compatibility)
         Schema::table('penerimaan_barang', function (Blueprint $table) {
-            if (!Schema::hasColumn('penerimaan_barang', 'qty_damaged')) {
+            if (! Schema::hasColumn('penerimaan_barang', 'qty_damaged')) {
                 $table->integer('qty_damaged')->default(0)->after('jumlah_rusak');
             }
         });

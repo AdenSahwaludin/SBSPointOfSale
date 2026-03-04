@@ -62,9 +62,55 @@ class ReportController extends Controller
             'total_batal' => (clone $statsQuery)->where('status_pembayaran', 'BATAL')->count(),
         ];
 
+        // Sales Trend (Daily for the selected range)
+        $salesTrend = (clone $statsQuery)
+            ->where('status_pembayaran', 'LUNAS')
+            ->selectRaw('DATE(tanggal) as date, COUNT(*) as count, SUM(total) as revenue')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Payment Methods (LUNAS only)
+        $paymentMethods = (clone $statsQuery)
+            ->where('status_pembayaran', 'LUNAS')
+            ->selectRaw('metode_bayar as method, COUNT(*) as count, SUM(total) as total')
+            ->groupBy('metode_bayar')
+            ->get();
+
+        // Status Distribution
+        $statusDistribution = (clone $statsQuery)
+            ->selectRaw('status_pembayaran as status, COUNT(*) as count')
+            ->groupBy('status_pembayaran')
+            ->get();
+
+        // Top Products
+        // Get top 5 products sold in this period
+        $topProductsQuery = \App\Models\TransaksiDetail::query()
+            ->join('transaksi', 'transaksi.nomor_transaksi', '=', 'transaksi_detail.nomor_transaksi')
+            ->join('produk', 'produk.id_produk', '=', 'transaksi_detail.id_produk')
+            ->where('transaksi.status_pembayaran', 'LUNAS');
+
+        if ($startDate) {
+            $topProductsQuery->whereDate('transaksi.tanggal', '>=', $startDate);
+        }
+        if ($endDate) {
+            $topProductsQuery->whereDate('transaksi.tanggal', '<=', $endDate);
+        }
+
+        $topProducts = $topProductsQuery
+            ->selectRaw('produk.nama, SUM(transaksi_detail.jumlah) as total_qty, SUM(transaksi_detail.subtotal) as total_revenue')
+            ->groupBy('produk.id_produk', 'produk.nama')
+            ->orderByDesc('total_qty')
+            ->limit(5)
+            ->get();
+
         return Inertia::render('Admin/Reports/Index', [
             'transaksi' => $transaksi,
             'stats' => $stats,
+            'salesTrend' => $salesTrend,
+            'paymentMethods' => $paymentMethods,
+            'statusDistribution' => $statusDistribution,
+            'topProducts' => $topProducts,
             'filters' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,

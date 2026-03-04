@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\KontrakKredit;
 use App\Models\Transaksi;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class KontrakKreditSeeder extends Seeder

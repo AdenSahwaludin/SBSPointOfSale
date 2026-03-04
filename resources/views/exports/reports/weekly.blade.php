@@ -1,245 +1,258 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan Mingguan - {{ date('d F Y', strtotime($start_date)) }}</title>
+    <title>Laporan Mingguan</title>
     <style>
-        * {
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.5;
+            font-size: 11px;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            line-height: 1.6;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #10b981;
-            padding-bottom: 20px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 10px;
         }
-        .header h1 {
-            font-size: 24px;
+        .company-name {
+            font-size: 20px;
+            font-weight: bold;
             color: #10b981;
+            text-transform: uppercase;
             margin-bottom: 5px;
         }
-        .header h2 {
-            font-size: 16px;
-            color: #666;
+        .report-title {
+            font-size: 14px;
             font-weight: 600;
-            margin-top: 10px;
+            color: #555;
+            margin-bottom: 5px;
         }
-        .period {
-            background-color: #f0fdf4;
-            padding: 10px 15px;
-            border-left: 4px solid #10b981;
+        .period-info {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .stats-container {
+            width: 100%;
             margin-bottom: 20px;
-            font-size: 13px;
-        }
-        .stats-grid {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
+            display: table;
+            border-spacing: 5px;
         }
         .stat-card {
-            flex: 1;
-            min-width: 130px;
-            border: 1px solid #e5e7eb;
-            padding: 12px;
-            border-radius: 8px;
-            background-color: #f9fafb;
-            font-size: 11px;
+            display: table-cell;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            width: 16%;
         }
         .stat-label {
-            font-size: 10px;
-            color: #999;
+            display: block;
+            font-size: 9px;
             text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 5px;
             font-weight: 600;
-            margin-bottom: 6px;
         }
         .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #10b981;
-        }
-        .section-title {
+            display: block;
             font-size: 14px;
             font-weight: bold;
-            color: #10b981;
-            margin-top: 25px;
-            margin-bottom: 12px;
+            color: #333;
+        }
+        .highlight-green { color: #10b981; }
+        .highlight-red { color: #ef4444; }
+        .highlight-orange { color: #f59e0b; }
+        
+        .section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+        .section-title {
+            font-size: 13px;
+            color: #374151;
+            margin-bottom: 10px;
             border-left: 4px solid #10b981;
             padding-left: 10px;
+            font-weight: bold;
         }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 11px;
-            margin-bottom: 20px;
-        }
-        thead {
-            background-color: #10b981;
-            color: white;
+            font-size: 10px;
         }
         th {
-            padding: 10px;
-            text-align: left;
+            background-color: #f3f4f6;
+            color: #374151;
             font-weight: 600;
-            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
         }
         td {
-            padding: 8px 10px;
-            border: 1px solid #ddd;
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #4b5563;
         }
-        tbody tr:nth-child(even) {
-            background-color: #f9fafb;
-        }
+        tr:nth-child(even) { background-color: #f9fafb; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        
+        .col-2 { width: 48%; display: inline-block; vertical-align: top; margin-right: 2%; }
+        .col-2:last-child { margin-right: 0; }
+        
         .footer {
-            margin-top: 40px;
-            text-align: right;
-            font-size: 10px;
-            color: #999;
-            border-top: 1px solid #e5e7eb;
+            margin-top: 30px;
             padding-top: 15px;
-        }
-        .text-right {
+            border-top: 1px solid #e5e7eb;
+            font-size: 9px;
+            color: #9ca3af;
             text-align: right;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>📊 Laporan Mingguan</h1>
-        <h2>{{ date('d F Y', strtotime($start_date)) }} s.d. {{ date('d F Y', strtotime($end_date)) }}</h2>
-        <p>Sari Bumi Sakti POS System</p>
+        <div class="company-name">Sari Bumi Sakti</div>
+        <div class="report-title">Laporan Mingguan</div>
+        <div class="period-info">{{ date('d M Y', strtotime($start_date)) }} - {{ date('d M Y', strtotime($end_date)) }}</div>
     </div>
 
-    <div class="period">
-        <strong>Periode:</strong> {{ date('d F Y', strtotime($start_date)) }} hingga {{ date('d F Y', strtotime($end_date)) }} ({{ isset($week_display) ? $week_display : 'Minggu ini' }})
-    </div>
-
-    <div class="stats-grid">
+    <!-- Stats -->
+    <div class="stats-container">
         <div class="stat-card">
-            <div class="stat-label">Total Transaksi</div>
-            <div class="stat-value">{{ $stats['total_transaksi'] }}</div>
+            <span class="stat-label">Transaksi</span>
+            <span class="stat-value">{{ number_format($stats['total_transaksi']) }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Lunas</div>
-            <div class="stat-value" style="color: #059669;">{{ $stats['total_lunas'] }}</div>
+            <span class="stat-label">Lunas</span>
+            <span class="stat-value highlight-green">{{ number_format($stats['total_lunas']) }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Menunggu</div>
-            <div class="stat-value" style="color: #d97706;">{{ $stats['total_menunggu'] }}</div>
+            <span class="stat-label">Menunggu</span>
+            <span class="stat-value highlight-orange">{{ number_format($stats['total_menunggu']) }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Batal</div>
-            <div class="stat-value" style="color: #dc2626;">{{ $stats['total_batal'] }}</div>
+            <span class="stat-label">Batal</span>
+            <span class="stat-value highlight-red">{{ number_format($stats['total_batal']) }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Nilai</div>
-            <div class="stat-value">Rp {{ number_format($stats['total_nilai'], 0, ',', '.') }}</div>
+            <span class="stat-label">Total Nilai</span>
+            <span class="stat-value highlight-green">{{ number_format($stats['total_nilai']) }}</span>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Item</div>
-            <div class="stat-value">{{ $stats['total_item'] }}</div>
+            <span class="stat-label">Total Item</span>
+            <span class="stat-value">{{ number_format($stats['total_item']) }}</span>
         </div>
     </div>
 
-    @if(isset($dailyData) && count($dailyData) > 0)
-    <div class="section-title">📅 Penjualan Per Hari</div>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 20%;">Tanggal</th>
-                <th style="width: 20%;">Hari</th>
-                <th style="width: 30%; text-align: right;">Total Penjualan</th>
-                <th style="width: 30%; text-align: center;">Jumlah Transaksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($dailyData as $day)
-            <tr>
-                <td>{{ date('d F Y', strtotime($day['tanggal'])) }}</td>
-                <td>{{ date('l', strtotime($day['tanggal'])) }}</td>
-                <td class="text-right">Rp {{ number_format($day['total'], 0, ',', '.') }}</td>
-                <td style="text-align: center;">{{ $day['count'] }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
-
-    @if(isset($paymentMethods) && count($paymentMethods) > 0)
-    <div class="section-title">💳 Metode Pembayaran</div>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 40%;">Metode</th>
-                <th style="width: 35%; text-align: right;">Total</th>
-                <th style="width: 25%; text-align: center;">Jumlah Transaksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($paymentMethods as $method)
-            <tr>
-                <td><strong>{{ $method['metode'] }}</strong></td>
-                <td class="text-right">Rp {{ number_format($method['total'], 0, ',', '.') }}</td>
-                <td style="text-align: center;">{{ $method['count'] }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
-
-    @if(isset($topKasir) && count($topKasir) > 0)
-    <div class="section-title">👤 Top Kasir</div>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 40%;">Nama Kasir</th>
-                <th style="width: 35%; text-align: right;">Total Penjualan</th>
-                <th style="width: 25%; text-align: center;">Transaksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($topKasir as $kasir)
-            <tr>
-                <td><strong>{{ $kasir['nama'] }}</strong></td>
-                <td class="text-right">Rp {{ number_format($kasir['total'], 0, ',', '.') }}</td>
-                <td style="text-align: center;">{{ $kasir['count'] }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
-
-    @if(isset($topPelanggan) && count($topPelanggan) > 0)
-    <div class="section-title">🛍️ Top Pelanggan</div>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 40%;">Nama Pelanggan</th>
-                <th style="width: 35%; text-align: right;">Total Pembelian</th>
-                <th style="width: 25%; text-align: center;">Transaksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($topPelanggan as $pelanggan)
-            <tr>
-                <td><strong>{{ $pelanggan['nama'] }}</strong></td>
-                <td class="text-right">Rp {{ number_format($pelanggan['total'], 0, ',', '.') }}</td>
-                <td style="text-align: center;">{{ $pelanggan['count'] }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
-
-    <div class="footer">
-        <p>Laporan ini dihasilkan pada: {{ date('d F Y H:i:s') }}</p>
+    <!-- Daily Breakdown -->
+    <div class="section">
+        <div class="section-title">Rincian Per Hari</div>
+        <table>
+            <thead>
+                <tr>
+                    <th width="20%">Tanggal</th>
+                    <th width="15%">Hari</th>
+                    <th width="15%" class="text-right">Transaksi</th>
+                    <th width="25%" class="text-right">Pendapatan</th>
+                    <th width="25%" class="text-right">Rata-rata</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($dailyData as $day)
+                <tr>
+                    <td>{{ date('d/m/Y', strtotime($day['tanggal'])) }}</td>
+                    <td>{{ date('l', strtotime($day['tanggal'])) }}</td>
+                    <td class="text-right">{{ $day['count'] }}</td>
+                    <td class="text-right">Rp {{ number_format($day['total'], 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ $day['count'] > 0 ? number_format($day['total'] / $day['count'], 0, ',', '.') : 0 }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
+    
+    <!-- Top Performers & Methods -->
+    <div style="margin-bottom: 20px;">
+        <div class="col-2">
+            <div class="section-title">Top 5 Kasir</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th class="text-right">Trx</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($topKasir as $k)
+                    <tr>
+                        <td>{{ $k['nama'] }}</td>
+                        <td class="text-right">{{ $k['count'] }}</td>
+                        <td class="text-right">Rp {{ number_format($k['total'], 0, ',', '.') }}</td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="3" class="text-center">No Data</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="col-2">
+            <div class="section-title">Metode Pembayaran</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metode</th>
+                        <th class="text-right">Trx</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($paymentMethods as $pm)
+                    <tr>
+                        <td>{{ $pm['metode'] }}</td>
+                        <td class="text-right">{{ $pm['count'] }}</td>
+                        <td class="text-right">Rp {{ number_format($pm['total'], 0, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Top Customers -->
+    <div class="section" style="clear: both;">
+        <div class="section-title">Top 5 Pelanggan</div>
+        <table>
+            <thead>
+                <tr>
+                    <th width="40%">Nama Pelanggan</th>
+                    <th width="20%" class="text-right">Jumlah Transaksi</th>
+                    <th width="40%" class="text-right">Total Belanja</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($topPelanggan as $p)
+                <tr>
+                    <td>{{ $p['nama'] }}</td>
+                    <td class="text-right">{{ $p['count'] }}</td>
+                    <td class="text-right">Rp {{ number_format($p['total'], 0, ',', '.') }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="3" class="text-center">Tidak ada data pelanggan</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">Generated on {{ date('d F Y H:i') }} | Sari Bumi Sakti POS System</div>
 </body>
 </html>

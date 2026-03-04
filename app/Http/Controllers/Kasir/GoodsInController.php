@@ -320,7 +320,7 @@ class GoodsInController extends Controller
     public function history(): Response
     {
         $kasirId = Auth::user()->id_pengguna;
-        
+
         $pos = GoodsIn::with(['details.produk', 'kasir'])
             ->where('id_kasir', $kasirId)
             ->whereNotIn('status', ['draft'])
@@ -338,7 +338,7 @@ class GoodsInController extends Controller
     public function historyShow(GoodsIn $goodsIn): Response
     {
         $kasirId = Auth::user()->id_pengguna;
-        
+
         // Ensure kasir can only view their own PO history
         if ($goodsIn->id_kasir !== $kasirId) {
             abort(403, 'Unauthorized');

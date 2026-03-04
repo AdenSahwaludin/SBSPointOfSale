@@ -14,8 +14,8 @@ return new class extends Migration
     {
         // Determine table name - could be English or Indonesian depending on migration order
         $tableName = Schema::hasTable('pemesanan_barang') ? 'pemesanan_barang' : 'goods_ins';
-        
-        if (!Schema::hasTable($tableName)) {
+
+        if (! Schema::hasTable($tableName)) {
             return; // Skip if table doesn't exist
         }
 
@@ -57,8 +57,8 @@ return new class extends Migration
     {
         // Determine table name - could be English or Indonesian depending on migration order
         $tableName = Schema::hasTable('pemesanan_barang') ? 'pemesanan_barang' : 'goods_ins';
-        
-        if (!Schema::hasTable($tableName)) {
+
+        if (! Schema::hasTable($tableName)) {
             return; // Skip if table doesn't exist
         }
 

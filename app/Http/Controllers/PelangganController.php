@@ -225,12 +225,12 @@ class PelangganController extends Controller
     {
         if ($this->userRole === 'kasir') {
             $filtered = [];
-            
+
             // Only include id_pelanggan if it exists in the data (for create operations)
             if (array_key_exists('id_pelanggan', $data)) {
                 $filtered['id_pelanggan'] = $data['id_pelanggan'];
             }
-            
+
             // Kasir can only edit these fields (including kota)
             $allowed = ['nama', 'email', 'telepon', 'kota', 'alamat'];
             foreach ($allowed as $field) {
@@ -238,7 +238,7 @@ class PelangganController extends Controller
                     $filtered[$field] = $data[$field];
                 }
             }
-            
+
             return $filtered;
         }
 

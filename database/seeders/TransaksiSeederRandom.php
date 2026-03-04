@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
-use App\Models\User;
 
 class TransaksiSeederRandom extends Seeder
 {
@@ -13,7 +13,7 @@ class TransaksiSeederRandom extends Seeder
     {
         $pelangganIds = ['P001', 'P002']; // Sesuai PelangganSeeder
         $produkIds = [1, 2, 3, 4, 5]; // ID produk (1-20 ada di seeder)
-        
+
         // Ambil kasir pertama dari database
         $kasir = User::where('role', 'kasir')->first();
         $id_kasir = $kasir ? $kasir->id_pengguna : '001-ADMI';
@@ -38,28 +38,28 @@ class TransaksiSeederRandom extends Seeder
             }
             $tanggal = Carbon::create($currentYear, $currentMonth, $day, rand(8, 17), rand(0, 59), 0);
             $pelangganId = $pelangganIds[array_rand($pelangganIds)];
-            $nomorTransaksi = 'INV-' . $currentYear . '-' . str_pad($currentMonth, 2, '0', STR_PAD_LEFT) . '-' . $i . '-' . $pelangganId;
-            
+            $nomorTransaksi = 'INV-'.$currentYear.'-'.str_pad($currentMonth, 2, '0', STR_PAD_LEFT).'-'.$i.'-'.$pelangganId;
+
             // Hitung subtotal dari items
             $jumlahItem = rand(2, 5);
             $subtotal = 0;
             $items = [];
-            
+
             for ($j = 0; $j < $jumlahItem; $j++) {
                 $hargaSatuan = rand(25000, 100000);
                 $kuantitas = rand(2, 8);
                 $itemSubtotal = $hargaSatuan * $kuantitas;
                 $subtotal += $itemSubtotal;
-                
+
                 $items[] = [
                     'harga_satuan' => $hargaSatuan,
                     'kuantitas' => $kuantitas,
                     'subtotal' => $itemSubtotal,
-                    'produk_id' => $produkIds[array_rand($produkIds)]
+                    'produk_id' => $produkIds[array_rand($produkIds)],
                 ];
             }
-            
-            $pajak = (int)($subtotal * 0.10); // 10% pajak
+
+            $pajak = (int) ($subtotal * 0.10); // 10% pajak
             $total = $subtotal + $pajak;
 
             DB::table('transaksi')->insert([
@@ -92,7 +92,7 @@ class TransaksiSeederRandom extends Seeder
                 DB::table('transaksi_detail')->insert([
                     'nomor_transaksi' => $nomorTransaksi,
                     'id_produk' => $item['produk_id'],
-                    'nama_produk' => 'Produk ' . $item['produk_id'],
+                    'nama_produk' => 'Produk '.$item['produk_id'],
                     'jumlah' => $item['kuantitas'],
                     'jenis_satuan' => 'unit',
                     'harga_satuan' => $item['harga_satuan'],

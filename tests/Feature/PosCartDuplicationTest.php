@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-
 it('should not duplicate cart items when adding non-pcs units multiple times', function () {
     $response = $this->getJson('/kasir/pos');
     $response->assertStatus(200);
@@ -44,8 +42,8 @@ it('should not duplicate cart items when adding non-pcs units multiple times', f
 
     // Verify: Cart should have 1 item with qty=2, not 2 separate items
     $cart = $response->json('cart') ?? [];
-    $kartonItems = array_filter($cart, fn($item) => $item['id_produk'] === '2');
-    
+    $kartonItems = array_filter($cart, fn ($item) => $item['id_produk'] === '2');
+
     expect(count($kartonItems))->toBe(1);
     expect($kartonItems[array_key_first($kartonItems)]['jumlah'] ?? 0)->toBe(2);
 });
@@ -53,7 +51,7 @@ it('should not duplicate cart items when adding non-pcs units multiple times', f
 it('should merge pack mode items correctly for karton satuan products', function () {
     // Produk dengan satuan 'karton' harus selalu menggunakan mode 'pack'
     // Ketika ditambahkan berkali-kali, harus increment quantity, bukan duplikat
-    
+
     $response = $this->getJson('/kasir/pos');
     $response->assertStatus(200);
 
@@ -82,7 +80,7 @@ it('should merge pack mode items correctly for karton satuan products', function
 it('should handle pcs units efficiently without duplication', function () {
     // Produk dengan satuan 'pcs' dalam mode 'unit' sudah bekerja dengan baik
     // Tapi kami perlu memastikan tetap bekerja setelah fix ini
-    
+
     $response = $this->getJson('/kasir/pos');
     $response->assertStatus(200);
 
@@ -98,8 +96,8 @@ it('should handle pcs units efficiently without duplication', function () {
     ]);
 
     $cart = $response2->json('cart') ?? [];
-    $pcsItems = array_filter($cart, fn($item) => $item['id_produk'] === '1');
-    
+    $pcsItems = array_filter($cart, fn ($item) => $item['id_produk'] === '1');
+
     // Should have 1 item with qty=2
     expect(count($pcsItems))->toBe(1);
 })->skip('Cart API endpoint may not be implemented in the same way');

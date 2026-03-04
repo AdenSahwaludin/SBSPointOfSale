@@ -4,7 +4,6 @@ use App\Models\Pelanggan;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\CustomerCreditScoringService;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
