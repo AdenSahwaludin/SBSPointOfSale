@@ -230,10 +230,16 @@ class GoodsInController extends Controller
         $kasirId = Auth::user()->id_pengguna;
 
         // Get approved and partial_received POs (in progress receiving)
+        // Exclude POs that have ANY damaged goods recorded
         $approvedPOs = GoodsIn::with(['details.produk', 'kasir', 'receivedGoods'])
             ->whereIn('status', ['approved', 'partial_received'])
             ->orderBy('tanggal_approval', 'desc')
             ->get()
+            ->filter(function ($po) {
+                // Filter out POs that have any received goods with damaged items
+                return ! $po->receivedGoods->contains(fn ($good) => $good->jumlah_rusak > 0);
+            })
+            ->values()
             ->toArray();
 
         return Inertia::render('Kasir/GoodsIn/ReceivingIndex', [
