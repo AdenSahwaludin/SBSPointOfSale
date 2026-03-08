@@ -126,10 +126,10 @@ function getTotalItems(details: GoodsInDetail[]) {
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
-                                        class="inline-flex rounded-full border border-yellow-200 bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800"
+                                        class="inline-flex items-center justify-center rounded-full border border-yellow-200 bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800"
                                     >
-                                        <i class="fas fa-clock mr-1.5"></i>
-                                        Pending
+                                        <i class="fas fa-clock"></i>
+                                        <span class="ml-1.5">Pending</span>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right whitespace-nowrap">

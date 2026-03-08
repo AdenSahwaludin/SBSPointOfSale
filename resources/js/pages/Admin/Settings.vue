@@ -164,7 +164,7 @@ function setActiveTab(tab: string) {
                             <button
                                 type="submit"
                                 :disabled="profileForm.processing"
-                                class="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 font-medium text-white transition-all duration-200 hover:from-emerald-600 hover:to-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                class="rounded-xl bg-emerald-500 px-6 py-3 font-medium text-white transition-all duration-200 hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <span v-if="profileForm.processing" class="flex items-center">
                                     <svg

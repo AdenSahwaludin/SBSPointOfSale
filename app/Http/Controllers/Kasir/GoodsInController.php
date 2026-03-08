@@ -230,6 +230,7 @@ class GoodsInController extends Controller
         $kasirId = Auth::user()->id_pengguna;
 
         // Get approved and partial_received POs (in progress receiving)
+        // Do NOT show 'received' status - those are already completed
         $approvedPOs = GoodsIn::with(['details.produk', 'kasir', 'receivedGoods'])
             ->whereIn('status', ['approved', 'partial_received'])
             ->orderBy('tanggal_approval', 'desc')
@@ -253,18 +254,35 @@ class GoodsInController extends Controller
 
         $goodsIn->load(['details.produk', 'kasir', 'receivedGoods']);
 
-        // Get items that haven't been fully received yet
-        $pendingItems = $goodsIn->details()->with('produk')->get()->map(function ($detail) {
-            return [
-                'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
-                'id_produk' => $detail->id_produk,
-                'nama_produk' => $detail->produk->nama,
-                'sku' => $detail->produk->sku,
-                'jumlah_dipesan' => $detail->jumlah_dipesan,
-                'jumlah_diterima' => $detail->jumlah_diterima,
-                'qty_remaining' => $detail->jumlah_dipesan - $detail->jumlah_diterima,
-            ];
-        });
+        // Get received goods summary per detail
+        $receivedSummary = \App\Models\GoodsReceived::where('id_pemesanan_barang', $goodsIn->id_pemesanan_barang)
+            ->groupBy('id_detail_pemesanan_barang')
+            ->selectRaw('id_detail_pemesanan_barang, SUM(jumlah_diterima) as total_received, SUM(jumlah_rusak) as total_damaged')
+            ->get()
+            ->keyBy('id_detail_pemesanan_barang');
+
+        // Get items that haven't been fully received yet (considering damaged goods)
+        $pendingItems = $goodsIn->details()->with('produk')->get()
+            ->filter(function ($detail) use ($receivedSummary) {
+                $summary = $receivedSummary->get($detail->id_detail_pemesanan_barang);
+                $totalProcessed = ($summary ? $summary->total_received + $summary->total_damaged : 0);
+
+                return $totalProcessed < $detail->jumlah_dipesan;
+            })
+            ->map(function ($detail) use ($receivedSummary) {
+                $summary = $receivedSummary->get($detail->id_detail_pemesanan_barang);
+                $totalProcessed = ($summary ? $summary->total_received + $summary->total_damaged : 0);
+
+                return [
+                    'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
+                    'id_produk' => $detail->id_produk,
+                    'nama_produk' => $detail->produk->nama,
+                    'sku' => $detail->produk->sku,
+                    'jumlah_dipesan' => $detail->jumlah_dipesan,
+                    'jumlah_diterima' => $detail->jumlah_diterima,
+                    'qty_remaining' => $detail->jumlah_dipesan - $totalProcessed,
+                ];
+            });
 
         // Get already received goods
         $receivedGoods = $this->goodsInService->getReceivedGoodsByPO($goodsIn);
@@ -344,10 +362,30 @@ class GoodsInController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $goodsIn->load(['details.produk', 'kasir', 'receivedGoods']);
+        $goodsIn->load(['details.produk', 'kasir', 'receivedGoods.kasir']);
+
+        // Build summary of received goods per detail
+        $detailSummaries = [];
+        foreach ($goodsIn->details as $detail) {
+            $receivedForDetail = $goodsIn->receivedGoods
+                ->where('id_detail_pemesanan_barang', $detail->id_goods_in_detail)
+                ->values()
+                ->all();
+
+            $totalReceived = collect($receivedForDetail)->sum('jumlah_diterima');
+            $totalDamaged = collect($receivedForDetail)->sum('jumlah_rusak');
+
+            $detailSummaries[$detail->id_goods_in_detail] = [
+                'total_diterima' => $totalReceived,
+                'total_rusak' => $totalDamaged,
+                'total_good' => $totalReceived - $totalDamaged,
+                'receiving_batches' => $receivedForDetail,
+            ];
+        }
 
         return Inertia::render('Kasir/GoodsIn/HistoryShow', [
             'po' => $goodsIn,
+            'detailSummaries' => $detailSummaries,
         ]);
     }
 }

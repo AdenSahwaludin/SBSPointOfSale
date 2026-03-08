@@ -124,16 +124,11 @@ const submitForm = () => {
     // Map Vue field names to backend field names
     const items = selectedFormItems.value.map((item) => {
         const state = ensureState(item);
-        const qty = clampQty(state.qty, item.qty_remaining);
-        const maxDamaged = Math.max(qty - 1, 0);
-
-        state.qty = qty;
-        state.damaged = clampDamaged(state.damaged, maxDamaged);
 
         return {
-            id_detail_pemesanan_barang: item.id_detail_pemesanan_barang, // Backend expects this field name
-            jumlah_diterima: state.qty, // Backend expects this field name
-            jumlah_rusak: state.damaged || 0, // Backend expects this field name
+            id_detail_pemesanan_barang: item.id_detail_pemesanan_barang,
+            jumlah_diterima: state.qty || 0,
+            jumlah_rusak: state.damaged || 0,
             catatan: state.note || undefined,
         };
     });
@@ -270,10 +265,6 @@ const goBack = () => {
                                 <input
                                     type="number"
                                     v-model.number="ensureState(item).qty"
-                                    @input="
-                                        ensureState(item).qty = clampQty(ensureState(item).qty, item.qty_remaining);
-                                        ensureState(item).damaged = clampDamaged(ensureState(item).damaged, Math.max(ensureState(item).qty - 1, 0));
-                                    "
                                     :max="item.qty_remaining"
                                     min="1"
                                     class="mt-1 w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-emerald-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
@@ -289,17 +280,11 @@ const goBack = () => {
                                 <input
                                     type="number"
                                     v-model.number="ensureState(item).damaged"
-                                    @input="
-                                        ensureState(item).damaged = clampDamaged(ensureState(item).damaged, Math.max(ensureState(item).qty - 1, 0))
-                                    "
-                                    :max="Math.max(ensureState(item).qty - 1, 0)"
                                     min="0"
                                     class="mt-1 w-full rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-950 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none"
                                     placeholder="0"
                                 />
-                                <p class="mt-1 text-xs text-amber-700">
-                                    Barang rusak tidak akan menambah stok. Maks: {{ Math.max(ensureState(item).qty - 1, 0) }}
-                                </p>
+                                <p class="mt-1 text-xs text-amber-700">Barang rusak tidak akan menambah stok</p>
                             </div>
 
                             <!-- Notes Input -->

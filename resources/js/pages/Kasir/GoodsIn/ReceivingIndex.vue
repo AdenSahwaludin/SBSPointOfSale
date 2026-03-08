@@ -21,7 +21,10 @@ interface GoodsInData {
         };
     }>;
     receivedGoods?: Array<{
-        id_goods_received: number;
+        id_penerimaan_barang: number;
+        id_detail_pemesanan_barang: number;
+        jumlah_diterima: number;
+        jumlah_rusak: number;
     }>;
 }
 
@@ -41,6 +44,20 @@ onMounted(() => {
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/goods-in-receiving');
 const hasApprovedPOs = computed(() => Array.isArray(props.approvedPOs) && props.approvedPOs.length > 0);
 const safeApprovedPOs = computed(() => props.approvedPOs ?? []);
+
+function calculateTotalProcessed(detailId: number, po: GoodsInData): number {
+    if (!po.receivedGoods) return 0;
+    return po.receivedGoods
+        .filter((rg) => rg.id_detail_pemesanan_barang === detailId)
+        .reduce((sum, rg) => sum + rg.jumlah_diterima + rg.jumlah_rusak, 0);
+}
+
+function getProgressPercentage(detailId: number, po: GoodsInData): number {
+    const detail = po.details?.find((d) => d.id_goods_in_detail === detailId);
+    if (!detail) return 0;
+    const totalProcessed = calculateTotalProcessed(detailId, po);
+    return Math.min(100, Math.round((totalProcessed / detail.jumlah_dipesan) * 100));
+}
 </script>
 
 <template>
@@ -90,7 +107,8 @@ const safeApprovedPOs = computed(() => props.approvedPOs ?? []);
                                     <div v-for="detail in po.details" :key="detail.id_goods_in_detail" class="flex items-center justify-between">
                                         <span class="truncate">{{ detail.produk?.nama }}</span>
                                         <span class="ml-2 whitespace-nowrap">
-                                            <span class="font-semibold">{{ detail.jumlah_diterima }}</span> / {{ detail.jumlah_dipesan }}
+                                            <span class="font-semibold">{{ calculateTotalProcessed(detail.id_goods_in_detail, po) }}</span> /
+                                            {{ detail.jumlah_dipesan }}
                                         </span>
                                     </div>
                                 </div>

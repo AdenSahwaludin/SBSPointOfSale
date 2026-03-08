@@ -36,7 +36,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/stock-adju
 const form = useForm({
     id_produk: null as number | null,
     tipe: '',
-    qty_adjustment: 0,
+    jumlah_penyesuaian: 0,
     alasan: '',
 });
 
@@ -47,29 +47,8 @@ const showProductDropdown = ref(false);
 const filteredProducts = computed(() => {
     if (!searchQuery.value) return props.produk;
     const query = searchQuery.value.toLowerCase().trim();
-    
-    // Filter products that match the query
-    const matches = props.produk.filter(
-        (p) => p.nama.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query) || p.kategori?.nama_kategori.toLowerCase().includes(query),
-    );
-    
-    // Sort: prioritize exact matches and start-with matches
-    return matches.sort((a, b) => {
-        const aNameLower = a.nama.toLowerCase();
-        const bNameLower = b.nama.toLowerCase();
-        const aSkuLower = a.sku.toLowerCase();
-        const bSkuLower = b.sku.toLowerCase();
-        
-        // Exact match priority
-        if (aNameLower === query || aSkuLower === query) return -1;
-        if (bNameLower === query || bSkuLower === query) return 1;
-        
-        // Start-with priority
-        if (aNameLower.startsWith(query) || aSkuLower.startsWith(query)) return -1;
-        if (bNameLower.startsWith(query) || bSkuLower.startsWith(query)) return 1;
-        
-        return 0;
-    });
+
+    return props.produk.filter((p) => p.nama.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query));
 });
 
 const selectedProduct = computed(() => {
@@ -109,13 +88,13 @@ watch(
     () => form.tipe,
     (newType) => {
         // Reset qty when type changes
-        form.qty_adjustment = 0;
+        form.jumlah_penyesuaian = 0;
     },
 );
 
 function selectProduct(product: Produk) {
     selectedProductId.value = product.id_produk;
-    searchQuery.value = `${product.nama} (${product.sku})`;
+    searchQuery.value = '';
     showProductDropdown.value = false;
 }
 
@@ -124,10 +103,10 @@ function handleQtyInput(event: Event) {
     let value = parseInt(input.value) || 0;
 
     if (isPositiveAdjustment.value) {
-        form.qty_adjustment = Math.abs(value);
+        form.jumlah_penyesuaian = Math.abs(value);
     } else if (isNegativeAdjustment.value) {
         const absValue = Math.abs(value);
-        form.qty_adjustment = -Math.min(absValue, maxNegativeQty.value);
+        form.jumlah_penyesuaian = -Math.min(absValue, maxNegativeQty.value);
     }
 }
 
@@ -142,7 +121,7 @@ function submit() {
         return;
     }
 
-    if (form.qty_adjustment === 0) {
+    if (form.jumlah_penyesuaian === 0) {
         alert('Qty adjustment harus lebih dari 0');
         return;
     }
@@ -182,7 +161,11 @@ function submit() {
                             <input
                                 v-model="searchQuery"
                                 @focus="showProductDropdown = true"
-                                @input="showProductDropdown = true"
+                                @blur="
+                                    setTimeout(() => {
+                                        showProductDropdown = false;
+                                    }, 100)
+                                "
                                 type="text"
                                 placeholder="Cari produk..."
                                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
@@ -194,21 +177,19 @@ function submit() {
                                 v-if="showProductDropdown && filteredProducts.length > 0"
                                 class="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
                             >
-                                <button
+                                <div
                                     v-for="product in filteredProducts"
                                     :key="product.id_produk"
-                                    @click.prevent="selectProduct(product)"
-                                    type="button"
-                                    class="w-full border-b border-gray-100 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-emerald-50"
+                                    @mousedown="selectProduct(product)"
+                                    class="cursor-pointer border-b border-gray-100 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-emerald-50"
                                 >
                                     <div class="font-medium text-gray-900">{{ product.nama }}</div>
-                                    <div class="space-x-2 text-xs text-gray-500">
+                                    <div class="text-xs text-gray-500">
                                         <span>{{ product.sku }}</span>
-                                        <span>•</span>
+                                        <span class="mx-1">•</span>
                                         <span>Stok: {{ product.stok }} {{ product.satuan }}</span>
-                                        <span v-if="product.kategori">• {{ product.kategori.nama_kategori }}</span>
                                     </div>
-                                </button>
+                                </div>
                             </div>
                         </div>
                         <p v-if="form.errors.id_produk" class="mt-1 text-sm text-red-600">{{ form.errors.id_produk }}</p>
@@ -250,15 +231,15 @@ function submit() {
 
                     <!-- Qty Adjustment -->
                     <div>
-                        <label for="qty_adjustment" class="mb-2 block text-sm font-medium text-gray-700">
+                        <label for="jumlah_penyesuaian" class="mb-2 block text-sm font-medium text-gray-700">
                             Qty Adjustment <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
                             <input
-                                :value="Math.abs(form.qty_adjustment)"
+                                :value="Math.abs(form.jumlah_penyesuaian)"
                                 @input="handleQtyInput"
                                 type="number"
-                                id="qty_adjustment"
+                                id="jumlah_penyesuaian"
                                 min="0"
                                 :max="isNegativeAdjustment ? maxNegativeQty : undefined"
                                 placeholder="Masukkan jumlah"
@@ -282,19 +263,19 @@ function submit() {
                         <p v-if="isOpnameAdjustment" class="mt-1 text-xs text-gray-500">
                             Opname: Gunakan + untuk penambahan atau - untuk pengurangan
                         </p>
-                        <p v-if="form.errors.qty_adjustment" class="mt-1 text-sm text-red-600">{{ form.errors.qty_adjustment }}</p>
+                        <p v-if="form.errors.jumlah_penyesuaian" class="mt-1 text-sm text-red-600">{{ form.errors.jumlah_penyesuaian }}</p>
                     </div>
 
                     <!-- Projected Stock -->
-                    <div v-if="selectedProduct && form.qty_adjustment !== 0" class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                    <div v-if="selectedProduct && form.jumlah_penyesuaian !== 0" class="rounded-lg border border-blue-200 bg-blue-50 p-4">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-blue-800">Proyeksi Stok Setelah Adjustment</p>
                                 <p class="text-xs text-blue-600">Stok saat ini: {{ selectedProduct.stok }} {{ selectedProduct.satuan }}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-2xl font-bold" :class="form.qty_adjustment >= 0 ? 'text-emerald-600' : 'text-orange-600'">
-                                    {{ selectedProduct.stok + form.qty_adjustment }}
+                                <p class="text-2xl font-bold" :class="form.jumlah_penyesuaian >= 0 ? 'text-emerald-600' : 'text-orange-600'">
+                                    {{ selectedProduct.stok + form.jumlah_penyesuaian }}
                                 </p>
                                 <p class="text-xs text-blue-600">{{ selectedProduct.satuan }}</p>
                             </div>
@@ -323,7 +304,7 @@ function submit() {
                             type="submit"
                             variant="primary"
                             icon="fas fa-check"
-                            :disabled="!form.id_produk || !form.tipe || form.qty_adjustment === 0 || form.processing"
+                            :disabled="!form.id_produk || !form.tipe || form.jumlah_penyesuaian === 0 || form.processing"
                             :loading="form.processing"
                             class="flex-1"
                         >

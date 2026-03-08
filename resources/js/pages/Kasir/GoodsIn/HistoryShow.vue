@@ -3,6 +3,7 @@ import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface Kasir {
     id_pengguna: number;
@@ -27,9 +28,18 @@ interface GoodsInDetail {
 interface GoodsReceived {
     id_penerimaan_barang: number;
     id_pemesanan_barang: number;
+    id_detail_pemesanan_barang: number;
     jumlah_diterima: number;
     jumlah_rusak: number;
-    tanggal_terima: string;
+    created_at: string;
+    kasir: Kasir;
+}
+
+interface DetailSummary {
+    total_diterima: number;
+    total_rusak: number;
+    total_good: number;
+    receiving_batches: GoodsReceived[];
 }
 
 interface GoodsIn {
@@ -47,9 +57,11 @@ interface GoodsIn {
 
 interface Props {
     po: GoodsIn;
+    detailSummaries: Record<number, DetailSummary>;
 }
 
 const props = defineProps<Props>();
+const expandedDetails = ref<Record<number, boolean>>({});
 
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/goods-in-history');
 
@@ -125,6 +137,21 @@ function getTotalQuantity() {
 function getTotalReceived() {
     return props.po?.receivedGoods?.reduce((sum, received) => sum + received.jumlah_diterima, 0) || 0;
 }
+
+function toggleDetailExpand(detailId: number) {
+    expandedDetails.value[detailId] = !expandedDetails.value[detailId];
+}
+
+function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | undefined) {
+    if (!summary) return 'fas fa-circle-xmark text-gray-400';
+    if (summary.total_diterima + summary.total_rusak >= detail.jumlah_dipesan) {
+        return 'fas fa-check-circle text-green-500';
+    } else if (summary.total_diterima + summary.total_rusak > 0) {
+        return 'fas fa-minus-circle text-amber-500';
+    } else {
+        return 'fas fa-circle-xmark text-gray-400';
+    }
+}
 </script>
 
 <template>
@@ -188,34 +215,89 @@ function getTotalReceived() {
                 <p class="rounded-lg bg-emerald-50 p-4 whitespace-pre-wrap text-emerald-800">{{ po.catatan_approval }}</p>
             </div>
 
-            <!-- Items Table -->
+            <!-- Items Table with Receiving Summary -->
             <div class="card-emerald overflow-hidden">
-                <h3 class="mb-4 text-lg font-semibold text-emerald-800">Daftar Item</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="border-b border-emerald-200 bg-emerald-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Produk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">SKU</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Satuan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Jumlah Dipesan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-emerald-200">
-                            <tr v-for="detail in po?.details || []" :key="detail.id_goods_in_detail" class="hover:bg-emerald-50">
-                                <td class="px-6 py-4 text-sm font-medium text-emerald-900">{{ detail.produk.nama }}</td>
-                                <td class="px-6 py-4 text-sm text-emerald-700">{{ detail.produk.sku }}</td>
-                                <td class="px-6 py-4 text-sm text-emerald-700">{{ detail.produk.satuan }}</td>
-                                <td class="px-6 py-4 text-sm font-medium text-emerald-800">{{ detail.jumlah_dipesan }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <h3 class="mb-4 text-lg font-semibold text-emerald-800">Daftar Item & Penerimaan</h3>
+                <div class="space-y-4">
+                    <div
+                        v-for="detail in po?.details || []"
+                        :key="detail.id_goods_in_detail"
+                        class="overflow-hidden rounded-lg border border-emerald-200"
+                    >
+                        <!-- Detail Header -->
+                        <div
+                            class="flex cursor-pointer items-center justify-between bg-emerald-50 px-6 py-4 hover:bg-emerald-100"
+                            @click="toggleDetailExpand(detail.id_goods_in_detail)"
+                        >
+                            <div class="flex flex-1 items-center gap-4">
+                                <div class="flex-shrink-0">
+                                    <i :class="['text-lg', getDetailStatusIcon(detail, detailSummaries[detail.id_goods_in_detail])]"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-emerald-900">{{ detail.produk.nama }}</p>
+                                    <p class="text-sm text-emerald-600">SKU: {{ detail.produk.sku }} | Satuan: {{ detail.produk.satuan }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-emerald-700">
+                                        Dipesan: <span class="font-semibold">{{ detail.jumlah_dipesan }}</span>
+                                    </p>
+                                    <p v-if="detailSummaries[detail.id_goods_in_detail]" class="text-sm">
+                                        <span class="text-green-600">{{ detailSummaries[detail.id_goods_in_detail].total_good }} baik</span>
+                                        <span class="text-red-600">{{ detailSummaries[detail.id_goods_in_detail].total_rusak }} rusak</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="ml-4 flex-shrink-0">
+                                <i
+                                    :class="[
+                                        'fas transition-transform',
+                                        expandedDetails[detail.id_goods_in_detail] ? 'fa-chevron-up' : 'fa-chevron-down',
+                                    ]"
+                                ></i>
+                            </div>
+                        </div>
+
+                        <!-- Receiving Batches -->
+                        <div
+                            v-if="expandedDetails[detail.id_goods_in_detail] && detailSummaries[detail.id_goods_in_detail]?.receiving_batches.length"
+                            class="border-t border-emerald-200 bg-white px-6 py-4"
+                        >
+                            <p class="mb-3 text-sm font-semibold text-emerald-700">Detail Penerimaan:</p>
+                            <div class="space-y-2">
+                                <div
+                                    v-for="batch in detailSummaries[detail.id_goods_in_detail].receiving_batches"
+                                    :key="batch.id_penerimaan_barang"
+                                    class="flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-2 text-sm"
+                                >
+                                    <div class="flex flex-col gap-1">
+                                        <div class="font-medium text-emerald-800">{{ formatDate(batch.created_at) }}</div>
+                                        <div class="text-xs text-emerald-600">Kasir: {{ batch.kasir?.name || 'N/A' }}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="font-semibold text-green-600">{{ batch.jumlah_diterima }} baik</span>
+                                        <span class="mx-2 text-emerald-400">·</span>
+                                        <span class="font-semibold" :class="batch.jumlah_rusak > 0 ? 'text-red-600' : 'text-emerald-700'"
+                                            >{{ batch.jumlah_rusak }} rusak</span
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-else-if="
+                                expandedDetails[detail.id_goods_in_detail] && !detailSummaries[detail.id_goods_in_detail]?.receiving_batches.length
+                            "
+                            class="border-t border-emerald-200 bg-white px-6 py-4 text-center text-sm text-emerald-600"
+                        >
+                            Belum ada penerimaan untuk item ini
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Received Goods Table -->
+            <!-- All Receiving Goods Summary Table (for reference) -->
             <div v-if="po?.receivedGoods && po.receivedGoods.length > 0" class="card-emerald overflow-hidden">
-                <h3 class="mb-4 text-lg font-semibold text-emerald-800">Barang yang Diterima</h3>
+                <h3 class="mb-4 text-lg font-semibold text-emerald-800">Riwayat Semua Penerimaan</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="border-b border-emerald-200 bg-emerald-50">
@@ -223,15 +305,17 @@ function getTotalReceived() {
                                 <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Tanggal Terima</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Jumlah Diterima</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Jumlah Rusak</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Kasir</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-emerald-200">
                             <tr v-for="received in po.receivedGoods" :key="received.id_penerimaan_barang" class="hover:bg-emerald-50">
-                                <td class="px-6 py-4 text-sm text-emerald-700">{{ formatDate(received.tanggal_terima) }}</td>
+                                <td class="px-6 py-4 text-sm text-emerald-700">{{ formatDate(received.created_at) }}</td>
                                 <td class="px-6 py-4 text-sm font-medium text-green-600">{{ received.jumlah_diterima }}</td>
                                 <td class="px-6 py-4 text-sm font-medium" :class="received.jumlah_rusak > 0 ? 'text-red-600' : 'text-emerald-700'">
                                     {{ received.jumlah_rusak }}
                                 </td>
+                                <td class="px-6 py-4 text-sm text-emerald-700">{{ received.kasir?.name || 'N/A' }}</td>
                             </tr>
                         </tbody>
                     </table>

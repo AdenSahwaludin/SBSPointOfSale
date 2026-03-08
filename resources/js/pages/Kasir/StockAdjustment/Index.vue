@@ -20,7 +20,7 @@ interface StockAdjustment {
     id_adjustment: number;
     id_produk: number;
     tipe: string;
-    qty_adjustment: number;
+    jumlah_penyesuaian: number;
     alasan: string;
     tanggal_adjustment: string;
     produk: Produk;
@@ -134,8 +134,8 @@ function formatQty(qty: number): string {
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center whitespace-nowrap">
-                                    <span :class="getQtyClass(adjustment.qty_adjustment)" class="text-sm">
-                                        {{ formatQty(adjustment.qty_adjustment) }} {{ adjustment.produk.satuan }}
+                                    <span :class="getQtyClass(adjustment.jumlah_penyesuaian)" class="text-sm">
+                                        {{ formatQty(adjustment.jumlah_penyesuaian) }} {{ adjustment.produk.satuan }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -178,8 +178,8 @@ function formatQty(qty: number): string {
 
                                 <div class="flex items-center justify-between text-sm">
                                     <span class="text-gray-500">Qty Adjustment:</span>
-                                    <span :class="getQtyClass(adjustment.qty_adjustment)">
-                                        {{ formatQty(adjustment.qty_adjustment) }} {{ adjustment.produk.satuan }}
+                                    <span :class="getQtyClass(adjustment.jumlah_penyesuaian)">
+                                        {{ formatQty(adjustment.jumlah_penyesuaian) }} {{ adjustment.produk.satuan }}
                                     </span>
                                 </div>
 

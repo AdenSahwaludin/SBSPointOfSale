@@ -323,8 +323,22 @@ class GoodsInService
             $goodsIn->refresh();
             $allDetails = $goodsIn->details;
 
-            $isFullyReceived = $allDetails->every(function ($detail) {
-                return $detail->jumlah_diterima >= $detail->jumlah_dipesan;
+            // Get received goods for this PO to sum up jumlah_diterima + jumlah_rusak per detail
+            $receivedSummary = \App\Models\GoodsReceived::where('id_pemesanan_barang', $goodsIn->id_pemesanan_barang)
+                ->groupBy('id_detail_pemesanan_barang')
+                ->selectRaw('id_detail_pemesanan_barang, SUM(jumlah_diterima) as total_received, SUM(jumlah_rusak) as total_damaged')
+                ->get()
+                ->keyBy('id_detail_pemesanan_barang');
+
+            $isFullyReceived = $allDetails->every(function ($detail) use ($receivedSummary) {
+                $summary = $receivedSummary->get($detail->id_detail_pemesanan_barang);
+                if (! $summary) {
+                    return false;
+                }
+                // Check if total received + damaged equals ordered quantity
+                $totalProcessed = $summary->total_received + $summary->total_damaged;
+
+                return $totalProcessed >= $detail->jumlah_dipesan;
             });
 
             // Update PO status based on receiving completeness
