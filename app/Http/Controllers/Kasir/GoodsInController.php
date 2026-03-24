@@ -235,6 +235,11 @@ class GoodsInController extends Controller
             ->whereIn('status', ['approved', 'partial_received'])
             ->orderBy('tanggal_approval', 'desc')
             ->get()
+            ->filter(function ($po) {
+                // Filter out POs that have any received goods with damaged items
+                return ! $po->receivedGoods->contains(fn ($good) => $good->jumlah_rusak > 0);
+            })
+            ->values()
             ->toArray();
 
         return Inertia::render('Kasir/GoodsIn/ReceivingIndex', [

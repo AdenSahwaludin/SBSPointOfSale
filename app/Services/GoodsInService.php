@@ -368,6 +368,7 @@ class GoodsInService
     {
         return \App\Models\GoodsReceived::with(['produk', 'kasir'])
             ->where('id_pemesanan_barang', $goodsIn->id_pemesanan_barang)
+            ->where('jumlah_rusak', '=', 0) // Only show items with no damaged goods
             ->orderBy('created_at', 'desc')
             ->get();
     }
