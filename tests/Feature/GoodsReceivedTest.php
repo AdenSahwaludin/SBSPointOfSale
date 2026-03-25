@@ -489,3 +489,43 @@ it('allows multiple partial receives until completion', function () {
     expect($po->status)->toBe('received');
     expect($detail->jumlah_diterima)->toBe(30);
 });
+
+it('can record goods where all items are damaged with zero good items', function () {
+    $kasir = User::factory()->create(['role' => 'kasir']);
+    $admin = User::factory()->create(['role' => 'admin']);
+    $produk = Produk::factory()->create(['nama' => 'Produk Test', 'sku' => 'SKU-TEST', 'stok' => 100]);
+    $service = app(GoodsInService::class);
+
+    $po = GoodsIn::factory()
+        ->for($kasir, 'kasir')
+        ->for($admin, 'admin')
+        ->state(['status' => 'approved'])
+        ->create();
+
+    $detail = GoodsInDetail::factory()
+        ->for($po)
+        ->for($produk, 'produk')
+        ->create(['jumlah_dipesan' => 5, 'jumlah_diterima' => 0]);
+
+    $initialStock = $produk->stok;
+
+    // Record received goods where ALL items are damaged - 5 received, 5 damaged, 0 good
+    $service->recordReceivedGoods($po, [
+        [
+            'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
+            'jumlah_diterima' => 5,
+            'jumlah_rusak' => 5, // All items damaged
+        ],
+    ], $kasir->id_pengguna);
+
+    // Verify product stock does not increase (0 good items)
+    $produk->refresh();
+    expect($produk->stok)->toBe($initialStock);
+
+    // Verify penerimaan_barang record has all items marked as damaged
+    $this->assertDatabaseHas('penerimaan_barang', [
+        'id_detail_pemesanan_barang' => $detail->id_detail_pemesanan_barang,
+        'jumlah_diterima' => 5,
+        'jumlah_rusak' => 5,
+    ]);
+});
