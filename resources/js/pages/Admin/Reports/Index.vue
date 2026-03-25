@@ -6,31 +6,10 @@ import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
-import {
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LineElement,
-  LinearScale,
-  PointElement,
-  Title,
-  Tooltip,
-} from 'chart.js';
+import { ArcElement, BarElement, CategoryScale, Chart as ChartJS, Legend, LineElement, LinearScale, PointElement, Title, Tooltip } from 'chart.js';
 import { Bar, Doughnut, Line } from 'vue-chartjs';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  PointElement,
-  ArcElement
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement, PointElement, ArcElement);
 
 interface Kasir {
     id_pengguna: string;
@@ -185,7 +164,7 @@ function formatDateTime(dateString: string): string {
 
 // Charts Data
 const salesTrendChartData = computed(() => ({
-    labels: props.salesTrend.map(item => new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })),
+    labels: props.salesTrend.map((item) => new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })),
     datasets: [
         {
             label: 'Pendapatan (Rp)',
@@ -195,7 +174,7 @@ const salesTrendChartData = computed(() => ({
             pointBackgroundColor: '#059669',
             pointRadius: 4,
             fill: true,
-            data: props.salesTrend.map(item => item.revenue)
+            data: props.salesTrend.map((item) => item.revenue),
         },
         {
             label: 'Jumlah Transaksi',
@@ -204,9 +183,9 @@ const salesTrendChartData = computed(() => ({
             borderWidth: 2,
             type: 'line',
             yAxisID: 'y1',
-            data: props.salesTrend.map(item => item.count)
-        }
-    ]
+            data: props.salesTrend.map((item) => item.count),
+        },
+    ],
 }));
 
 const salesTrendChartOptions = {
@@ -221,20 +200,20 @@ const salesTrendChartOptions = {
             type: 'linear' as const,
             display: true,
             position: 'left' as const,
-            title: { display: true, text: 'Pendapatan' }
+            title: { display: true, text: 'Pendapatan' },
         },
         y1: {
             type: 'linear' as const,
             display: true,
             position: 'right' as const,
             grid: { drawOnChartArea: false },
-            title: { display: true, text: 'Jumlah Transaksi' }
-        }
+            title: { display: true, text: 'Jumlah Transaksi' },
+        },
     },
     plugins: {
         tooltip: {
             callbacks: {
-                label: function(context: any) {
+                label: function (context: any) {
                     let label = context.dataset.label || '';
                     if (label) {
                         label += ': ';
@@ -245,39 +224,39 @@ const salesTrendChartOptions = {
                         label += context.raw;
                     }
                     return label;
-                }
-            }
-        }
-    }
+                },
+            },
+        },
+    },
 };
 
 const statusChartData = computed(() => {
     const statusMap: Record<string, string> = {
-        'LUNAS': '#10b981',
-        'MENUNGGU': '#f59e0b',
-        'BATAL': '#ef4444'
+        LUNAS: '#10b981',
+        MENUNGGU: '#f59e0b',
+        BATAL: '#ef4444',
     };
-    
+
     return {
-        labels: props.statusDistribution.map(item => item.status),
+        labels: props.statusDistribution.map((item) => item.status),
         datasets: [
             {
-                backgroundColor: props.statusDistribution.map(item => statusMap[item.status] || '#9ca3af'),
-                data: props.statusDistribution.map(item => item.count)
-            }
-        ]
+                backgroundColor: props.statusDistribution.map((item) => statusMap[item.status] || '#9ca3af'),
+                data: props.statusDistribution.map((item) => item.count),
+            },
+        ],
     };
 });
 
 const paymentMethodsChartData = computed(() => ({
-    labels: props.paymentMethods.map(item => item.method),
+    labels: props.paymentMethods.map((item) => item.method),
     datasets: [
         {
             label: 'Total Nilai (Rp)',
             backgroundColor: '#8b5cf6', // purple-500
-            data: props.paymentMethods.map(item => item.total)
-        }
-    ]
+            data: props.paymentMethods.map((item) => item.total),
+        },
+    ],
 }));
 </script>
 
@@ -287,7 +266,7 @@ const paymentMethodsChartData = computed(() => ({
     <BaseLayout :menuItems="adminMenuItems" userRole="admin">
         <div class="space-y-6">
             <!-- Header & Actions -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
                     <h1 class="text-3xl font-bold text-emerald-800">Ringkasan Laporan</h1>
                     <p class="text-emerald-600">Dashboard ringkasan dan statistik performa penjualan</p>
@@ -301,9 +280,9 @@ const paymentMethodsChartData = computed(() => ({
             </div>
 
             <!-- Filters -->
-            <div class="rounded-xl shadow-sm border border-gray-100 bg-white p-5">
-                <div class="flex flex-col md:flex-row gap-4 items-end">
-                    <div class="flex-1 w-full">
+            <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                <div class="flex flex-col items-end gap-4 md:flex-row">
+                    <div class="w-full flex-1">
                         <label class="mb-1 block text-xs font-medium text-gray-500">Dari Tanggal</label>
                         <input
                             v-model="startDate"
@@ -311,7 +290,7 @@ const paymentMethodsChartData = computed(() => ({
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
                         />
                     </div>
-                    <div class="flex-1 w-full">
+                    <div class="w-full flex-1">
                         <label class="mb-1 block text-xs font-medium text-gray-500">Sampai Tanggal</label>
                         <input
                             v-model="endDate"
@@ -319,7 +298,7 @@ const paymentMethodsChartData = computed(() => ({
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
                         />
                     </div>
-                    <div class="flex-1 w-full">
+                    <div class="w-full flex-1">
                         <label class="mb-1 block text-xs font-medium text-gray-500">Status Pembayaran</label>
                         <select
                             v-model="selectedStatus"
@@ -331,45 +310,49 @@ const paymentMethodsChartData = computed(() => ({
                             <option value="BATAL">Batal</option>
                         </select>
                     </div>
-                    <div class="flex gap-2 w-full md:w-auto">
-                        <BaseButton @click="handleFilter" variant="primary" icon="fas fa-filter" class="flex-1 md:flex-none justify-center"> Terapkan </BaseButton>
-                        <BaseButton @click="resetFilters" variant="secondary" icon="fas fa-redo" class="flex-1 md:flex-none justify-center"> Reset </BaseButton>
+                    <div class="flex w-full gap-2 md:w-auto">
+                        <BaseButton @click="handleFilter" variant="primary" icon="fas fa-filter" class="flex-1 justify-center md:flex-none">
+                            Terapkan
+                        </BaseButton>
+                        <BaseButton @click="resetFilters" variant="secondary" icon="fas fa-redo" class="flex-1 justify-center md:flex-none">
+                            Reset
+                        </BaseButton>
                     </div>
                 </div>
             </div>
 
             <!-- Stats Cards -->
             <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-                <div class="rounded-xl border border-emerald-100 shadow-sm bg-gradient-to-br from-emerald-50 to-white p-5">
-                    <div class="flex justify-between items-start mb-2">
+                <div class="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-5 shadow-sm">
+                    <div class="mb-2 flex items-start justify-between">
                         <p class="text-sm font-medium text-emerald-700">Total Transaksi</p>
                         <i class="fas fa-shopping-cart text-emerald-400"></i>
                     </div>
                     <p class="text-3xl font-bold text-emerald-900">{{ stats.total_transaksi }}</p>
                 </div>
-                <div class="rounded-xl border border-purple-100 shadow-sm bg-gradient-to-br from-purple-50 to-white p-5">
-                    <div class="flex justify-between items-start mb-2">
+                <div class="rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50 to-white p-5 shadow-sm">
+                    <div class="mb-2 flex items-start justify-between">
                         <p class="text-sm font-medium text-purple-700">Pendapatan</p>
                         <i class="fas fa-money-bill-wave text-purple-400"></i>
                     </div>
-                    <p class="text-xl md:text-2xl font-bold text-purple-900">{{ formatCurrency(stats.total_pendapatan) }}</p>
+                    <p class="text-xl font-bold text-purple-900 md:text-2xl">{{ formatCurrency(stats.total_pendapatan) }}</p>
                 </div>
-                <div class="rounded-xl border border-green-100 shadow-sm bg-gradient-to-br from-green-50 to-white p-5">
-                    <div class="flex justify-between items-start mb-2">
+                <div class="rounded-xl border border-green-100 bg-gradient-to-br from-green-50 to-white p-5 shadow-sm">
+                    <div class="mb-2 flex items-start justify-between">
                         <p class="text-sm font-medium text-green-700">Lunas</p>
                         <i class="fas fa-check-circle text-green-400"></i>
                     </div>
                     <p class="text-2xl font-bold text-green-900">{{ stats.total_lunas }}</p>
                 </div>
-                <div class="rounded-xl border border-yellow-100 shadow-sm bg-gradient-to-br from-yellow-50 to-white p-5">
-                    <div class="flex justify-between items-start mb-2">
+                <div class="rounded-xl border border-yellow-100 bg-gradient-to-br from-yellow-50 to-white p-5 shadow-sm">
+                    <div class="mb-2 flex items-start justify-between">
                         <p class="text-sm font-medium text-yellow-700">Menunggu</p>
                         <i class="fas fa-clock text-yellow-400"></i>
                     </div>
                     <p class="text-2xl font-bold text-yellow-900">{{ stats.total_menunggu }}</p>
                 </div>
-                <div class="rounded-xl border border-red-100 shadow-sm bg-gradient-to-br from-red-50 to-white p-5">
-                    <div class="flex justify-between items-start mb-2">
+                <div class="rounded-xl border border-red-100 bg-gradient-to-br from-red-50 to-white p-5 shadow-sm">
+                    <div class="mb-2 flex items-start justify-between">
                         <p class="text-sm font-medium text-red-700">Batal</p>
                         <i class="fas fa-times-circle text-red-400"></i>
                     </div>
@@ -378,26 +361,20 @@ const paymentMethodsChartData = computed(() => ({
             </div>
 
             <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <!-- Tren Penjualan -->
-                <div class="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                    <h3 class="font-semibold text-gray-800 mb-4">Tren Penjualan</h3>
+                <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm lg:col-span-2">
+                    <h3 class="mb-4 font-semibold text-gray-800">Tren Penjualan</h3>
                     <div class="h-72 w-full">
-                        <Line
-                            v-if="salesTrend.length > 0"
-                            :data="salesTrendChartData"
-                            :options="salesTrendChartOptions"
-                        />
-                        <div v-else class="h-full flex items-center justify-center text-gray-400">
-                            Tidak ada data tren untuk periode ini
-                        </div>
+                        <Line v-if="salesTrend.length > 0" :data="salesTrendChartData" :options="salesTrendChartOptions" />
+                        <div v-else class="flex h-full items-center justify-center text-gray-400">Tidak ada data tren untuk periode ini</div>
                     </div>
                 </div>
 
                 <!-- Status Transaksi -->
                 <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                    <h3 class="font-semibold text-gray-800 mb-4">Status Transaksi</h3>
-                    <div class="h-64 w-full flex items-center justify-center">
+                    <h3 class="mb-4 font-semibold text-gray-800">Status Transaksi</h3>
+                    <div class="flex h-64 w-full items-center justify-center">
                         <Doughnut
                             v-if="statusDistribution.length > 0"
                             :data="statusChartData"
@@ -409,27 +386,27 @@ const paymentMethodsChartData = computed(() => ({
 
                 <!-- Metode Pembayaran -->
                 <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                    <h3 class="font-semibold text-gray-800 mb-4">Metode Pembayaran (Lunas)</h3>
+                    <h3 class="mb-4 font-semibold text-gray-800">Metode Pembayaran (Lunas)</h3>
                     <div class="h-64 w-full">
                         <Bar
                             v-if="paymentMethods.length > 0"
                             :data="paymentMethodsChartData"
                             :options="{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }"
                         />
-                        <div v-else class="h-full flex items-center justify-center text-gray-400">Tidak ada data</div>
+                        <div v-else class="flex h-full items-center justify-center text-gray-400">Tidak ada data</div>
                     </div>
                 </div>
 
                 <!-- Top Products -->
-                <div class="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                    <h3 class="font-semibold text-gray-800 mb-4">Produk Paling Laris (Lunas)</h3>
+                <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm lg:col-span-2">
+                    <h3 class="mb-4 font-semibold text-gray-800">Produk Paling Laris (Lunas)</h3>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-gray-500 bg-gray-50 border-b">
+                        <table class="w-full text-left text-sm">
+                            <thead class="border-b bg-gray-50 text-gray-500">
                                 <tr>
                                     <th class="px-4 py-2 font-medium">Nama Produk</th>
-                                    <th class="px-4 py-2 font-medium text-right">Terjual (Qty)</th>
-                                    <th class="px-4 py-2 font-medium text-right">Total Pendapatan</th>
+                                    <th class="px-4 py-2 text-right font-medium">Terjual (Qty)</th>
+                                    <th class="px-4 py-2 text-right font-medium">Total Pendapatan</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y text-gray-700">
@@ -446,7 +423,7 @@ const paymentMethodsChartData = computed(() => ({
                     </div>
                 </div>
             </div>
-            
+
             <!-- Detail Transaksi - Collapsible or Less Dominant -->
             <details class="group rounded-xl border border-gray-200 bg-white shadow-sm" open>
                 <summary class="flex cursor-pointer items-center justify-between p-5 font-semibold text-gray-800 marker:content-none">
@@ -458,7 +435,7 @@ const paymentMethodsChartData = computed(() => ({
                         <i class="fas fa-chevron-down text-gray-400"></i>
                     </span>
                 </summary>
-                
+
                 <div class="border-t border-gray-100 p-5">
                     <div class="mb-4 flex justify-end">
                         <div class="flex items-center gap-2">
@@ -515,31 +492,34 @@ const paymentMethodsChartData = computed(() => ({
                             </tbody>
                         </table>
                     </div>
-                    <div v-else class="py-8 text-center bg-gray-50 rounded-lg">
+                    <div v-else class="rounded-lg bg-gray-50 py-8 text-center">
                         <p class="text-gray-500">Tidak ada data transaksi</p>
                     </div>
 
                     <!-- Pagination -->
-                    <div v-if="transaksi?.meta?.last_page && transaksi.meta.last_page > 1" class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div
+                        v-if="transaksi?.meta?.last_page && transaksi.meta.last_page > 1"
+                        class="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row"
+                    >
                         <p class="text-xs text-gray-500">
                             Menampilkan {{ transaksi?.meta?.from || 0 }} - {{ transaksi?.meta?.to || 0 }} dari {{ transaksi?.meta?.total || 0 }}
                         </p>
-                        <div class="flex flex-wrap gap-1 justify-center">
-                            <template v-for="(link, i) in (transaksi?.links || [])" :key="i">
+                        <div class="flex flex-wrap justify-center gap-1">
+                            <template v-for="(link, i) in transaksi?.links || []" :key="i">
                                 <Link
                                     v-if="link.url"
                                     :href="link.url"
                                     :class="[
-                                        'rounded px-3 py-1 text-sm transition-colors border',
+                                        'rounded border px-3 py-1 text-sm transition-colors',
                                         link.active
-                                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 font-medium'
-                                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50',
+                                            ? 'border-emerald-200 bg-emerald-50 font-medium text-emerald-700'
+                                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50',
                                     ]"
                                     v-html="link.label"
                                 ></Link>
                                 <span
                                     v-else
-                                    class="rounded px-3 py-1 text-sm border bg-gray-50 border-gray-200 text-gray-400"
+                                    class="rounded border border-gray-200 bg-gray-50 px-3 py-1 text-sm text-gray-400"
                                     v-html="link.label"
                                     aria-disabled="true"
                                 ></span>

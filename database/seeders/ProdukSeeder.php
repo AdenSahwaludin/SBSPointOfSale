@@ -24,7 +24,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 16000,
                 'harga_pack' => 15500, // harga per 3 pcs
-                'stok' => 200,
+                'stok' => 245,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 30,
+                'jumlah_restock' => 50,
             ],
             [
                 'sku' => 'DA-SRH-60ML',
@@ -36,7 +39,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 16000,
                 'harga_pack' => 15500,
-                'stok' => 200,
+                'stok' => 8,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 20,
+                'jumlah_restock' => 50,
             ],
             [
                 'sku' => 'DA-ALK-60ML',
@@ -48,7 +54,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 14000,
                 'harga_pack' => 13500,
-                'stok' => 200,
+                'stok' => 0,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 25,
+                'jumlah_restock' => 50,
             ],
             [
                 'sku' => 'DA-KYP-60ML',
@@ -60,7 +69,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 18000,
                 'harga_pack' => 17800,
-                'stok' => 200,
+                'stok' => 156,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 35,
+                'jumlah_restock' => 50,
             ],
 
             // B. Produk 140 mL (per pcs)
@@ -74,7 +86,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 35000,
                 'harga_pack' => 34500,
-                'stok' => 150,
+                'stok' => 2,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 15,
+                'jumlah_restock' => 50,
             ],
             [
                 'sku' => 'DA-ALK-140ML',
@@ -86,7 +101,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 25000,
                 'harga_pack' => 24500,
-                'stok' => 150,
+                'stok' => 167,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 30,
+                'jumlah_restock' => 50,
             ],
             [
                 'sku' => 'DA-KYP-140ML',
@@ -98,7 +116,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 36000,
                 'harga_pack' => 35500,
-                'stok' => 150,
+                'stok' => 124,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 25,
+                'jumlah_restock' => 50,
             ],
 
             // C. Produk 275 mL (per pcs)
@@ -112,7 +133,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 70000,
                 'harga_pack' => 69000,
-                'stok' => 100,
+                'stok' => 76,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 20,
+                'jumlah_restock' => 50,
             ],
             [
                 'sku' => 'DA-ALK-275ML',
@@ -124,7 +148,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 50000,
                 'harga_pack' => 49000,
-                'stok' => 100,
+                'stok' => 35,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 18,
+                'jumlah_restock' => 50,
             ],
             [
                 'sku' => 'DA-KYP-275ML',
@@ -136,7 +163,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 1,
                 'harga' => 72000,
                 'harga_pack' => 71000,
-                'stok' => 100,
+                'stok' => 0,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 22,
+                'jumlah_restock' => 50,
             ],
 
             // D. Produk Karton 60 mL (1 karton = 144 pcs)
@@ -150,7 +180,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 144,
                 'harga' => 1584000, // 144 x Rp 11.000
                 'harga_pack' => 1584000,
-                'stok' => 10,
+                'stok' => 15,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 8,
+                'jumlah_restock' => 15,
             ],
             [
                 'sku' => 'DA-SRH-KRT144',
@@ -162,7 +195,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 144,
                 'harga' => 1584000, // 144 x Rp 11.000
                 'harga_pack' => 1584000,
-                'stok' => 10,
+                'stok' => 1,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 5,
+                'jumlah_restock' => 15,
             ],
             [
                 'sku' => 'DA-ALK-KRT144',
@@ -174,7 +210,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 144,
                 'harga' => 1440000, // 144 x Rp 10.000
                 'harga_pack' => 1440000,
-                'stok' => 10,
+                'stok' => 22,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 10,
+                'jumlah_restock' => 15,
             ],
             [
                 'sku' => 'DA-KYP-KRT144',
@@ -186,7 +225,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 144,
                 'harga' => 2160000, // 144 x Rp 15.000
                 'harga_pack' => 2160000,
-                'stok' => 10,
+                'stok' => 0,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 7,
+                'jumlah_restock' => 15,
             ],
 
             // E. Produk Pack 140 mL (1 pack = 72 pcs)
@@ -200,7 +242,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 72,
                 'harga' => 1800000, // 72 x Rp 25.000
                 'harga_pack' => 1800000,
-                'stok' => 5,
+                'stok' => 18,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 8,
+                'jumlah_restock' => 20,
             ],
             [
                 'sku' => 'DA-ALK-PCK72',
@@ -213,6 +258,9 @@ class ProdukSeeder extends Seeder
                 'harga' => 1368000, // 72 x Rp 19.000
                 'harga_pack' => 1368000,
                 'stok' => 5,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 5,
+                'jumlah_restock' => 20,
             ],
             [
                 'sku' => 'DA-KYP-PCK72',
@@ -224,7 +272,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 72,
                 'harga' => 2160000, // 72 x Rp 30.000
                 'harga_pack' => 2160000,
-                'stok' => 5,
+                'stok' => 0,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 6,
+                'jumlah_restock' => 20,
             ],
 
             // F. Produk Pack 275 mL (1 pack = 36 pcs)
@@ -238,7 +289,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 36,
                 'harga' => 1620000, // 36 x Rp 45.000
                 'harga_pack' => 1620000,
-                'stok' => 5,
+                'stok' => 42,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 10,
+                'jumlah_restock' => 25,
             ],
             [
                 'sku' => 'DA-ALK-PCK36',
@@ -250,7 +304,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 36,
                 'harga' => 1368000, // 36 x Rp 38.000
                 'harga_pack' => 1368000,
-                'stok' => 5,
+                'stok' => 3,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 6,
+                'jumlah_restock' => 25,
             ],
             [
                 'sku' => 'DA-KYP-PCK36',
@@ -262,7 +319,10 @@ class ProdukSeeder extends Seeder
                 'isi_per_pack' => 36,
                 'harga' => 2052000, // 36 x Rp 57.000
                 'harga_pack' => 2052000,
-                'stok' => 5,
+                'stok' => 89,
+                'sisa_pcs_terbuka' => 0,
+                'batas_stok_minimum' => 12,
+                'jumlah_restock' => 25,
             ],
         ];
 
