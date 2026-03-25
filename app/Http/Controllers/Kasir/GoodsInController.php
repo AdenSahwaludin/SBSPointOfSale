@@ -373,14 +373,14 @@ class GoodsInController extends Controller
         $detailSummaries = [];
         foreach ($goodsIn->details as $detail) {
             $receivedForDetail = $goodsIn->receivedGoods
-                ->where('id_detail_pemesanan_barang', $detail->id_goods_in_detail)
+                ->where('id_detail_pemesanan_barang', $detail->id_detail_pemesanan_barang)
                 ->values()
                 ->all();
 
             $totalReceived = collect($receivedForDetail)->sum('jumlah_diterima');
             $totalDamaged = collect($receivedForDetail)->sum('jumlah_rusak');
 
-            $detailSummaries[$detail->id_goods_in_detail] = [
+            $detailSummaries[$detail->id_detail_pemesanan_barang] = [
                 'total_diterima' => $totalReceived,
                 'total_rusak' => $totalDamaged,
                 'total_good' => $totalReceived - $totalDamaged,

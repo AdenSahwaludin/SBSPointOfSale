@@ -18,7 +18,7 @@ interface Produk {
 }
 
 interface GoodsInDetail {
-    id_goods_in_detail: number;
+    id_detail_pemesanan_barang: number;
     id_pemesanan_barang: number;
     id_produk: string;
     jumlah_dipesan: number;
@@ -221,17 +221,17 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
                 <div class="space-y-4">
                     <div
                         v-for="detail in po?.details || []"
-                        :key="detail.id_goods_in_detail"
+                        :key="detail.id_detail_pemesanan_barang"
                         class="overflow-hidden rounded-lg border border-emerald-200"
                     >
                         <!-- Detail Header -->
                         <div
                             class="flex cursor-pointer items-center justify-between bg-emerald-50 px-6 py-4 hover:bg-emerald-100"
-                            @click="toggleDetailExpand(detail.id_goods_in_detail)"
+                            @click="toggleDetailExpand(detail.id_detail_pemesanan_barang)"
                         >
                             <div class="flex flex-1 items-center gap-4">
                                 <div class="flex-shrink-0">
-                                    <i :class="['text-lg', getDetailStatusIcon(detail, detailSummaries[detail.id_goods_in_detail])]"></i>
+                                    <i :class="['text-lg', getDetailStatusIcon(detail, detailSummaries[detail.id_detail_pemesanan_barang])]"></i>
                                 </div>
                                 <div class="flex-1">
                                     <p class="font-semibold text-emerald-900">{{ detail.produk.nama }}</p>
@@ -241,9 +241,9 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
                                     <p class="text-sm text-emerald-700">
                                         Dipesan: <span class="font-semibold">{{ detail.jumlah_dipesan }}</span>
                                     </p>
-                                    <p v-if="detailSummaries[detail.id_goods_in_detail]" class="text-sm">
-                                        <span class="text-green-600">{{ detailSummaries[detail.id_goods_in_detail].total_good }} baik</span>
-                                        <span class="text-red-600">{{ detailSummaries[detail.id_goods_in_detail].total_rusak }} rusak</span>
+                                    <p v-if="detailSummaries[detail.id_detail_pemesanan_barang]" class="text-sm">
+                                        <span class="text-green-600">{{ detailSummaries[detail.id_detail_pemesanan_barang].total_good }} baik</span>
+                                        <span class="text-red-600">{{ detailSummaries[detail.id_detail_pemesanan_barang].total_rusak }} rusak</span>
                                     </p>
                                 </div>
                             </div>
@@ -251,7 +251,7 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
                                 <i
                                     :class="[
                                         'fas transition-transform',
-                                        expandedDetails[detail.id_goods_in_detail] ? 'fa-chevron-up' : 'fa-chevron-down',
+                                        expandedDetails[detail.id_detail_pemesanan_barang] ? 'fa-chevron-up' : 'fa-chevron-down',
                                     ]"
                                 ></i>
                             </div>
@@ -259,13 +259,13 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
 
                         <!-- Receiving Batches -->
                         <div
-                            v-if="expandedDetails[detail.id_goods_in_detail] && detailSummaries[detail.id_goods_in_detail]?.receiving_batches.length"
+                            v-if="expandedDetails[detail.id_detail_pemesanan_barang] && detailSummaries[detail.id_detail_pemesanan_barang]?.receiving_batches.length"
                             class="border-t border-emerald-200 bg-white px-6 py-4"
                         >
                             <p class="mb-3 text-sm font-semibold text-emerald-700">Detail Penerimaan:</p>
                             <div class="space-y-2">
                                 <div
-                                    v-for="batch in detailSummaries[detail.id_goods_in_detail].receiving_batches"
+                                    v-for="batch in detailSummaries[detail.id_detail_pemesanan_barang].receiving_batches"
                                     :key="batch.id_penerimaan_barang"
                                     class="flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-2 text-sm"
                                 >
@@ -285,7 +285,7 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
                         </div>
                         <div
                             v-else-if="
-                                expandedDetails[detail.id_goods_in_detail] && !detailSummaries[detail.id_goods_in_detail]?.receiving_batches.length
+                                expandedDetails[detail.id_detail_pemesanan_barang] && !detailSummaries[detail.id_detail_pemesanan_barang]?.receiving_batches.length
                             "
                             class="border-t border-emerald-200 bg-white px-6 py-4 text-center text-sm text-emerald-600"
                         >
