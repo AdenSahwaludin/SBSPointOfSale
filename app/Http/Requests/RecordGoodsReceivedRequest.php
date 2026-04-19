@@ -22,9 +22,9 @@ class RecordGoodsReceivedRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'items' => 'required|array|min:1',
+            'items' => 'required|array|min:0',
             'items.*.id_detail_pemesanan_barang' => 'required|integer|exists:detail_pemesanan_barang,id_detail_pemesanan_barang',
-            'items.*.jumlah_diterima' => 'required|integer|min:1',
+            'items.*.jumlah_diterima' => 'required|integer|min:0',
             'items.*.jumlah_rusak' => 'nullable|integer|min:0',
             'items.*.catatan' => 'nullable|string|max:500',
         ];
@@ -40,12 +40,12 @@ class RecordGoodsReceivedRequest extends FormRequest
                 $jumlahRusak = intval($item['jumlah_rusak'] ?? 0);
 
                 // Validasi: jumlah rusak tidak boleh lebih besar dari jumlah diterima
-                if ($jumlahRusak > $jumlahDiterima) {
-                    $validator->errors()->add(
-                        "items.{$index}.jumlah_rusak",
-                        "Jumlah rusak tidak boleh lebih besar dari jumlah diterima. Qty Diterima: {$jumlahDiterima}, Qty Rusak: {$jumlahRusak}"
-                    );
-                }
+                // if ($jumlahRusak > $jumlahDiterima) {
+                //     $validator->errors()->add(
+                //         "items.{$index}.jumlah_rusak",
+                //         "Jumlah rusak tidak boleh lebih besar dari jumlah diterima. Qty Diterima: {$jumlahDiterima}, Qty Rusak: {$jumlahRusak}"
+                //     );
+                // }
 
                 // Validasi: setidaknya harus ada barang yang tidak rusak (qty baik > 0)
                 // Ini opsional - uncomment jika ingin minimal 1 barang baik

@@ -266,7 +266,7 @@ const goBack = () => {
                                     type="number"
                                     v-model.number="ensureState(item).qty"
                                     :max="item.qty_remaining"
-                                    min="1"
+                                    min="0"
                                     class="mt-1 w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-emerald-950 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
                                 />
                             </div>

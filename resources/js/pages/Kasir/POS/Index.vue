@@ -130,7 +130,7 @@ const transactionForm = useForm({
 // Computed
 const filteredProduk = computed(() => {
     // Jika ada search query, gunakan hasil dari API
-    if (searchQuery.value && searchResults.value.length > 0) {
+    if (searchQuery.value) {
         return searchResults.value;
     }
 
@@ -218,7 +218,7 @@ const filteredPelanggan = computed(() => {
         const email = (p.email || '').toLowerCase();
         const telp = (p.telepon || '').toLowerCase();
         return name.includes(q) || email.includes(q) || telp.includes(q);
-    });
+    }); 
 });
 
 function openPelangganDropdown() {

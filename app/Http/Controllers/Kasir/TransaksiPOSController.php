@@ -175,6 +175,7 @@ class TransaksiPOSController extends Controller
             ->filter(function ($item) {
                 return ($item['_score'] > 0) && ! empty($item['_match']);
             })
+            ->sortByDesc('_score')
             ->take(10)
             ->values()
             ->map(function ($item) {

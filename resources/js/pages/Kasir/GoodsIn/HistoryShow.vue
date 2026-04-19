@@ -7,7 +7,7 @@ import { ref } from 'vue';
 
 interface Kasir {
     id_pengguna: number;
-    name: string;
+    nama: string;
 }
 
 interface Produk {
@@ -241,10 +241,6 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
                                     <p class="text-sm text-emerald-700">
                                         Dipesan: <span class="font-semibold">{{ detail.jumlah_dipesan }}</span>
                                     </p>
-                                    <p v-if="detailSummaries[detail.id_detail_pemesanan_barang]" class="text-sm">
-                                        <span class="text-green-600">{{ detailSummaries[detail.id_detail_pemesanan_barang].total_good }} baik</span>
-                                        <span class="text-red-600">{{ detailSummaries[detail.id_detail_pemesanan_barang].total_rusak }} rusak</span>
-                                    </p>
                                 </div>
                             </div>
                             <div class="ml-4 flex-shrink-0">
@@ -259,7 +255,10 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
 
                         <!-- Receiving Batches -->
                         <div
-                            v-if="expandedDetails[detail.id_detail_pemesanan_barang] && detailSummaries[detail.id_detail_pemesanan_barang]?.receiving_batches.length"
+                            v-if="
+                                expandedDetails[detail.id_detail_pemesanan_barang] &&
+                                detailSummaries[detail.id_detail_pemesanan_barang]?.receiving_batches.length
+                            "
                             class="border-t border-emerald-200 bg-white px-6 py-4"
                         >
                             <p class="mb-3 text-sm font-semibold text-emerald-700">Detail Penerimaan:</p>
@@ -271,7 +270,7 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
                                 >
                                     <div class="flex flex-col gap-1">
                                         <div class="font-medium text-emerald-800">{{ formatDate(batch.created_at) }}</div>
-                                        <div class="text-xs text-emerald-600">Kasir: {{ batch.kasir?.name || 'N/A' }}</div>
+                                        <div class="text-xs text-emerald-600">Kasir: {{ batch.kasir?.nama || 'N/A' }}</div>
                                     </div>
                                     <div class="text-right">
                                         <span class="font-semibold text-green-600">{{ batch.jumlah_diterima }} baik</span>
@@ -285,7 +284,8 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
                         </div>
                         <div
                             v-else-if="
-                                expandedDetails[detail.id_detail_pemesanan_barang] && !detailSummaries[detail.id_detail_pemesanan_barang]?.receiving_batches.length
+                                expandedDetails[detail.id_detail_pemesanan_barang] &&
+                                !detailSummaries[detail.id_detail_pemesanan_barang]?.receiving_batches.length
                             "
                             class="border-t border-emerald-200 bg-white px-6 py-4 text-center text-sm text-emerald-600"
                         >
@@ -315,7 +315,7 @@ function getDetailStatusIcon(detail: GoodsInDetail, summary: DetailSummary | und
                                 <td class="px-6 py-4 text-sm font-medium" :class="received.jumlah_rusak > 0 ? 'text-red-600' : 'text-emerald-700'">
                                     {{ received.jumlah_rusak }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-emerald-700">{{ received.kasir?.name || 'N/A' }}</td>
+                                <td class="px-6 py-4 text-sm text-emerald-700">{{ received.kasir?.nama || 'N/A' }}</td>
                             </tr>
                         </tbody>
                     </table>
