@@ -78,9 +78,10 @@ describe('Goods In - Kasir Operations', function () {
             ->get(route('kasir.goods-in.index'));
 
         $response->assertSuccessful();
-        $response->assertInertia(fn ($page) => $page
-            ->component('Kasir/GoodsIn/Index')
-            ->has('pos', 2)
+        $response->assertInertia(
+            fn($page) => $page
+                ->component('Kasir/GoodsIn/Index')
+                ->has('pos', 2)
         );
     });
 
@@ -190,9 +191,10 @@ describe('Goods In - Admin Approval Operations', function () {
             ->get(route('admin.goods-in-approval.index'));
 
         $response->assertSuccessful();
-        $response->assertInertia(fn ($page) => $page
-            ->component('Admin/GoodsInApproval/Index')
-            ->has('pendingPOs', 2)
+        $response->assertInertia(
+            fn($page) => $page
+                ->component('Admin/GoodsInApproval/Index')
+                ->has('pendingPOs', 2)
         );
     });
 
@@ -350,7 +352,7 @@ describe('Goods In - PO Number Generation', function () {
 
         // Manually create PO with next month's date to simulate month change
         $nextMonth = now()->addMonth();
-        $nextMonthPONumber = 'PO-'.$nextMonth->format('Y-m').'-00001';
+        $nextMonthPONumber = 'PO-' . $nextMonth->format('Y-m') . '-00001';
 
         $nextMonthPO = GoodsIn::create([
             'nomor_po' => $nextMonthPONumber,

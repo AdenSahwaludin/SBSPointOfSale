@@ -89,7 +89,7 @@ function getStatusIcon(status: string) {
         case 'rejected':
             return 'fas fa-times-circle';
         case 'received':
-            return 'fas fa-box';
+            return 'fas fa-box-open';
         case 'partial_received':
             return 'fas fa-boxes';
         case 'draft':
@@ -106,9 +106,9 @@ function getStatusLabel(status: string) {
         case 'rejected':
             return 'Ditolak';
         case 'received':
-            return 'Diterima';
+            return 'Diterima Sepenuhnya';
         case 'partial_received':
-            return 'Diterima Sebagian';
+        return 'Diterima Sebagian';
         case 'draft':
             return 'Draf';
         default:

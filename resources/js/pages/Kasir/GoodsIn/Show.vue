@@ -17,10 +17,10 @@ interface Produk {
 }
 
 interface GoodsInDetail {
-    id_goods_in_detail: number;
+    id_detail_pemesanan_barang: number;
     id_produk: number;
     jumlah_dipesan: number;
-    qty_received: number;
+    jumlah_diterima: number;
     produk: Produk;
 }
 
@@ -39,7 +39,7 @@ interface Admin {
 interface GoodsIn {
     id_pemesanan_barang: number;
     nomor_po: string;
-    status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'received';
+    status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'partial_received' | 'received';
     tanggal_request: string;
     tanggal_approval?: string;
     catatan_approval?: string;
@@ -58,9 +58,33 @@ interface Props {
 const props = defineProps<Props>();
 const page = usePage();
 
+import { onClickOutside } from '@vueuse/core';
+
 const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/goods-in');
 const selectedProductId = ref<number | null>(null);
 const selectedQty = ref<number>(1);
+const searchProductQuery = ref('');
+const isProductDropdownOpen = ref(false);
+const productDropdownRef = ref<HTMLElement | null>(null);
+
+onClickOutside(productDropdownRef, () => {
+    isProductDropdownOpen.value = false;
+});
+
+const filteredAvailableProducts = computed(() => {
+    if (!searchProductQuery.value) return props.availableProducts;
+    const query = searchProductQuery.value.toLowerCase().trim();
+    return props.availableProducts.filter(p => 
+        p.nama.toLowerCase().includes(query) || 
+        p.sku.toLowerCase().includes(query)
+    );
+});
+
+function selectProduct(product: Produk) {
+    selectedProductId.value = product.id_produk;
+    searchProductQuery.value = `${product.sku} - ${product.nama}`;
+    isProductDropdownOpen.value = false;
+}
 
 const addForm = useForm({
     id_produk: null as number | null,
@@ -93,6 +117,7 @@ function getStatusBadgeClass(status: string) {
         approved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
         rejected: 'bg-red-100 text-red-700 border-red-200',
         received: 'bg-blue-100 text-blue-700 border-blue-200',
+        partial_received: 'bg-purple-100 text-purple-700 border-purple-200',
     };
     return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-700 border-gray-200';
 }
@@ -103,7 +128,8 @@ function getStatusLabel(status: string) {
         submitted: 'Menunggu Persetujuan',
         approved: 'Disetujui',
         rejected: 'Ditolak',
-        received: 'Diterima',
+        received: 'Diterima Sepenuhnya',
+        partial_received: 'Diterima Sebagian',
     };
     return labels[status as keyof typeof labels] || status;
 }
@@ -115,6 +141,7 @@ function getStatusIcon(status: string) {
         approved: 'fas fa-check-circle',
         rejected: 'fas fa-times-circle',
         received: 'fas fa-box-open',
+        partial_received: 'fas fa-boxes',
     };
     return icons[status as keyof typeof icons] || 'fas fa-question-circle';
 }
@@ -133,6 +160,7 @@ function addItem() {
         onSuccess: () => {
             selectedProductId.value = null;
             selectedQty.value = 1;
+            searchProductQuery.value = '';
             addForm.reset();
         },
     });
@@ -142,7 +170,7 @@ function removeItem(detailId: number) {
     if (!confirm('Yakin ingin menghapus item ini dari PO?')) return;
 
     const form = useForm({});
-    form.delete(itemsRoutes.remove([{ goodsIn: props.goodsIn.id_pemesanan_barang }, detailId]).url);
+    form.delete(itemsRoutes.remove({ goodsIn: props.goodsIn.id_pemesanan_barang, id_detail: detailId }).url);
 }
 
 function submitPO() {
@@ -286,7 +314,7 @@ function submitPO() {
                                 <th class="px-4 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Stok</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase">Qty Request</th>
                                 <th
-                                    v-if="goodsIn.status === 'received'"
+                                    v-if="goodsIn.status === 'received' || goodsIn.status === 'partial_received'"
                                     class="px-4 py-3 text-left text-xs font-medium tracking-wider text-emerald-600 uppercase"
                                 >
                                     Qty Diterima
@@ -303,7 +331,7 @@ function submitPO() {
                         <tbody class="divide-y divide-emerald-100">
                             <tr
                                 v-for="(detail, index) in goodsIn.details"
-                                :key="detail.id_goods_in_detail"
+                                :key="detail.id_detail_pemesanan_barang"
                                 class="transition-colors hover:bg-emerald-50"
                             >
                                 <td class="px-4 py-3 text-sm whitespace-nowrap text-emerald-600">{{ index + 1 }}</td>
@@ -315,26 +343,26 @@ function submitPO() {
                                 <td class="px-4 py-3 text-sm whitespace-nowrap text-emerald-700">
                                     <span class="font-medium">{{ detail.jumlah_dipesan }}</span> {{ detail.produk.satuan }}
                                 </td>
-                                <td v-if="goodsIn.status === 'received'" class="px-4 py-3 text-sm whitespace-nowrap text-emerald-700">
-                                    <span class="font-medium">{{ detail.qty_received }}</span> {{ detail.produk.satuan }}
+                                <td v-if="goodsIn.status === 'received' || goodsIn.status === 'partial_received'" class="px-4 py-3 text-sm whitespace-nowrap text-emerald-700">
+                                    <span class="font-medium">{{ detail.jumlah_diterima }}</span> {{ detail.produk.satuan }}
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
                                     <span
-                                        v-if="goodsIn.status === 'received' && detail.qty_received >= detail.jumlah_dipesan"
+                                        v-if="(goodsIn.status === 'received' || goodsIn.status === 'partial_received') && detail.jumlah_diterima >= detail.jumlah_dipesan"
                                         class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700"
                                     >
                                         <i class="fas fa-check"></i>
                                         Lengkap
                                     </span>
                                     <span
-                                        v-else-if="goodsIn.status === 'received' && detail.qty_received > 0"
+                                        v-else-if="(goodsIn.status === 'received' || goodsIn.status === 'partial_received') && detail.jumlah_diterima > 0"
                                         class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700"
                                     >
                                         <i class="fas fa-exclamation-triangle"></i>
                                         Sebagian
                                     </span>
                                     <span
-                                        v-else-if="goodsIn.status === 'received'"
+                                        v-else-if="goodsIn.status === 'received' || goodsIn.status === 'partial_received'"
                                         class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
                                     >
                                         <i class="fas fa-minus"></i>
@@ -350,7 +378,7 @@ function submitPO() {
                                 </td>
                                 <td v-if="goodsIn.status === 'draft'" class="px-4 py-3 text-center whitespace-nowrap">
                                     <button
-                                        @click="removeItem(detail.id_goods_in_detail)"
+                                        @click="removeItem(detail.id_detail_pemesanan_barang)"
                                         class="text-red-600 transition-colors hover:text-red-700"
                                         title="Hapus item"
                                     >
@@ -388,16 +416,34 @@ function submitPO() {
                                 <i class="fas fa-box mr-1"></i>
                                 Pilih Produk
                             </label>
-                            <select
-                                id="product-select"
-                                v-model.number="selectedProductId"
-                                class="w-full rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
-                            >
-                                <option :value="null" disabled>-- Pilih Produk --</option>
-                                <option v-for="product in availableProducts" :key="product.id_produk" :value="product.id_produk">
-                                    {{ product.sku }} - {{ product.nama }}
-                                </option>
-                            </select>
+                            <div class="relative" ref="productDropdownRef">
+                                <input
+                                    type="text"
+                                    id="product-select"
+                                    v-model="searchProductQuery"
+                                    @focus="isProductDropdownOpen = true"
+                                    @input="selectedProductId = null; isProductDropdownOpen = true"
+                                    placeholder="-- Ketik SKU atau Nama Produk --"
+                                    class="w-full rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                                    autocomplete="off"
+                                />
+                                <div
+                                    v-if="isProductDropdownOpen"
+                                    class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-emerald-200 bg-white py-1 shadow-lg"
+                                >
+                                    <div
+                                        v-for="product in filteredAvailableProducts"
+                                        :key="product.id_produk"
+                                        @click="selectProduct(product)"
+                                        class="cursor-pointer px-4 py-2 text-sm hover:bg-emerald-50"
+                                    >
+                                        {{ product.sku }} - {{ product.nama }}
+                                    </div>
+                                    <div v-if="filteredAvailableProducts.length === 0" class="px-4 py-2 text-sm text-gray-500">
+                                        Tidak ada produk yang cocok
+                                    </div>
+                                </div>
+                            </div>
                             <div v-if="(page.props.errors as any)?.id_produk" class="mt-1 text-sm text-red-600">
                                 {{ (page.props.errors as any)?.id_produk }}
                             </div>

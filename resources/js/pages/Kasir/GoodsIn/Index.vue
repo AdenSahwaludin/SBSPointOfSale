@@ -18,7 +18,7 @@ interface GoodsInDetail {
 interface GoodsIn {
     id_pemesanan_barang: number;
     nomor_po: string;
-    status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'received';
+    status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'received' | 'partial_received';
     tanggal_request: string;
     tanggal_approval?: string;
     details?: GoodsInDetail[];
@@ -47,6 +47,7 @@ function getStatusBadgeClass(status: string) {
         approved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
         rejected: 'bg-red-100 text-red-700 border-red-200',
         received: 'bg-blue-100 text-blue-700 border-blue-200',
+        partial_received: 'bg-purple-100 text-purple-700 border-purple-200',
     };
     return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-700 border-gray-200';
 }
@@ -57,7 +58,8 @@ function getStatusLabel(status: string) {
         submitted: 'Diajukan',
         approved: 'Disetujui',
         rejected: 'Ditolak',
-        received: 'Diterima',
+        received: 'Diterima Sepenuhnya',
+        partial_received: 'Diterima Sebagian',
     };
     return labels[status as keyof typeof labels] || status;
 }
@@ -120,7 +122,7 @@ function deletePO(goodsIn: GoodsIn) {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-emerald-100">
-                            <tr v-for="po in pos" :key="po.id_goods_in" class="transition-colors hover:bg-emerald-50">
+                            <tr v-for="po in pos" :key="po.id_pemesanan_barang" class="transition-colors hover:bg-emerald-50">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-2">
                                         <i class="fas fa-file-invoice text-emerald-600"></i>
@@ -140,7 +142,8 @@ function deletePO(goodsIn: GoodsIn) {
                                                 'fas fa-clock': po.status === 'submitted',
                                                 'fas fa-check-circle': po.status === 'approved',
                                                 'fas fa-times-circle': po.status === 'rejected',
-                                                'fas fa-box': po.status === 'received',
+                                                'fas fa-box-open': po.status === 'received',
+                                                'fas fa-boxes': po.status === 'partial_received',
                                             }"
                                         ></i>
                                         {{ getStatusLabel(po.status) }}

@@ -74,7 +74,7 @@ function getStatusBadgeClass(status: string) {
         case 'received':
             return 'bg-blue-100 text-blue-800 border-blue-200';
         case 'partial_received':
-            return 'bg-amber-100 text-amber-800 border-amber-200';
+            return 'bg-purple-100 text-purple-800 border-purple-200';
         case 'draft':
             return 'bg-gray-100 text-gray-800 border-gray-200';
         default:
@@ -89,7 +89,7 @@ function getStatusIcon(status: string) {
         case 'rejected':
             return 'fas fa-times-circle';
         case 'received':
-            return 'fas fa-box';
+            return 'fas fa-box-open';
         case 'partial_received':
             return 'fas fa-boxes';
         case 'draft':
@@ -106,7 +106,7 @@ function getStatusLabel(status: string) {
         case 'rejected':
             return 'Ditolak';
         case 'received':
-            return 'Diterima';
+            return 'Diterima Sepenuhnya';
         case 'partial_received':
             return 'Diterima Sebagian';
         case 'draft':

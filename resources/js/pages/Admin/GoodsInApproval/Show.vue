@@ -23,7 +23,7 @@ interface ProdukDetail {
 }
 
 interface GoodsInDetail {
-    id_goods_in_detail: number;
+    id_detail_pemesanan_barang: number;
     id_pemesanan_barang: number;
     id_produk: string;
     jumlah_dipesan: number;
@@ -222,7 +222,7 @@ function handleReject() {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-emerald-100 bg-white-emerald">
-                            <tr v-for="(detail, index) in goodsIn.details" :key="detail.id_goods_in_detail" class="hover:bg-emerald-25">
+                            <tr v-for="(detail, index) in goodsIn.details" :key="detail.id_detail_pemesanan_barang" class="hover:bg-emerald-25">
                                 <td class="px-6 py-4 text-sm whitespace-nowrap text-emerald-800">{{ index + 1 }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-emerald-800">{{ detail.produk.sku }}</div>
