@@ -54,6 +54,32 @@ const form = useForm({
     sku: props.produk.sku,
 });
 
+// Computed SKU preview berdasarkan input user
+function generateSkuPreview(): string {
+    if (!form.nama || !form.id_kategori || !form.satuan) {
+        return '';
+    }
+
+    // Ambil kode kategori dari props
+    const kategori = props.kategori.find((k) => k.id_kategori === form.id_kategori);
+    if (!kategori) return '';
+
+    const kodeKategori = kategori.id_kategori;
+    const namaToken = form.nama
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .substring(0, 6)
+        .toUpperCase();
+
+    const kemasan = form.satuan === 'pcs' ? 'PCS' : form.satuan === 'karton' ? `KRT${form.isi_per_pack}` : `PCK${form.isi_per_pack}`;
+
+    return `${kodeKategori}-${namaToken}-${kemasan}`;
+}
+
+// Auto-set SKU dari preview
+function autoSetSku() {
+    form.sku = generateSkuPreview();
+}
+
 function submit() {
     form.patch(`/admin/produk/${props.produk.id_produk}`);
 }
@@ -94,14 +120,26 @@ function submit() {
                             <!-- SKU (Editable) -->
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-emerald-700"> SKU * </label>
-                                <input
-                                    v-model="form.sku"
-                                    type="text"
-                                    maxlength="32"
-                                    class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                                    placeholder="Contoh: HB-MKP120-KRT12"
-                                    required
-                                />
+                                <div class="flex items-center gap-2">
+                                    <input
+                                        v-model="form.sku"
+                                        type="text"
+                                        maxlength="32"
+                                        placeholder="Contoh: HB-MKP120-KRT12"
+                                        class="flex-1 rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                        required
+                                    />
+                                    <BaseButton
+                                        type="button"
+                                        @click="autoSetSku"
+                                        variant="secondary"
+                                        size="sm"
+                                        icon="fas fa-magic"
+                                        title="Generate SKU otomatis"
+                                    >
+                                        Auto
+                                    </BaseButton>
+                                </div>
                                 <p class="mt-1 text-xs text-emerald-600">Format: KODE-NAMA-KEMASAN (max 32 karakter)</p>
                                 <div v-if="form.errors.sku" class="mt-1 text-sm text-red-600">
                                     {{ form.errors.sku }}

@@ -28,7 +28,6 @@ class TransaksiPOSController extends Controller
     {
         return Inertia::render('Kasir/POS/Index', [
             'produk' => Produk::with('kategori')
-                ->inStock()
                 ->get()
                 ->map(function ($p) {
                     return [
@@ -67,9 +66,8 @@ class TransaksiPOSController extends Controller
 
         $searchTerm = strtolower(trim($query));
 
-        // Ambil semua produk in stock
+        // Ambil semua produk
         $produk = Produk::with('kategori')
-            ->inStock()
             ->get()
             ->map(function ($p) use ($searchTerm) {
                 $score = 0;
@@ -196,7 +194,6 @@ class TransaksiPOSController extends Controller
 
         $produk = Produk::with('kategori')
             ->where('barcode', $barcode)
-            ->inStock()
             ->first();
 
         if (! $produk) {

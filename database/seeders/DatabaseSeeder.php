@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             PenggunaSeeder::class,
             ProdukSeeder::class,
             TransaksiSeederRandom::class,
+            ProdukDummys::class,
+            ProdukDummy::class,
         ]);
     }
 }

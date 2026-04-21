@@ -57,11 +57,9 @@ function generateSkuPreview(): string {
     return `${kodeKategori}-${namaToken}-${kemasan}`;
 }
 
-// Auto-set SKU dari preview jika user belum manual override
+// Auto-set SKU dari preview
 function autoSetSku() {
-    if (!form.sku) {
-        form.sku = generateSkuPreview();
-    }
+    form.sku = generateSkuPreview();
 }
 
 function submit() {

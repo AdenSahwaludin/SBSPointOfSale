@@ -428,7 +428,8 @@ function addToCart(produk: Produk, mode: 'unit' | 'pack' = 'unit') {
         } else {
             addNotification({
                 type: 'warning',
-                title: 'Produk tidak tersedia!',
+                title: 'Stok produk habis!',
+                message: `Produk ${produk.nama} saat ini tidak tersedia.`,
             });
         }
     }
@@ -986,16 +987,20 @@ onMounted(() => {
             }
         }
 
-        // F2 - Process transaction
+        // F2 - Focus to Jumlah Bayar
         if (e.key === 'F2') {
             e.preventDefault();
-            processTransaction();
+            const bayarEl = document.getElementById('jumlah-bayar-input') as HTMLInputElement;
+            if (bayarEl) {
+                bayarEl.focus();
+                bayarEl.select();
+            }
         }
 
-        // F3 - Clear cart
+        // F3 - Process transaction
         if (e.key === 'F3') {
             e.preventDefault();
-            clearCart();
+            processTransaction();
         }
     };
 
@@ -1113,9 +1118,21 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                         <div
                             v-for="produk in filteredProduk"
                             :key="produk.id_produk"
-                            class="cursor-pointer rounded-xl border-2 border-transparent bg-gray-50 p-4 transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md"
+                            :class="[
+                                'relative cursor-pointer rounded-xl border-2 p-4 transition-all hover:shadow-md',
+                                produk.stok <= 0
+                                    ? 'border-gray-200 bg-gray-50 opacity-75 grayscale hover:border-gray-300'
+                                    : 'border-transparent bg-white hover:border-emerald-500 hover:bg-emerald-50',
+                            ]"
                             @click="addToCart(produk)"
                         >
+                            <!-- Out of Stock Overlay -->
+                            <div
+                                v-if="produk.stok <= 0"
+                                class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/40 backdrop-blur-[1px]"
+                            >
+                                <span class="rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white shadow-lg">STOK HABIS</span>
+                            </div>
                             <div class="text-center">
                                 <div class="mb-2 flex items-center justify-center">
                                     <span class="rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-600">
@@ -1379,6 +1396,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                     <div v-if="metodeBayar === 'TUNAI'">
                         <label class="mb-2 block text-sm font-medium text-gray-700">Jumlah Bayar</label>
                         <input
+                            id="jumlah-bayar-input"
                             :value="jumlahBayarDisplay"
                             @input="
                                 (e) => {
@@ -1440,12 +1458,12 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                             :loading="transactionForm.processing"
                         >
                             <i class="fas fa-credit-card mr-2"></i>
-                            Bayar (F2)
+                            Bayar (F3)
                         </BaseButton>
 
                         <BaseButton @click="clearCart" variant="outline" class="w-full">
                             <i class="fas fa-trash mr-2"></i>
-                            Clear (F3)
+                            Clear
                         </BaseButton>
                     </div>
                 </div>

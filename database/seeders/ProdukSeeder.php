@@ -79,7 +79,7 @@ class ProdukSeeder extends Seeder
             [
                 'sku' => 'LR-GSU-140ML',
                 'barcode' => '8997000610005',
-                'no_bpom' => 'QD.185616215',
+                'no_bpom' => 'POM TR195626561',
                 'nama' => 'Minyak Gosok Urut Cap Laron 140 mL',
                 'id_kategori' => 'AR',
                 'satuan' => 'pcs',
@@ -126,7 +126,7 @@ class ProdukSeeder extends Seeder
             [
                 'sku' => 'LR-GSU-275ML',
                 'barcode' => '8997000610008',
-                'no_bpom' => 'QD.185616218',
+                'no_bpom' => 'POM TR195626561',
                 'nama' => 'Minyak Gosok Urut Cap Laron 275 mL',
                 'id_kategori' => 'SP01',
                 'satuan' => 'pcs',
@@ -235,7 +235,7 @@ class ProdukSeeder extends Seeder
             [
                 'sku' => 'LR-GSU-PCK72',
                 'barcode' => null,
-                'no_bpom' => 'QD.185616215',
+                'no_bpom' => 'POM TR195626561',
                 'nama' => 'Minyak Gosok Urut Cap Laron Pack 72 pcs (140 mL)',
                 'id_kategori' => 'AR',
                 'satuan' => 'pack',
@@ -282,7 +282,7 @@ class ProdukSeeder extends Seeder
             [
                 'sku' => 'LR-GSU-PCK36',
                 'barcode' => null,
-                'no_bpom' => 'QD.185616218',
+                'no_bpom' => 'POM TR195626561',
                 'nama' => 'Minyak Gosok Urut Cap Laron Pack 36 pcs (275 mL)',
                 'id_kategori' => 'SP01',
                 'satuan' => 'pack',
