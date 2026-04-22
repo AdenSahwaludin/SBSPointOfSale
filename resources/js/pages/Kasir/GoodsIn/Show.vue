@@ -74,10 +74,7 @@ onClickOutside(productDropdownRef, () => {
 const filteredAvailableProducts = computed(() => {
     if (!searchProductQuery.value) return props.availableProducts;
     const query = searchProductQuery.value.toLowerCase().trim();
-    return props.availableProducts.filter(p => 
-        p.nama.toLowerCase().includes(query) || 
-        p.sku.toLowerCase().includes(query)
-    );
+    return props.availableProducts.filter((p) => p.nama.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query));
 });
 
 function selectProduct(product: Produk) {
@@ -343,19 +340,27 @@ function submitPO() {
                                 <td class="px-4 py-3 text-sm whitespace-nowrap text-emerald-700">
                                     <span class="font-medium">{{ detail.jumlah_dipesan }}</span> {{ detail.produk.satuan }}
                                 </td>
-                                <td v-if="goodsIn.status === 'received' || goodsIn.status === 'partial_received'" class="px-4 py-3 text-sm whitespace-nowrap text-emerald-700">
+                                <td
+                                    v-if="goodsIn.status === 'received' || goodsIn.status === 'partial_received'"
+                                    class="px-4 py-3 text-sm whitespace-nowrap text-emerald-700"
+                                >
                                     <span class="font-medium">{{ detail.jumlah_diterima }}</span> {{ detail.produk.satuan }}
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
                                     <span
-                                        v-if="(goodsIn.status === 'received' || goodsIn.status === 'partial_received') && detail.jumlah_diterima >= detail.jumlah_dipesan"
+                                        v-if="
+                                            (goodsIn.status === 'received' || goodsIn.status === 'partial_received') &&
+                                            detail.jumlah_diterima >= detail.jumlah_dipesan
+                                        "
                                         class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700"
                                     >
                                         <i class="fas fa-check"></i>
                                         Lengkap
                                     </span>
                                     <span
-                                        v-else-if="(goodsIn.status === 'received' || goodsIn.status === 'partial_received') && detail.jumlah_diterima > 0"
+                                        v-else-if="
+                                            (goodsIn.status === 'received' || goodsIn.status === 'partial_received') && detail.jumlah_diterima > 0
+                                        "
                                         class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700"
                                     >
                                         <i class="fas fa-exclamation-triangle"></i>
@@ -422,7 +427,10 @@ function submitPO() {
                                     id="product-select"
                                     v-model="searchProductQuery"
                                     @focus="isProductDropdownOpen = true"
-                                    @input="selectedProductId = null; isProductDropdownOpen = true"
+                                    @input="
+                                        selectedProductId = null;
+                                        isProductDropdownOpen = true;
+                                    "
                                     placeholder="-- Ketik SKU atau Nama Produk --"
                                     class="w-full rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                                     autocomplete="off"

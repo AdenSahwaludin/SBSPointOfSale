@@ -12,6 +12,151 @@ class ProdukDummys extends Seeder
      */
     public function run(): void
     {
+        // Manual Products (Migrated from ProdukDummy.php)
+        $manualProducts = [
+            // AROMATHERAPY
+            [
+                'sku' => 'DA-LAV-60ML',
+                'nama' => 'Minyak Aromaterapi Lavender 60 mL',
+                'id_kategori' => 'AR',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 18000,
+                'harga_pack' => 17500,
+                'stok' => 120,
+                'no_bpom' => 'NA18230100001',
+            ],
+            [
+                'sku' => 'DA-LAV-140ML',
+                'nama' => 'Minyak Aromaterapi Lavender 140 mL',
+                'id_kategori' => 'AR',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 35000,
+                'harga_pack' => 34000,
+                'stok' => 80,
+                'no_bpom' => 'NA18230100002',
+            ],
+            // ESSENTIAL OIL
+            [
+                'sku' => 'DA-TEA-60ML',
+                'nama' => 'Essential Oil Tea Tree 60 mL',
+                'id_kategori' => 'EL',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 22000,
+                'harga_pack' => 21000,
+                'stok' => 95,
+                'no_bpom' => 'NA18230100003',
+            ],
+            [
+                'sku' => 'DA-EUC-140ML',
+                'nama' => 'Essential Oil Eucalyptus 140 mL',
+                'id_kategori' => 'EL',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 36000,
+                'harga_pack' => 35000,
+                'stok' => 70,
+                'no_bpom' => 'NA18230100004',
+            ],
+            // HERBAL
+            [
+                'sku' => 'DA-JAE-60ML',
+                'nama' => 'Minyak Jahe Herbal 60 mL',
+                'id_kategori' => 'HB',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 15000,
+                'harga_pack' => 14500,
+                'stok' => 110,
+                'no_bpom' => 'TR18230100005',
+            ],
+            [
+                'sku' => 'DA-KUN-140ML',
+                'nama' => 'Minyak Kunyit Herbal 140 mL',
+                'id_kategori' => 'HB',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 30000,
+                'harga_pack' => 29000,
+                'stok' => 65,
+                'no_bpom' => 'TR18230100006',
+            ],
+            // SPICE OIL
+            [
+                'sku' => 'DA-CNG-60ML',
+                'nama' => 'Minyak Cengkeh 60 mL',
+                'id_kategori' => 'SP01',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 17000,
+                'harga_pack' => 16500,
+                'stok' => 90,
+                'no_bpom' => 'TR18230100007',
+            ],
+            [
+                'sku' => 'DA-KYT-140ML',
+                'nama' => 'Minyak Kayu Manis 140 mL',
+                'id_kategori' => 'SP01',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 34000,
+                'harga_pack' => 33000,
+                'stok' => 55,
+                'no_bpom' => 'TR18230100008',
+            ],
+            // THERAPEUTIC
+            [
+                'sku' => 'LR-URU-140ML',
+                'nama' => 'Minyak Urut Herbal 140 mL',
+                'id_kategori' => 'TH',
+                'satuan' => 'pcs',
+                'isi_per_pack' => 1,
+                'harga' => 32000,
+                'harga_pack' => 31000,
+                'stok' => 60,
+                'no_bpom' => 'QD18230100009',
+            ],
+            // PACKS & KARTONS
+            [
+                'sku' => 'DA-LAV-KRT144',
+                'nama' => 'Minyak Aromaterapi Lavender Karton 144 pcs',
+                'id_kategori' => 'AR',
+                'satuan' => 'karton',
+                'isi_per_pack' => 144,
+                'harga' => 2400000,
+                'harga_pack' => 2400000,
+                'stok' => 10,
+                'no_bpom' => 'NA18230100001',
+            ],
+            [
+                'sku' => 'DA-TEA-PCK72',
+                'nama' => 'Essential Oil Tea Tree Pack 72 pcs',
+                'id_kategori' => 'EL',
+                'satuan' => 'pack',
+                'isi_per_pack' => 72,
+                'harga' => 1500000,
+                'harga_pack' => 1500000,
+                'stok' => 15,
+                'no_bpom' => 'NA18230100003',
+            ],
+        ];
+
+        $companyCode = '70006';
+        $no = 200; // Start sequence for manual/dummy products
+
+        foreach ($manualProducts as $mp) {
+            $mp['barcode'] = ($mp['satuan'] === 'pcs') ? $this->generateEAN13('899', $companyCode, $no++) : null;
+            $mp['sisa_pcs_terbuka'] = 0;
+            $mp['batas_stok_minimum'] = 20;
+            $mp['jumlah_restock'] = 50;
+            
+            // Use updateOrCreate to avoid unique SKU conflict
+            Produk::updateOrCreate(['sku' => $mp['sku']], $mp);
+        }
+
+        // Generated Products
         $baseProducts = [
             ['code' => 'LAV', 'name' => 'Lavender', 'cat' => 'AR', 'price' => 18000],
             ['code' => 'EUC', 'name' => 'Eucalyptus', 'cat' => 'EL', 'price' => 20000],
@@ -41,15 +186,13 @@ class ProdukDummys extends Seeder
             ['label' => '275ML', 'ml' => 275, 'multiplier' => 4],
         ];
 
-        $no = 1;
-
         foreach ($baseProducts as $bp) {
             foreach ($sizes as $size) {
-
+                $skuBase = "DA-{$bp['code']}-{$size['label']}";
+                
                 // PCS
-                Produk::create([
-                    'sku' => "DA-{$bp['code']}-{$size['label']}",
-                    'barcode' => '8998' . str_pad($no++, 9, '0', STR_PAD_LEFT),
+                Produk::updateOrCreate(['sku' => $skuBase], [
+                    'barcode' => $this->generateEAN13('899', $companyCode, $no++),
                     'no_bpom' => 'NA1823' . str_pad($no, 6, '0', STR_PAD_LEFT),
                     'nama' => "Minyak {$bp['name']} {$size['ml']} mL",
                     'id_kategori' => $bp['cat'],
@@ -64,8 +207,7 @@ class ProdukDummys extends Seeder
                 ]);
 
                 // PACK 36
-                Produk::create([
-                    'sku' => "DA-{$bp['code']}-PCK36",
+                Produk::updateOrCreate(['sku' => "{$skuBase}-PCK36"], [
                     'barcode' => null,
                     'no_bpom' => 'NA1823' . str_pad($no, 6, '0', STR_PAD_LEFT),
                     'nama' => "Minyak {$bp['name']} Pack 36 pcs ({$size['ml']} mL)",
@@ -81,8 +223,7 @@ class ProdukDummys extends Seeder
                 ]);
 
                 // KARTON
-                Produk::create([
-                    'sku' => "DA-{$bp['code']}-KRT144",
+                Produk::updateOrCreate(['sku' => "{$skuBase}-KRT144"], [
                     'barcode' => null,
                     'no_bpom' => 'NA1823' . str_pad($no, 6, '0', STR_PAD_LEFT),
                     'nama' => "Minyak {$bp['name']} Karton 144 pcs ({$size['ml']} mL)",
@@ -99,5 +240,20 @@ class ProdukDummys extends Seeder
             }
         }
     }
-}
 
+    private function generateEAN13($prefix, $company, $sequence)
+    {
+        $code = $prefix . str_pad($company, 5, '0', STR_PAD_LEFT) . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        $sum = 0;
+        for ($i = 0; $i < 12; $i++) {
+            $digit = (int)$code[$i];
+            if ($i % 2 === 0) {
+                $sum += $digit;
+            } else {
+                $sum += $digit * 3;
+            }
+        }
+        $checkDigit = (10 - ($sum % 10)) % 10;
+        return $code . $checkDigit;
+    }
+}

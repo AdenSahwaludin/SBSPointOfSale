@@ -58,13 +58,34 @@ class TransaksiController extends Controller
 
         $transaksi = $query->paginate($perPage)->withQueryString();
 
+        // Base query for stats (apply all filters EXCEPT status)
+        $statsQuery = Transaksi::query();
+        
+        if ($search) {
+            $statsQuery->where(function ($q) use ($search) {
+                $q->where('nomor_transaksi', 'like', "%{$search}%")
+                    ->orWhereHas('pelanggan', function ($q2) use ($search) {
+                        $q2->where('nama', 'like', "%{$search}%");
+                    });
+            });
+        }
+        if ($metodeBayar && $metodeBayar !== 'all') {
+            $statsQuery->where('metode_bayar', $metodeBayar);
+        }
+        if ($startDate) {
+            $statsQuery->whereDate('tanggal', '>=', $startDate);
+        }
+        if ($endDate) {
+            $statsQuery->whereDate('tanggal', '<=', $endDate);
+        }
+
         // Calculate stats
         $stats = [
-            'total_transaksi' => Transaksi::count(),
-            'total_lunas' => Transaksi::where('status_pembayaran', 'LUNAS')->count(),
-            'total_menunggu' => Transaksi::where('status_pembayaran', 'MENUNGGU')->count(),
-            'total_batal' => Transaksi::where('status_pembayaran', 'BATAL')->count(),
-            'total_nilai' => Transaksi::where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_transaksi' => (clone $statsQuery)->count(),
+            'total_lunas' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => (clone $statsQuery)->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => (clone $statsQuery)->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->sum('total'),
         ];
 
         return Inertia::render('Admin/Transactions/Index', [
@@ -120,17 +141,31 @@ class TransaksiController extends Controller
 
         $transaksi = $query->paginate($perPage)->withQueryString();
 
+        // Base query for credit stats (apply all filters EXCEPT status)
+        $creditStatsQuery = Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT);
+        
+        if ($search) {
+            $creditStatsQuery->where(function ($q) use ($search) {
+                $q->where('nomor_transaksi', 'like', "%{$search}%")
+                    ->orWhereHas('pelanggan', function ($q2) use ($search) {
+                        $q2->where('nama', 'like', "%{$search}%");
+                    });
+            });
+        }
+        if ($startDate) {
+            $creditStatsQuery->whereDate('tanggal', '>=', $startDate);
+        }
+        if ($endDate) {
+            $creditStatsQuery->whereDate('tanggal', '<=', $endDate);
+        }
+
         // Calculate stats for credit transactions only
         $creditStats = [
-            'total_transaksi' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)->count(),
-            'total_lunas' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)
-                ->where('status_pembayaran', 'LUNAS')->count(),
-            'total_menunggu' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)
-                ->where('status_pembayaran', 'MENUNGGU')->count(),
-            'total_batal' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)
-                ->where('status_pembayaran', 'BATAL')->count(),
-            'total_nilai' => Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT)
-                ->where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_transaksi' => (clone $creditStatsQuery)->count(),
+            'total_lunas' => (clone $creditStatsQuery)->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => (clone $creditStatsQuery)->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => (clone $creditStatsQuery)->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => (clone $creditStatsQuery)->where('status_pembayaran', 'LUNAS')->sum('total'),
         ];
 
         return Inertia::render('Admin/Transactions/CreditIndex', [

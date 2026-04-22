@@ -148,7 +148,7 @@ function formatDate(dateString?: string) {
                     </table>
                 </div>
 
-                <!-- Empty State -->    
+                <!-- Empty State -->
                 <div v-if="pengguna.length === 0" class="py-12 text-center">
                     <i class="fas fa-users mb-4 text-4xl text-emerald-300"></i>
                     <h3 class="mb-2 text-lg font-medium text-emerald-800">Belum ada pengguna</h3>

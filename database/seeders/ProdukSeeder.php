@@ -16,8 +16,7 @@ class ProdukSeeder extends Seeder
             // A. Produk 60 mL (per pcs)
             [
                 'sku' => 'DA-GDP-60ML',
-                'barcode' => '8997000610001',
-                'no_bpom' => 'QD.185616211',
+                'no_bpom' => 'POM QD195616871',
                 'nama' => 'Minyak Gandarpura Cap Daun 60 mL',
                 'id_kategori' => 'HB',
                 'satuan' => 'pcs',
@@ -31,8 +30,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-SRH-60ML',
-                'barcode' => '8997000610002',
-                'no_bpom' => 'QD.185616212',
+                'no_bpom' => 'POM TR185617791',
                 'nama' => 'Minyak Sereh Cap Daun 60 mL',
                 'id_kategori' => 'EL',
                 'satuan' => 'pcs',
@@ -46,8 +44,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-ALK-60ML',
-                'barcode' => '8997000610003',
-                'no_bpom' => 'QD.185616213',
+                'no_bpom' => 'POM QD185616211',
                 'nama' => 'Minyak Akar Lawang Cap Daun 60 mL',
                 'id_kategori' => 'SP01',
                 'satuan' => 'pcs',
@@ -61,8 +58,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-KYP-60ML',
-                'barcode' => '8997000610004',
-                'no_bpom' => 'QD.185616214',
+                'no_bpom' => 'POM TR185620801',
                 'nama' => 'Minyak Kayu Putih Cap Daun 60 mL',
                 'id_kategori' => 'TH',
                 'satuan' => 'pcs',
@@ -78,7 +74,6 @@ class ProdukSeeder extends Seeder
             // B. Produk 140 mL (per pcs)
             [
                 'sku' => 'LR-GSU-140ML',
-                'barcode' => '8997000610005',
                 'no_bpom' => 'POM TR195626561',
                 'nama' => 'Minyak Gosok Urut Cap Laron 140 mL',
                 'id_kategori' => 'AR',
@@ -93,8 +88,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-ALK-140ML',
-                'barcode' => '8997000610006',
-                'no_bpom' => 'QD.185616216',
+                'no_bpom' => 'POM QD185616211',
                 'nama' => 'Minyak Akar Lawang Cap Daun 140 mL',
                 'id_kategori' => 'HB',
                 'satuan' => 'pcs',
@@ -108,8 +102,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-KYP-140ML',
-                'barcode' => '8997000610007',
-                'no_bpom' => 'QD.185616217',
+                'no_bpom' => 'POM TR185620801',
                 'nama' => 'Minyak Kayu Putih Cap Daun 140 mL',
                 'id_kategori' => 'EL',
                 'satuan' => 'pcs',
@@ -125,7 +118,6 @@ class ProdukSeeder extends Seeder
             // C. Produk 275 mL (per pcs)
             [
                 'sku' => 'LR-GSU-275ML',
-                'barcode' => '8997000610008',
                 'no_bpom' => 'POM TR195626561',
                 'nama' => 'Minyak Gosok Urut Cap Laron 275 mL',
                 'id_kategori' => 'SP01',
@@ -140,8 +132,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-ALK-275ML',
-                'barcode' => '8997000610009',
-                'no_bpom' => 'QD.185616219',
+                'no_bpom' => 'POM QD185616211',
                 'nama' => 'Minyak Akar Lawang Cap Daun 275 mL',
                 'id_kategori' => 'TH',
                 'satuan' => 'pcs',
@@ -155,8 +146,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-KYP-275ML',
-                'barcode' => '8997000610010',
-                'no_bpom' => 'QD.185616220',
+                'no_bpom' => 'POM TR185620801',
                 'nama' => 'Minyak Kayu Putih Cap Daun 275 mL',
                 'id_kategori' => 'AR',
                 'satuan' => 'pcs',
@@ -172,8 +162,7 @@ class ProdukSeeder extends Seeder
             // D. Produk Karton 60 mL (1 karton = 144 pcs)
             [
                 'sku' => 'DA-GDP-KRT144',
-                'barcode' => null,
-                'no_bpom' => 'QD.185616211',
+                'no_bpom' => 'POM QD195616871',
                 'nama' => 'Minyak Gandarpura Cap Daun Karton 144 pcs (60 mL)',
                 'id_kategori' => 'HB',
                 'satuan' => 'karton',
@@ -187,8 +176,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-SRH-KRT144',
-                'barcode' => null,
-                'no_bpom' => 'QD.185616212',
+                'no_bpom' => 'POM TR185617791',
                 'nama' => 'Minyak Sereh Cap Daun Karton 144 pcs (60 mL)',
                 'id_kategori' => 'EL',
                 'satuan' => 'karton',
@@ -202,8 +190,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-ALK-KRT144',
-                'barcode' => null,
-                'no_bpom' => 'QD.185616213',
+                'no_bpom' => 'POM QD185616211',
                 'nama' => 'Minyak Akar Lawang Cap Daun Karton 144 pcs (60 mL)',
                 'id_kategori' => 'SP01',
                 'satuan' => 'karton',
@@ -217,8 +204,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-KYP-KRT144',
-                'barcode' => null,
-                'no_bpom' => 'QD.185616214',
+                'no_bpom' => 'POM TR185620801',
                 'nama' => 'Minyak Kayu Putih Cap Daun Karton 144 pcs (60 mL)',
                 'id_kategori' => 'TH',
                 'satuan' => 'karton',
@@ -234,7 +220,6 @@ class ProdukSeeder extends Seeder
             // E. Produk Pack 140 mL (1 pack = 72 pcs)
             [
                 'sku' => 'LR-GSU-PCK72',
-                'barcode' => null,
                 'no_bpom' => 'POM TR195626561',
                 'nama' => 'Minyak Gosok Urut Cap Laron Pack 72 pcs (140 mL)',
                 'id_kategori' => 'AR',
@@ -249,8 +234,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-ALK-PCK72',
-                'barcode' => null,
-                'no_bpom' => 'QD.185616216',
+                'no_bpom' => 'POM QD185616211',
                 'nama' => 'Minyak Akar Lawang Cap Daun Pack 72 pcs (140 mL)',
                 'id_kategori' => 'HB',
                 'satuan' => 'pack',
@@ -264,8 +248,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-KYP-PCK72',
-                'barcode' => null,
-                'no_bpom' => 'QD.185616217',
+                'no_bpom' => 'POM TR185620801',
                 'nama' => 'Minyak Kayu Putih Cap Daun Pack 72 pcs (140 mL)',
                 'id_kategori' => 'EL',
                 'satuan' => 'pack',
@@ -281,7 +264,6 @@ class ProdukSeeder extends Seeder
             // F. Produk Pack 275 mL (1 pack = 36 pcs)
             [
                 'sku' => 'LR-GSU-PCK36',
-                'barcode' => null,
                 'no_bpom' => 'POM TR195626561',
                 'nama' => 'Minyak Gosok Urut Cap Laron Pack 36 pcs (275 mL)',
                 'id_kategori' => 'SP01',
@@ -296,8 +278,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-ALK-PCK36',
-                'barcode' => null,
-                'no_bpom' => 'QD.185616219',
+                'no_bpom' => 'POM QD185616211',
                 'nama' => 'Minyak Akar Lawang Cap Daun Pack 36 pcs (275 mL)',
                 'id_kategori' => 'TH',
                 'satuan' => 'pack',
@@ -311,8 +292,7 @@ class ProdukSeeder extends Seeder
             ],
             [
                 'sku' => 'DA-KYP-PCK36',
-                'barcode' => null,
-                'no_bpom' => 'QD.185616220',
+                'no_bpom' => 'POM TR185620801',
                 'nama' => 'Minyak Kayu Putih Cap Daun Pack 36 pcs (275 mL)',
                 'id_kategori' => 'AR',
                 'satuan' => 'pack',
@@ -326,8 +306,33 @@ class ProdukSeeder extends Seeder
             ],
         ];
 
+        $companyCode = '70006';
+        $no = 1;
+
         foreach ($products as $product) {
+            // Only generate barcode for pcs, and if not already set or needing update
+            if ($product['satuan'] === 'pcs') {
+                $product['barcode'] = $this->generateEAN13('899', $companyCode, $no++);
+            } else {
+                $product['barcode'] = null;
+            }
             Produk::create($product);
         }
+    }
+
+    private function generateEAN13($prefix, $company, $sequence)
+    {
+        $code = $prefix . str_pad($company, 5, '0', STR_PAD_LEFT) . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        $sum = 0;
+        for ($i = 0; $i < 12; $i++) {
+            $digit = (int)$code[$i];
+            if ($i % 2 === 0) {
+                $sum += $digit;
+            } else {
+                $sum += $digit * 3;
+            }
+        }
+        $checkDigit = (10 - ($sum % 10)) % 10;
+        return $code . $checkDigit;
     }
 }

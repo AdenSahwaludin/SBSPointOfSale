@@ -218,7 +218,7 @@ const filteredPelanggan = computed(() => {
         const email = (p.email || '').toLowerCase();
         const telp = (p.telepon || '').toLowerCase();
         return name.includes(q) || email.includes(q) || telp.includes(q);
-    }); 
+    });
 });
 
 function openPelangganDropdown() {
@@ -1081,9 +1081,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
 
                     <!-- Search info -->
                     <div v-if="searchQuery && !isSearching" class="mt-3 text-sm text-gray-600">
-                        <span v-if="filteredProduk.length > 0">
-                            Ditemukan {{ filteredProduk.length }} produk
-                        </span>
+                        <span v-if="filteredProduk.length > 0"> Ditemukan {{ filteredProduk.length }} produk </span>
                         <span v-else class="text-orange-600">
                             Tidak ada produk ditemukan untuk "<strong>{{ searchQuery }}</strong
                             >"

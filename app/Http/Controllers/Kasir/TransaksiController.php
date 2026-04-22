@@ -57,13 +57,34 @@ class TransaksiController extends Controller
 
         $transaksi = $query->paginate($perPage)->withQueryString();
 
+        // Base query for stats (apply all filters EXCEPT status)
+        $statsQuery = Transaksi::query();
+        
+        if ($search) {
+            $statsQuery->where(function ($q) use ($search) {
+                $q->where('nomor_transaksi', 'like', "%{$search}%")
+                    ->orWhereHas('pelanggan', function ($q2) use ($search) {
+                        $q2->where('nama', 'like', "%{$search}%");
+                    });
+            });
+        }
+        if ($metodeBayar && $metodeBayar !== 'all') {
+            $statsQuery->where('metode_bayar', $metodeBayar);
+        }
+        if ($startDate) {
+            $statsQuery->whereDate('tanggal', '>=', $startDate);
+        }
+        if ($endDate) {
+            $statsQuery->whereDate('tanggal', '<=', $endDate);
+        }
+
         // Calculate stats
         $stats = [
-            'total_transaksi' => Transaksi::count(),
-            'total_lunas' => Transaksi::where('status_pembayaran', 'LUNAS')->count(),
-            'total_menunggu' => Transaksi::where('status_pembayaran', 'MENUNGGU')->count(),
-            'total_batal' => Transaksi::where('status_pembayaran', 'BATAL')->count(),
-            'total_nilai' => Transaksi::where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_transaksi' => (clone $statsQuery)->count(),
+            'total_lunas' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => (clone $statsQuery)->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => (clone $statsQuery)->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->sum('total'),
         ];
 
         return Inertia::render('Kasir/Transactions/Index', [
@@ -115,15 +136,29 @@ class TransaksiController extends Controller
 
         $transaksi = $query->paginate($perPage)->withQueryString();
 
+        // Base query for stats (apply all filters EXCEPT status)
+        $statsQuery = Transaksi::whereDate('tanggal', Carbon::today());
+        
+        if ($search) {
+            $statsQuery->where(function ($q) use ($search) {
+                $q->where('nomor_transaksi', 'like', "%{$search}%")
+                    ->orWhereHas('pelanggan', function ($q2) use ($search) {
+                        $q2->where('nama', 'like', "%{$search}%");
+                    });
+            });
+        }
+        if ($metodeBayar && $metodeBayar !== 'all') {
+            $statsQuery->where('metode_bayar', $metodeBayar);
+        }
+
         // Calculate today's stats
-        $todayTransactions = Transaksi::whereDate('tanggal', Carbon::today());
         $stats = [
-            'total_transaksi' => $todayTransactions->count(),
-            'total_lunas' => $todayTransactions->where('status_pembayaran', 'LUNAS')->count(),
-            'total_menunggu' => $todayTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
-            'total_batal' => $todayTransactions->where('status_pembayaran', 'BATAL')->count(),
-            'total_nilai' => $todayTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
-            'total_item_terjual' => $todayTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
+            'total_transaksi' => (clone $statsQuery)->count(),
+            'total_lunas' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => (clone $statsQuery)->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => (clone $statsQuery)->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_item_terjual' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->sum('total_item'),
         ];
 
         return Inertia::render('Kasir/Transactions/Today', [

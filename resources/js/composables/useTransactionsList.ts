@@ -66,23 +66,18 @@ export function useTransactionsList<T extends AnyObject>(
     const displayedTransaksi = computed(() => props.transaksi.data);
 
     const filteredTotalNilai = computed<number>(() => {
-        // Sum only visible rows; coerce to numbers if formatted strings
-        return displayedTransaksi.value.reduce((sum: number, t: any) => {
-            const raw = t?.total;
-            const value = typeof raw === 'number' ? raw : parseInt(String(raw).replace(/[^0-9-]/g, ''), 10) || 0;
-            return sum + value;
-        }, 0);
+        return Number(props.stats?.total_nilai) || 0;
     });
 
     const formatCurrency = (amount: number): string => 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
 
     const statsTabsData = computed(() => {
-        // Count transaksi per status dari displayed table
+        // Use stats from backend which are already filtered
         const counts = {
-            total_transaksi: displayedTransaksi.value.length,
-            total_lunas: displayedTransaksi.value.filter((t) => t.status_pembayaran === 'LUNAS').length,
-            total_menunggu: displayedTransaksi.value.filter((t) => t.status_pembayaran === 'MENUNGGU').length,
-            total_batal: displayedTransaksi.value.filter((t) => t.status_pembayaran === 'BATAL').length,
+            total_transaksi: props.stats?.total_transaksi || 0,
+            total_lunas: props.stats?.total_lunas || 0,
+            total_menunggu: props.stats?.total_menunggu || 0,
+            total_batal: props.stats?.total_batal || 0,
         };
 
         return [

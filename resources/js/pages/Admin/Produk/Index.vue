@@ -325,51 +325,6 @@ function goToPage(url: string | null) {
                 <BaseButton @click="$inertia.visit('/admin/produk/create')" variant="primary" icon="fas fa-plus"> Tambah Produk </BaseButton>
             </div>
 
-            <!-- Search Bar -->
-            <div class="card-emerald p-4">
-                <div class="relative">
-                    <div class="relative flex items-center">
-                        <i class="fas fa-search absolute left-4 text-emerald-400"></i>
-                        <input
-                            v-model="searchQuery"
-                            @input="handleSearch"
-                            type="text"
-                            placeholder="Cari produk berdasarkan nama, ID, SKU, barcode, atau kategori..."
-                            class="w-full rounded-lg border border-emerald-200 bg-white py-3 pr-24 pl-11 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
-                        />
-                        <button
-                            v-if="searchQuery"
-                            @click="clearSearch"
-                            class="absolute right-3 rounded-lg px-3 py-1.5 text-sm text-emerald-600 transition-colors hover:bg-emerald-100"
-                        >
-                            <i class="fas fa-times mr-1"></i>
-                            Clear
-                        </button>
-                        <div v-if="isSearching" class="absolute right-3">
-                            <i class="fas fa-spinner fa-spin text-emerald-500"></i>
-                        </div>
-                    </div>
-
-                    <!-- Search Info -->
-                    <div v-if="searchQuery.trim()" class="mt-2 text-sm">
-                        <span v-if="isSearching" class="text-emerald-600">
-                            <i class="fas fa-spinner fa-spin mr-1"></i>
-                            Mencari...
-                        </span>
-                        <span v-else-if="searchResults.length > 0" class="text-emerald-700">
-                            <i class="fas fa-check-circle mr-1 text-green-600"></i>
-                            Ditemukan <strong>{{ searchResults.length }}</strong> produk untuk "<strong>{{ searchQuery }}</strong
-                            >"
-                        </span>
-                        <span v-else class="text-red-600">
-                            <i class="fas fa-exclamation-circle mr-1"></i>
-                            Tidak ada produk ditemukan untuk "<strong>{{ searchQuery }}</strong
-                            >"
-                        </span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Filter & Stats Section -->
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <!-- Stats Cards -->
@@ -531,7 +486,50 @@ function goToPage(url: string | null) {
                     Menampilkan <strong>{{ statsData.displayed }}</strong> dari <strong>{{ statsData.total }}</strong> produk
                 </div>
             </div>
+            <!-- Search Bar -->
+            <div class="card-emerald p-4">
+                <div class="relative">
+                    <div class="relative flex items-center">
+                        <i class="fas fa-search absolute left-4 text-emerald-400"></i>
+                        <input
+                            v-model="searchQuery"
+                            @input="handleSearch"
+                            type="text"
+                            placeholder="Cari produk berdasarkan nama, ID, SKU, barcode, atau kategori..."
+                            class="w-full rounded-lg border border-emerald-200 bg-white py-3 pr-24 pl-11 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none"
+                        />
+                        <button
+                            v-if="searchQuery"
+                            @click="clearSearch"
+                            class="absolute right-3 rounded-lg px-3 py-1.5 text-sm text-emerald-600 transition-colors hover:bg-emerald-100"
+                        >
+                            <i class="fas fa-times mr-1"></i>
+                            Clear
+                        </button>
+                        <div v-if="isSearching" class="absolute right-3">
+                            <i class="fas fa-spinner fa-spin text-emerald-500"></i>
+                        </div>
+                    </div>
 
+                    <!-- Search Info -->
+                    <div v-if="searchQuery.trim()" class="mt-2 text-sm">
+                        <span v-if="isSearching" class="text-emerald-600">
+                            <i class="fas fa-spinner fa-spin mr-1"></i>
+                            Mencari...
+                        </span>
+                        <span v-else-if="searchResults.length > 0" class="text-emerald-700">
+                            <i class="fas fa-check-circle mr-1 text-green-600"></i>
+                            Ditemukan <strong>{{ searchResults.length }}</strong> produk untuk "<strong>{{ searchQuery }}</strong
+                            >"
+                        </span>
+                        <span v-else class="text-red-600">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            Tidak ada produk ditemukan untuk "<strong>{{ searchQuery }}</strong
+                            >"
+                        </span>
+                    </div>
+                </div>
+            </div>
             <!-- Products Grid -->
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
                 <div class="p-6">

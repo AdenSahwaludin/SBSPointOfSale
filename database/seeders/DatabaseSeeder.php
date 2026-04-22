@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
             ProdukSeeder::class,
             TransaksiSeederRandom::class,
             ProdukDummys::class,
-            ProdukDummy::class,
         ]);
     }
 }
