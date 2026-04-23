@@ -1,352 +1,339 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8">
-    <title>Ringkasan Laporan</title>
+    <title>Ringkasan Laporan - Sari Bumi Sakti</title>
     <style>
+        @page { margin: 40px 50px; }
         body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            color: #333;
-            line-height: 1.6;
-            font-size: 11px;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #2b2b2b;
+            line-height: 1.4;
+            font-size: 10px;
             margin: 0;
             padding: 0;
+            background-color: #ffffff;
         }
 
+        /* Typography & Hierarchy */
+        h1, h2, h3, h4, p { margin: 0; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: bold; }
+        .text-muted { color: #6b7280; }
+
+        /* Corporate Header */
         .header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #10b981;
-            padding-bottom: 10px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #000000;
         }
-
+        .header table { width: 100%; border: none; margin: 0; }
+        .header td { border: none; padding: 0; background: none; }
         .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #10b981;
+            font-size: 28px;
+            font-weight: 800;
+            color: #000000;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            margin-bottom: 5px;
         }
-
         .report-title {
             font-size: 14px;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 5px;
-        }
-
-        .period-info {
-            font-size: 10px;
-            color: #777;
-        }
-
-        .stats-container {
-            width: 100%;
-            margin-bottom: 20px;
-            page-break-inside: avoid;
-        }
-
-        .stat-card {
-            display: inline-block;
-            width: 30%;
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            padding: 10px;
-            border-radius: 4px;
-            text-align: center;
-            margin-right: 2%;
-            margin-bottom: 10px;
-            vertical-align: top;
-            font-size: 9px;
-        }
-
-        .stat-card:nth-child(3n) {
-            margin-right: 0;
-        }
-
-        .stat-label {
-            display: block;
-            font-size: 9px;
+            font-weight: normal;
+            color: #4b5563;
             text-transform: uppercase;
-            color: #6c757d;
-            margin-bottom: 3px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+        .period-info {
+            font-size: 11px;
+            color: #000000;
+            margin-top: 5px;
         }
 
-        .stat-value {
-            display: block;
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
+        /* Executive Summary Stats */
+        .exec-summary {
+            width: 100%;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 20px;
         }
-
-        .text-green {
-            color: #10b981;
-        }
-
-        .text-orange {
-            color: #f59e0b;
-        }
-
-        .text-red {
-            color: #ef4444;
-        }
-
-        table {
+        .exec-summary table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            margin-bottom: 20px;
+        }
+        .exec-summary td {
+            vertical-align: top;
+            width: 33.33%;
+            padding-right: 20px;
+            border-right: 1px solid #e5e7eb;
+        }
+        .exec-summary td:last-child {
+            padding-right: 0;
+            border-right: none;
+        }
+        .stat-group { margin-bottom: 15px; }
+        .stat-group:last-child { margin-bottom: 0; }
+        .stat-label {
             font-size: 9px;
-            page-break-inside: avoid;
-        }
-
-        th {
-            background-color: #f3f4f6;
-            color: #374151;
-            font-weight: 600;
-            text-align: left;
-            padding: 8px 6px;
-            border-bottom: 1.5px solid #e5e7eb;
             text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000000;
+        }
+        .stat-value.highlight {
+            font-size: 20px;
         }
 
-        td {
-            padding: 7px 6px;
-            border-bottom: 1px solid #e5e7eb;
-            color: #4b5563;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9fafb;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 8px;
-            font-weight: 600;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .badge-lunas {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-menunggu {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-batal {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-
-        .footer {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #e5e7eb;
-            font-size: 8px;
-            color: #9ca3af;
-            text-align: right;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .font-mono {
-            font-family: monospace;
-        }
-
+        /* Sections */
         .section-title {
             font-size: 12px;
-            color: #374151;
-            margin-top: 15px;
-            margin-bottom: 8px;
-            border-left: 3px solid #10b981;
-            padding-left: 8px;
+            color: #000000;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #000000;
             font-weight: bold;
             page-break-after: avoid;
         }
 
-        .page-break {
-            page-break-after: always;
+        /* Minimalist Tables */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-bottom: 20px;
+        }
+        table.data-table th {
+            color: #000000;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 8px 4px;
+            border-bottom: 1px solid #000000;
+            text-align: left;
+            font-size: 9px;
+        }
+        table.data-table td {
+            padding: 8px 4px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+        table.data-table tr:last-child td { border-bottom: 1px solid #000000; }
+        table.data-table th.text-right, table.data-table td.text-right { text-align: right; }
+
+        /* Status Text (No badges) */
+        .status-text {
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
-        .two-column {
-            display: inline-block;
-            width: 48%;
-            vertical-align: top;
-            margin-right: 2%;
+        /* Layout Helpers */
+        .page-break { page-break-after: always; }
+        .two-column-wrapper { width: 100%; display: table; margin-bottom: 20px; }
+        .two-column { display: table-cell; width: 48%; vertical-align: top; }
+        .gap { display: table-cell; width: 4%; }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #000000;
+            font-size: 8px;
+            color: #4b5563;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 
 <body>
+    <!-- HEADER -->
     <div class="header">
-        <div class="company-name">Sari Bumi Sakti</div>
-        <div class="report-title">Ringkasan Laporan</div>
-        @if ($startDate && $endDate)
-            <div class="period-info">
-                Periode: {{ date('d/m/Y', strtotime($startDate)) }} - {{ date('d/m/Y', strtotime($endDate)) }}
-                @if ($status && $status !== 'all')
-                    | Status: <span style="text-transform: uppercase;">{{ $status }}</span>
+        <table>
+            <tr>
+                @if(file_exists(public_path('assets/images/Logo_Cap_Daun_Kayu_Putih.png')))
+                <td width="60" style="vertical-align: top;">
+                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/images/Logo_Cap_Daun_Kayu_Putih.png'))) }}" width="50">
+                </td>
                 @endif
-            </div>
-        @endif
+                <td>
+                    <div class="company-name">Sari Bumi Sakti</div>
+                    <div class="report-title">Ringkasan Operasional & Keuangan</div>
+                </td>
+                <td class="text-right" style="vertical-align: bottom;">
+                    @if ($startDate && $endDate)
+                        <div class="period-info">
+                            <strong>PERIODE:</strong> {{ date('d M Y', strtotime($startDate)) }} &mdash; {{ date('d M Y', strtotime($endDate)) }}
+                            @if ($status && $status !== 'all')
+                                <br><strong>STATUS:</strong> <span style="text-transform: uppercase;">{{ $status }}</span>
+                            @endif
+                        </div>
+                    @endif
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="stats-container">
-        <div class="stat-card">
-            <span class="stat-label">Total Transaksi</span>
-            <span class="stat-value">{{ number_format($stats['total_transaksi'], 0, ',', '.') }}</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">Total Pendapatan</span>
-            <span class="stat-value text-green">Rp {{ number_format($stats['total_pendapatan'], 0, ',', '.') }}</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">Rata-rata Nilai</span>
-            <span class="stat-value">Rp
-                {{ $stats['total_transaksi'] > 0 ? number_format($stats['total_pendapatan'] / $stats['total_transaksi'], 0, ',', '.') : 0 }}</span>
-        </div>
+    <!-- EXECUTIVE SUMMARY -->
+    <div class="exec-summary">
+        <table>
+            <tr>
+                <td>
+                    <div class="stat-group">
+                        <div class="stat-label">Total Pendapatan</div>
+                        <div class="stat-value highlight">Rp {{ number_format($stats['total_pendapatan'], 0, ',', '.') }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="stat-group">
+                        <div class="stat-label">Total Transaksi</div>
+                        <div class="stat-value">{{ number_format($stats['total_transaksi'], 0, ',', '.') }}</div>
+                    </div>
+                    <div class="stat-group" style="margin-top: 15px;">
+                        <div class="stat-label">Rata-rata Nilai Order</div>
+                        <div class="stat-value">Rp {{ $stats['total_transaksi'] > 0 ? number_format($stats['total_pendapatan'] / $stats['total_transaksi'], 0, ',', '.') : 0 }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="stat-group">
+                        <div class="stat-label">Transaksi Berhasil (Lunas)</div>
+                        <div class="stat-value">{{ number_format($stats['total_lunas'], 0, ',', '.') }}</div>
+                    </div>
+                    <div class="stat-group" style="margin-top: 15px;">
+                        <div class="stat-label">Tertunda / Dibatalkan</div>
+                        <div class="stat-value">{{ number_format($stats['total_menunggu'], 0, ',', '.') }} / {{ number_format($stats['total_batal'], 0, ',', '.') }}</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
-        <div class="stat-card">
-            <span class="stat-label">Lunas</span>
-            <span class="stat-value text-green">{{ number_format($stats['total_lunas'], 0, ',', '.') }}</span>
+    <div class="two-column-wrapper">
+        <div class="two-column">
+            <div class="section-title">Kinerja Produk Unggulan</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="50%">Nama Produk</th>
+                        <th width="15%" class="text-right">Qty</th>
+                        <th width="35%" class="text-right">Pendapatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($topProducts as $product)
+                        <tr>
+                            <td class="font-bold">{{ $product->nama }}</td>
+                            <td class="text-right">{{ $product->total_qty }}</td>
+                            <td class="text-right">Rp {{ number_format($product->total_revenue, 0, ',', '.') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">Tidak ada data tersedia</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-        <div class="stat-card">
-            <span class="stat-label">Menunggu</span>
-            <span class="stat-value text-orange">{{ number_format($stats['total_menunggu'], 0, ',', '.') }}</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">Batal</span>
-            <span class="stat-value text-red">{{ number_format($stats['total_batal'], 0, ',', '.') }}</span>
+        <div class="gap"></div>
+        <div class="two-column">
+            <div class="section-title">Metode Pembayaran</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="40%">Metode</th>
+                        <th width="20%" class="text-right">Trx</th>
+                        <th width="40%" class="text-right">Volume</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($paymentMethods as $method)
+                        <tr>
+                            <td class="font-bold">{{ $method->method }}</td>
+                            <td class="text-right">{{ $method->count }}</td>
+                            <td class="text-right font-bold">Rp {{ number_format($method->total, 0, ',', '.') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">Tidak ada data tersedia</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Trend Penjualan -->
-    <div class="section-title">Trend Penjualan Harian</div>
-    <table>
-        <thead>
-            <tr>
-                <th width="30%">Tanggal</th>
-                <th width="30%" class="text-right">Jumlah Transaksi</th>
-                <th width="40%" class="text-right">Total Pendapatan</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($salesTrend as $trend)
-                <tr>
-                    <td>{{ date('d/m/Y', strtotime($trend->date)) }}</td>
-                    <td class="text-right">{{ $trend->count }}</td>
-                    <td class="text-right">Rp {{ number_format($trend->revenue, 0, ',', '.') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="3" style="text-align: center;">Tidak ada data penjualan</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+    <div class="two-column-wrapper">
+        <div class="two-column">
+            <div class="section-title">Tren Penjualan Harian</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="35%">Tanggal</th>
+                        <th width="25%" class="text-right">Trx</th>
+                        <th width="40%" class="text-right">Pendapatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($salesTrend as $trend)
+                        <tr>
+                            <td>{{ date('d M Y', strtotime($trend->date)) }}</td>
+                            <td class="text-right">{{ $trend->count }}</td>
+                            <td class="text-right">Rp {{ number_format($trend->revenue, 0, ',', '.') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">Tidak ada data tersedia</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="gap"></div>
+        <div class="two-column">
+            <div class="section-title">Distribusi Status Transaksi</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="60%">Status</th>
+                        <th width="40%" class="text-right">Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($statusDistribution as $dist)
+                        <tr>
+                            <td class="status-text">{{ $dist->status }}</td>
+                            <td class="text-right font-bold">{{ $dist->count }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">Tidak ada data tersedia</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    <!-- Metode Pembayaran -->
-    <div class="section-title">Metode Pembayaran</div>
-    <table>
-        <thead>
-            <tr>
-                <th width="35%">Metode</th>
-                <th width="30%" class="text-right">Jumlah Transaksi</th>
-                <th width="35%" class="text-right">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($paymentMethods as $method)
-                <tr>
-                    <td>{{ $method->method }}</td>
-                    <td class="text-right">{{ $method->count }}</td>
-                    <td class="text-right">Rp {{ number_format($method->total, 0, ',', '.') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="3" style="text-align: center;">Tidak ada data metode pembayaran</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <!-- Distribusi Status -->
-    <div class="section-title">Distribusi Status Transaksi</div>
-    <table>
-        <thead>
-            <tr>
-                <th width="50%">Status</th>
-                <th width="50%" class="text-right">Jumlah</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($statusDistribution as $dist)
-                <tr>
-                    <td>
-                        <span class="badge badge-{{ strtolower($dist->status) }}">
-                            {{ $dist->status }}
-                        </span>
-                    </td>
-                    <td class="text-right">{{ $dist->count }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="2" style="text-align: center;">Tidak ada data distribusi status</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <!-- Top Produk -->
-    <div class="section-title">Top 5 Produk Terlaris</div>
-    <table>
-        <thead>
-            <tr>
-                <th width="40%">Produk</th>
-                <th width="30%" class="text-right">Jumlah Terjual</th>
-                <th width="30%" class="text-right">Total Penjualan</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($topProducts as $product)
-                <tr>
-                    <td>{{ $product->nama }}</td>
-                    <td class="text-right">{{ $product->total_qty }}</td>
-                    <td class="text-right">Rp {{ number_format($product->total_revenue, 0, ',', '.') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="3" style="text-align: center;">Tidak ada data produk terjual</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <!-- Page Break -->
     <div class="page-break"></div>
 
-    <!-- Detail Transaksi -->
-    <div class="section-title">Detail Transaksi</div>
-    <table>
+    <!-- DETAILED RECORDS -->
+    <div class="section-title">Rincian Transaksi</div>
+    <table class="data-table">
         <thead>
             <tr>
-                <th width="12%">No. Transaksi</th>
-                <th width="12%">Tanggal</th>
-                <th width="18%">Pelanggan</th>
-                <th width="15%">Kasir</th>
+                <th width="15%">No. Transaksi</th>
+                <th width="15%">Tanggal/Waktu</th>
+                <th width="22%">Pelanggan</th>
+                <th width="18%">Kasir</th>
                 <th width="18%" class="text-right">Total</th>
                 <th width="12%" class="text-right">Status</th>
             </tr>
@@ -354,27 +341,23 @@
         <tbody>
             @forelse($transaksi as $t)
                 <tr>
-                    <td class="font-mono"><strong>{{ $t->nomor_transaksi }}</strong></td>
+                    <td style="font-family: monospace;">{{ $t->nomor_transaksi }}</td>
                     <td>{{ date('d/m/y H:i', strtotime($t->tanggal)) }}</td>
-                    <td>{{ $t->pelanggan?->nama ?? '-' }}</td>
+                    <td>{{ $t->pelanggan?->nama ?? 'Umum' }}</td>
                     <td>{{ $t->kasir?->nama ?? '-' }}</td>
-                    <td class="text-right">Rp {{ number_format($t->total, 0, ',', '.') }}</td>
-                    <td class="text-right">
-                        <span class="badge badge-{{ strtolower($t->status_pembayaran) }}">
-                            {{ $t->status_pembayaran }}
-                        </span>
-                    </td>
+                    <td class="text-right font-bold">Rp {{ number_format($t->total, 0, ',', '.') }}</td>
+                    <td class="text-right status-text">{{ $t->status_pembayaran }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 15px;">Tidak ada data transaksi</td>
+                    <td colspan="6" class="text-center text-muted" style="padding: 20px;">Tidak ada riwayat transaksi pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
     <div class="footer">
-        Generated on {{ date('d F Y H:i') }} | Sari Bumi Sakti POS System
+        RAHASIA &bull; SARI BUMI SAKTI &bull; DICETAK PADA {{ date('d M Y, H:i') }}
     </div>
 </body>
 

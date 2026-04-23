@@ -431,13 +431,14 @@ const paymentMethodsChartData = computed(() => ({
                         <i class="fas fa-list text-gray-400"></i>
                         Data Transaksi Lengkap ({{ transaksi?.meta?.total || 0 }})
                     </span>
-                    <span class="transition group-open:rotate-180">
+                    <div class="transition group-open:rotate-180">
                         <i class="fas fa-chevron-down text-gray-400"></i>
-                    </span>
+                    </div> 
                 </summary>
 
                 <div class="border-t border-gray-100 p-5">
-                    <div class="mb-4 flex justify-end">
+                    <div class="mb-4 flex items-center justify-between">
+                        <p class="text-sm text-gray-500">Daftar seluruh transaksi sesuai filter di atas.</p>
                         <div class="flex items-center gap-2">
                             <label class="text-sm font-medium text-gray-700">Tampilkan:</label>
                             <select

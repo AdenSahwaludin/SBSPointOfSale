@@ -54,6 +54,14 @@ interface Props {
     paymentMethods: PaymentMethod[];
     hourlyData: HourlyData[];
     transaksi: Transaksi[];
+    insights: {
+        aov: number;
+        growth: number;
+        last_period_value: number;
+        dominant_method: string;
+        best_time: string;
+        top_customer: string;
+    };
 }
 
 const props = defineProps<Props>();
@@ -142,6 +150,43 @@ function formatDateTime(dateString: string): string {
                 <div class="rounded-lg border border-purple-200 bg-purple-50 p-4">
                     <p class="text-xs font-medium text-purple-700">Total Nilai</p>
                     <p class="mt-2 text-lg font-bold text-purple-800">{{ formatCurrency(stats.total_nilai) }}</p>
+                </div>
+            </div>
+
+            <!-- Insights Section -->
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-shopping-cart text-indigo-500"></i>
+                        <p class="text-xs font-medium text-indigo-700">Average Order Value</p>
+                    </div>
+                    <p class="mt-2 text-xl font-bold text-indigo-800">{{ formatCurrency(insights.aov) }}</p>
+                </div>
+                <div class="rounded-lg border border-teal-200 bg-teal-50 p-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-chart-line text-teal-500"></i>
+                        <p class="text-xs font-medium text-teal-700">Pertumbuhan (vs Kemarin)</p>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <p class="text-xl font-bold" :class="insights.growth >= 0 ? 'text-green-600' : 'text-red-600'">
+                            <i :class="insights.growth >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'" class="mr-1 text-sm"></i>
+                            {{ Math.abs(insights.growth) }}%
+                        </p>
+                    </div>
+                </div>
+                <div class="rounded-lg border border-orange-200 bg-orange-50 p-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-credit-card text-orange-500"></i>
+                        <p class="text-xs font-medium text-orange-700">Metode Dominan</p>
+                    </div>
+                    <p class="mt-2 text-xl font-bold text-orange-800">{{ insights.dominant_method }}</p>
+                </div>
+                <div class="rounded-lg border border-pink-200 bg-pink-50 p-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-clock text-pink-500"></i>
+                        <p class="text-xs font-medium text-pink-700">Jam Tersibuk</p>
+                    </div>
+                    <p class="mt-2 text-xl font-bold text-pink-800">{{ insights.best_time }}</p>
                 </div>
             </div>
 

@@ -10,6 +10,7 @@ use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransaksiController extends Controller
 {
@@ -60,7 +61,7 @@ class TransaksiController extends Controller
 
         // Base query for stats (apply all filters EXCEPT status)
         $statsQuery = Transaksi::query();
-        
+
         if ($search) {
             $statsQuery->where(function ($q) use ($search) {
                 $q->where('nomor_transaksi', 'like', "%{$search}%")
@@ -143,7 +144,7 @@ class TransaksiController extends Controller
 
         // Base query for credit stats (apply all filters EXCEPT status)
         $creditStatsQuery = Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT);
-        
+
         if ($search) {
             $creditStatsQuery->where(function ($q) use ($search) {
                 $q->where('nomor_transaksi', 'like', "%{$search}%")
@@ -224,6 +225,7 @@ class TransaksiController extends Controller
                 return [
                     'total' => $group->sum('total'),
                     'count' => $group->count(),
+                    'total_item' => $group->sum('total_item'),
                 ];
             });
 
@@ -233,12 +235,53 @@ class TransaksiController extends Controller
             $data = $hourlyRaw->get($h);
             if ($data && ($data['total'] > 0 || $data['count'] > 0)) {
                 $hourlyData[] = [
-                    'jam' => str_pad($h, 2, '0', STR_PAD_LEFT).':00',
+                    'jam' => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00',
                     'total' => $data['total'],
                     'count' => $data['count'],
+                    'total_item' => $data['total_item'],
                 ];
             }
         }
+
+        // INSIGHTS & AOV
+        $lunasTransactions = $dayTransactions->where('status_pembayaran', 'LUNAS');
+        $totalLunasCount = $lunasTransactions->count();
+        $totalLunasValue = $lunasTransactions->sum('total');
+
+        $aov = $totalLunasCount > 0 ? $totalLunasValue / $totalLunasCount : 0;
+
+        // Growth (vs yesterday)
+        $yesterdayDate = $tanggal->copy()->subDay();
+        $yesterdayValue = Transaksi::whereDate('tanggal', $yesterdayDate)
+            ->where('status_pembayaran', 'LUNAS')
+            ->sum('total');
+
+        $growth = 0;
+        if ($yesterdayValue > 0) {
+            $growth = (($totalLunasValue - $yesterdayValue) / $yesterdayValue) * 100;
+        } elseif ($totalLunasValue > 0) {
+            $growth = 100;
+        }
+
+        // Dominant Payment Method
+        $dominantMethod = $paymentMethods->sortByDesc('total')->first();
+
+        // Best Hour
+        $bestHour = collect($hourlyData)->sortByDesc('total')->first();
+
+        // Top Customer for the day
+        $topCustomer = $lunasTransactions->groupBy('id_pelanggan')->map(function ($g) {
+            return ['nama' => $g->first()->pelanggan?->nama ?? 'Umum', 'total' => $g->sum('total')];
+        })->sortByDesc('total')->first();
+
+        $insights = [
+            'aov' => $aov,
+            'growth' => round($growth, 2),
+            'last_period_value' => $yesterdayValue,
+            'dominant_method' => $dominantMethod ? $dominantMethod['metode'] : '-',
+            'best_time' => $bestHour ? $bestHour['jam'] : '-',
+            'top_customer' => $topCustomer ? $topCustomer['nama'] : '-',
+        ];
 
         return Inertia::render('Admin/Transactions/DailyReport', [
             'tanggal' => $tanggal->format('Y-m-d'),
@@ -247,6 +290,7 @@ class TransaksiController extends Controller
             'paymentMethods' => $paymentMethods,
             'hourlyData' => $hourlyData,
             'transaksi' => $dayTransactions,
+            'insights' => $insights,
         ]);
     }
 
@@ -298,6 +342,7 @@ class TransaksiController extends Controller
                     'hari' => Carbon::parse($key)->translatedFormat('d M'),
                     'total' => $group->sum('total'),
                     'count' => $group->count(),
+                    'total_item' => $group->sum('total_item'),
                 ];
             })
             ->values()
@@ -315,9 +360,9 @@ class TransaksiController extends Controller
                     'count' => $group->count(),
                 ];
             })
-            ->values()
             ->sortByDesc('total')
-            ->take(5);
+            ->take(5)
+            ->values();
 
         // Get top customers
         $topPelanggan = $monthTransactions->where('status_pembayaran', 'LUNAS')
@@ -331,9 +376,45 @@ class TransaksiController extends Controller
                     'count' => $group->count(),
                 ];
             })
-            ->values()
             ->sortByDesc('total')
-            ->take(5);
+            ->take(5)
+            ->values();
+
+        // INSIGHTS & AOV
+        $lunasTransactions = $monthTransactions->where('status_pembayaran', 'LUNAS');
+        $totalLunasCount = $lunasTransactions->count();
+        $totalLunasValue = $lunasTransactions->sum('total');
+
+        $aov = $totalLunasCount > 0 ? $totalLunasValue / $totalLunasCount : 0;
+
+        // Growth (vs last month)
+        $lastMonthDate = Carbon::createFromDate($tahun, $bulan, 1)->subMonth();
+        $lastMonthValue = Transaksi::whereYear('tanggal', $lastMonthDate->year)
+            ->whereMonth('tanggal', $lastMonthDate->month)
+            ->where('status_pembayaran', 'LUNAS')
+            ->sum('total');
+
+        $growth = 0;
+        if ($lastMonthValue > 0) {
+            $growth = (($totalLunasValue - $lastMonthValue) / $lastMonthValue) * 100;
+        } elseif ($totalLunasValue > 0) {
+            $growth = 100;
+        }
+
+        // Dominant Payment Method
+        $dominantMethod = $paymentMethods->sortByDesc('total')->first();
+
+        // Best Day
+        $bestDay = $dailyData->sortByDesc('total')->first();
+
+        $insights = [
+            'aov' => $aov,
+            'growth' => round($growth, 2),
+            'last_period_value' => $lastMonthValue,
+            'dominant_method' => $dominantMethod ? $dominantMethod['metode'] : '-',
+            'best_day' => $bestDay ? $bestDay['hari'] : '-',
+            'top_customer' => $topPelanggan->first() ? $topPelanggan->first()['nama'] : '-',
+        ];
 
         $bulanDisplay = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F Y');
 
@@ -346,6 +427,7 @@ class TransaksiController extends Controller
             'dailyData' => $dailyData,
             'topKasir' => $topKasir,
             'topPelanggan' => $topPelanggan,
+            'insights' => $insights,
         ]);
     }
 
@@ -396,6 +478,7 @@ class TransaksiController extends Controller
                     'hari' => Carbon::parse($key)->translatedFormat('l'),
                     'total' => $group->sum('total'),
                     'count' => $group->count(),
+                    'total_item' => $group->sum('total_item'),
                 ];
             })
             ->values()
@@ -413,9 +496,9 @@ class TransaksiController extends Controller
                     'count' => $group->count(),
                 ];
             })
-            ->values()
             ->sortByDesc('total')
-            ->take(5);
+            ->take(5)
+            ->values();
 
         // Get top customers
         $topPelanggan = $weekTransactions->where('status_pembayaran', 'LUNAS')
@@ -429,11 +512,47 @@ class TransaksiController extends Controller
                     'count' => $group->count(),
                 ];
             })
-            ->values()
             ->sortByDesc('total')
-            ->take(5);
+            ->take(5)
+            ->values();
 
-        $weekDisplay = $startDate->translatedFormat('d M').' - '.$endDate->translatedFormat('d M Y');
+        // INSIGHTS & AOV
+        $lunasTransactions = $weekTransactions->where('status_pembayaran', 'LUNAS');
+        $totalLunasCount = $lunasTransactions->count();
+        $totalLunasValue = $lunasTransactions->sum('total');
+
+        $aov = $totalLunasCount > 0 ? $totalLunasValue / $totalLunasCount : 0;
+
+        // Growth (vs last week)
+        $lastWeekStart = $startDate->copy()->subWeek();
+        $lastWeekEnd = $endDate->copy()->subWeek();
+        $lastWeekValue = Transaksi::whereBetween('tanggal', [$lastWeekStart, $lastWeekEnd])
+            ->where('status_pembayaran', 'LUNAS')
+            ->sum('total');
+
+        $growth = 0;
+        if ($lastWeekValue > 0) {
+            $growth = (($totalLunasValue - $lastWeekValue) / $lastWeekValue) * 100;
+        } elseif ($totalLunasValue > 0) {
+            $growth = 100;
+        }
+
+        // Dominant Payment Method
+        $dominantMethod = $paymentMethods->sortByDesc('total')->first();
+
+        // Best Day
+        $bestDay = $dailyData->sortByDesc('total')->first();
+
+        $insights = [
+            'aov' => $aov,
+            'growth' => round($growth, 2),
+            'last_period_value' => $lastWeekValue,
+            'dominant_method' => $dominantMethod ? $dominantMethod['metode'] : '-',
+            'best_day' => $bestDay ? $bestDay['hari'] : '-',
+            'top_customer' => $topPelanggan->first() ? $topPelanggan->first()['nama'] : '-',
+        ];
+
+        $weekDisplay = $startDate->translatedFormat('d M') . ' - ' . $endDate->translatedFormat('d M Y');
 
         return Inertia::render('Admin/Transactions/WeeklyReport', [
             'start_date' => $startDate->format('Y-m-d'),
@@ -445,6 +564,7 @@ class TransaksiController extends Controller
             'topKasir' => $topKasir,
             'topPelanggan' => $topPelanggan,
             'transaksi' => $weekTransactions,
+            'insights' => $insights,
         ]);
     }
 
@@ -547,23 +667,49 @@ class TransaksiController extends Controller
             ];
         })->toArray();
 
+        // INSIGHTS & AOV
+        $lunasTransactions = $dayTransactions->where('status_pembayaran', 'LUNAS');
+        $totalLunasCount = $lunasTransactions->count();
+        $totalLunasValue = $lunasTransactions->sum('total');
+
+        $aov = $totalLunasCount > 0 ? round($totalLunasValue / $totalLunasCount) : 0;
+
+        // Growth
+        $yesterdayDate = $tanggal->copy()->subDay();
+        $yesterdayValue = Transaksi::whereDate('tanggal', $yesterdayDate)->where('status_pembayaran', 'LUNAS')->sum('total');
+        $growth = $yesterdayValue > 0 ? (($totalLunasValue - $yesterdayValue) / $yesterdayValue) * 100 : ($totalLunasValue > 0 ? 100 : 0);
+
+        // Dominant Payment Method & Top Customer
+        $dominantMethod = collect($paymentMethods)->sortByDesc('total')->first();
+        $topCustomer = $lunasTransactions->groupBy('id_pelanggan')->map(function ($g) {
+            return ['nama' => $g->first()->pelanggan?->nama ?? 'Umum', 'total' => $g->sum('total')];
+        })->sortByDesc('total')->first();
+
+        $insights = [
+            'aov' => $aov,
+            'growth' => round($growth, 2),
+            'dominant_method' => $dominantMethod ? $dominantMethod['metode'] : '-',
+            'top_customer' => $topCustomer ? $topCustomer['nama'] : '-',
+        ];
+
         $pdf = Pdf::loadView('exports.reports.daily', [
             'tanggal' => $tanggal->format('Y-m-d'),
             'stats' => $stats,
             'paymentMethods' => $paymentMethods,
             'transaksi' => $transaksi,
+            'insights' => $insights,
         ])
             ->setPaper('a4')
             ->setOption('margin-top', 10)
             ->setOption('margin-bottom', 10);
 
-        return $pdf->download('laporan-harian-'.$tanggal->format('Y-m-d').'.pdf');
+        return $pdf->download('laporan-harian-' . $tanggal->format('Y-m-d') . '.pdf');
     }
 
     /**
      * Export daily report as CSV
      */
-    public function exportDailyCsv(Request $request): HttpResponse
+    public function exportDailyCsv(Request $request): StreamedResponse
     {
         $tanggal = $request->get('tanggal') ? Carbon::parse($request->get('tanggal')) : Carbon::today();
 
@@ -572,68 +718,47 @@ class TransaksiController extends Controller
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        $filename = 'laporan-harian-'.$tanggal->format('Y-m-d').'.csv';
+        $filename = 'laporan-harian-' . $tanggal->format('Y-m-d') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $output = fopen('php://output', 'w');
-        // BOM for Excel UTF-8
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        return response()->streamDownload(function () use ($dayTransactions) {
+            $output = fopen('php://output', 'w');
+            // BOM for Excel UTF-8
+            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        fputcsv($output, ['Laporan Harian - '.$tanggal->translatedFormat('l, d F Y')]);
-        fputcsv($output, ['']);
-
-        // Stats
-        fputcsv($output, ['STATISTIK']);
-        fputcsv($output, [
-            'Total Transaksi',
-            'Total Lunas',
-            'Total Menunggu',
-            'Total Batal',
-            'Total Nilai',
-            'Total Item',
-        ]);
-        fputcsv($output, [
-            $dayTransactions->count(),
-            $dayTransactions->where('status_pembayaran', 'LUNAS')->count(),
-            $dayTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
-            $dayTransactions->where('status_pembayaran', 'BATAL')->count(),
-            $dayTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
-            $dayTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
-        ]);
-        fputcsv($output, ['']);
-
-        // Data
-        fputcsv($output, [
-            'No. Transaksi',
-            'Jam',
-            'Pelanggan',
-            'Kasir',
-            'Metode',
-            'Total',
-            'Status',
-        ]);
-
-        foreach ($dayTransactions as $t) {
             fputcsv($output, [
-                $t->nomor_transaksi,
-                date('H:i', strtotime($t->tanggal)),
-                $t->pelanggan ? $t->pelanggan->nama : '-',
-                $t->kasir ? $t->kasir->nama : '-',
-                $t->metode_bayar,
-                $t->total,
-                $t->status_pembayaran,
+                'Nomor Transaksi',
+                'Tanggal',
+                'Pelanggan',
+                'Kasir',
+                'Status Pembayaran',
+                'Metode Bayar',
+                'Subtotal',
+                'Diskon',
+                'Pajak',
+                'Total'
             ]);
-        }
 
-        fputcsv($output, ['']);
-        fputcsv($output, ['Generated at: '.date('d F Y H:i:s')]);
+            foreach ($dayTransactions as $t) {
+                fputcsv($output, [
+                    $t->nomor_transaksi,
+                    date('Y-m-d H:i:s', strtotime($t->tanggal)),
+                    $t->pelanggan ? $t->pelanggan->nama : 'Umum',
+                    $t->kasir ? $t->kasir->nama : '-',
+                    $t->status_pembayaran,
+                    $t->metode_bayar ?? '-',
+                    $t->subtotal,
+                    $t->diskon,
+                    $t->pajak,
+                    $t->total,
+                ]);
+            }
 
-        fclose($output);
-
-        return response()->streamDownload(function () {}, $filename, $headers);
+            fclose($output);
+        }, $filename, $headers);
     }
 
     /**
@@ -667,10 +792,12 @@ class TransaksiController extends Controller
             ->map(function ($group) {
                 return [
                     'tanggal' => $group->first()->tanggal,
+                    'hari' => Carbon::parse($group->first()->tanggal)->translatedFormat('l'),
                     'total' => $group->sum('total'),
                     'count' => $group->count(),
                 ];
             })
+            ->sortBy('tanggal')
             ->values()
             ->toArray();
 
@@ -717,6 +844,33 @@ class TransaksiController extends Controller
             ->values()
             ->toArray();
 
+        // INSIGHTS & AOV
+        $lunasTransactions = $weekTransactions->where('status_pembayaran', 'LUNAS');
+        $totalLunasCount = $lunasTransactions->count();
+        $totalLunasValue = $lunasTransactions->sum('total');
+        $aov = $totalLunasCount > 0 ? round($totalLunasValue / $totalLunasCount) : 0;
+
+        // Growth
+        $lastWeekStart = $startDate->copy()->subWeek();
+        $lastWeekEnd = $endDate->copy()->subWeek();
+        $lastWeekValue = Transaksi::whereBetween('tanggal', [$lastWeekStart, $lastWeekEnd])->where('status_pembayaran', 'LUNAS')->sum('total');
+        $growth = $lastWeekValue > 0 ? (($totalLunasValue - $lastWeekValue) / $lastWeekValue) * 100 : ($totalLunasValue > 0 ? 100 : 0);
+
+        // Dominant Method
+        $dominantMethod = collect($paymentMethods)->sortByDesc('total')->first();
+
+        // Best Day
+        $bestDay = collect($dailyData)->sortByDesc('total')->first();
+
+        $insights = [
+            'aov' => $aov,
+            'growth' => round($growth, 2),
+            'last_period_value' => $lastWeekValue,
+            'dominant_method' => $dominantMethod ? $dominantMethod['metode'] : '-',
+            'best_day' => $bestDay ? $bestDay['hari'] : '-',
+            'top_customer' => collect($topPelanggan)->first()['nama'] ?? '-',
+        ];
+
         $pdf = Pdf::loadView('exports.reports.weekly', [
             'start_date' => $startDate->format('Y-m-d'),
             'end_date' => $endDate->format('Y-m-d'),
@@ -725,18 +879,19 @@ class TransaksiController extends Controller
             'paymentMethods' => $paymentMethods,
             'topKasir' => $topKasir,
             'topPelanggan' => $topPelanggan,
+            'insights' => $insights,
         ])
             ->setPaper('a4')
             ->setOption('margin-top', 10)
             ->setOption('margin-bottom', 10);
 
-        return $pdf->download('laporan-mingguan-'.$startDate->format('Y-m-d').'.pdf');
+        return $pdf->download('laporan-mingguan-' . $startDate->format('Y-m-d') . '.pdf');
     }
 
     /**
      * Export weekly report as CSV
      */
-    public function exportWeeklyCsv(Request $request): HttpResponse
+    public function exportWeeklyCsv(Request $request): StreamedResponse
     {
         $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::today()->startOfWeek();
         $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : $startDate->copy()->endOfWeek();
@@ -745,42 +900,46 @@ class TransaksiController extends Controller
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->get();
 
-        $filename = 'laporan-mingguan-'.$startDate->format('Y-m-d').'.csv';
+        $filename = 'laporan-mingguan-' . $startDate->format('Y-m-d') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $output = fopen('php://output', 'w');
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        return response()->streamDownload(function () use ($weekTransactions) {
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        fputcsv($output, ['Laporan Mingguan - '.$startDate->format('d F Y').' hingga '.$endDate->format('d F Y')]);
-        fputcsv($output, ['']);
+            fputcsv($output, [
+                'Nomor Transaksi',
+                'Tanggal',
+                'Pelanggan',
+                'Kasir',
+                'Status Pembayaran',
+                'Metode Bayar',
+                'Subtotal',
+                'Diskon',
+                'Pajak',
+                'Total'
+            ]);
 
-        // Stats
-        fputcsv($output, ['STATISTIK']);
-        fputcsv($output, [
-            'Total Transaksi',
-            'Total Lunas',
-            'Total Menunggu',
-            'Total Batal',
-            'Total Nilai',
-            'Total Item',
-        ]);
-        fputcsv($output, [
-            $weekTransactions->count(),
-            $weekTransactions->where('status_pembayaran', 'LUNAS')->count(),
-            $weekTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
-            $weekTransactions->where('status_pembayaran', 'BATAL')->count(),
-            $weekTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
-            $weekTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
-        ]);
-        fputcsv($output, ['']);
-        fputcsv($output, ['Generated at: '.date('d F Y H:i:s')]);
+            foreach ($weekTransactions as $t) {
+                fputcsv($output, [
+                    $t->nomor_transaksi,
+                    date('Y-m-d H:i:s', strtotime($t->tanggal)),
+                    $t->pelanggan ? $t->pelanggan->nama : 'Umum',
+                    $t->kasir ? $t->kasir->nama : '-',
+                    $t->status_pembayaran,
+                    $t->metode_bayar ?? '-',
+                    $t->subtotal,
+                    $t->diskon,
+                    $t->pajak,
+                    $t->total,
+                ]);
+            }
 
-        fclose($output);
-
-        return response()->streamDownload(function () {}, $filename, $headers);
+            fclose($output);
+        }, $filename, $headers);
     }
 
     /**
@@ -788,8 +947,8 @@ class TransaksiController extends Controller
      */
     public function exportMonthlyPdf(Request $request): HttpResponse
     {
-        $bulan = $request->get('bulan', now()->month);
-        $tahun = $request->get('tahun', now()->year);
+        $bulan = (int) $request->get('bulan', now()->month);
+        $tahun = (int) $request->get('tahun', now()->year);
 
         $startDate = Carbon::createFromDate($tahun, $bulan, 1);
         $endDate = $startDate->copy()->endOfMonth();
@@ -816,10 +975,12 @@ class TransaksiController extends Controller
             ->map(function ($group) {
                 return [
                     'tanggal' => $group->first()->tanggal,
+                    'hari' => Carbon::parse($group->first()->tanggal)->translatedFormat('d M'),
                     'total' => $group->sum('total'),
                     'count' => $group->count(),
                 ];
             })
+            ->sortBy('tanggal')
             ->values()
             ->toArray();
 
@@ -842,11 +1003,11 @@ class TransaksiController extends Controller
             ->map(function ($group) {
                 return [
                     'nama' => $group->first()->kasir->nama ?? '-',
-                    'total' => $group->sum('total'),
-                    'count' => $group->count(),
+                    'total_penjualan' => $group->sum('total'),
+                    'transaksi' => $group->count(),
                 ];
             })
-            ->sortByDesc('total')
+            ->sortByDesc('total_penjualan')
             ->take(5)
             ->values()
             ->toArray();
@@ -857,22 +1018,71 @@ class TransaksiController extends Controller
             ->map(function ($group) {
                 return [
                     'nama' => $group->first()->pelanggan->nama ?? '-',
-                    'total' => $group->sum('total'),
-                    'count' => $group->count(),
+                    'total_belanja' => $group->sum('total'),
+                    'transaksi' => $group->count(),
                 ];
             })
-            ->sortByDesc('total')
+            ->sortByDesc('total_belanja')
             ->take(5)
             ->values()
             ->toArray();
 
         $months = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
         ];
 
-        $bulan_display = $months[$bulan].' '.$tahun;
+        $bulan_display = $months[$bulan] . ' ' . $tahun;
+
+        // INSIGHTS & AOV
+        $lunasTransactions = $monthTransactions->where('status_pembayaran', 'LUNAS');
+        $totalLunasCount = $lunasTransactions->count();
+        $totalLunasValue = $lunasTransactions->sum('total');
+        $aov = $totalLunasCount > 0 ? round($totalLunasValue / $totalLunasCount) : 0;
+
+        // Growth
+        $lastMonthDate = Carbon::createFromDate($tahun, $bulan, 1)->subMonth();
+        $lastMonthValue = Transaksi::whereYear('tanggal', $lastMonthDate->year)
+            ->whereMonth('tanggal', $lastMonthDate->month)
+            ->where('status_pembayaran', 'LUNAS')->sum('total');
+        $growth = $lastMonthValue > 0 ? (($totalLunasValue - $lastMonthValue) / $lastMonthValue) * 100 : ($totalLunasValue > 0 ? 100 : 0);
+
+        // Dominant Method
+        $dominantMethod = collect($paymentMethods)->sortByDesc('total')->first();
+
+        // Best Day
+        $bestDay = collect($dailyData)->sortByDesc('total')->first();
+
+        $insights = [
+            'aov' => $aov,
+            'growth' => round($growth, 2),
+            'last_period_value' => $lastMonthValue,
+            'dominant_method' => $dominantMethod ? $dominantMethod['metode'] : '-',
+            'best_day' => $bestDay ? $bestDay['hari'] : '-',
+            'top_customer' => collect($topPelanggan)->first()['nama'] ?? '-',
+        ];
+
+        $transaksi = $monthTransactions->map(function ($t) {
+            return [
+                'nomor_transaksi' => $t->nomor_transaksi,
+                'tanggal' => $t->tanggal,
+                'pelanggan' => ['nama' => $t->pelanggan ? $t->pelanggan->nama : '-'],
+                'kasir' => ['nama' => $t->kasir ? $t->kasir->nama : '-'],
+                'metode_bayar' => $t->metode_bayar,
+                'total' => $t->total,
+                'status_pembayaran' => $t->status_pembayaran,
+            ];
+        })->toArray();
 
         $pdf = Pdf::loadView('exports.reports.monthly', [
             'bulan' => $bulan,
@@ -885,21 +1095,23 @@ class TransaksiController extends Controller
             'paymentMethods' => $paymentMethods,
             'topKasir' => $topKasir,
             'topPelanggan' => $topPelanggan,
+            'insights' => $insights,
+            'transaksi' => $transaksi,
         ])
             ->setPaper('a4')
             ->setOption('margin-top', 10)
             ->setOption('margin-bottom', 10);
 
-        return $pdf->download('laporan-bulanan-'.$startDate->format('Y-m-d').'.pdf');
+        return $pdf->download('laporan-bulanan-' . $startDate->format('Y-m-d') . '.pdf');
     }
 
     /**
      * Export monthly report as CSV
      */
-    public function exportMonthlyCsv(Request $request): HttpResponse
+    public function exportMonthlyCsv(Request $request): StreamedResponse
     {
-        $bulan = $request->get('bulan', now()->month);
-        $tahun = $request->get('tahun', now()->year);
+        $bulan = (int) $request->get('bulan', now()->month);
+        $tahun = (int) $request->get('tahun', now()->year);
 
         $startDate = Carbon::createFromDate($tahun, $bulan, 1);
         $endDate = $startDate->copy()->endOfMonth();
@@ -909,47 +1121,60 @@ class TransaksiController extends Controller
             ->get();
 
         $months = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
         ];
 
-        $bulan_display = $months[$bulan].' '.$tahun;
-        $filename = 'laporan-bulanan-'.$startDate->format('Y-m-d').'.csv';
+        $bulan_display = $months[$bulan] . ' ' . $tahun;
+        $filename = 'laporan-bulanan-' . $startDate->format('Y-m-d') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $output = fopen('php://output', 'w');
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        return response()->streamDownload(function () use ($monthTransactions) {
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        fputcsv($output, ['Laporan Bulanan - '.$bulan_display]);
-        fputcsv($output, ['']);
+            fputcsv($output, [
+                'Nomor Transaksi',
+                'Tanggal',
+                'Pelanggan',
+                'Kasir',
+                'Status Pembayaran',
+                'Metode Bayar',
+                'Subtotal',
+                'Diskon',
+                'Pajak',
+                'Total'
+            ]);
 
-        // Stats
-        fputcsv($output, ['STATISTIK']);
-        fputcsv($output, [
-            'Total Transaksi',
-            'Total Lunas',
-            'Total Menunggu',
-            'Total Batal',
-            'Total Nilai',
-            'Total Item',
-        ]);
-        fputcsv($output, [
-            $monthTransactions->count(),
-            $monthTransactions->where('status_pembayaran', 'LUNAS')->count(),
-            $monthTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
-            $monthTransactions->where('status_pembayaran', 'BATAL')->count(),
-            $monthTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
-            $monthTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
-        ]);
-        fputcsv($output, ['']);
-        fputcsv($output, ['Generated at: '.date('d F Y H:i:s')]);
+            foreach ($monthTransactions as $t) {
+                fputcsv($output, [
+                    $t->nomor_transaksi,
+                    date('Y-m-d H:i:s', strtotime($t->tanggal)),
+                    $t->pelanggan ? $t->pelanggan->nama : 'Umum',
+                    $t->kasir ? $t->kasir->nama : '-',
+                    $t->status_pembayaran,
+                    $t->metode_bayar ?? '-',
+                    $t->subtotal,
+                    $t->diskon,
+                    $t->pajak,
+                    $t->total,
+                ]);
+            }
 
-        fclose($output);
-
-        return response()->streamDownload(function () {}, $filename, $headers);
+            fclose($output);
+        }, $filename, $headers);
     }
 }

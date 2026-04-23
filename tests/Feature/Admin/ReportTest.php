@@ -118,3 +118,22 @@ test('reports page can filter by status', function () {
         ->where('stats.total_lunas', 1)
     );
 });
+
+test('monthly report exports accept zero-padded month values', function (string $path) {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    createTransaksi([
+        'tanggal' => Carbon::create(2026, 4, 15),
+        'status_pembayaran' => 'LUNAS',
+        'total' => 150000,
+        'total_item' => 3,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get($path.'?bulan=04&tahun=2026');
+
+    $response->assertSuccessful();
+})->with([
+    'pdf' => '/admin/reports/monthly/export/pdf',
+    'csv' => '/admin/reports/monthly/export/csv',
+]);

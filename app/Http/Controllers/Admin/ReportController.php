@@ -306,85 +306,38 @@ class ReportController extends Controller
 
         $filename = 'laporan-ringkasan-'.date('Y-m-d').'.csv';
 
-        return response()->streamDownload(function () use ($stats, $salesTrend, $paymentMethods, $statusDistribution, $topProducts, $transaksi, $startDate, $endDate) {
+        return response()->streamDownload(function () use ($transaksi) {
             $output = fopen('php://output', 'w');
             // BOM for Excel UTF-8
             fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // ==== HEADER INFO ====
-            fputcsv($output, ['LAPORAN RINGKASAN SARI BUMI SAKTI']);
-            fputcsv($output, ['Periode: '.$startDate.' hingga '.$endDate]);
-            fputcsv($output, ['Generated: '.date('d F Y H:i:s')]);
-            fputcsv($output, []);
+            // ==== HEADER KOLOM ====
+            fputcsv($output, [
+                'Nomor Transaksi', 
+                'Tanggal', 
+                'Pelanggan', 
+                'Kasir', 
+                'Status Pembayaran', 
+                'Metode Bayar',
+                'Subtotal',
+                'Diskon',
+                'Pajak',
+                'Total'
+            ]);
 
-            // ==== STATISTIK UTAMA ====
-            fputcsv($output, ['STATISTIK UTAMA']);
-            fputcsv($output, ['Metrik', 'Nilai']);
-            fputcsv($output, ['Total Transaksi', $stats['total_transaksi']]);
-            fputcsv($output, ['Total Pendapatan', 'Rp '.number_format($stats['total_pendapatan'], 0, ',', '.')]);
-            fputcsv($output, ['Status Lunas', $stats['total_lunas']]);
-            fputcsv($output, ['Status Menunggu', $stats['total_menunggu']]);
-            fputcsv($output, ['Status Batal', $stats['total_batal']]);
-            fputcsv($output, []);
-
-            // ==== TREND PENJUALAN HARIAN ====
-            fputcsv($output, ['TREND PENJUALAN HARIAN']);
-            fputcsv($output, ['Tanggal', 'Jumlah Transaksi', 'Total Pendapatan']);
-            foreach ($salesTrend as $trend) {
-                fputcsv($output, [
-                    $trend->date,
-                    $trend->count,
-                    'Rp '.number_format($trend->revenue, 0, ',', '.'),
-                ]);
-            }
-            fputcsv($output, []);
-
-            // ==== METODE PEMBAYARAN ====
-            fputcsv($output, ['METODE PEMBAYARAN']);
-            fputcsv($output, ['Metode', 'Jumlah Transaksi', 'Total']);
-            foreach ($paymentMethods as $method) {
-                fputcsv($output, [
-                    $method->method,
-                    $method->count,
-                    'Rp '.number_format($method->total, 0, ',', '.'),
-                ]);
-            }
-            fputcsv($output, []);
-
-            // ==== DISTRIBUSI STATUS ====
-            fputcsv($output, ['DISTRIBUSI STATUS TRANSAKSI']);
-            fputcsv($output, ['Status', 'Jumlah']);
-            foreach ($statusDistribution as $dist) {
-                fputcsv($output, [
-                    $dist->status,
-                    $dist->count,
-                ]);
-            }
-            fputcsv($output, []);
-
-            // ==== TOP 5 PRODUK TERLARIS ====
-            fputcsv($output, ['TOP 5 PRODUK TERLARIS']);
-            fputcsv($output, ['Produk', 'Jumlah Terjual', 'Total Penjualan']);
-            foreach ($topProducts as $product) {
-                fputcsv($output, [
-                    $product->nama,
-                    $product->total_qty,
-                    'Rp '.number_format($product->total_revenue, 0, ',', '.'),
-                ]);
-            }
-            fputcsv($output, []);
-
-            // ==== DETAIL TRANSAKSI ====
-            fputcsv($output, ['DETAIL TRANSAKSI']);
-            fputcsv($output, ['No. Transaksi', 'Tanggal', 'Pelanggan', 'Kasir', 'Total', 'Status']);
+            // ==== DATA ROW ====
             foreach ($transaksi as $t) {
                 fputcsv($output, [
                     $t->nomor_transaksi,
-                    date('d/m/Y H:i', strtotime($t->tanggal)),
-                    $t->pelanggan ? $t->pelanggan->nama : '-',
+                    date('Y-m-d H:i:s', strtotime($t->tanggal)),
+                    $t->pelanggan ? $t->pelanggan->nama : 'Umum',
                     $t->kasir ? $t->kasir->nama : '-',
-                    'Rp '.number_format($t->total, 0, ',', '.'),
                     $t->status_pembayaran,
+                    $t->metode_bayar ?? '-',
+                    $t->subtotal,
+                    $t->diskon,
+                    $t->pajak,
+                    $t->total,
                 ]);
             }
 
