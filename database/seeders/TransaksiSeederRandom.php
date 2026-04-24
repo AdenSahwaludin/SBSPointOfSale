@@ -25,7 +25,7 @@ class TransaksiSeederRandom extends Seeder
 
         // Get cashier
         $kasir = User::where('role', 'kasir')->first();
-        $id_kasir = $kasir ? $kasir->id_pengguna : '001-ADMI';
+        $id_kasir = $kasir ? $kasir->id_pengguna : '001-ADM';
 
         // Payment methods and transaction types (must match enum values)
         $metodePaymentList = ['TUNAI', 'KREDIT', 'QRIS', 'TRANSFER BCA'];
@@ -80,7 +80,7 @@ class TransaksiSeederRandom extends Seeder
             }
 
             // Format: INV-YYYY-MM-NNN-PXXX
-            $nomorTransaksi = 'INV-'.$currentYear.'-'.str_pad($currentMonth, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 3, '0', STR_PAD_LEFT).'-'.$pelangganId;
+            $nomorTransaksi = 'INV-' . $currentYear . '-' . str_pad($currentMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($transactionNum, 3, '0', STR_PAD_LEFT) . '-' . $pelangganId;
 
             // Random number of items (1-5)
             $jumlahItem = rand(1, 5);
@@ -136,7 +136,7 @@ class TransaksiSeederRandom extends Seeder
                 $jenisTranasksi = 'KREDIT';
                 $paidAt = null;
 
-                $nomorKontrak = 'KRD-'.$currentYear.str_pad($currentMonth, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 4, '0', STR_PAD_LEFT);
+                $nomorKontrak = 'KRD-' . $currentYear . str_pad($currentMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($transactionNum, 4, '0', STR_PAD_LEFT);
                 $kontrakData = [
                     'nomor_kontrak' => $nomorKontrak,
                     'id_pelanggan' => $pelangganId,

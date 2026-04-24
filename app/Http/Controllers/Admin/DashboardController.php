@@ -102,7 +102,7 @@ class DashboardController extends Controller
             )
             ->groupBy('produk.id_produk', 'produk.nama')
             ->orderByDesc('total_terjual')
-            ->limit(5)
+            ->limit(7)
             ->get();
 
         // ========================================
@@ -131,9 +131,9 @@ class DashboardController extends Controller
         // ========================================
         $lowStockProducts = Produk::with('kategori')
             ->where('stok', '>', 0)
-            ->where('stok', '<=', 10)
+            ->where('stok', '<=', 5)
             ->orderBy('stok', 'asc')
-            ->limit(10)
+            ->limit(5)
             ->get();
 
         // ========================================

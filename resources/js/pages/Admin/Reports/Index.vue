@@ -5,6 +5,7 @@ import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import type { ChartData } from 'chart.js';
 
 import { ArcElement, BarElement, CategoryScale, Chart as ChartJS, Legend, LineElement, LinearScale, PointElement, Title, Tooltip } from 'chart.js';
 import { Bar, Doughnut, Line } from 'vue-chartjs';
@@ -140,7 +141,7 @@ function resetFilters() {
 }
 
 function formatCurrency(amount: number): string {
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+    return 'Rp ' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(amount));
 }
 
 function getStatusBadgeClass(status: string): string {
@@ -163,7 +164,7 @@ function formatDateTime(dateString: string): string {
 }
 
 // Charts Data
-const salesTrendChartData = computed(() => ({
+const salesTrendChartData = computed<ChartData<'line'>>(() => ({
     labels: props.salesTrend.map((item) => new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })),
     datasets: [
         {
@@ -181,7 +182,7 @@ const salesTrendChartData = computed(() => ({
             backgroundColor: 'rgba(139, 92, 246, 0.2)', // purple-500
             borderColor: '#8b5cf6',
             borderWidth: 2,
-            type: 'line',
+            // type: 'line', <-- Opsional: Kadang TypeScript protes kalau ini diisi, padahal chart utamanya sudah 'line'. Kalau masih merah, baris ini bisa dihapus saja.
             yAxisID: 'y1',
             data: props.salesTrend.map((item) => item.count),
         },
@@ -429,7 +430,7 @@ const paymentMethodsChartData = computed(() => ({
                 <summary class="flex cursor-pointer items-center justify-between p-5 font-semibold text-gray-800 marker:content-none">
                     <span class="flex items-center gap-2">
                         <i class="fas fa-list text-gray-400"></i>
-                        Data Transaksi Lengkap ({{ transaksi?.meta?.total || 0 }})
+                        Data Transaksi Lengkap
                     </span>
                     <div class="transition group-open:rotate-180">
                         <i class="fas fa-chevron-down text-gray-400"></i>

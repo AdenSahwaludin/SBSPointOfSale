@@ -83,7 +83,7 @@ class DashboardController extends Controller
         // ========================================
         $lowStockAlerts = Produk::with('kategori')
             ->where('stok', '>', 0)
-            ->where('stok', '<=', 10)
+            ->where('stok', '<=', 5)
             ->orderBy('stok', 'asc')
             ->limit(5)
             ->get();
@@ -108,7 +108,7 @@ class DashboardController extends Controller
         $salesByHour = [];
         for ($h = 0; $h < 24; $h++) {
             $salesByHour[] = [
-                'hour' => str_pad($h, 2, '0', STR_PAD_LEFT).':00',
+                'hour' => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00',
                 'count' => $hourlySales->get($h)->count ?? 0,
                 'amount' => $hourlySales->get($h)->amount ?? 0,
             ];
@@ -135,8 +135,8 @@ class DashboardController extends Controller
         ];
 
         $weekComparison['growth'] = $weekComparison['last_week'] > 0
-         ? (($weekComparison['this_week'] - $weekComparison['last_week']) / $weekComparison['last_week']) * 100
-         : 0;
+            ? (($weekComparison['this_week'] - $weekComparison['last_week']) / $weekComparison['last_week']) * 100
+            : 0;
 
         return Inertia::render('Kasir/Dashboard', [
             'todayStats' => $todayStats,

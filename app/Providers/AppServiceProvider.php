@@ -22,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Set default locale for Carbon
+        \Carbon\Carbon::setLocale('id');
+        app()->setLocale('id');
+
         // Register event listeners
         Event::listen(
             PaymentReceived::class,

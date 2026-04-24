@@ -69,15 +69,15 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/reports/we
 const selectedStartDate = ref(props.start_date);
 const selectedEndDate = ref(props.end_date);
 
-const exportPdfUrl = computed(() => `/admin/reports/weekly/export/pdf?start_date=${selectedStartDate.value}&end_date=${selectedEndDate.value}`);
-const exportCsvUrl = computed(() => `/admin/reports/weekly/export/csv?start_date=${selectedStartDate.value}&end_date=${selectedEndDate.value}`);
+const exportPdfUrl = computed(() => `/admin/reports/weekly/export/pdf?start_date=${selectedStartDate.value}`);
+const exportCsvUrl = computed(() => `/admin/reports/weekly/export/csv?start_date=${selectedStartDate.value}`);
 
 function handleDateChange() {
-    router.get(`/admin/transactions/laporan-mingguan?start_date=${selectedStartDate.value}&end_date=${selectedEndDate.value}`);
+    router.get(`/admin/transactions/laporan-mingguan?start_date=${selectedStartDate.value}`);
 }
 
 function formatCurrency(amount: number): string {
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+    return 'Rp ' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(amount));
 }
 
 function getStatusBadgeClass(status: string): string {
@@ -124,10 +124,10 @@ function formatDateTime(dateString: string): string {
             <!-- Date Picker -->
             <div class="flex max-w-sm items-end gap-3">
                 <div class="flex-1">
-                    <label class="mb-2 block text-sm font-medium text-gray-700">Pilih Tanggal (Minggu)</label>
+                    <label class="mb-2 block text-sm font-medium text-gray-700">Pilih Minggu</label>
                     <input
                         v-model="selectedStartDate"
-                        type="date"
+                        type="week"
                         @change="handleDateChange"
                         class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
                     />
@@ -236,9 +236,9 @@ function formatDateTime(dateString: string): string {
                                     ></div>
                                 </div>
                             </div>
-                            <div class="w-20 text-right">
-                                <p class="text-xs font-medium text-gray-600">{{ formatCurrency(day.total) }}</p>
-                            </div>
+                            <div class="w-20 shrink-0">
+    <p class="whitespace-nowrap text-xs font-medium text-gray-600">{{ formatCurrency(day.total) }}</p>
+</div>
                         </div>
                     </div>
                     <div v-else class="py-8 text-center">

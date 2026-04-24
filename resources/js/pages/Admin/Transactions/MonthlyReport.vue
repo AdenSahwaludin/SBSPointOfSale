@@ -64,7 +64,7 @@ function handleDateChange() {
 }
 
 function formatCurrency(amount: number): string {
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+    return 'Rp ' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(amount));
 }
 
 function getMaxDailyTotal(): number {
@@ -237,9 +237,9 @@ const years = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
                                     ></div>
                                 </div>
                             </div>
-                            <div class="w-16 text-right">
-                                <p class="text-xs font-medium text-gray-600">{{ formatCurrency(day.total) }}</p>
-                            </div>
+                         <div class="w-24 shrink-0">
+    <p class="whitespace-nowrap text-xs font-medium text-gray-600">{{ formatCurrency(day.total) }}</p>
+</div>
                         </div>
                     </div>
                     <div v-else class="py-8 text-center">

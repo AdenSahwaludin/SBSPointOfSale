@@ -248,7 +248,7 @@ class TransaksiController extends Controller
         $totalLunasCount = $lunasTransactions->count();
         $totalLunasValue = $lunasTransactions->sum('total');
 
-        $aov = $totalLunasCount > 0 ? $totalLunasValue / $totalLunasCount : 0;
+        $aov = $totalLunasCount > 0 ? round($totalLunasValue / $totalLunasCount) : 0;
 
         // Growth (vs yesterday)
         $yesterdayDate = $tanggal->copy()->subDay();
@@ -345,8 +345,8 @@ class TransaksiController extends Controller
                     'total_item' => $group->sum('total_item'),
                 ];
             })
-            ->values()
-            ->sortBy('tanggal');
+            ->sortBy('tanggal')
+            ->values();
 
         // Get top kasir
         $topKasir = $monthTransactions->where('status_pembayaran', 'LUNAS')
@@ -385,7 +385,7 @@ class TransaksiController extends Controller
         $totalLunasCount = $lunasTransactions->count();
         $totalLunasValue = $lunasTransactions->sum('total');
 
-        $aov = $totalLunasCount > 0 ? $totalLunasValue / $totalLunasCount : 0;
+        $aov = $totalLunasCount > 0 ? round($totalLunasValue / $totalLunasCount) : 0;
 
         // Growth (vs last month)
         $lastMonthDate = Carbon::createFromDate($tahun, $bulan, 1)->subMonth();
@@ -436,7 +436,7 @@ class TransaksiController extends Controller
      */
     public function weeklyReport(Request $request): Response
     {
-        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : Carbon::now()->startOfWeek();
+        $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date'))->startOfWeek() : Carbon::now()->startOfWeek();
         $endDate = $startDate->copy()->endOfWeek();
 
         // Get all transactions for the selected week
@@ -481,8 +481,8 @@ class TransaksiController extends Controller
                     'total_item' => $group->sum('total_item'),
                 ];
             })
-            ->values()
-            ->sortBy('tanggal');
+            ->sortBy('tanggal')
+            ->values();
 
         // Get top kasir
         $topKasir = $weekTransactions->where('status_pembayaran', 'LUNAS')
@@ -521,7 +521,7 @@ class TransaksiController extends Controller
         $totalLunasCount = $lunasTransactions->count();
         $totalLunasValue = $lunasTransactions->sum('total');
 
-        $aov = $totalLunasCount > 0 ? $totalLunasValue / $totalLunasCount : 0;
+        $aov = $totalLunasCount > 0 ? round($totalLunasValue / $totalLunasCount) : 0;
 
         // Growth (vs last week)
         $lastWeekStart = $startDate->copy()->subWeek();
@@ -555,7 +555,7 @@ class TransaksiController extends Controller
         $weekDisplay = $startDate->translatedFormat('d M') . ' - ' . $endDate->translatedFormat('d M Y');
 
         return Inertia::render('Admin/Transactions/WeeklyReport', [
-            'start_date' => $startDate->format('Y-m-d'),
+            'start_date' => $startDate->format('Y-\WW'),
             'end_date' => $endDate->format('Y-m-d'),
             'week_display' => $weekDisplay,
             'stats' => $stats,

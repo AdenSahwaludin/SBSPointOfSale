@@ -76,7 +76,7 @@ function handleDateChange() {
 }
 
 function formatCurrency(amount: number): string {
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+    return 'Rp ' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(amount));
 }
 
 function getStatusBadgeClass(status: string): string {
