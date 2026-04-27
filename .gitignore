@@ -1,28 +1,48 @@
-/.phpunit.cache
-/bootstrap/ssr
+# --- Folder Core Laravel (Wajib di-ignore) ---
 /node_modules
+/vendor
+/.phpunit.cache
+.phpunit.result.cache
+/bootstrap/ssr
 /public/build
 /public/hot
-/public/storage
-/resources/js/actions
-/resources/js/routes
-/resources/js/wayfinder
-/storage/*.key
 /storage/pail
-/vendor
+/auth.json
+/docs
+
+# --- Storage & Logs ---
+# Kita ignore isinya, tapi tetap simpan foldernya (lewat file .gitignore di tiap folder storage)
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*.log
+/storage/*.key
+
+# Symlink storage (biasanya hasil php artisan storage:link)
+/public/storage
+
+# --- Configuration & Environment ---
 .env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
+.env.*
+!.env.example
 Homestead.json
 Homestead.yaml
-npm-debug.log
-yarn-error.log
-/auth.json
+
+# --- IDE & Editor Settings ---
 /.fleet
 /.idea
 /.nova
 /.vscode
 /.zed
-/docs
+.phpactor.json
+
+# --- Logs & Debugging ---
+npm-debug.log
+yarn-error.log
+
+# --- CATATAN PENTING ---
+# Folder di bawah ini DIHAPUS dari list ignore karena ini adalah SOURCE CODE:
+# /resources/js/actions    <- (Jangan di-ignore)
+# /resources/js/routes     <- (Jangan di-ignore)
+# /resources/js/wayfinder  <- (Jangan di-ignore)
