@@ -65,8 +65,16 @@ const props = defineProps<{
 const { formatCurrency } = useCurrencyFormat();
 
 // Computed
+const salesByHourFiltered = computed(() => {
+    return props.salesByHour.filter((data) => {
+        const hourNumber = Number.parseInt(data.hour.slice(0, 2), 10);
+
+        return hourNumber >= 7 && hourNumber <= 21;
+    });
+});
+
 const maxHourValue = computed(() => {
-    return Math.max(...props.salesByHour.map((d) => d.amount), 1);
+    return Math.max(...salesByHourFiltered.value.map((d) => d.amount), 1);
 });
 
 const avgTransaction = computed(() => {
@@ -131,7 +139,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
         <div class="space-y-6">
             <!-- Today Stats -->
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-sm">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Total Penjualan</p>
@@ -144,7 +152,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-sm">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Rata-rata Transaksi</p>
@@ -157,7 +165,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Item Terjual</p>
@@ -170,7 +178,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Menunggu Pembayaran</p>
@@ -185,7 +193,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
             </div>
 
             <!-- Week Comparison -->
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
                 <h2 class="mb-4 text-lg font-semibold text-gray-900">Perbandingan Minggu Ini vs Minggu Lalu</h2>
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div>
@@ -208,25 +216,25 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
             </div>
 
             <!-- Hourly Sales Chart -->
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div class="border-b border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900">Penjualan Per Jam (24 Jam Terakhir)</h2>
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm ring-1 ring-gray-900/5">
+                <div class="border-b border-gray-100 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Penjualan Per Jam (07:00 - 21:00)</h2>
                 </div>
                 <div class="p-6">
-                    <div class="flex h-64 items-end justify-between gap-1">
-                        <div v-for="(data, index) in salesByHour" :key="index" class="flex flex-1 flex-col items-center gap-1">
-                            <div class="flex w-full flex-col items-center">
-                                <span v-if="data.amount > 0" class="mb-1 text-xs font-medium text-gray-900">
+                    <div class="flex h-64 items-end justify-between gap-2 sm:gap-3 md:gap-4">
+                        <div v-for="(data, index) in salesByHourFiltered" :key="index" class="flex flex-1 flex-col items-center gap-1">
+                            <div class="flex w-full flex-col items-center justify-end">
+                                <span v-if="data.amount > 0" class="mb-1 text-[10px] font-medium text-gray-900 md:text-xs">
                                     {{ formatChartLabel(data.amount) }}
                                 </span>
-                                <div class="relative w-full bg-gray-100">
+                                <div class="relative flex w-full justify-center">
                                     <div
                                         :style="{ height: `${Math.max((data.amount / maxHourValue) * 200, 2)}px` }"
-                                        class="w-full bg-emerald-600 transition-all hover:bg-emerald-700"
+                                        class="mx-auto w-12 rounded-t-md bg-gradient-to-t from-emerald-500 to-emerald-400 opacity-90 sm:w-14 md:w-16"
                                     ></div>
                                 </div>
                             </div>
-                            <span class="text-xs text-gray-600">{{ data.hour }}</span>
+                            <span class="text-[10px] text-gray-600 md:text-xs">{{ data.hour }}</span>
                         </div>
                     </div>
                 </div>
@@ -234,8 +242,8 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <!-- Payment Methods -->
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 p-6">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm ring-1 ring-gray-900/5">
+                    <div class="border-b border-gray-100 p-6">
                         <h2 class="text-lg font-semibold text-gray-900">Metode Pembayaran Hari Ini</h2>
                     </div>
                     <div class="p-6">
@@ -244,7 +252,11 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                             <p class="text-sm">Belum ada transaksi</p>
                         </div>
                         <div v-else class="space-y-3">
-                            <div v-for="method in paymentMethods" :key="method.metode_bayar" class="flex items-center justify-between">
+                            <div
+                                v-for="method in paymentMethods"
+                                :key="method.metode_bayar"
+                                class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/40 p-3"
+                            >
                                 <div class="flex items-center gap-3">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                                         <i class="fas fa-credit-card text-blue-600"></i>
@@ -254,15 +266,15 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                                         <p class="text-xs text-gray-500">{{ method.count }} transaksi</p>
                                     </div>
                                 </div>
-                                <p class="text-sm font-semibold text-gray-900">{{ formatCurrency(method.amount) }}</p>
+                                <p class="text-sm font-semibold text-emerald-600">{{ formatCurrency(method.amount) }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Top Products -->
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 p-6">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm ring-1 ring-gray-900/5">
+                    <div class="border-b border-gray-100 p-6">
                         <h2 class="text-lg font-semibold text-gray-900">Produk Terlaris Hari Ini</h2>
                     </div>
                     <div class="p-6">
@@ -274,7 +286,16 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                             <div v-for="(product, index) in topProducts" :key="index" class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-600"
+                                        :class="[
+                                            'flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold',
+                                            index === 0
+                                                ? 'bg-yellow-100 text-yellow-700'
+                                                : index === 1
+                                                  ? 'bg-slate-200 text-slate-700'
+                                                  : index === 2
+                                                    ? 'bg-orange-100 text-orange-700'
+                                                    : 'bg-gray-100 text-gray-600',
+                                        ]"
                                     >
                                         {{ index + 1 }}
                                     </div>
@@ -292,11 +313,11 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <!-- Recent Transactions -->
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 p-6">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm ring-1 ring-gray-900/5">
+                    <div class="border-b border-gray-100 p-6">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-900">Transaksi Terbaru</h2>
-                            <Link href="/kasir/transactions/today" class="text-sm text-blue-600 hover:text-blue-800">
+                            <Link href="/kasir/transactions/today" class="text-sm text-blue-600">
                                 Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
                             </Link>
                         </div>
@@ -306,7 +327,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                             <i class="fas fa-receipt mb-2 text-3xl"></i>
                             <p class="text-sm">Belum ada transaksi</p>
                         </div>
-                        <div v-for="trx in recentTransactions.slice(0, 5)" :key="trx.nomor_transaksi" class="p-4 hover:bg-gray-50">
+                        <div v-for="trx in recentTransactions.slice(0, 5)" :key="trx.nomor_transaksi" class="p-4">
                             <div class="flex items-center justify-between">
                                 <div class="flex-1">
                                     <p class="text-sm font-medium text-gray-900">{{ trx.nomor_transaksi }}</p>
@@ -326,25 +347,23 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir');
                 </div>
 
                 <!-- Low Stock Alert -->
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 p-6">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm ring-1 ring-gray-900/5">
+                    <div class="border-b border-gray-100 p-6">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-900">Peringatan Stok Rendah</h2>
-                            <Link href="/kasir/produk" class="text-sm text-blue-600 hover:text-blue-800">
-                                Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
-                            </Link>
+                            <Link href="/kasir/produk" class="text-sm text-blue-600"> Lihat Semua <i class="fas fa-arrow-right ml-1"></i> </Link>
                         </div>
                     </div>
                     <div class="p-6">
                         <div v-if="lowStockAlerts.length === 0" class="py-8 text-center text-gray-500">
-                            <i class="fas fa-check-circle mb-2 text-3xl text-green-600"></i>
-                            <p class="text-sm">Semua stok aman</p>
+                            <i class="fas fa-check-circle mb-2 text-3xl text-emerald-500"></i>
+                            <p class="text-sm font-medium">Semua stok aman</p>
                         </div>
                         <div v-else class="space-y-3">
                             <div
                                 v-for="product in lowStockAlerts"
                                 :key="product.nama"
-                                class="flex items-center justify-between border-l-4 border-orange-500 bg-orange-50 p-3"
+                                class="flex items-center justify-between rounded-r-md border-l-4 border-orange-500 bg-orange-50/50 p-3"
                             >
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">{{ product.nama }}</p>

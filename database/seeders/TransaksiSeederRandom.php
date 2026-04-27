@@ -18,10 +18,26 @@ class TransaksiSeederRandom extends Seeder
 
         // Get all products with their real data
         $produk = DB::table('produk')
-            ->select('id_produk', 'nama', 'harga')
+            ->select('id_produk', 'nama', 'harga', 'satuan', 'isi_per_pack')
             ->get();
-        $produkIds = $produk->pluck('id_produk')->toArray();
+
         $produkMap = $produk->keyBy('id_produk');
+        $produkPcs = $produk->where('satuan', 'pcs')->values();
+        $produkPack = $produk->where('satuan', 'pack')->values();
+
+        $ambilProdukUnik = function ($koleksi, array &$terpakai) use ($produkMap) {
+            $tersedia = $koleksi->pluck('id_produk')->diff($terpakai)->values();
+
+            if ($tersedia->isEmpty()) {
+                $terpakai = [];
+                $tersedia = $koleksi->pluck('id_produk')->values();
+            }
+
+            $produkId = $tersedia->random();
+            $terpakai[] = $produkId;
+
+            return $produkMap->get($produkId);
+        };
 
         // Get cashier
         $kasir = User::where('role', 'kasir')->first();
@@ -35,64 +51,109 @@ class TransaksiSeederRandom extends Seeder
         $now = Carbon::now();
         $currentMonth = $now->month;
         $currentYear = $now->year;
-        $currentDay = $now->day;
         $daysInMonth = $now->daysInMonth;
-        $lastSevenDaysStart = max(1, $currentDay - 7); // Last 7 days
+        $lastSevenDaysStart = max(1, $daysInMonth - 6); // Last 7 calendar days in the month
+        $earlyMonthEnd = max(1, $lastSevenDaysStart - 1);
 
-        // Total 150 transactions
-        // 75 in last 7 days, 75 in day 1-23 (rest of the month)
-        $transactionCount = 150;
-        $lastSevenDaysCount = 75;
-        $otherDaysCount = 75;
+        // Total 600 transactions for better distribution (approx 20 per day)
+        $transactionCount = 600;
+        $lastSevenDaysCount = 200;
 
         $transactionNum = 400;
         $creditCount = 0;
-        $maxCredit = 5; // Limit to 5 credit transactions only
+        $maxCredit = 15; // Increased credit limit for more data
+
         // Create transactions
         for ($i = 0; $i < $transactionCount; $i++) {
             // Determine distribution: last 7 days or other days
             if ($i < $lastSevenDaysCount) {
-                // Last 7 days
-                $day = rand($lastSevenDaysStart, $currentDay);
+                $day = rand($lastSevenDaysStart, $daysInMonth);
             } else {
-                // Days 1 to 23
-                $day = rand(1, min(23, $daysInMonth - 7));
+                $day = rand(1, $earlyMonthEnd);
             }
 
             $tanggal = Carbon::create($currentYear, $currentMonth, $day, rand(8, 17), rand(0, 59), 0);
 
-            // Select payment method first, then determine customer eligibility
-            // Limit KREDIT to only 5 total transactions
+            // Select payment method
             $metodePayment = $metodePaymentList[array_rand($metodePaymentList)];
-            if ($metodePayment === 'KREDIT' && $creditCount >= $maxCredit) {
-                // If we've reached max credit, use a non-credit method instead
+
+            // Credit logic: only for transactions that have a wholesale item or just randomly for others
+            if ($metodePayment === 'KREDIT' && ($creditCount >= $maxCredit)) {
                 $nonCreditMethods = ['TUNAI', 'QRIS', 'TRANSFER BCA'];
                 $metodePayment = $nonCreditMethods[array_rand($nonCreditMethods)];
             }
 
-            // If KREDIT method, only use credit-eligible customers
             if ($metodePayment === 'KREDIT') {
                 $pelangganId = $creditPelangganIds[array_rand($creditPelangganIds)];
                 $creditCount++;
             } else {
-                // For cash/qris/transfer, use any customer
                 $pelangganId = $allPelangganIds[array_rand($allPelangganIds)];
             }
 
-            // Format: INV-YYYY-MM-NNN-PXXX
-            $nomorTransaksi = 'INV-' . $currentYear . '-' . str_pad($currentMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($transactionNum, 3, '0', STR_PAD_LEFT) . '-' . $pelangganId;
+            $nomorTransaksi = 'INV-'.$currentYear.'-'.str_pad($currentMonth, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 3, '0', STR_PAD_LEFT).'-'.$pelangganId;
 
-            // Random number of items (1-5)
-            $jumlahItem = rand(1, 5);
-            $subtotal = 0;
             $items = [];
+            $subtotal = 0;
+            $terpakaiProdukIds = [];
 
-            // Generate line items with real products
-            for ($j = 0; $j < $jumlahItem; $j++) {
-                $produkId = $produkIds[array_rand($produkIds)];
-                $produk_data = $produkMap[$produkId];
+            $targetSubtotal = rand(400000, 800000);
+            if (rand(1, 100) <= 25) {
+                $targetSubtotal = rand(800000, 1000000);
+            }
+
+            $pakaiPack = rand(1, 100) <= 30 && $produkPack->isNotEmpty();
+
+            if ($pakaiPack) {
+                $produk_data = $ambilProdukUnik($produkPack, $terpakaiProdukIds);
                 $hargaSatuan = (int) $produk_data->harga;
-                $kuantitas = rand(1, 5);
+
+                if ($hargaSatuan <= ($targetSubtotal * 0.85)) {
+                    $itemSubtotal = $hargaSatuan;
+                    $subtotal += $itemSubtotal;
+
+                    $items[] = [
+                        'harga_satuan' => $hargaSatuan,
+                        'kuantitas' => 1,
+                        'subtotal' => $itemSubtotal,
+                        'produk_id' => $produk_data->id_produk,
+                        'nama_produk' => $produk_data->nama,
+                        'jenis_satuan' => 'pack',
+                        'isi_per_pack' => (int) ($produk_data->isi_per_pack ?? 1),
+                    ];
+                }
+            }
+
+            $maksItem = $pakaiPack ? rand(2, 3) : rand(2, 4);
+
+            while ($subtotal < $targetSubtotal && count($items) < $maksItem) {
+                $produk_data = $ambilProdukUnik($produkPcs, $terpakaiProdukIds);
+                $hargaSatuan = (int) $produk_data->harga;
+                $remaining = max(1, $targetSubtotal - $subtotal);
+                $kuantitas = rand(8, 18);
+                $kuantitas = max(1, min($kuantitas, (int) max(1, floor($remaining / $hargaSatuan))));
+                $itemSubtotal = $hargaSatuan * $kuantitas;
+
+                $subtotal += $itemSubtotal;
+
+                $items[] = [
+                    'harga_satuan' => $hargaSatuan,
+                    'kuantitas' => $kuantitas,
+                    'subtotal' => $itemSubtotal,
+                    'produk_id' => $produk_data->id_produk,
+                    'nama_produk' => $produk_data->nama,
+                    'jenis_satuan' => 'unit',
+                    'isi_per_pack' => (int) ($produk_data->isi_per_pack ?? 1),
+                ];
+
+                if ($subtotal >= ($targetSubtotal * 0.9) && count($items) >= 2) {
+                    break;
+                }
+            }
+
+            if ($subtotal < 250000 && $produkPcs->isNotEmpty()) {
+                $produk_data = $ambilProdukUnik($produkPcs, $terpakaiProdukIds);
+                $hargaSatuan = (int) $produk_data->harga;
+                $kuantitas = 10;
                 $itemSubtotal = $hargaSatuan * $kuantitas;
                 $subtotal += $itemSubtotal;
 
@@ -100,10 +161,14 @@ class TransaksiSeederRandom extends Seeder
                     'harga_satuan' => $hargaSatuan,
                     'kuantitas' => $kuantitas,
                     'subtotal' => $itemSubtotal,
-                    'produk_id' => $produkId,
+                    'produk_id' => $produk_data->id_produk,
                     'nama_produk' => $produk_data->nama,
+                    'jenis_satuan' => 'unit',
+                    'isi_per_pack' => (int) ($produk_data->isi_per_pack ?? 1),
                 ];
             }
+
+            $jumlahItemReal = count($items);
 
             $pajak = (int) (floor(($subtotal * 0.10) / 1000) * 1000); // 10% tax, rounded to nearest 1000
             $total = $subtotal + $pajak;
@@ -136,7 +201,7 @@ class TransaksiSeederRandom extends Seeder
                 $jenisTranasksi = 'KREDIT';
                 $paidAt = null;
 
-                $nomorKontrak = 'KRD-' . $currentYear . str_pad($currentMonth, 2, '0', STR_PAD_LEFT) . '-' . str_pad($transactionNum, 4, '0', STR_PAD_LEFT);
+                $nomorKontrak = 'KRD-'.$currentYear.str_pad($currentMonth, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 4, '0', STR_PAD_LEFT);
                 $kontrakData = [
                     'nomor_kontrak' => $nomorKontrak,
                     'id_pelanggan' => $pelangganId,
@@ -160,7 +225,7 @@ class TransaksiSeederRandom extends Seeder
                 'id_pelanggan' => $pelangganId,
                 'id_kasir' => $id_kasir,
                 'tanggal' => $tanggal,
-                'total_item' => $jumlahItem,
+                'total_item' => $jumlahItemReal,
                 'subtotal' => $subtotal,
                 'diskon' => 0,
                 'pajak' => $pajak,
@@ -187,9 +252,9 @@ class TransaksiSeederRandom extends Seeder
                     'id_produk' => $item['produk_id'],
                     'nama_produk' => $item['nama_produk'],
                     'jumlah' => $item['kuantitas'],
-                    'jenis_satuan' => 'unit',
+                    'jenis_satuan' => $item['jenis_satuan'],
                     'harga_satuan' => $item['harga_satuan'],
-                    'isi_pack_saat_transaksi' => 1,
+                    'isi_pack_saat_transaksi' => $item['isi_per_pack'],
                     'diskon_item' => 0,
                     'subtotal' => $item['subtotal'],
                     'created_at' => $tanggal,

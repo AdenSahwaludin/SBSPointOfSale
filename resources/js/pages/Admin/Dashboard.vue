@@ -140,7 +140,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
         <div class="space-y-6">
             <!-- Sales Stats -->
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                <div
+                    class="overflow-hidden rounded-xl border border-gray-100 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Penjualan Hari Ini</p>
@@ -153,7 +155,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                <div
+                    class="overflow-hidden rounded-xl border border-gray-100 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Penjualan Bulan Ini</p>
@@ -171,7 +175,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                <div
+                    class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Total Piutang</p>
@@ -184,7 +190,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                <div
+                    class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Pelanggan Aktif</p>
@@ -200,7 +208,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
 
             <!-- Stock Stats (Hover animation) -->
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                <div
+                    class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Produk</p>
@@ -210,7 +220,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                <div
+                    class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Item Stok</p>
@@ -220,7 +232,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-orange-200 bg-orange-50 p-6 shadow-sm ring-1 ring-orange-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                <div
+                    class="overflow-hidden rounded-xl border border-orange-200 bg-orange-50 p-6 shadow-sm ring-1 ring-orange-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-orange-800">Stok Rendah</p>
@@ -230,7 +244,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm ring-1 ring-red-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                <div
+                    class="overflow-hidden rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm ring-1 ring-red-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-red-800">Stok Habis</p>
@@ -247,7 +263,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     <h2 class="text-lg font-semibold text-gray-900">Penjualan 7 Hari Terakhir</h2>
                 </div>
                 <div class="p-6">
-                    <div class="flex h-64 items-end justify-between gap-2 sm:gap-4 md:gap-6">
+                    <div class="flex h-64 items-end justify-between gap-1 sm:gap-2 md:gap-3">
                         <div v-for="(data, index) in salesChart" :key="index" class="flex flex-1 flex-col items-center gap-2">
                             <div class="flex w-full flex-col items-center justify-end">
                                 <span class="mb-1 text-[10px] font-medium text-gray-900 md:text-xs">
@@ -256,7 +272,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                                 <div class="relative flex w-full justify-center">
                                     <div
                                         :style="{ height: `${Math.max((data.amount / maxChartValue) * 200, 4)}px` }"
-                                        class="mx-auto w-12 sm:w-16 md:w-20 rounded-t-md bg-gradient-to-t from-emerald-500 to-emerald-400 opacity-90 transition-all duration-300 hover:opacity-100"
+                                        class="mx-auto w-[92%] rounded-t-md bg-gradient-to-t from-emerald-500 to-emerald-400 opacity-90"
                                     ></div>
                                 </div>
                             </div>
@@ -281,12 +297,16 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                         <div v-else class="space-y-4">
                             <div v-for="(product, index) in topProducts" :key="index" class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div 
-                                        :class="['flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold', 
-                                            index === 0 ? 'bg-yellow-100 text-yellow-700' : 
-                                            index === 1 ? 'bg-slate-200 text-slate-700' : 
-                                            index === 2 ? 'bg-orange-100 text-orange-700' : 
-                                            'bg-gray-100 text-gray-600'
+                                    <div
+                                        :class="[
+                                            'flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold',
+                                            index === 0
+                                                ? 'bg-yellow-100 text-yellow-700'
+                                                : index === 1
+                                                  ? 'bg-slate-200 text-slate-700'
+                                                  : index === 2
+                                                    ? 'bg-orange-100 text-orange-700'
+                                                    : 'bg-gray-100 text-gray-600',
                                         ]"
                                     >
                                         {{ index + 1 }}
@@ -307,7 +327,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     <div class="border-b border-gray-100 p-6">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-900">Peringatan Stok Rendah</h2>
-                            <Link href="/admin/produk" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                            <Link href="/admin/produk" class="text-sm text-blue-600 transition-colors hover:text-blue-800">
                                 Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
                             </Link>
                         </div>
@@ -321,7 +341,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                             <div
                                 v-for="product in lowStockProducts"
                                 :key="product.nama"
-                                class="flex items-center justify-between border-l-4 border-orange-500 bg-orange-50/50 p-3 rounded-r-md transition-all hover:bg-orange-50"
+                                class="flex items-center justify-between rounded-r-md border-l-4 border-orange-500 bg-orange-50/50 p-3 transition-all hover:bg-orange-50"
                             >
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">{{ product.nama }}</p>

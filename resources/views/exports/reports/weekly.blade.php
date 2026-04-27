@@ -5,7 +5,10 @@
     <meta charset="utf-8">
     <title>Laporan Mingguan - Sari Bumi Sakti</title>
     <style>
-        @page { margin: 40px 50px; }
+        @page {
+            margin: 40px 50px;
+        }
+
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: #2b2b2b;
@@ -17,11 +20,29 @@
         }
 
         /* Typography & Hierarchy */
-        h1, h2, h3, h4, p { margin: 0; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .font-bold { font-weight: bold; }
-        .text-muted { color: #6b7280; }
+        h1,
+        h2,
+        h3,
+        h4,
+        p {
+            margin: 0;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .text-muted {
+            color: #6b7280;
+        }
 
         /* Corporate Header */
         .header {
@@ -29,8 +50,19 @@
             padding-bottom: 20px;
             border-bottom: 2px solid #000000;
         }
-        .header table { width: 100%; border: none; margin: 0; }
-        .header td { border: none; padding: 0; background: none; }
+
+        .header table {
+            width: 100%;
+            border: none;
+            margin: 0;
+        }
+
+        .header td {
+            border: none;
+            padding: 0;
+            background: none;
+        }
+
         .company-name {
             font-size: 28px;
             font-weight: 800;
@@ -38,6 +70,7 @@
             letter-spacing: 1px;
             text-transform: uppercase;
         }
+
         .report-title {
             font-size: 14px;
             font-weight: normal;
@@ -46,6 +79,7 @@
             letter-spacing: 2px;
             margin-top: 5px;
         }
+
         .period-info {
             font-size: 11px;
             color: #000000;
@@ -59,22 +93,32 @@
             border-bottom: 1px solid #e5e7eb;
             padding-bottom: 20px;
         }
+
         .exec-summary table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .exec-summary td {
             vertical-align: top;
             width: 33.33%;
             padding-right: 20px;
             border-right: 1px solid #e5e7eb;
         }
+
         .exec-summary td:last-child {
             padding-right: 0;
             border-right: none;
         }
-        .stat-group { margin-bottom: 15px; }
-        .stat-group:last-child { margin-bottom: 0; }
+
+        .stat-group {
+            margin-bottom: 15px;
+        }
+
+        .stat-group:last-child {
+            margin-bottom: 0;
+        }
+
         .stat-label {
             font-size: 9px;
             text-transform: uppercase;
@@ -82,11 +126,13 @@
             letter-spacing: 0.5px;
             margin-bottom: 3px;
         }
+
         .stat-value {
             font-size: 16px;
             font-weight: bold;
             color: #000000;
         }
+
         .stat-value.highlight {
             font-size: 20px;
         }
@@ -112,6 +158,7 @@
             font-size: 10px;
             margin-bottom: 20px;
         }
+
         table.data-table th {
             color: #000000;
             font-weight: bold;
@@ -121,13 +168,21 @@
             text-align: left;
             font-size: 9px;
         }
+
         table.data-table td {
             padding: 8px 4px;
             border-bottom: 1px solid #e5e7eb;
             color: #1f2937;
         }
-        table.data-table tr:last-child td { border-bottom: 1px solid #000000; }
-        table.data-table th.text-right, table.data-table td.text-right { text-align: right; }
+
+        table.data-table tr:last-child td {
+            border-bottom: 1px solid #000000;
+        }
+
+        table.data-table th.text-right,
+        table.data-table td.text-right {
+            text-align: right;
+        }
 
         /* Status Text */
         .status-text {
@@ -137,11 +192,27 @@
         }
 
         /* Layout Helpers */
-        .page-break { page-break-after: always; }
-        .two-column-wrapper { width: 100%; display: table; margin-bottom: 20px; }
-        .two-column { display: table-cell; width: 48%; vertical-align: top; }
-        .gap { display: table-cell; width: 4%; }
-        
+        .page-break {
+            page-break-after: always;
+        }
+
+        .two-column-wrapper {
+            width: 100%;
+            display: table;
+            margin-bottom: 20px;
+        }
+
+        .two-column {
+            display: table-cell;
+            width: 48%;
+            vertical-align: top;
+        }
+
+        .gap {
+            display: table-cell;
+            width: 4%;
+        }
+
         .footer {
             margin-top: 30px;
             padding-top: 10px;
@@ -160,14 +231,20 @@
     <div class="header">
         <table>
             <tr>
-
+                @if (file_exists(public_path('assets/images/Logo_Cap_Daun_Kayu_Putih.png')))
+                    <td width="60" style="vertical-align: top;">
+                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/images/Logo_Cap_Daun_Kayu_Putih.png'))) }}"
+                            width="50">
+                    </td>
+                @endif
                 <td>
                     <div class="company-name">Sari Bumi Sakti</div>
                     <div class="report-title">Laporan Mingguan Operasional & Keuangan</div>
                 </td>
                 <td class="text-right" style="vertical-align: bottom;">
                     <div class="period-info">
-                        <strong>PERIODE:</strong> {{ date('d M Y', strtotime($start_date)) }} - {{ date('d M Y', strtotime($end_date)) }}
+                        <strong>PERIODE:</strong> {{ date('d M Y', strtotime($start_date)) }} -
+                        {{ date('d M Y', strtotime($end_date)) }}
                     </div>
                 </td>
             </tr>
@@ -181,13 +258,15 @@
                 <td>
                     <div class="stat-group">
                         <div class="stat-label">Total Pendapatan (Lunas)</div>
-                        <div class="stat-value highlight">Rp {{ number_format($stats['total_nilai'], 0, ',', '.') }}</div>
+                        <div class="stat-value highlight">Rp {{ number_format($stats['total_nilai'], 0, ',', '.') }}
+                        </div>
                     </div>
                 </td>
                 <td>
                     <div class="stat-group">
                         <div class="stat-label">Total Transaksi / Item</div>
-                        <div class="stat-value">{{ number_format($stats['total_transaksi'], 0, ',', '.') }} / {{ number_format($stats['total_item'], 0, ',', '.') }}</div>
+                        <div class="stat-value">{{ number_format($stats['total_transaksi'], 0, ',', '.') }} /
+                            {{ number_format($stats['total_item'], 0, ',', '.') }}</div>
                     </div>
                     <div class="stat-group" style="margin-top: 15px;">
                         <div class="stat-label">Rata-rata Nilai Order (AOV)</div>
@@ -201,7 +280,8 @@
                     </div>
                     <div class="stat-group" style="margin-top: 15px;">
                         <div class="stat-label">Tertunda / Dibatalkan</div>
-                        <div class="stat-value">{{ number_format($stats['total_menunggu'], 0, ',', '.') }} / {{ number_format($stats['total_batal'], 0, ',', '.') }}</div>
+                        <div class="stat-value">{{ number_format($stats['total_menunggu'], 0, ',', '.') }} /
+                            {{ number_format($stats['total_batal'], 0, ',', '.') }}</div>
                     </div>
                 </td>
             </tr>
@@ -221,19 +301,21 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($dailyData as $day)
-                <tr>
-                    <td>{{ date('d/m/Y', strtotime($day['tanggal'])) }}</td>
-                    <td>{{ date('l', strtotime($day['tanggal'])) }}</td>
-                    <td class="text-right">{{ $day['count'] }}</td>
-                    <td class="text-right">Rp {{ number_format($day['total'], 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ $day['count'] > 0 ? number_format($day['total'] / $day['count'], 0, ',', '.') : 0 }}</td>
-                </tr>
+                @foreach ($dailyData as $day)
+                    <tr>
+                        <td>{{ date('d/m/Y', strtotime($day['tanggal'])) }}</td>
+                        <td>{{ date('l', strtotime($day['tanggal'])) }}</td>
+                        <td class="text-right">{{ $day['count'] }}</td>
+                        <td class="text-right">Rp {{ number_format($day['total'], 0, ',', '.') }}</td>
+                        <td class="text-right">Rp
+                            {{ $day['count'] > 0 ? number_format($day['total'] / $day['count'], 0, ',', '.') : 0 }}
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-    
+
     <!-- Top Performers & Methods -->
     <div style="margin-bottom: 20px;">
         <div class="col-2">
@@ -248,13 +330,15 @@
                 </thead>
                 <tbody>
                     @forelse($topKasir as $k)
-                    <tr>
-                        <td>{{ $k['nama'] }}</td>
-                        <td class="text-right">{{ $k['count'] }}</td>
-                        <td class="text-right">Rp {{ number_format($k['total'], 0, ',', '.') }}</td>
-                    </tr>
+                        <tr>
+                            <td>{{ $k['nama'] }}</td>
+                            <td class="text-right">{{ $k['count'] }}</td>
+                            <td class="text-right">Rp {{ number_format($k['total'], 0, ',', '.') }}</td>
+                        </tr>
                     @empty
-                    <tr><td colspan="3" class="text-center">No Data</td></tr>
+                        <tr>
+                            <td colspan="3" class="text-center">No Data</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -270,12 +354,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($paymentMethods as $pm)
-                    <tr>
-                        <td>{{ $pm['metode'] }}</td>
-                        <td class="text-right">{{ $pm['count'] }}</td>
-                        <td class="text-right">Rp {{ number_format($pm['total'], 0, ',', '.') }}</td>
-                    </tr>
+                    @foreach ($paymentMethods as $pm)
+                        <tr>
+                            <td>{{ $pm['metode'] }}</td>
+                            <td class="text-right">{{ $pm['count'] }}</td>
+                            <td class="text-right">Rp {{ number_format($pm['total'], 0, ',', '.') }}</td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
@@ -296,13 +380,15 @@
                 </thead>
                 <tbody>
                     @forelse($topPelanggan as $p)
-                    <tr>
-                        <td>{{ $p['nama'] }}</td>
-                        <td class="text-right">{{ $p['count'] }}</td>
-                        <td class="text-right">Rp {{ number_format($p['total'], 0, ',', '.') }}</td>
-                    </tr>
+                        <tr>
+                            <td>{{ $p['nama'] }}</td>
+                            <td class="text-right">{{ $p['count'] }}</td>
+                            <td class="text-right">Rp {{ number_format($p['total'], 0, ',', '.') }}</td>
+                        </tr>
                     @empty
-                    <tr><td colspan="3" class="text-center">Tidak ada data pelanggan</td></tr>
+                        <tr>
+                            <td colspan="3" class="text-center">Tidak ada data pelanggan</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -313,12 +399,14 @@
                 <tbody>
                     <tr>
                         <td style="font-weight: bold; width: 60%;">Rata-rata Order (AOV)</td>
-                        <td class="text-right text-indigo-700 font-bold">Rp {{ number_format($insights['aov'], 0, ',', '.') }}</td>
+                        <td class="text-right text-indigo-700 font-bold">Rp
+                            {{ number_format($insights['aov'], 0, ',', '.') }}</td>
                     </tr>
                     <tr>
                         <td style="font-weight: bold;">Pertumbuhan (vs Mgg Lalu)</td>
                         <td class="text-right">
-                            <span class="{{ $insights['growth'] >= 0 ? 'highlight-green' : 'highlight-red' }}" style="font-weight: bold;">
+                            <span class="{{ $insights['growth'] >= 0 ? 'highlight-green' : 'highlight-red' }}"
+                                style="font-weight: bold;">
                                 {{ $insights['growth'] >= 0 ? '+' : '' }}{{ number_format($insights['growth'], 2, ',', '.') }}%
                             </span>
                         </td>
@@ -338,4 +426,5 @@
 
     <div class="footer">Generated on {{ date('d F Y H:i') }} | Sari Bumi Sakti POS System</div>
 </body>
+
 </html>
