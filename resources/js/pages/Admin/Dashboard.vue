@@ -140,7 +140,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
         <div class="space-y-6">
             <!-- Sales Stats -->
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Penjualan Hari Ini</p>
@@ -153,7 +153,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-gradient-to-br from-white to-emerald-50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Penjualan Bulan Ini</p>
@@ -171,7 +171,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Total Piutang</p>
@@ -184,7 +184,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600">Pelanggan Aktif</p>
@@ -198,9 +198,9 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                 </div>
             </div>
 
-            <!-- Stock Stats -->
+            <!-- Stock Stats (Hover animation) -->
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Produk</p>
@@ -210,7 +210,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Item Stok</p>
@@ -220,7 +220,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-orange-300 bg-orange-50 p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-orange-200 bg-orange-50 p-6 shadow-sm ring-1 ring-orange-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-orange-800">Stok Rendah</p>
@@ -230,7 +230,7 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-red-300 bg-red-50 p-6 shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm ring-1 ring-red-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-red-800">Stok Habis</p>
@@ -241,34 +241,36 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                 </div>
             </div>
 
-            <!-- Sales Chart -->
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div class="border-b border-gray-200 p-6">
+            <!-- Sales Chart (Improved spacing and gradient bars) -->
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm ring-1 ring-gray-900/5">
+                <div class="border-b border-gray-100 p-6">
                     <h2 class="text-lg font-semibold text-gray-900">Penjualan 7 Hari Terakhir</h2>
                 </div>
                 <div class="p-6">
-                    <div class="flex h-64 items-end justify-between gap-2">
+                    <div class="flex h-64 items-end justify-between gap-2 sm:gap-4 md:gap-6">
                         <div v-for="(data, index) in salesChart" :key="index" class="flex flex-1 flex-col items-center gap-2">
-                            <div class="flex w-full flex-col items-center">
-                                <span class="mb-1 text-xs font-medium text-gray-900">{{ formatCurrency(data.amount).replace('Rp ', '') }}</span>
-                                <div class="relative w-full bg-gray-100">
+                            <div class="flex w-full flex-col items-center justify-end">
+                                <span class="mb-1 text-[10px] font-medium text-gray-900 md:text-xs">
+                                    {{ formatCurrency(data.amount).replace('Rp ', '') }}
+                                </span>
+                                <div class="relative flex w-full justify-center">
                                     <div
                                         :style="{ height: `${Math.max((data.amount / maxChartValue) * 200, 4)}px` }"
-                                        class="w-full bg-blue-600 transition-all hover:bg-blue-700"
+                                        class="mx-auto w-12 sm:w-16 md:w-20 rounded-t-md bg-gradient-to-t from-emerald-500 to-emerald-400 opacity-90 transition-all duration-300 hover:opacity-100"
                                     ></div>
                                 </div>
                             </div>
-                            <span class="text-xs text-gray-600">{{ data.date }}</span>
-                            <span class="text-xs text-gray-500">{{ data.count }}x</span>
+                            <span class="mt-1 text-[10px] font-medium text-gray-500 md:text-xs">{{ data.date }}</span>
+                            <span class="text-[10px] text-gray-400 md:text-xs">{{ data.count }}x</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <!-- Top Products -->
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 p-6">
+                <!-- Top Products (Dynamic Winner Colors) -->
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm ring-1 ring-gray-900/5">
+                    <div class="border-b border-gray-100 p-6">
                         <h2 class="text-lg font-semibold text-gray-900">Produk Terlaris Bulan Ini</h2>
                     </div>
                     <div class="p-6">
@@ -279,7 +281,14 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                         <div v-else class="space-y-4">
                             <div v-for="(product, index) in topProducts" :key="index" class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
+                                    <div 
+                                        :class="['flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold', 
+                                            index === 0 ? 'bg-yellow-100 text-yellow-700' : 
+                                            index === 1 ? 'bg-slate-200 text-slate-700' : 
+                                            index === 2 ? 'bg-orange-100 text-orange-700' : 
+                                            'bg-gray-100 text-gray-600'
+                                        ]"
+                                    >
                                         {{ index + 1 }}
                                     </div>
                                     <div>
@@ -294,25 +303,25 @@ const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin');
                 </div>
 
                 <!-- Low Stock Alert -->
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-200 p-6">
+                <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm ring-1 ring-gray-900/5">
+                    <div class="border-b border-gray-100 p-6">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-900">Peringatan Stok Rendah</h2>
-                            <Link href="/admin/produk" class="text-sm text-blue-600 hover:text-blue-800">
+                            <Link href="/admin/produk" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
                                 Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
                             </Link>
                         </div>
                     </div>
                     <div class="p-6">
                         <div v-if="lowStockProducts.length === 0" class="py-8 text-center text-gray-500">
-                            <i class="fas fa-check-circle mb-2 text-3xl text-green-600"></i>
-                            <p class="text-sm">Semua stok aman</p>
+                            <i class="fas fa-check-circle mb-2 text-3xl text-emerald-500"></i>
+                            <p class="text-sm font-medium">Semua stok aman</p>
                         </div>
                         <div v-else class="space-y-3">
                             <div
                                 v-for="product in lowStockProducts"
                                 :key="product.nama"
-                                class="flex items-center justify-between border-l-4 border-orange-500 bg-orange-50 p-3"
+                                class="flex items-center justify-between border-l-4 border-orange-500 bg-orange-50/50 p-3 rounded-r-md transition-all hover:bg-orange-50"
                             >
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">{{ product.nama }}</p>
