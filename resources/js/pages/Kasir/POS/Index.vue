@@ -1120,7 +1120,7 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                 'relative cursor-pointer rounded-xl border-2 p-4 transition-all hover:shadow-md',
                                 produk.stok <= 0
                                     ? 'border-gray-200 bg-gray-50 opacity-75 grayscale hover:border-gray-300'
-                                    : 'border-transparent bg-white hover:border-emerald-500 hover:bg-emerald-50',
+                                    : 'border-gray-200 bg-white hover:border-emerald-500 hover:bg-emerald-50',
                             ]"
                             @click="addToCart(produk)"
                         >
