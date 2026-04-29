@@ -301,6 +301,13 @@ const totalItems = computed(() => {
 });
 
 // Methods
+function getCookie(name: string): string {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return decodeURIComponent(parts.pop()?.split(';').shift() || '');
+    return '';
+}
+
 function toNumber(val: unknown): number {
     if (typeof val === 'number') return val;
     if (typeof val === 'string') {
@@ -604,7 +611,8 @@ function handleConfirmTransaction() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            'Accept': 'application/json',
+            'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
         },
         body: JSON.stringify(requestData),
     })
@@ -696,7 +704,8 @@ function handlePrintReceipt() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            'Accept': 'application/json',
+            'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
         },
         body: JSON.stringify(requestData),
     })

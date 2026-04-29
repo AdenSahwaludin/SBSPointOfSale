@@ -187,7 +187,7 @@ interface TransactionData {
 
 interface Props {
     show: boolean;
-    transaction: TransactionData;
+    transaction: TransactionData | null;
 }
 
 const props = defineProps<Props>();
@@ -201,7 +201,7 @@ const emit = defineEmits<{
 const isSubmitting = ref(false);
 
 const kembalian = computed(() => {
-    if (props.transaction.metode_bayar === 'TUNAI' && props.transaction.jumlah_bayar) {
+    if (props.transaction && props.transaction.metode_bayar === 'TUNAI' && props.transaction.jumlah_bayar) {
         return props.transaction.jumlah_bayar - props.transaction.total;
     }
     return 0;

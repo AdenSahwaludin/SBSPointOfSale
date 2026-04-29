@@ -104,19 +104,22 @@ class Transaksi extends Model
         $year = $today->format('Y');
         $month = $today->format('m');
 
-        // Cari transaksi terakhir hari ini
-        $lastTransaction = self::where('nomor_transaksi', 'like', "INV-{$year}-{$month}-%")
-            ->orderBy('nomor_transaksi', 'desc')
-            ->first();
+        // Cari semua transaksi di bulan ini
+        $nomorTransaksis = self::where('nomor_transaksi', 'like', "INV-{$year}-{$month}-%")
+            ->pluck('nomor_transaksi');
 
-        $sequence = 1;
-        if ($lastTransaction) {
-            // Extract sequence dari nomor transaksi terakhir
-            $parts = explode('-', $lastTransaction->nomor_transaksi);
+        $maxSequence = 0;
+        foreach ($nomorTransaksis as $nomor) {
+            $parts = explode('-', $nomor);
             if (count($parts) >= 4) {
-                $sequence = (int) $parts[3] + 1;
+                $seq = (int) $parts[3];
+                if ($seq > $maxSequence) {
+                    $maxSequence = $seq;
+                }
             }
         }
+
+        $sequence = $maxSequence + 1;
 
         return sprintf('INV-%s-%s-%03d-%s', $year, $month, $sequence, $idPelanggan);
     }
