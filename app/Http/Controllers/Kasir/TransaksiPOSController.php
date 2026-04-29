@@ -491,7 +491,7 @@ class TransaksiPOSController extends Controller
 
             // Auto-increase credit limit and saldo based on transaction activity
             $pelanggan = Pelanggan::find($request->id_pelanggan);
-            if ($pelanggan && $pelanggan->trust_score >= 70) {
+            if ($pelanggan && $pelanggan->trust_score >= 55) {
                 CustomerCreditScoringService::autoIncreaseCredit($pelanggan);
             }
 

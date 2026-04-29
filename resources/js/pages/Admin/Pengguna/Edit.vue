@@ -2,7 +2,7 @@
 import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 interface Pengguna {
@@ -18,6 +18,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
 
 // Menu items dengan active state
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pengguna');
@@ -49,7 +50,8 @@ function resetPassword() {
     resetPasswordForm.post(`/admin/pengguna/${props.pengguna.id_pengguna}/reset-password`, {
         onSuccess: () => {
             showResetPasswordModal.value = false;
-            alert('Password berhasil direset ke default');
+            const generatedPassword = (page.props as any).flash?.generated_password;
+            alert(generatedPassword ? `Password berhasil direset. Password baru: ${generatedPassword}` : 'Password berhasil direset');
         },
         onError: () => {
             alert('Gagal mereset password');
@@ -208,16 +210,14 @@ function handlePhoneInput(event: Event) {
         </div>
 
         <!-- Reset Password Modal -->
-        <div
-            v-if="showResetPasswordModal"
-            class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"
-            @click.self="closeResetPasswordModal"
-        >
+        <div v-if="showResetPasswordModal" class="modal-bg fixed inset-0 z-50 flex items-center justify-center" @click.self="closeResetPasswordModal">
             <div class="shadow-emerald w-full max-w-md rounded-lg border border-emerald-200 bg-white-emerald p-6">
                 <div class="mb-4">
                     <h3 class="text-lg font-semibold text-emerald-800">Reset Password</h3>
                     <p class="text-emerald-600">Apakah Anda yakin ingin mereset password untuk pengguna "{{ pengguna.nama }}"?</p>
-                    <p class="mt-2 text-sm text-gray-600">Password akan direset ke default: <code class="rounded bg-gray-100 px-1">123456</code></p>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Password baru akan digenerate otomatis oleh sistem sebagai string acak 20 karakter alfanumerik.
+                    </p>
                 </div>
 
                 <div class="flex justify-end gap-3">

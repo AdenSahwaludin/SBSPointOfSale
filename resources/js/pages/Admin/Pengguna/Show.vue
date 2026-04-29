@@ -2,7 +2,8 @@
 import BaseButton from '@/components/BaseButton.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface Pengguna {
     id_pengguna: string;
@@ -20,9 +21,13 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
 
 // Menu items dengan active state menggunakan composable
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/pengguna');
+
+const showResetPasswordModal = ref(false);
+const isResettingPassword = ref(false);
 
 function getRoleBadgeClass(role: string) {
     return role === 'admin' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-emerald-200 text-emerald-800 border-emerald-300';
@@ -31,6 +36,36 @@ function getRoleBadgeClass(role: string) {
 function formatDate(dateString?: string) {
     if (!dateString) return 'Tidak tersedia';
     return new Date(dateString).toLocaleString('id-ID');
+}
+
+function openResetPasswordModal() {
+    showResetPasswordModal.value = true;
+}
+
+function closeResetPasswordModal() {
+    showResetPasswordModal.value = false;
+}
+
+function resetPassword() {
+    isResettingPassword.value = true;
+
+    router.post(
+        `/admin/pengguna/${props.pengguna.id_pengguna}/reset-password`,
+        {},
+        {
+            onSuccess: () => {
+                showResetPasswordModal.value = false;
+                const generatedPassword = (page.props as any).flash?.generated_password;
+                alert(generatedPassword ? `Password berhasil direset. Password baru: ${generatedPassword}` : 'Password berhasil direset');
+            },
+            onError: () => {
+                alert('Gagal mereset password');
+            },
+            onFinish: () => {
+                isResettingPassword.value = false;
+            },
+        },
+    );
 }
 </script>
 
@@ -162,8 +197,39 @@ function formatDate(dateString?: string) {
                         Edit Pengguna
                     </BaseButton>
 
-                    <!-- Reset Password (future feature) -->
-                    <BaseButton variant="secondary" icon="fas fa-key" :disabled="true" title="Fitur akan datang"> Reset Password </BaseButton>
+                    <BaseButton variant="warning" icon="fas fa-key" @click="openResetPasswordModal"> Reset Password </BaseButton>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset Password Modal -->
+        <div
+            v-if="showResetPasswordModal"
+            class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"
+            @click.self="closeResetPasswordModal"
+        >
+            <div class="shadow-emerald w-full max-w-md rounded-lg border border-emerald-200 bg-white-emerald p-6">
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold text-emerald-800">Reset Password</h3>
+                    <p class="text-emerald-600">Apakah Anda yakin ingin mereset password untuk pengguna "{{ pengguna.nama }}"?</p>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Password baru akan digenerate otomatis oleh sistem sebagai string acak 20 karakter alfanumerik.
+                    </p>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <BaseButton variant="secondary" @click="closeResetPasswordModal"> Batal </BaseButton>
+
+                    <BaseButton
+                        variant="warning"
+                        icon="fas fa-key"
+                        :loading="isResettingPassword"
+                        :disabled="isResettingPassword"
+                        @click="resetPassword"
+                    >
+                        <span v-if="isResettingPassword">Mereset...</span>
+                        <span v-else>Reset Password</span>
+                    </BaseButton>
                 </div>
             </div>
         </div>

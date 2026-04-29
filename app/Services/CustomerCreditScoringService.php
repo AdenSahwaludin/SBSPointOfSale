@@ -31,13 +31,14 @@ class CustomerCreditScoringService
     {
         $originalLimit = (int) $pelanggan->credit_limit;
 
-        // Only eligible customers can get credit limit increase
-        if ($pelanggan->trust_score < 70) {
+        // Only eligible customers can get credit limit increase (TS >= 55)
+        $eligibility = CreditLimitService::checkEligibility($pelanggan->trust_score);
+        if (!$eligibility['eligible']) {
             return [
                 'limit_increased' => false,
                 'new_limit' => $originalLimit,
                 'increase_amount' => 0,
-                'reason' => 'Trust score below 70. Not eligible for credit increase.',
+                'reason' => 'Trust score below 55. Not eligible for credit increase.',
             ];
         }
 

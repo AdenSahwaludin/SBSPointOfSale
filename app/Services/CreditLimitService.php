@@ -59,8 +59,18 @@ class CreditLimitService
             ];
         }
 
-        // Method 1: 50% of largest transaction
+        // Calculate store median transaction for anomaly check
+        $storeMedian = Transaksi::pluck('total')->median() ?? 0;
+
+        // Filter anomalies: Exclude largest transaction if it > 3 * store median
         $largestTransaction = $transactions->first()->total ?? 0;
+        if ($storeMedian > 0 && $largestTransaction > (3 * $storeMedian)) {
+            // Remove the anomaly and use the second largest as the new largest
+            $transactions = $transactions->slice(1)->values();
+            $largestTransaction = $transactions->first()->total ?? 0;
+        }
+
+        // Method 1: 50% of largest transaction
         $method1 = (int) ($largestTransaction * 0.5);
 
         // Method 2: 50% of average of top 3 transactions
@@ -85,6 +95,21 @@ class CreditLimitService
         // Calculate final credit limit (rounded to nearest thousand)
         $creditLimit = (int) (round(($limitBase * $trustFactor) / 1000) * 1000);
 
+        // Apply minimum limit rule from brief (Rp 100.000)
+        if ($creditLimit > 0 && $creditLimit < 100000) {
+            $creditLimit = 100000;
+        }
+
+        // Check for active arrears (tunggakan)
+        $hasActiveLate = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
+            $q->where('id_pelanggan', $pelanggan->id_pelanggan);
+        })->whereIn('status', ['DUE', 'LATE'])->exists();
+
+        // If there are active arrears, Credit Limit is 0
+        if ($hasActiveLate) {
+            $creditLimit = 0;
+        }
+
         return [
             'limit_base' => $limitBase,
             'trust_factor' => $trustFactor,
@@ -103,10 +128,10 @@ class CreditLimitService
      */
     private static function getTrustScoreFactor(int $trustScore): float
     {
-        if ($trustScore < 50) {
-            return 0.0; // Rejected
-        } elseif ($trustScore >= 50 && $trustScore <= 59) {
-            return 0.7;
+        if ($trustScore < 55) {
+            return 0.0;
+        } elseif ($trustScore >= 55 && $trustScore <= 59) {
+            return 0.5;
         } elseif ($trustScore >= 60 && $trustScore <= 74) {
             return 1.0;
         } elseif ($trustScore >= 75 && $trustScore <= 89) {
@@ -149,29 +174,23 @@ class CreditLimitService
      */
     public static function checkEligibility(int $trustScore): array
     {
-        if ($trustScore < 50) {
+        if ($trustScore < 55) {
             return [
                 'eligible' => false,
                 'status' => 'REJECTED',
-                'message' => 'Pengajuan cicilan tidak diperbolehkan karena trust score terlalu rendah.',
+                'message' => 'Pengajuan cicilan ditolak karena Trust Score di bawah 55.',
             ];
-        } elseif ($trustScore == 50) {
+        } elseif ($trustScore >= 55 && $trustScore <= 69) {
             return [
-                'eligible' => false,
-                'status' => 'BASELINE',
-                'message' => 'Trust score berada pada baseline minimum. Pengajuan cicilan otomatis ditolak. Tingkatkan trust score untuk qualify.',
-            ];
-        } elseif ($trustScore >= 51 && $trustScore <= 69) {
-            return [
-                'eligible' => false,
-                'status' => 'REJECTED',
-                'message' => 'Pengajuan cicilan otomatis ditolak. Trust score belum mencapai threshold minimum 70.',
+                'eligible' => true,
+                'status' => 'REVIEW',
+                'message' => 'Pengajuan cicilan dipertimbangkan.',
             ];
         } else { // >= 70
             return [
                 'eligible' => true,
                 'status' => 'APPROVED',
-                'message' => 'Customer layak untuk cicilan berdasarkan trust score. Proses dapat dilanjutkan.',
+                'message' => 'Pelanggan layak menerima fasilitas cicilan.',
             ];
         }
     }

@@ -7,7 +7,7 @@ import { useDebouncedSearch } from '@/composables/useDebouncedSearch';
 import { setActiveMenuItem, useKasirMenuItems } from '@/composables/useKasirMenu';
 import { useNotifications } from '@/composables/useNotifications';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
 
 interface Kategori {
@@ -496,6 +496,12 @@ function clearCart() {
     dpBayarDisplay.value = '';
 }
 
+function refreshPosData() {
+    router.reload({
+        only: ['produk', 'pelanggan'],
+    });
+}
+
 // Live search (debounced) using composable
 function handleSearchInput() {
     productQuery.value = searchQuery.value;
@@ -611,7 +617,7 @@ function handleConfirmTransaction() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
         },
         body: JSON.stringify(requestData),
@@ -637,6 +643,7 @@ function handleConfirmTransaction() {
                 creditConfig.value = null;
                 clearCart();
                 resetForm();
+                refreshPosData();
             } else {
                 addNotification({
                     type: 'error',
@@ -704,7 +711,7 @@ function handlePrintReceipt() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
         },
         body: JSON.stringify(requestData),
@@ -730,6 +737,7 @@ function handlePrintReceipt() {
                 creditConfig.value = null;
                 clearCart();
                 resetForm();
+                refreshPosData();
 
                 // Then open receipt for printing
                 const receiptWindow = window.open('', '_blank');
@@ -1254,9 +1262,19 @@ const kasirMenuItems = setActiveMenuItem(useKasirMenuItems(), '/kasir/pos');
                                             : 'text-gray-900',
                                     ]"
                                 >
-                                    <div class="font-medium">{{ pelanggan.nama }}</div>
-                                    <div class="text-xs text-gray-500" v-if="pelanggan.email || pelanggan.telepon">
-                                        {{ pelanggan.email || pelanggan.telepon }}
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <div class="font-medium">{{ pelanggan.nama }}</div>
+                                            <div class="text-xs text-gray-500" v-if="pelanggan.email || pelanggan.telepon">
+                                                {{ pelanggan.email || pelanggan.telepon }}
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0 text-right">
+                                            <div class="text-[10px] tracking-wide text-gray-400 uppercase">Limit</div>
+                                            <div class="text-sm font-semibold text-emerald-600">
+                                                {{ formatCurrency(Number(pelanggan.credit_limit || 0)) }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </button>
                             </div>

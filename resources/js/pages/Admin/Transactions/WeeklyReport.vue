@@ -3,7 +3,7 @@ import BaseButton from '@/components/BaseButton.vue';
 import ExportDropdown from '@/components/ExportDropdown.vue';
 import { setActiveMenuItem, useAdminMenuItems } from '@/composables/useAdminMenu';
 import BaseLayout from '@/pages/Layouts/BaseLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface TopPerformer {
@@ -53,7 +53,16 @@ interface Props {
     dailyData: DailyData[];
     topKasir: TopPerformer[];
     topPelanggan: TopPerformer[];
-    transaksi: Transaksi[];
+    transaksi: {
+        data: Transaksi[];
+        current_page: number;
+        from: number;
+        last_page: number;
+        per_page: number;
+        to: number;
+        total: number;
+        links: { url: string | null; label: string; active: boolean }[];
+    };
     insights: {
         aov: number;
         growth: number;
@@ -72,8 +81,21 @@ const selectedEndDate = ref(props.end_date);
 const exportPdfUrl = computed(() => `/admin/reports/weekly/export/pdf?start_date=${selectedStartDate.value}`);
 const exportCsvUrl = computed(() => `/admin/reports/weekly/export/csv?start_date=${selectedStartDate.value}`);
 
+const perPage = ref(String(props.transaksi?.per_page || 15));
+
 function handleDateChange() {
-    router.get(`/admin/transactions/laporan-mingguan?start_date=${selectedStartDate.value}`);
+    router.get(`/admin/transactions/laporan-mingguan`, {
+        start_date: selectedStartDate.value,
+        per_page: perPage.value
+    });
+}
+
+function handlePerPageChange() {
+    router.get(`/admin/transactions/laporan-mingguan`, {
+        start_date: selectedStartDate.value,
+        per_page: perPage.value,
+        page: 1
+    }, { preserveState: true });
 }
 
 function formatCurrency(amount: number): string {
@@ -300,8 +322,24 @@ function formatDateTime(dateString: string): string {
 
             <!-- Transaction List -->
             <div class="rounded-lg border border-gray-200 bg-white p-6">
-                <h3 class="mb-4 text-lg font-semibold text-gray-900">Daftar Transaksi ({{ transaksi.length }})</h3>
-                <div v-if="transaksi.length > 0" class="overflow-x-auto">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Daftar Transaksi ({{ transaksi.total }})</h3>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm font-medium text-gray-700">Per Halaman:</label>
+                        <select
+                            v-model="perPage"
+                            @change="handlePerPageChange"
+                            class="rounded-lg border border-gray-300 px-2 py-1 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                        >
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+                <div v-if="transaksi.data.length > 0" class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="border-b-2 border-gray-200 bg-gray-50">
                             <tr>
@@ -315,7 +353,7 @@ function formatDateTime(dateString: string): string {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            <tr v-for="trans in transaksi" :key="trans.nomor_transaksi" class="hover:bg-gray-50">
+                            <tr v-for="trans in transaksi.data" :key="trans.nomor_transaksi" class="hover:bg-gray-50">
                                 <td class="px-4 py-3 font-medium text-emerald-600">{{ trans.nomor_transaksi }}</td>
                                 <td class="px-4 py-3 text-gray-600">{{ formatDateTime(trans.tanggal) }}</td>
                                 <td class="px-4 py-3 text-gray-900">{{ trans.pelanggan.nama }}</td>
@@ -336,6 +374,31 @@ function formatDateTime(dateString: string): string {
                 </div>
                 <div v-else class="py-8 text-center">
                     <p class="text-gray-500">Tidak ada transaksi pada minggu ini</p>
+                </div>
+
+                <!-- Pagination -->
+                <div v-if="transaksi.last_page > 1" class="mt-6 flex flex-col items-center justify-between gap-4 border-t border-gray-100 pt-6 md:flex-row">
+                    <p class="text-sm text-gray-600">
+                        Menampilkan <span class="font-semibold">{{ transaksi.from || 0 }}</span> hingga <span class="font-semibold">{{ transaksi.to || 0 }}</span> dari
+                        <span class="font-semibold text-emerald-600">{{ transaksi.total || 0 }}</span> transaksi
+                    </p>
+                    <div class="flex flex-wrap items-center gap-1">
+                        <Link
+                            v-for="(link, index) in transaksi.links"
+                            :key="index"
+                            :href="link.url || '#'"
+                            :class="[
+                                'inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+                                link.active
+                                    ? 'bg-emerald-600 text-white shadow-md'
+                                    : link.url
+                                      ? 'bg-white border border-gray-300 text-gray-700 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50'
+                                      : 'cursor-not-allowed bg-gray-50 border border-gray-200 text-gray-400',
+                                index === 0 || index === transaksi.links.length - 1 ? 'px-4' : '',
+                            ]"
+                            v-html="link.label"
+                        ></Link>
+                    </div>
                 </div>
             </div>
         </div>

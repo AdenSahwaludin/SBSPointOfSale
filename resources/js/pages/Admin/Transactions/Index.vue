@@ -36,15 +36,13 @@ interface PaginationLink {
 interface Props {
     transaksi: {
         data: Transaksi[];
+        current_page: number;
+        from: number;
+        last_page: number;
+        per_page: number;
+        to: number;
+        total: number;
         links: PaginationLink[];
-        meta: {
-            current_page: number;
-            from: number;
-            last_page: number;
-            per_page: number;
-            to: number;
-            total: number;
-        };
     };
     stats: {
         total_transaksi: number;
@@ -70,7 +68,7 @@ const selectedStatus = ref(props.filters.status || 'all');
 const selectedMethode = ref(props.filters.metode_bayar || 'all');
 const startDate = ref(props.filters.start_date || '');
 const endDate = ref(props.filters.end_date || '');
-const perPage = ref(String(props.transaksi?.meta?.per_page || 15));
+const perPage = ref(String(props.transaksi?.per_page || 15));
 
 function handleSearch() {
     router.get(
@@ -244,7 +242,7 @@ function formatDateTime(dateString: string): string {
             <!-- Transaction Table -->
             <div class="rounded-lg border border-gray-200 bg-white p-6">
                 <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900">Daftar Transaksi ({{ transaksi?.meta?.total || 0 }})</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">Daftar Transaksi</h3>
                     <div class="flex items-center gap-2">
                         <label class="text-sm font-medium text-gray-700">Per Halaman:</label>
                         <select
@@ -307,23 +305,25 @@ function formatDateTime(dateString: string): string {
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="transaksi?.meta?.last_page && transaksi.meta.last_page > 1" class="mt-6 flex items-center justify-between">
+                <div v-if="transaksi.last_page > 1" class="mt-6 flex flex-col items-center justify-between gap-4 border-t border-gray-100 pt-6 md:flex-row">
                     <p class="text-sm text-gray-600">
-                        Menampilkan {{ transaksi?.meta?.from || 0 }} hingga {{ transaksi?.meta?.to || 0 }} dari
-                        {{ transaksi?.meta?.total || 0 }} transaksi
+                        Menampilkan <span class="font-semibold">{{ transaksi.from || 0 }}</span> hingga <span class="font-semibold">{{ transaksi.to || 0 }}</span> dari
+                        <span class="font-semibold text-emerald-600">{{ transaksi.total || 0 }}</span> transaksi
                     </p>
-                    <div class="flex gap-1">
+                    <div class="flex flex-wrap items-center gap-1">
                         <Link
-                            v-for="link in transaksi?.links || []"
-                            :key="link.label"
+                            v-for="(link, index) in transaksi.links"
+                            :key="index"
                             :href="link.url || '#'"
                             :class="[
-                                'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                                'inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                                 link.active
-                                    ? 'bg-emerald-600 text-white'
+                                    ? 'bg-emerald-600 text-white shadow-md'
                                     : link.url
-                                      ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                      : 'cursor-not-allowed bg-gray-100 text-gray-400',
+                                      ? 'bg-white border border-gray-300 text-gray-700 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50'
+                                      : 'cursor-not-allowed bg-gray-50 border border-gray-200 text-gray-400',
+                                // Hide specific labels on small screens if needed
+                                index === 0 || index === transaksi.links.length - 1 ? 'px-4' : '',
                             ]"
                             v-html="link.label"
                         ></Link>

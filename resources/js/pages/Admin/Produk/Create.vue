@@ -19,6 +19,17 @@ const props = defineProps<Props>();
 // Menu items dengan active state
 const adminMenuItems = setActiveMenuItem(useAdminMenuItems(), '/admin/produk');
 
+function handleSatuanChange() {
+    if (form.satuan === 'pcs') {
+        form.isi_per_pack = 1;
+        return;
+    }
+
+    if (Number(form.isi_per_pack) < 1) {
+        form.isi_per_pack = 1;
+    }
+}
+
 // Form state
 const form = useForm({
     nama: '',
@@ -88,35 +99,6 @@ function submit() {
                     <div>
                         <h3 class="mb-4 text-lg font-semibold text-emerald-800">Identitas Produk</h3>
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            <!-- SKU (Editable dengan Auto Generate) -->
-                            <div>
-                                <label class="mb-2 block text-sm font-medium text-emerald-700"> SKU * </label>
-                                <div class="flex items-center gap-2">
-                                    <input
-                                        v-model="form.sku"
-                                        type="text"
-                                        maxlength="32"
-                                        placeholder="Contoh: HB-MKP120-KRT12"
-                                        class="flex-1 rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                                        required
-                                    />
-                                    <BaseButton
-                                        type="button"
-                                        @click="autoSetSku"
-                                        variant="secondary"
-                                        size="sm"
-                                        icon="fas fa-magic"
-                                        title="Generate SKU otomatis"
-                                    >
-                                        Auto
-                                    </BaseButton>
-                                </div>
-                                <p class="mt-1 text-xs text-emerald-600">Format: KODE-NAMA-KEMASAN (max 32 karakter)</p>
-                                <div v-if="form.errors.sku" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.sku }}
-                                </div>
-                            </div>
-
                             <!-- Nama -->
                             <div class="md:col-span-2">
                                 <label class="mb-2 block text-sm font-medium text-emerald-700"> Nama Produk * </label>
@@ -191,6 +173,7 @@ function submit() {
                                 <label class="mb-2 block text-sm font-medium text-emerald-700"> Satuan * </label>
                                 <select
                                     v-model="form.satuan"
+                                    @change="handleSatuanChange"
                                     class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                     required
                                 >
@@ -210,7 +193,9 @@ function submit() {
                                     v-model.number="form.isi_per_pack"
                                     type="number"
                                     min="1"
-                                    class="w-full rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    :readonly="form.satuan === 'pcs'"
+                                    class="w-full rounded-lg border border-emerald-200 px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    :class="form.satuan === 'pcs' ? 'bg-gray-50 text-gray-500' : 'bg-white-emerald'"
                                     placeholder="Jumlah item per kemasan"
                                     required
                                 />
@@ -234,6 +219,35 @@ function submit() {
                                     {{ form.errors.sisa_pcs_terbuka }}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2.5: SKU -->
+                    <div class="mt-6">
+                        <label class="mb-2 block text-sm font-medium text-emerald-700"> SKU * </label>
+                        <div class="flex items-center gap-2">
+                            <input
+                                v-model="form.sku"
+                                type="text"
+                                maxlength="32"
+                                placeholder="Contoh: HB-MKP120-KRT12"
+                                class="flex-1 rounded-lg border border-emerald-200 bg-white-emerald px-3 py-2 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                required
+                            />
+                            <BaseButton
+                                type="button"
+                                @click="autoSetSku"
+                                variant="secondary"
+                                size="sm"
+                                icon="fas fa-magic"
+                                title="Generate SKU otomatis"
+                            >
+                                Auto
+                            </BaseButton>
+                        </div>
+                        <p class="mt-1 text-xs text-emerald-600">Format: KODE-NAMA-KEMASAN (max 32 karakter)</p>
+                        <div v-if="form.errors.sku" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.sku }}
                         </div>
                     </div>
 

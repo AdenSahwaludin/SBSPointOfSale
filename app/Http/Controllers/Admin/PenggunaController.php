@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -143,11 +144,15 @@ class PenggunaController extends Controller
             return back()->with('error', 'Tidak dapat mereset password akun sendiri');
         }
 
-        // Reset password ke default
+        $generatedPassword = Str::random(20);
+
+        // Reset password ke string acak yang digenerate sistem
         $pengguna->update([
-            'password' => '123456', // Password default
+            'password' => $generatedPassword,
         ]);
 
-        return back()->with('success', 'Password berhasil direset ke default (123456)');
+        return back()
+            ->with('success', 'Password berhasil direset')
+            ->with('generated_password', $generatedPassword);
     }
 }

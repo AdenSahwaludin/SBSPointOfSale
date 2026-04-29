@@ -28,8 +28,8 @@ class PelangganSeeder extends Seeder
             ],
             [
                 'id_pelanggan' => 'P002',
-                'nama' => 'Budi Santoso',
-                'email' => 'budi.santoso@email.com',
+                'nama' => 'Aden Sahwaludin',
+                'email' => 'adensahwaludin@gmail.com',
                 'telepon' => '081234567890',
                 'kota' => 'Jakarta',
                 'alamat' => 'Jl. Merdeka No. 123, Jakarta Pusat',
@@ -41,8 +41,8 @@ class PelangganSeeder extends Seeder
             ],
             [
                 'id_pelanggan' => 'P003',
-                'nama' => 'Siti Nurhaliza',
-                'email' => 'siti.nur@email.com',
+                'nama' => 'Mega Wahyuni',
+                'email' => 'megawahyuni@email.com',
                 'telepon' => '081234567891',
                 'kota' => 'Bandung',
                 'alamat' => 'Jl. Asia Afrika No. 45, Bandung',

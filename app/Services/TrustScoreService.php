@@ -79,13 +79,12 @@ class TrustScoreService
             }
         }
 
-        // Shopping frequency: +5 if >= 3 transactions in current month
-        $now = now();
-        $monthlyTxnCount = \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
-            ->whereYear('tanggal', $now->year)
-            ->whereMonth('tanggal', $now->month)
+        // Shopping frequency: +5 if >= 3 transactions per month on average in last 3 months (>= 9 total)
+        $threeMonthsAgo = now()->subMonths(3);
+        $recentTxnCount = \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->where('tanggal', '>=', $threeMonthsAgo)
             ->count();
-        $shoppingFrequencyDelta = $monthlyTxnCount >= 3 ? 5 : 0;
+        $shoppingFrequencyDelta = $recentTxnCount >= 9 ? 5 : 0;
 
         // Transaction value: +5 if customer's average total > store median total
         $allTotals = \App\Models\Transaksi::pluck('total');
@@ -98,17 +97,12 @@ class TrustScoreService
             }
         }
 
-        // Active arrears: -10 for 1 late/due, -15 for >1
-        $activeLateCount = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
+        // Active arrears: -10 if any active arrears (DUE or LATE)
+        $hasActiveLate = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
             $q->where('id_pelanggan', $pelanggan->id_pelanggan);
-        })->whereIn('status', ['DUE', 'LATE'])->count();
+        })->whereIn('status', ['DUE', 'LATE'])->exists();
 
-        $activeArrearsDelta = 0;
-        if ($activeLateCount > 1) {
-            $activeArrearsDelta = -15;
-        } elseif ($activeLateCount === 1) {
-            $activeArrearsDelta = -10;
-        }
+        $activeArrearsDelta = $hasActiveLate ? -10 : 0;
 
         $total = $baseline
             + $accountAgeDelta

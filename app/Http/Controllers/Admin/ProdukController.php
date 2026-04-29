@@ -63,7 +63,7 @@ class ProdukController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'id_kategori' => 'required|exists:kategori,id_kategori',
             'barcode' => 'nullable|string|max:13|unique:produk,barcode',
@@ -79,14 +79,18 @@ class ProdukController extends Controller
             'sku' => 'required|string|max:32|unique:produk,sku',
         ]);
 
+        if ($validated['satuan'] === 'pcs') {
+            $validated['isi_per_pack'] = 1;
+        }
+
         // Generate SKU otomatis jika user belum override
-        $sku = $request->sku;
+        $sku = $validated['sku'];
         if (empty($sku)) {
             $sku = SKUGenerator::generate(
-                $request->nama,
-                $request->id_kategori,
-                $request->satuan,
-                $request->isi_per_pack
+                $validated['nama'],
+                $validated['id_kategori'],
+                $validated['satuan'],
+                $validated['isi_per_pack']
             );
         }
 
@@ -97,18 +101,18 @@ class ProdukController extends Controller
 
         Produk::create([
             'sku' => $sku,
-            'nama' => $request->nama,
-            'id_kategori' => $request->id_kategori,
-            'barcode' => $request->barcode,
-            'no_bpom' => $request->no_bpom,
-            'satuan' => $request->satuan,
-            'isi_per_pack' => $request->isi_per_pack,
-            'harga' => $request->harga,
-            'harga_pack' => $request->harga_pack,
-            'stok' => $request->stok,
-            'sisa_pcs_terbuka' => $request->sisa_pcs_terbuka,
-            'batas_stok_minimum' => $request->batas_stok_minimum,
-            'jumlah_restock' => $request->jumlah_restock,
+            'nama' => $validated['nama'],
+            'id_kategori' => $validated['id_kategori'],
+            'barcode' => $validated['barcode'],
+            'no_bpom' => $validated['no_bpom'],
+            'satuan' => $validated['satuan'],
+            'isi_per_pack' => $validated['isi_per_pack'],
+            'harga' => $validated['harga'],
+            'harga_pack' => $validated['harga_pack'],
+            'stok' => $validated['stok'],
+            'sisa_pcs_terbuka' => $validated['sisa_pcs_terbuka'],
+            'batas_stok_minimum' => $validated['batas_stok_minimum'],
+            'jumlah_restock' => $validated['jumlah_restock'],
         ]);
 
         return redirect()->route('admin.produk.index')
@@ -148,7 +152,7 @@ class ProdukController extends Controller
     {
         $produk = Produk::where('id_produk', $id)->firstOrFail();
 
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'id_kategori' => 'required|exists:kategori,id_kategori',
             'barcode' => 'nullable|string|max:13|unique:produk,barcode,'.$produk->id_produk.',id_produk',
@@ -164,20 +168,24 @@ class ProdukController extends Controller
             'sku' => 'required|string|max:32|unique:produk,sku,'.$produk->id_produk.',id_produk',
         ]);
 
+        if ($validated['satuan'] === 'pcs') {
+            $validated['isi_per_pack'] = 1;
+        }
+
         $produk->update([
-            'sku' => $request->sku,
-            'nama' => $request->nama,
-            'id_kategori' => $request->id_kategori,
-            'barcode' => $request->barcode,
-            'no_bpom' => $request->no_bpom,
-            'satuan' => $request->satuan,
-            'isi_per_pack' => $request->isi_per_pack,
-            'harga' => $request->harga,
-            'harga_pack' => $request->harga_pack,
-            'stok' => $request->stok,
-            'sisa_pcs_terbuka' => $request->sisa_pcs_terbuka,
-            'batas_stok_minimum' => $request->batas_stok_minimum,
-            'jumlah_restock' => $request->jumlah_restock,
+            'sku' => $validated['sku'],
+            'nama' => $validated['nama'],
+            'id_kategori' => $validated['id_kategori'],
+            'barcode' => $validated['barcode'],
+            'no_bpom' => $validated['no_bpom'],
+            'satuan' => $validated['satuan'],
+            'isi_per_pack' => $validated['isi_per_pack'],
+            'harga' => $validated['harga'],
+            'harga_pack' => $validated['harga_pack'],
+            'stok' => $validated['stok'],
+            'sisa_pcs_terbuka' => $validated['sisa_pcs_terbuka'],
+            'batas_stok_minimum' => $validated['batas_stok_minimum'],
+            'jumlah_restock' => $validated['jumlah_restock'],
         ]);
 
         return redirect()->route('admin.produk.index')

@@ -26,7 +26,7 @@ class TransaksiController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
-        $query = Transaksi::with(['pelanggan', 'kasir', 'detail', 'kontrakKredit.jadwalAngsuran'])
+        $query = Transaksi::with(['pelanggan', 'kasir'])
             ->orderBy('tanggal', 'desc');
 
         // Search by nomor_transaksi, pelanggan nama
@@ -59,9 +59,8 @@ class TransaksiController extends Controller
 
         $transaksi = $query->paginate($perPage)->withQueryString();
 
-        // Base query for stats (apply all filters EXCEPT status)
+        // Calculate stats efficiently using a single query
         $statsQuery = Transaksi::query();
-
         if ($search) {
             $statsQuery->where(function ($q) use ($search) {
                 $q->where('nomor_transaksi', 'like', "%{$search}%")
@@ -80,13 +79,20 @@ class TransaksiController extends Controller
             $statsQuery->whereDate('tanggal', '<=', $endDate);
         }
 
-        // Calculate stats
+        $statsData = $statsQuery->selectRaw('
+            COUNT(*) as total_transaksi,
+            SUM(CASE WHEN status_pembayaran = "LUNAS" THEN 1 ELSE 0 END) as total_lunas,
+            SUM(CASE WHEN status_pembayaran = "MENUNGGU" THEN 1 ELSE 0 END) as total_menunggu,
+            SUM(CASE WHEN status_pembayaran = "BATAL" THEN 1 ELSE 0 END) as total_batal,
+            SUM(CASE WHEN status_pembayaran = "LUNAS" THEN total ELSE 0 END) as total_nilai
+        ')->first();
+
         $stats = [
-            'total_transaksi' => (clone $statsQuery)->count(),
-            'total_lunas' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->count(),
-            'total_menunggu' => (clone $statsQuery)->where('status_pembayaran', 'MENUNGGU')->count(),
-            'total_batal' => (clone $statsQuery)->where('status_pembayaran', 'BATAL')->count(),
-            'total_nilai' => (clone $statsQuery)->where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_transaksi' => (int) ($statsData->total_transaksi ?? 0),
+            'total_lunas' => (int) ($statsData->total_lunas ?? 0),
+            'total_menunggu' => (int) ($statsData->total_menunggu ?? 0),
+            'total_batal' => (int) ($statsData->total_batal ?? 0),
+            'total_nilai' => (float) ($statsData->total_nilai ?? 0),
         ];
 
         return Inertia::render('Admin/Transactions/Index', [
@@ -113,7 +119,7 @@ class TransaksiController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
-        $query = Transaksi::with(['pelanggan', 'kasir', 'detail', 'kontrakKredit.jadwalAngsuran'])
+        $query = Transaksi::with(['pelanggan', 'kasir'])
             ->where('jenis_transaksi', Transaksi::JENIS_KREDIT)
             ->orderBy('tanggal', 'desc');
 
@@ -142,9 +148,8 @@ class TransaksiController extends Controller
 
         $transaksi = $query->paginate($perPage)->withQueryString();
 
-        // Base query for credit stats (apply all filters EXCEPT status)
+        // Calculate stats for credit transactions only
         $creditStatsQuery = Transaksi::where('jenis_transaksi', Transaksi::JENIS_KREDIT);
-
         if ($search) {
             $creditStatsQuery->where(function ($q) use ($search) {
                 $q->where('nomor_transaksi', 'like', "%{$search}%")
@@ -160,13 +165,20 @@ class TransaksiController extends Controller
             $creditStatsQuery->whereDate('tanggal', '<=', $endDate);
         }
 
-        // Calculate stats for credit transactions only
+        $statsData = $creditStatsQuery->selectRaw('
+            COUNT(*) as total_transaksi,
+            SUM(CASE WHEN status_pembayaran = "LUNAS" THEN 1 ELSE 0 END) as total_lunas,
+            SUM(CASE WHEN status_pembayaran = "MENUNGGU" THEN 1 ELSE 0 END) as total_menunggu,
+            SUM(CASE WHEN status_pembayaran = "BATAL" THEN 1 ELSE 0 END) as total_batal,
+            SUM(CASE WHEN status_pembayaran = "LUNAS" THEN total ELSE 0 END) as total_nilai
+        ')->first();
+
         $creditStats = [
-            'total_transaksi' => (clone $creditStatsQuery)->count(),
-            'total_lunas' => (clone $creditStatsQuery)->where('status_pembayaran', 'LUNAS')->count(),
-            'total_menunggu' => (clone $creditStatsQuery)->where('status_pembayaran', 'MENUNGGU')->count(),
-            'total_batal' => (clone $creditStatsQuery)->where('status_pembayaran', 'BATAL')->count(),
-            'total_nilai' => (clone $creditStatsQuery)->where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_transaksi' => (int) ($statsData->total_transaksi ?? 0),
+            'total_lunas' => (int) ($statsData->total_lunas ?? 0),
+            'total_menunggu' => (int) ($statsData->total_menunggu ?? 0),
+            'total_batal' => (int) ($statsData->total_batal ?? 0),
+            'total_nilai' => (float) ($statsData->total_nilai ?? 0),
         ];
 
         return Inertia::render('Admin/Transactions/CreditIndex', [
@@ -187,25 +199,32 @@ class TransaksiController extends Controller
     public function dailyReport(Request $request): Response
     {
         $tanggal = $request->get('tanggal') ? Carbon::parse($request->get('tanggal')) : Carbon::today();
+        $perPage = $request->get('per_page', 15);
 
-        // Get all transactions for the selected day
-        $dayTransactions = Transaksi::with(['pelanggan', 'kasir'])
+        // Fetch all transactions for the day to calculate stats and charts accurately
+        $allTransactions = Transaksi::with(['pelanggan', 'kasir'])
             ->whereDate('tanggal', $tanggal)
-            ->orderBy('tanggal', 'desc')
             ->get();
 
         // Calculate stats
         $stats = [
-            'total_transaksi' => $dayTransactions->count(),
-            'total_lunas' => $dayTransactions->where('status_pembayaran', 'LUNAS')->count(),
-            'total_menunggu' => $dayTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
-            'total_batal' => $dayTransactions->where('status_pembayaran', 'BATAL')->count(),
-            'total_nilai' => $dayTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
-            'total_item' => $dayTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
+            'total_transaksi' => $allTransactions->count(),
+            'total_lunas' => $allTransactions->where('status_pembayaran', 'LUNAS')->count(),
+            'total_menunggu' => $allTransactions->where('status_pembayaran', 'MENUNGGU')->count(),
+            'total_batal' => $allTransactions->where('status_pembayaran', 'BATAL')->count(),
+            'total_nilai' => $allTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
+            'total_item' => $allTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
         ];
 
-        // Get payment method breakdown
-        $paymentMethods = $dayTransactions->where('status_pembayaran', 'LUNAS')
+        // Paginate only for the table display
+        $paginatedTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereDate('tanggal', $tanggal)
+            ->orderBy('tanggal', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        // Get payment method breakdown from ALL transactions
+        $paymentMethods = $allTransactions->where('status_pembayaran', 'LUNAS')
             ->groupBy('metode_bayar')
             ->map(function ($group) {
                 return [
@@ -216,8 +235,8 @@ class TransaksiController extends Controller
             })
             ->values();
 
-        // Get hourly breakdown for chart
-        $hourlyRaw = $dayTransactions->where('status_pembayaran', 'LUNAS')
+        // Get hourly breakdown for chart from ALL transactions
+        $hourlyRaw = $allTransactions->where('status_pembayaran', 'LUNAS')
             ->groupBy(function ($transaction) {
                 return (int) Carbon::parse($transaction->tanggal)->format('H');
             })
@@ -243,8 +262,8 @@ class TransaksiController extends Controller
             }
         }
 
-        // INSIGHTS & AOV
-        $lunasTransactions = $dayTransactions->where('status_pembayaran', 'LUNAS');
+        // INSIGHTS & AOV from ALL transactions
+        $lunasTransactions = $allTransactions->where('status_pembayaran', 'LUNAS');
         $totalLunasCount = $lunasTransactions->count();
         $totalLunasValue = $lunasTransactions->sum('total');
 
@@ -270,8 +289,11 @@ class TransaksiController extends Controller
         $bestHour = collect($hourlyData)->sortByDesc('total')->first();
 
         // Top Customer for the day
-        $topCustomer = $lunasTransactions->groupBy('id_pelanggan')->map(function ($g) {
-            return ['nama' => $g->first()->pelanggan?->nama ?? 'Umum', 'total' => $g->sum('total')];
+        $topCustomerData = $lunasTransactions->groupBy('id_pelanggan')->map(function ($g) {
+            return [
+                'nama' => $g->first()->pelanggan->nama ?? '-',
+                'total' => $g->sum('total')
+            ];
         })->sortByDesc('total')->first();
 
         $insights = [
@@ -280,7 +302,7 @@ class TransaksiController extends Controller
             'last_period_value' => $yesterdayValue,
             'dominant_method' => $dominantMethod ? $dominantMethod['metode'] : '-',
             'best_time' => $bestHour ? $bestHour['jam'] : '-',
-            'top_customer' => $topCustomer ? $topCustomer['nama'] : '-',
+            'top_customer' => $topCustomerData ? $topCustomerData['nama'] : '-',
         ];
 
         return Inertia::render('Admin/Transactions/DailyReport', [
@@ -289,7 +311,7 @@ class TransaksiController extends Controller
             'stats' => $stats,
             'paymentMethods' => $paymentMethods,
             'hourlyData' => $hourlyData,
-            'transaksi' => $dayTransactions,
+            'transaksi' => $paginatedTransactions,
             'insights' => $insights,
         ]);
     }
@@ -301,12 +323,12 @@ class TransaksiController extends Controller
     {
         $bulan = $request->get('bulan') ? (int) $request->get('bulan') : now()->month;
         $tahun = $request->get('tahun') ? (int) $request->get('tahun') : now()->year;
+        $perPage = $request->get('per_page', 15);
 
-        // Get all transactions for the selected month
+        // Get all transactions for the selected month to calculate stats and charts accurately
         $monthTransactions = Transaksi::with(['pelanggan', 'kasir'])
             ->whereYear('tanggal', $tahun)
             ->whereMonth('tanggal', $bulan)
-            ->orderBy('tanggal', 'desc')
             ->get();
 
         // Calculate stats
@@ -318,6 +340,14 @@ class TransaksiController extends Controller
             'total_nilai' => $monthTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
             'total_item' => $monthTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
         ];
+
+        // Paginate for the table display
+        $paginatedTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $bulan)
+            ->orderBy('tanggal', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
 
         // Get payment method breakdown
         $paymentMethods = $monthTransactions->where('status_pembayaran', 'LUNAS')
@@ -438,11 +468,11 @@ class TransaksiController extends Controller
     {
         $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date'))->startOfWeek() : Carbon::now()->startOfWeek();
         $endDate = $startDate->copy()->endOfWeek();
+        $perPage = $request->get('per_page', 15);
 
-        // Get all transactions for the selected week
+        // Fetch all transactions for the week to calculate stats and charts accurately
         $weekTransactions = Transaksi::with(['pelanggan', 'kasir'])
             ->whereBetween('tanggal', [$startDate, $endDate])
-            ->orderBy('tanggal', 'desc')
             ->get();
 
         // Calculate stats
@@ -454,6 +484,13 @@ class TransaksiController extends Controller
             'total_nilai' => $weekTransactions->where('status_pembayaran', 'LUNAS')->sum('total'),
             'total_item' => $weekTransactions->where('status_pembayaran', 'LUNAS')->sum('total_item'),
         ];
+
+        // Paginate for the table display
+        $paginatedTransactions = Transaksi::with(['pelanggan', 'kasir'])
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->orderBy('tanggal', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
 
         // Get payment method breakdown
         $paymentMethods = $weekTransactions->where('status_pembayaran', 'LUNAS')
@@ -563,7 +600,7 @@ class TransaksiController extends Controller
             'dailyData' => $dailyData,
             'topKasir' => $topKasir,
             'topPelanggan' => $topPelanggan,
-            'transaksi' => $weekTransactions,
+            'transaksi' => $paginatedTransactions,
             'insights' => $insights,
         ]);
     }
