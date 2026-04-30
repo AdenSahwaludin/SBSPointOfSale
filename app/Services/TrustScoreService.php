@@ -47,19 +47,22 @@ class TrustScoreService
     {
         $baseline = 50;
 
-        // Account age
-        $accountAgeDelta = 0;
+        // P_umur: 30-179 days = +10, >= 180 days = +20
+        $pUmur = 0;
         if ($pelanggan->created_at) {
             $ageDays = $pelanggan->created_at->diffInDays(now());
             if ($ageDays >= 180) {
-                $accountAgeDelta = 20;
+                $pUmur = 20;
             } elseif ($ageDays >= 30) {
-                $accountAgeDelta = 10;
+                $pUmur = 10;
             }
         }
 
-        // Installment history: +2 on-time, -5 late, -25 failed (VOID)
-        $installmentDelta = 0;
+        // Installment History Components
+        $pTepat = 0; // +2 per on-time, max +20
+        $pTelat = 0; // -5 per late
+        $pGagal = 0; // -25 per failed (VOID)
+
         $installments = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
             $q->where('id_pelanggan', $pelanggan->id_pelanggan);
         })->get(['status', 'paid_at', 'jatuh_tempo']);
@@ -69,58 +72,68 @@ class TrustScoreService
             if ($status === 'LUNAS') {
                 // On-time if paid_at <= due date
                 if ($angsuran->paid_at && $angsuran->jatuh_tempo && $angsuran->paid_at->lessThanOrEqualTo($angsuran->jatuh_tempo)) {
-                    $installmentDelta += 2;
-                } elseif ($angsuran->paid_at && $angsuran->jatuh_tempo && $angsuran->paid_at->greaterThan($angsuran->jatuh_tempo)) {
-                    $installmentDelta -= 5;
+                    $pTepat += 2;
+                } else {
+                    $pTelat += 5;
                 }
             } elseif ($status === 'VOID') {
-                // Failed payment
-                $installmentDelta -= 25;
+                $pGagal += 25;
             }
         }
 
-        // Shopping frequency: +5 if >= 3 transactions per month on average in last 3 months (>= 9 total)
+        // Apply cap to P_tepat
+        $pTepat = min($pTepat, 20);
+
+        // P_frekuensi: +5 if >= 3 transactions per month in last 3 months (avg >= 3/mo = total 9)
         $threeMonthsAgo = now()->subMonths(3);
         $recentTxnCount = \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])
             ->where('tanggal', '>=', $threeMonthsAgo)
             ->count();
-        $shoppingFrequencyDelta = $recentTxnCount >= 9 ? 5 : 0;
+        $pFrekuensi = $recentTxnCount >= 9 ? 5 : 0;
 
-        // Transaction value: +5 if customer's average total > store median total
-        $allTotals = \App\Models\Transaksi::pluck('total');
-        $transactionValueDelta = 0;
+        // P_nilai: +5 if average transaction > store median
+        $pNilai = 0;
+        $allTotals = \App\Models\Transaksi::whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])->pluck('total');
         if ($allTotals->count() > 0) {
             $median = $allTotals->map(fn ($t) => (float) $t)->median();
-            $avg = (float) \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)->avg('total');
+            $avg = (float) \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+                ->whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])
+                ->avg('total');
             if ($avg > $median) {
-                $transactionValueDelta = 5;
+                $pNilai = 5;
             }
         }
 
-        // Active arrears: -10 if any active arrears (DUE or LATE)
-        $hasActiveLate = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
+        // P_tunggakan: -10 if any active arrears (DUE or LATE)
+        $hasActiveArrears = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
             $q->where('id_pelanggan', $pelanggan->id_pelanggan);
         })->whereIn('status', ['DUE', 'LATE'])->exists();
 
-        $activeArrearsDelta = $hasActiveLate ? -10 : 0;
+        $pTunggakan = $hasActiveArrears ? 10 : 0;
 
-        $total = $baseline
-            + $accountAgeDelta
-            + $installmentDelta
-            + $shoppingFrequencyDelta
-            + $transactionValueDelta
-            + $activeArrearsDelta;
+        // TS = 50 + P_umur + P_tepat + P_frekuensi + P_nilai - P_telat - P_gagal - P_tunggakan
+        $total = $baseline 
+            + $pUmur 
+            + $pTepat 
+            + $pFrekuensi 
+            + $pNilai 
+            - $pTelat 
+            - $pGagal 
+            - $pTunggakan;
 
         // Clamp to 0..100
         $total = max(0, min(100, (int) round($total)));
 
         return [
             'baseline' => $baseline,
-            'account_age' => $accountAgeDelta,
-            'installment_history' => $installmentDelta,
-            'shopping_frequency' => $shoppingFrequencyDelta,
-            'transaction_value' => $transactionValueDelta,
-            'active_arrears' => $activeArrearsDelta,
+            'p_umur' => $pUmur,
+            'p_tepat' => $pTepat,
+            'p_telat' => -$pTelat,
+            'p_gagal' => -$pGagal,
+            'p_frekuensi' => $pFrekuensi,
+            'p_nilai' => $pNilai,
+            'p_tunggakan' => -$pTunggakan,
             'total' => $total,
         ];
     }

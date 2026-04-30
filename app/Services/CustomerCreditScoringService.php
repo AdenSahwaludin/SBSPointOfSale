@@ -46,10 +46,8 @@ class CustomerCreditScoringService
         $sixMonthsAgo = Carbon::now()->subMonths(6);
         $transactions = Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
             ->where('tanggal', '>=', $sixMonthsAgo)
-            ->where(function ($query) {
-                $query->where('status_pembayaran', 'LUNAS')
-                    ->orWhere('jenis_transaksi', 'TUNAI');
-            })
+            ->whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])
+            ->where('status_pembayaran', 'LUNAS')
             ->get();
 
         $transactionCount = $transactions->count();

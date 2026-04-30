@@ -339,7 +339,8 @@ class TransaksiPOSController extends Controller
                 $customer = \App\Models\Pelanggan::find($request->id_pelanggan);
                 $principal = max(0.0, (float) $request->total - (float) ($request->dp ?? 0));
                 $tenorBulan = (int) ($request->tenor_bulan ?? 12);
-                $bungaPersen = (float) ($request->bunga_persen ?? 0);
+                // Bunga otomatis mengikuti tenor: per 3 bulan naik 5%
+                $bungaPersen = ($tenorBulan / 3) * 5;
                 $mulai = $request->mulai_kontrak ? Carbon::parse($request->mulai_kontrak) : Carbon::today();
 
                 // Hitung total tagihan (pokok + bunga), lalu distribusikan ke kelipatan 1000

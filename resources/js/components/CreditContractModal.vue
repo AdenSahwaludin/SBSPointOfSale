@@ -22,7 +22,7 @@ const emit = defineEmits<{
 }>();
 
 const tenor = ref<number>(12);
-const bunga = ref<number>(0);
+const bunga = computed(() => (tenor.value / 3) * 5);
 const startDate = ref<string>(new Date().toISOString().slice(0, 10));
 
 const principal = computed(() => Math.max(0, Number(props.total || 0) - Number(props.dp || 0)));
@@ -85,7 +85,6 @@ watch(
         if (val) {
             // reset sensible defaults on open
             tenor.value = 12;
-            bunga.value = 0;
             startDate.value = new Date().toISOString().slice(0, 10);
         }
     },
@@ -125,14 +124,10 @@ watch(
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700">Bunga (%)</label>
-                    <input
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        v-model.number="bunga"
-                        class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-emerald-500"
-                    />
-                    <p class="mt-1 text-xs text-gray-500">Bunga flat total kontrak</p>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-2 font-semibold text-gray-900">
+                        {{ bunga }}%
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Otomatis: 5% per 3 bulan tenor</p>
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700">Mulai Kontrak</label>

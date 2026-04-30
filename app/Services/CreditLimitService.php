@@ -30,17 +30,10 @@ class CreditLimitService
      */
     public static function calculateCreditLimit(Pelanggan $pelanggan): array
     {
-        // Get completed transactions (LUNAS or fully paid KREDIT)
+        // Get completed non-credit transactions (TUNAI or TRANSFER)
         $transactions = Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
-            ->where(function ($query) {
-                $query->where('status_pembayaran', 'LUNAS')
-                    ->orWhere(function ($q) {
-                        $q->where('jenis_transaksi', 'KREDIT')
-                            ->whereHas('kontrakKredit.jadwalAngsuran', function ($sq) {
-                                $sq->where('status', 'PAID');
-                            });
-                    });
-            })
+            ->whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])
+            ->where('status_pembayaran', 'LUNAS')
             ->orderBy('total', 'desc')
             ->get();
 

@@ -25,6 +25,8 @@ class PelangganSeeder extends Seeder
                 'credit_limit' => 0,
                 'status_kredit' => 'aktif',
                 'saldo_kredit' => 0,
+                'created_at' => now()->subMonths(12),
+                'updated_at' => now()->subMonths(12),
             ],
             [
                 'id_pelanggan' => 'P002',
@@ -34,10 +36,12 @@ class PelangganSeeder extends Seeder
                 'kota' => 'Jakarta',
                 'alamat' => 'Jl. Merdeka No. 123, Jakarta Pusat',
                 'aktif' => true,
-                'trust_score' => 75,
+                'trust_score' => 60,
                 'credit_limit' => 5000000,
                 'status_kredit' => 'aktif',
                 'saldo_kredit' => 0,
+                'created_at' => now()->subMonths(4),
+                'updated_at' => now()->subMonths(4),
             ],
             [
                 'id_pelanggan' => 'P003',
@@ -47,10 +51,12 @@ class PelangganSeeder extends Seeder
                 'kota' => 'Bandung',
                 'alamat' => 'Jl. Asia Afrika No. 45, Bandung',
                 'aktif' => true,
-                'trust_score' => 80,
+                'trust_score' => 70,
                 'credit_limit' => 7500000,
                 'status_kredit' => 'aktif',
                 'saldo_kredit' => 0,
+                'created_at' => now()->subMonths(6),
+                'updated_at' => now()->subMonths(6),
             ],
         ];
 
