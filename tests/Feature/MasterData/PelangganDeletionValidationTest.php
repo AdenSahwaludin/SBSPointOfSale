@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\MasterData;
 
 use App\Models\KontrakKredit;
 use App\Models\Pelanggan;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Credit;
 
 use App\Models\Pelanggan;
 use App\Models\Produk;
@@ -73,6 +73,7 @@ class CreditValidationTest extends TestCase
     {
         $pelanggan = Pelanggan::factory()->create([
             'status_kredit' => 'aktif',
+            'trust_score' => 80,
             'credit_limit' => 5000000,
             'saldo_kredit' => 0,
         ]);
@@ -116,6 +117,7 @@ class CreditValidationTest extends TestCase
     {
         $pelanggan = Pelanggan::factory()->create([
             'status_kredit' => 'aktif',
+            'trust_score' => 80,
             'credit_limit' => 5000000,
             'saldo_kredit' => 0,
         ]);
@@ -166,6 +168,7 @@ class CreditValidationTest extends TestCase
     {
         $pelanggan = Pelanggan::factory()->create([
             'status_kredit' => 'aktif',
+            'trust_score' => 80,
             'credit_limit' => 4000000,
             'saldo_kredit' => 1000000,
         ]);
@@ -199,6 +202,7 @@ class CreditValidationTest extends TestCase
     {
         $activeCustomer = Pelanggan::factory()->create([
             'status_kredit' => 'aktif',
+            'trust_score' => 80,
         ]);
 
         $inactiveCustomer = Pelanggan::factory()->create([
@@ -227,6 +231,7 @@ class CreditValidationTest extends TestCase
         // Test valid pelanggan
         $validPelanggan = Pelanggan::factory()->create([
             'status_kredit' => 'aktif',
+            'trust_score' => 80,
             'credit_limit' => 5000000,
             'saldo_kredit' => 1000000,
         ]);
@@ -254,6 +259,7 @@ class CreditValidationTest extends TestCase
     {
         $pelanggan = Pelanggan::factory()->create([
             'status_kredit' => 'aktif',
+            'trust_score' => 80,
             'credit_limit' => 1000000,
             'saldo_kredit' => 0,
         ]);
@@ -297,6 +303,7 @@ class CreditValidationTest extends TestCase
     {
         $pelanggan = Pelanggan::factory()->create([
             'status_kredit' => 'aktif',
+            'trust_score' => 80,
             'credit_limit' => 5000000,
             'saldo_kredit' => 0,
         ]);

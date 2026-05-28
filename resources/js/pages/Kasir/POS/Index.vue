@@ -850,6 +850,8 @@ function generateReceiptHTML(transaction: any): string {
         </head>
         <body>
             <div class="header">
+                <img src="/assets/images/Logo_Cap_Daun_Kayu_Putih.png" alt="Logo SBS" style="max-width: 80px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;">
+                <div style="font-size: 16px; margin-bottom: 5px;">SBS Point of Sale</div>
                 === STRUK TRANSAKSI ===
             </div>
             <div class="divider"></div>

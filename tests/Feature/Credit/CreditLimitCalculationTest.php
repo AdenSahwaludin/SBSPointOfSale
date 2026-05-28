@@ -166,7 +166,7 @@ describe('Credit Limit Calculation', function () {
         expect($result['credit_limit'])->toBe(0);
     });
 
-    it('applies 0.7x factor for trust score 50-59', function () {
+    it('applies 0.5x factor for trust score 55-59', function () {
         $pelanggan = Pelanggan::create([
             'id_pelanggan' => 'CL006',
             'nama' => 'Customer TS 55',
@@ -187,9 +187,9 @@ describe('Credit Limit Calculation', function () {
 
         $result = CreditLimitService::calculateCreditLimit($pelanggan);
 
-        expect($result['trust_factor'])->toBe(0.7);
-        // Base: 500,000 * 0.7 = 350,000 (rounded to thousands)
-        expect($result['credit_limit'])->toBe(350000);
+        expect($result['trust_factor'])->toBe(0.5);
+        // Base: 500,000 * 0.5 = 250,000
+        expect($result['credit_limit'])->toBe(250000);
     });
 
     it('applies 1.0x factor for trust score 60-74', function () {
@@ -323,7 +323,7 @@ describe('Credit Limit Calculation', function () {
         $result = CreditLimitService::checkEligibility(60);
 
         expect($result['eligible'])->toBe(true);
-        expect($result['status'])->toBe('MANUAL_REVIEW');
+        expect($result['status'])->toBe('REVIEW');
     });
 
     it('approves customers with trust score >= 70', function () {

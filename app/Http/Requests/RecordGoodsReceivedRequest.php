@@ -22,9 +22,9 @@ class RecordGoodsReceivedRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'items' => 'required|array|min:0',
+            'items' => 'required|array|min:1',
             'items.*.id_detail_pemesanan_barang' => 'required|integer|exists:detail_pemesanan_barang,id_detail_pemesanan_barang',
-            'items.*.jumlah_diterima' => 'required|integer|min:0',
+            'items.*.jumlah_diterima' => 'required|integer|min:1',
             'items.*.jumlah_rusak' => 'nullable|integer|min:0',
             'items.*.catatan' => 'nullable|string|max:500',
         ];

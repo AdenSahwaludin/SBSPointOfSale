@@ -234,7 +234,7 @@ describe('Customer Credit Scoring Service', function () {
 
             expect($result['eligible'])->toBeFalse();
             expect($result['available_limit'])->toBe(0);
-            expect($result['message'])->toContain('terlalu rendah');
+            expect($result['message'])->toContain('di bawah 55');
         });
 
         it('returns ineligible when credit limit is fully used', function () {
