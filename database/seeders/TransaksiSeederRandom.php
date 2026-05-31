@@ -49,48 +49,67 @@ class TransaksiSeederRandom extends Seeder
 
         // Get current date
         $now = Carbon::now();
-        $currentMonth = $now->month;
         $currentYear = $now->year;
-        $daysInMonth = $now->daysInMonth;
-        $lastSevenDaysStart = max(1, $daysInMonth - 6); // Last 7 calendar days in the month
-        $earlyMonthEnd = max(1, $lastSevenDaysStart - 1);
+        
+        // From May 1st to June 4th
+        $startDate = Carbon::create($currentYear, 5, 1, 0, 0, 0);
+        $endDate = Carbon::create($currentYear, 6, 4, 23, 59, 59);
+        
+        $startTimestamp = $startDate->timestamp;
+        $endTimestamp = $endDate->timestamp;
+        $lastSevenDaysTimestamp = $endDate->copy()->subDays(7)->timestamp;
 
-        // Total 600 transactions for better distribution (approx 20 per day)
-        $transactionCount = 600;
+        $transactionCount = 650;
         $lastSevenDaysCount = 200;
 
-        $transactionNum = 400;
-        $creditCount = 0;
-        $maxCredit = 15; // Increased credit limit for more data
+        $transactionNum = 350;
+        $lunasCreditCount = 0;
+        $maxLunasCredit = 30;
+
+        $creditPerPelanggan = ['P002' => 0, 'P003' => 0];
+        $maxCreditPerPelanggan = 1;
 
         // Create transactions
         for ($i = 0; $i < $transactionCount; $i++) {
             // Determine distribution: last 7 days or other days
             if ($i < $lastSevenDaysCount) {
-                $day = rand($lastSevenDaysStart, $daysInMonth);
+                $randomTimestamp = rand($lastSevenDaysTimestamp, $endTimestamp);
             } else {
-                $day = rand(1, $earlyMonthEnd);
+                $randomTimestamp = rand($startTimestamp, $lastSevenDaysTimestamp - 1);
             }
 
-            $tanggal = Carbon::create($currentYear, $currentMonth, $day, rand(8, 17), rand(0, 59), 0);
+            $tanggal = Carbon::createFromTimestamp($randomTimestamp);
+            $tanggal->hour(rand(8, 17));
+            $tanggal->minute(rand(0, 59));
+            $tanggal->second(0);
 
             // Select payment method
             $metodePayment = $metodePaymentList[array_rand($metodePaymentList)];
+            $isLunasCredit = false;
 
             // Credit logic: only for transactions that have a wholesale item or just randomly for others
-            if ($metodePayment === 'KREDIT' && ($creditCount >= $maxCredit)) {
-                $nonCreditMethods = ['TUNAI', 'QRIS', 'TRANSFER BCA'];
-                $metodePayment = $nonCreditMethods[array_rand($nonCreditMethods)];
-            }
+            $availableCreditPelanggan = array_keys(array_filter($creditPerPelanggan, function($count) use ($maxCreditPerPelanggan) {
+                return $count < $maxCreditPerPelanggan;
+            }));
 
             if ($metodePayment === 'KREDIT') {
-                $pelangganId = $creditPelangganIds[array_rand($creditPelangganIds)];
-                $creditCount++;
+                if ($lunasCreditCount < $maxLunasCredit) {
+                    $isLunasCredit = true;
+                    $pelangganId = $creditPelangganIds[array_rand($creditPelangganIds)];
+                    $lunasCreditCount++;
+                } else if (!empty($availableCreditPelanggan)) {
+                    $pelangganId = $availableCreditPelanggan[array_rand($availableCreditPelanggan)];
+                    $creditPerPelanggan[$pelangganId]++;
+                } else {
+                    $nonCreditMethods = ['TUNAI', 'QRIS', 'TRANSFER BCA'];
+                    $metodePayment = $nonCreditMethods[array_rand($nonCreditMethods)];
+                    $pelangganId = $allPelangganIds[array_rand($allPelangganIds)];
+                }
             } else {
                 $pelangganId = $allPelangganIds[array_rand($allPelangganIds)];
             }
 
-            $nomorTransaksi = 'INV-'.$currentYear.'-'.str_pad($currentMonth, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 3, '0', STR_PAD_LEFT).'-'.$pelangganId;
+            $nomorTransaksi = 'INV-'.$tanggal->year.'-'.str_pad($tanggal->month, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 3, '0', STR_PAD_LEFT).'-'.$pelangganId;
 
             $items = [];
             $subtotal = 0;
@@ -196,12 +215,20 @@ class TransaksiSeederRandom extends Seeder
                 $bunga = (int) (floor(($pokok * $bungaPersen / 100) / 1000) * 1000); // Interest, rounded to 1000
                 $cicilanBulanan = (int) (floor((($pokok + $bunga) / $tenorBulan) / 1000) * 1000); // Monthly payment, rounded to 1000
 
-                $statusPembayaran = 'MENUNGGU'; // For credit, payment is pending
-                $arStatus = 'AKTIF'; // AR status is AKTIF for active credit
-                $jenisTranasksi = 'KREDIT';
-                $paidAt = null;
-
-                $nomorKontrak = 'KRD-'.$currentYear.str_pad($currentMonth, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 4, '0', STR_PAD_LEFT);
+                if ($isLunasCredit) {
+                    $statusPembayaran = 'LUNAS'; // For lunas credit, payment is settled
+                    $arStatus = 'LUNAS'; // AR status is LUNAS
+                    $jenisTranasksi = 'KREDIT';
+                    $paidAt = $tanggal->copy()->addDays(2); // early payoff 2 days later
+                    $kontrakStatus = 'LUNAS';
+                } else {
+                    $statusPembayaran = 'MENUNGGU'; // For active credit, payment is pending
+                    $arStatus = 'AKTIF'; // AR status is AKTIF
+                    $jenisTranasksi = 'KREDIT';
+                    $paidAt = null;
+                    $kontrakStatus = 'AKTIF';
+                }
+                $nomorKontrak = 'KRD-'.$tanggal->year.str_pad($tanggal->month, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 4, '0', STR_PAD_LEFT);
                 $kontrakData = [
                     'nomor_kontrak' => $nomorKontrak,
                     'id_pelanggan' => $pelangganId,
@@ -212,7 +239,7 @@ class TransaksiSeederRandom extends Seeder
                     'dp' => $dp,
                     'bunga_persen' => $bungaPersen,
                     'cicilan_bulanan' => $cicilanBulanan,
-                    'status' => 'AKTIF',
+                    'status' => $kontrakStatus,
                     'score_snapshot' => rand(50, 100),
                     'created_at' => $tanggal,
                     'updated_at' => $tanggal,
@@ -274,16 +301,25 @@ class TransaksiSeederRandom extends Seeder
                 // Create jadwal_angsuran (installment schedule)
                 for ($period = 1; $period <= $tenorBulan; $period++) {
                     $jatuhTempo = $tanggal->copy()->addMonths($period);
-                    $statusAngsuran = 'DUE'; // Due (not paid)
+                    
+                    if ($isLunasCredit) {
+                        $statusAngsuran = 'PAID';
+                        $jumlahDibayar = $cicilanBulanan;
+                        $angsuranPaidAt = $paidAt; // paid at the early payoff date
+                    } else {
+                        $statusAngsuran = 'DUE'; // Due (not paid)
+                        $jumlahDibayar = 0;
+                        $angsuranPaidAt = null;
+                    }
 
                     DB::table('jadwal_angsuran')->insert([
                         'id_kontrak' => $idKontrak,
                         'periode_ke' => $period,
                         'jatuh_tempo' => $jatuhTempo,
                         'jumlah_tagihan' => $cicilanBulanan,
-                        'jumlah_dibayar' => 0,
+                        'jumlah_dibayar' => $jumlahDibayar,
                         'status' => $statusAngsuran,
-                        'paid_at' => null,
+                        'paid_at' => $angsuranPaidAt,
                         'created_at' => $tanggal,
                         'updated_at' => $tanggal,
                     ]);

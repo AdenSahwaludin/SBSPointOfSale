@@ -15,7 +15,7 @@ class TrustScoreService
      */
     public static function applyAccountAgeRule(Pelanggan $pelanggan): void
     {
-        if (! $pelanggan->created_at) {
+        if (! $pelanggan->created_at || $pelanggan->id_pelanggan === 'P001') {
             return;
         }
 
@@ -47,6 +47,21 @@ class TrustScoreService
     {
         $baseline = 50;
 
+        // P001 is Pelanggan Umum, always return 50
+        if ($pelanggan->id_pelanggan === 'P001') {
+            return [
+                'baseline' => $baseline,
+                'p_umur' => 0,
+                'p_tepat' => 0,
+                'p_telat' => 0,
+                'p_gagal' => 0,
+                'p_frekuensi' => 0,
+                'p_nilai' => 0,
+                'p_tunggakan' => 0,
+                'total' => $baseline,
+            ];
+        }
+
         // P_umur: 30-179 days = +10, >= 180 days = +20
         $pUmur = 0;
         if ($pelanggan->created_at) {
@@ -69,7 +84,7 @@ class TrustScoreService
 
         foreach ($installments as $angsuran) {
             $status = (string) $angsuran->status;
-            if ($status === 'LUNAS') {
+            if ($status === 'PAID') {
                 // On-time if paid_at <= due date
                 if ($angsuran->paid_at && $angsuran->jatuh_tempo && $angsuran->paid_at->lessThanOrEqualTo($angsuran->jatuh_tempo)) {
                     $pTepat += 2;
