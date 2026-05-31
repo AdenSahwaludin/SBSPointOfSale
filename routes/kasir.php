@@ -70,6 +70,7 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
         Route::get('/', [AngsuranController::class, 'index'])->name('index');
         Route::get('/{id}', [AngsuranController::class, 'show'])->name('show');
         Route::post('/{id}/pay', [AngsuranController::class, 'pay'])->name('pay');
+        Route::post('/{id}/void', [AngsuranController::class, 'voidContract'])->name('void');
     });
 
     // ==========================================

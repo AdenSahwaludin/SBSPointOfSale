@@ -47,7 +47,7 @@ interface KontrakKredit {
     bunga_persen: number;
     cicilan_bulanan: number;
     status: string;
-    jadwalAngsuran: JadwalAngsuran[];
+    jadwal_angsuran: JadwalAngsuran[];
 }
 
 interface Transaksi {
@@ -67,7 +67,7 @@ interface Transaksi {
     pelanggan: Pelanggan;
     kasir: Kasir;
     detail: TransaksiDetail[];
-    kontrakKredit: KontrakKredit | null;
+    kontrak_kredit: KontrakKredit | null;
 }
 
 interface Props {
@@ -206,39 +206,39 @@ function getAngsuranStatusColor(status: string) {
                     </div>
 
                     <!-- Installments (for KREDIT transactions) -->
-                    <div v-if="transaksi.jenis_transaksi === 'KREDIT' && transaksi.kontrakKredit" class="card-emerald">
+                    <div v-if="transaksi.jenis_transaksi === 'KREDIT' && transaksi.kontrak_kredit" class="card-emerald">
                         <h3 class="mb-4 text-lg font-semibold text-emerald-800">Jadwal Angsuran</h3>
                         <div class="mb-4 space-y-2 rounded-lg bg-emerald-50 p-4">
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <label class="text-sm font-medium text-emerald-700">Nomor Kontrak</label>
-                                    <p class="text-emerald-800">{{ transaksi.kontrakKredit.nomor_kontrak }}</p>
+                                    <p class="text-emerald-800">{{ transaksi.kontrak_kredit.nomor_kontrak }}</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-emerald-700">Tenor</label>
-                                    <p class="text-emerald-800">{{ transaksi.kontrakKredit.tenor_bulan }} bulan</p>
+                                    <p class="text-emerald-800">{{ transaksi.kontrak_kredit.tenor_bulan }} bulan</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-emerald-700">Pokok Pinjaman</label>
-                                    <p class="text-emerald-800">{{ formatCurrency(transaksi.kontrakKredit.pokok_pinjaman) }}</p>
+                                    <p class="text-emerald-800">{{ formatCurrency(transaksi.kontrak_kredit.pokok_pinjaman) }}</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-emerald-700">Cicilan Bulanan</label>
-                                    <p class="text-emerald-800">{{ formatCurrency(transaksi.kontrakKredit.cicilan_bulanan) }}</p>
+                                    <p class="text-emerald-800">{{ formatCurrency(transaksi.kontrak_kredit.cicilan_bulanan) }}</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-emerald-700">DP</label>
-                                    <p class="text-emerald-800">{{ formatCurrency(transaksi.kontrakKredit.dp) }}</p>
+                                    <p class="text-emerald-800">{{ formatCurrency(transaksi.kontrak_kredit.dp) }}</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-emerald-700">Bunga</label>
-                                    <p class="text-emerald-800">{{ transaksi.kontrakKredit.bunga_persen }}%</p>
+                                    <p class="text-emerald-800">{{ transaksi.kontrak_kredit.bunga_persen }}%</p>
                                 </div>
                             </div>
                         </div>
 
                         <div
-                            v-if="transaksi.kontrakKredit.jadwalAngsuran && transaksi.kontrakKredit.jadwalAngsuran.length > 0"
+                            v-if="transaksi.kontrak_kredit.jadwal_angsuran && transaksi.kontrak_kredit.jadwal_angsuran.length > 0"
                             class="overflow-x-auto"
                         >
                             <table class="w-full text-sm">
@@ -252,7 +252,7 @@ function getAngsuranStatusColor(status: string) {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-emerald-100">
-                                    <tr v-for="angsuran in transaksi.kontrakKredit.jadwalAngsuran" :key="angsuran.id_angsuran">
+                                    <tr v-for="angsuran in transaksi.kontrak_kredit.jadwal_angsuran" :key="angsuran.id_angsuran">
                                         <td class="px-4 py-3 text-emerald-700">Bulan ke-{{ angsuran.periode_ke }}</td>
                                         <td class="px-4 py-3 text-emerald-700">{{ formatDate(angsuran.jatuh_tempo) }}</td>
                                         <td class="px-4 py-3 text-right text-emerald-700">{{ formatCurrency(angsuran.jumlah_tagihan) }}</td>

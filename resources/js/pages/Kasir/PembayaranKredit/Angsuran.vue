@@ -30,6 +30,7 @@ const { formatCurrency } = useCurrencyFormat();
 
 const search = ref(props.filters?.search || '');
 const dueThisMonth = ref(props.filters?.due_this_month === '1');
+const showFailed = ref(props.filters?.show_failed === '1');
 const payAmount = ref<number>(0);
 const payMethod = ref<'TUNAI' | 'QRIS' | 'TRANSFER BCA'>('TUNAI');
 const note = ref('');
@@ -45,7 +46,7 @@ onMounted(() => {
 // Auto-apply filter when search text or checkbox changes (debounced on list view)
 let filterTimer: number | null = null;
 
-watch([search, dueThisMonth], () => {
+watch([search, dueThisMonth, showFailed], () => {
     // Hanya auto-filter di list view, tidak di detail view
     if (isDetailActive.value) return;
 
@@ -62,6 +63,7 @@ function applyFilter() {
     const q = search.value?.trim();
     if (q) params.set('search', q);
     params.set('due_this_month', dueThisMonth.value ? '1' : '0');
+    params.set('show_failed', showFailed.value ? '1' : '0');
     const url = params.toString() ? `/kasir/angsuran?${params.toString()}` : `/kasir/angsuran`;
     router.get(url, {}, { replace: true, preserveState: true });
 }
@@ -127,6 +129,21 @@ function submitPayment() {
         { preserveScroll: true },
     );
 }
+
+function confirmVoidContract() {
+    if (!props.selected) return;
+    const isConfirmed = window.confirm(
+        'PERINGATAN: Apakah Anda yakin ingin membatalkan (VOID) kontrak ini?\n\n' +
+        'Tindakan ini akan:\n' +
+        '1. Mengubah status kontrak menjadi GAGAL.\n' +
+        '2. Mengubah semua cicilan tersisa menjadi VOID.\n' +
+        '3. Memberikan PENALTI drastis (-25 poin per cicilan VOID) ke Trust Score pelanggan.\n\n' +
+        'Tindakan ini TIDAK DAPAT DIBATALKAN!'
+    );
+    if (isConfirmed) {
+        router.post(`/kasir/angsuran/${props.selected.id_kontrak}/void`, {}, { preserveScroll: true });
+    }
+}
 </script>
 
 <template>
@@ -146,6 +163,17 @@ function submitPayment() {
                 <div class="flex items-center gap-3">
                     <label
                         class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
+                    >
+                        <input
+                            type="checkbox"
+                            v-model="showFailed"
+                            class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-500"
+                        />
+                        <span class="text-gray-700">Tampilkan Kontrak Gagal</span>
+                    </label>
+                    <label
+                        class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
+                        v-if="!showFailed"
                     >
                         <input
                             type="checkbox"
@@ -294,7 +322,7 @@ function submitPayment() {
                                 <div>
                                     <div class="text-lg font-bold text-gray-900">Detail Kontrak</div>
                                     <div v-if="selected" class="text-sm text-gray-600">
-                                        {{ selected?.nomor_kontrak }} • {{ selected?.pelanggan?.nama }}
+                                        {{ selected?.nomor_kontrak }} • {{ selected?.nomor_transaksi }} • {{ selected?.pelanggan?.nama }}
                                     </div>
                                 </div>
                             </div>
@@ -406,7 +434,7 @@ function submitPayment() {
                         </div>
 
                         <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-                            <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 shadow-lg">
+                            <div v-if="selected?.status !== 'GAGAL'" class="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 shadow-lg">
                                 <div class="mb-4 flex items-center gap-2">
                                     <span class="text-sm font-bold text-gray-900">Pembayaran</span>
                                 </div>
@@ -524,7 +552,7 @@ function submitPayment() {
                                     </button>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 shadow-lg md:col-span-2">
+                            <div :class="['rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5 shadow-lg', selected?.status === 'GAGAL' ? 'md:col-span-3' : 'md:col-span-2']">
                                 <div class="mb-4 flex items-center gap-2">
                                     <span class="text-sm font-bold text-gray-900">Ringkasan Kontrak</span>
                                 </div>
@@ -541,6 +569,18 @@ function submitPayment() {
                                         <span class="text-sm font-bold text-red-700">Sisa Tagihan</span>
                                         <span class="text-xl font-bold text-red-600">{{ formatCurrency(summary?.total_sisa || 0) }}</span>
                                     </div>
+                                </div>
+                                <div class="mt-6 border-t border-gray-100 pt-4" v-if="selected?.status === 'AKTIF' || selected?.status === 'TUNDA'">
+                                    <button
+                                        @click="confirmVoidContract"
+                                        class="group relative w-full overflow-hidden rounded-lg px-4 py-3 font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition"
+                                    >
+                                        <span class="flex items-center justify-center gap-2">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                            Batalkan Kontrak (Gagal Bayar)
+                                        </span>
+                                    </button>
+                                    <p class="mt-2 text-center text-[10px] text-gray-500">Akan memberikan denda Trust Score (-25 per cicilan)</p>
                                 </div>
                             </div>
                         </div>

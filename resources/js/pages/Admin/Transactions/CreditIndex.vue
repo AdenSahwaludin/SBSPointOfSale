@@ -156,18 +156,8 @@ function formatDateTime(dateString: string): string {
 }
 
 function viewDetail(transaksi: Transaksi) {
-    // Fetch full transaction details via API
-    fetch(`/api/transactions/${transaksi.nomor_transaksi}`)
-        .then((response) => response.json())
-        .then((data) => {
-            selectedTransaksi.value = data.data || transaksi;
-            showDetailModal.value = true;
-        })
-        .catch(() => {
-            // Fallback to basic data if fetch fails
-            selectedTransaksi.value = transaksi;
-            showDetailModal.value = true;
-        });
+    selectedTransaksi.value = transaksi;
+    showDetailModal.value = true;   
 }
 
 function closeDetailModal() {

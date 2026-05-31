@@ -153,6 +153,55 @@ pay.post = (args: { id: string | number } | [id: string | number ] | string | nu
         })
     
     pay.form = payForm
-const AngsuranController = { index, show, pay }
+export const voidContract = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: voidContract.url(args, options),
+    method: 'post',
+})
+
+voidContract.definition = {
+    methods: ["post"],
+    url: '/kasir/angsuran/{id}/void',
+} satisfies RouteDefinition<["post"]>
+
+voidContract.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { id: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    id: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        id: args.id,
+                }
+
+    return voidContract.definition.url
+            .replace('{id}', parsedArgs.id.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+voidContract.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: voidContract.url(args, options),
+    method: 'post',
+})
+
+        const voidContractForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: voidContract.url(args, options),
+        method: 'post',
+    })
+
+                    voidContractForm.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: voidContract.url(args, options),
+            method: 'post',
+        })
+    
+    voidContract.form = voidContractForm
+const AngsuranController = { index, show, pay, voidContract }
 
 export default AngsuranController

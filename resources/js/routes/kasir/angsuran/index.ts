@@ -153,10 +153,60 @@ pay.post = (args: { id: string | number } | [id: string | number ] | string | nu
         })
     
     pay.form = payForm
+export const voidMethod = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: voidMethod.url(args, options),
+    method: 'post',
+})
+
+voidMethod.definition = {
+    methods: ["post"],
+    url: '/kasir/angsuran/{id}/void',
+} satisfies RouteDefinition<["post"]>
+
+voidMethod.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { id: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    id: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        id: args.id,
+                }
+
+    return voidMethod.definition.url
+            .replace('{id}', parsedArgs.id.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+voidMethod.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: voidMethod.url(args, options),
+    method: 'post',
+})
+
+        const voidMethodForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: voidMethod.url(args, options),
+        method: 'post',
+    })
+
+                    voidMethodForm.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: voidMethod.url(args, options),
+            method: 'post',
+        })
+    
+    voidMethod.form = voidMethodForm
 const angsuran = {
     index: Object.assign(index, index),
 show: Object.assign(show, show),
 pay: Object.assign(pay, pay),
+void: Object.assign(voidMethod, voidMethod),
 }
 
 export default angsuran

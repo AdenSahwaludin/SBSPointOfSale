@@ -119,7 +119,7 @@ class TransaksiController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
-        $query = Transaksi::with(['pelanggan', 'kasir'])
+        $query = Transaksi::with(['pelanggan', 'kasir', 'detail.produk', 'kontrakKredit.jadwalAngsuran'])
             ->where('jenis_transaksi', Transaksi::JENIS_KREDIT)
             ->orderBy('tanggal', 'desc');
 

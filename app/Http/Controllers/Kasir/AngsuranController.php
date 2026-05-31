@@ -31,18 +31,24 @@ class AngsuranController extends Controller
             $unpaidOnly = true;
         } // default hanya belum lunas
 
+        $showFailed = filter_var($request->get('show_failed', '0'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
         $startMonth = Carbon::now()->startOfMonth();
         $endMonth = Carbon::now()->endOfMonth();
 
         $contracts = KontrakKredit::with(['pelanggan'])
-            ->when($unpaidOnly, fn ($q) => $q->where('status', '!=', 'LUNAS'))
+            ->when(!$showFailed, fn ($q) => $q->where('status', '!=', 'GAGAL'))
+            ->when($showFailed, fn ($q) => $q->where('status', 'GAGAL'))
+            ->when($unpaidOnly && !$showFailed, fn ($q) => $q->where('status', '!=', 'LUNAS'))
             ->when($search, function ($q) use ($search) {
-                $q->where('nomor_kontrak', 'like', "%{$search}%")
-                    ->orWhereHas('pelanggan', function ($q2) use ($search) {
-                        $q2->where('nama', 'like', "%{$search}%");
-                    });
+                $q->where(function ($query) use ($search) {
+                    $query->where('nomor_kontrak', 'like', "%{$search}%")
+                        ->orWhereHas('pelanggan', function ($q2) use ($search) {
+                            $q2->where('nama', 'like', "%{$search}%");
+                        });
+                });
             })
-            ->when($onlyDueThisMonth, function ($q) use ($startMonth, $endMonth) {
+            ->when($onlyDueThisMonth && !$showFailed, function ($q) use ($startMonth, $endMonth) {
                 $q->whereHas('jadwalAngsuran', function ($qq) use ($startMonth, $endMonth) {
                     $qq->whereIn('status', ['DUE', 'LATE'])
                         ->whereBetween('jatuh_tempo', [$startMonth->toDateString(), $endMonth->toDateString()]);
@@ -58,6 +64,7 @@ class AngsuranController extends Controller
                 'search' => $search,
                 'due_this_month' => $onlyDueThisMonth ? '1' : '0',
                 'unpaid_only' => $unpaidOnly ? '1' : '0',
+                'show_failed' => $showFailed ? '1' : '0',
             ],
         ]);
     }
@@ -91,12 +98,14 @@ class AngsuranController extends Controller
         $startMonth = Carbon::now()->startOfMonth();
         $endMonth = Carbon::now()->endOfMonth();
         $contracts = KontrakKredit::with(['pelanggan'])
+            ->where('status', '!=', 'GAGAL')
             ->where('status', '!=', 'LUNAS')
             ->whereHas('jadwalAngsuran', function ($qq) use ($startMonth, $endMonth) {
                 $qq->whereIn('status', ['DUE', 'LATE'])
                     ->whereBetween('jatuh_tempo', [$startMonth->toDateString(), $endMonth->toDateString()]);
             })
             ->orWhere('id_kontrak', $id) // Selalu include kontrak yang sedang dilihat
+            ->where('status', '!=', 'GAGAL')
             ->where('status', '!=', 'LUNAS')
             ->with(['pelanggan'])
             ->orderBy('mulai_kontrak', 'desc')
@@ -224,6 +233,57 @@ class AngsuranController extends Controller
             DB::rollBack();
 
             return back()->with('error', 'Gagal memproses pembayaran: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Cancel/Void an active contract due to bad debt/failed payment.
+     */
+    public function voidContract(int $id)
+    {
+        $kontrak = KontrakKredit::with(['jadwalAngsuran', 'pelanggan', 'transaksi'])->findOrFail($id);
+
+        if (!in_array($kontrak->status, ['AKTIF', 'TUNDA'])) {
+            return back()->with('error', 'Hanya kontrak AKTIF atau TUNDA yang dapat dibatalkan.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update contract status
+            $kontrak->status = 'GAGAL';
+            $kontrak->save();
+
+            // Set all unpaid schedules to VOID
+            foreach ($kontrak->jadwalAngsuran as $angsuran) {
+                if ($angsuran->status !== 'PAID') {
+                    $angsuran->status = 'VOID';
+                    $angsuran->save();
+                }
+            }
+
+            // Update associated transaction status to BATAL
+            $trx = $kontrak->transaksi;
+            if ($trx) {
+                $trx->status_pembayaran = Transaksi::STATUS_BATAL;
+                $trx->ar_status = 'GAGAL';
+                $trx->save();
+            }
+
+            // Recalculate trust score & credit limit
+            $pelanggan = $kontrak->pelanggan;
+            if ($pelanggan) {
+                \App\Services\TrustScoreService::updateTrustScore($pelanggan);
+                $pelanggan->refresh();
+                \App\Services\CreditLimitService::updateCreditLimit($pelanggan);
+            }
+
+            DB::commit();
+
+            return back()->with('success', 'Kontrak berhasil dibatalkan (VOID). Trust Score pelanggan telah diperbarui.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->with('error', 'Gagal membatalkan kontrak: '.$e->getMessage());
         }
     }
 }
