@@ -209,6 +209,14 @@ class AngsuranController extends Controller
                 }
             }
 
+            // Recalculate trust score & credit limit
+            $pelanggan = $kontrak->pelanggan;
+            if ($pelanggan) {
+                \App\Services\TrustScoreService::updateTrustScore($pelanggan);
+                $pelanggan->refresh();
+                \App\Services\CreditLimitService::updateCreditLimit($pelanggan);
+            }
+
             DB::commit();
 
             return back()->with('success', 'Pembayaran angsuran berhasil diproses');

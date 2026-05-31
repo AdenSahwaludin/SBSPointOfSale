@@ -51,12 +51,17 @@ class TrustScoreService
         if ($pelanggan->id_pelanggan === 'P001') {
             return [
                 'baseline' => $baseline,
+                'account_age' => 0,
                 'p_umur' => 0,
+                'installment_history' => 0,
                 'p_tepat' => 0,
                 'p_telat' => 0,
                 'p_gagal' => 0,
+                'shopping_frequency' => 0,
                 'p_frekuensi' => 0,
+                'transaction_value' => 0,
                 'p_nilai' => 0,
+                'active_arrears' => 0,
                 'p_tunggakan' => 0,
                 'total' => $baseline,
             ];
@@ -74,56 +79,87 @@ class TrustScoreService
         }
 
         // Installment History Components
-        $pTepat = 0; // +2 per on-time, max +20
-        $pTelat = 0; // -5 per late
-        $pGagal = 0; // -25 per failed (VOID)
+        $pTepat = 0; // +2 per completed contract on time (tenor 3/6/9/12), max +20
+        $pTelat = 0; // -5 per late installment
+        $pGagal = 0; // -25 per failed (VOID) installment
 
-        $installments = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
-            $q->where('id_pelanggan', $pelanggan->id_pelanggan);
-        })->get(['status', 'paid_at', 'jatuh_tempo']);
+        $contracts = \App\Models\KontrakKredit::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->with('jadwalAngsuran')
+            ->get();
 
-        foreach ($installments as $angsuran) {
-            $status = (string) $angsuran->status;
-            if ($status === 'PAID') {
-                // On-time if paid_at <= due date
-                if ($angsuran->paid_at && $angsuran->jatuh_tempo && $angsuran->paid_at->lessThanOrEqualTo($angsuran->jatuh_tempo)) {
-                    $pTepat += 2;
-                } else {
-                    $pTelat += 5;
+        foreach ($contracts as $contract) {
+            $tenor = (int) $contract->tenor_bulan;
+            $installments = $contract->jadwalAngsuran;
+            
+            // Check if contract is completed (LUNAS or all installments are PAID)
+            $isCompleted = ($contract->status === 'LUNAS') || ($installments->isNotEmpty() && $installments->where('status', '!=', 'PAID')->isEmpty());
+            
+            $hasLateOrFailed = false;
+            foreach ($installments as $angsuran) {
+                $status = (string) $angsuran->status;
+                $isLate = false;
+                
+                if ($status === 'PAID') {
+                    if ($angsuran->paid_at && $angsuran->jatuh_tempo && $angsuran->paid_at->greaterThan($angsuran->jatuh_tempo)) {
+                        $isLate = true;
+                    }
+                } elseif ($status === 'LATE' || $angsuran->isOverdue()) {
+                    $isLate = true;
+                } elseif ($status === 'VOID') {
+                    $pGagal += 25;
+                    $hasLateOrFailed = true;
                 }
-            } elseif ($status === 'VOID') {
-                $pGagal += 25;
+                
+                if ($isLate) {
+                    $pTelat += 5;
+                    $hasLateOrFailed = true;
+                }
+            }
+            
+            // Ptepat: +2 per completed contract on time (tenor 3/6/9/12 months)
+            if ($isCompleted && !$hasLateOrFailed && in_array($tenor, [3, 6, 9, 12])) {
+                $pTepat += 2;
             }
         }
 
         // Apply cap to P_tepat
         $pTepat = min($pTepat, 20);
 
-        // P_frekuensi: +5 if >= 3 transactions per month in last 3 months (avg >= 3/mo = total 9)
-        $threeMonthsAgo = now()->subMonths(3);
-        $recentTxnCount = \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
-            ->whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])
-            ->where('tanggal', '>=', $threeMonthsAgo)
+        // P_frekuensi: +5 if customer has >= 3 transactions in each of the last 3 months
+        $m1 = \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->where('status_pembayaran', '!=', 'BATAL')
+            ->whereBetween('tanggal', [now()->subMonth(), now()])
             ->count();
-        $pFrekuensi = $recentTxnCount >= 9 ? 5 : 0;
+        $m2 = \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->where('status_pembayaran', '!=', 'BATAL')
+            ->whereBetween('tanggal', [now()->subMonths(2), now()->subMonth()])
+            ->count();
+        $m3 = \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->where('status_pembayaran', '!=', 'BATAL')
+            ->whereBetween('tanggal', [now()->subMonths(3), now()->subMonths(2)])
+            ->count();
+        $pFrekuensi = ($m1 >= 3 && $m2 >= 3 && $m3 >= 3) ? 5 : 0;
 
         // P_nilai: +5 if average transaction > store median
         $pNilai = 0;
-        $allTotals = \App\Models\Transaksi::whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])->pluck('total');
+        $allTotals = \App\Models\Transaksi::where('status_pembayaran', '!=', 'BATAL')->pluck('total');
         if ($allTotals->count() > 0) {
             $median = $allTotals->map(fn ($t) => (float) $t)->median();
             $avg = (float) \App\Models\Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
-                ->whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])
+                ->where('status_pembayaran', '!=', 'BATAL')
                 ->avg('total');
             if ($avg > $median) {
                 $pNilai = 5;
             }
         }
 
-        // P_tunggakan: -10 if any active arrears (DUE or LATE)
+        // P_tunggakan: -10 if any active arrears (DUE or LATE that is overdue, meaning jatuh_tempo < Carbon::today())
         $hasActiveArrears = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
             $q->where('id_pelanggan', $pelanggan->id_pelanggan);
-        })->whereIn('status', ['DUE', 'LATE'])->exists();
+        })
+        ->where('status', '!=', 'PAID')
+        ->where('jatuh_tempo', '<', \Carbon\Carbon::today())
+        ->exists();
 
         $pTunggakan = $hasActiveArrears ? 10 : 0;
 
@@ -142,12 +178,18 @@ class TrustScoreService
 
         return [
             'baseline' => $baseline,
+            // Dual-mapped keys for compatibility with CLI and other services
+            'account_age' => $pUmur,
             'p_umur' => $pUmur,
+            'installment_history' => $pTepat - $pTelat - $pGagal,
             'p_tepat' => $pTepat,
             'p_telat' => -$pTelat,
             'p_gagal' => -$pGagal,
+            'shopping_frequency' => $pFrekuensi,
             'p_frekuensi' => $pFrekuensi,
+            'transaction_value' => $pNilai,
             'p_nilai' => $pNilai,
+            'active_arrears' => -$pTunggakan,
             'p_tunggakan' => -$pTunggakan,
             'total' => $total,
         ];

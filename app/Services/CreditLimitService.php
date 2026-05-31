@@ -30,10 +30,9 @@ class CreditLimitService
      */
     public static function calculateCreditLimit(Pelanggan $pelanggan): array
     {
-        // Get completed non-credit transactions (TUNAI or TRANSFER)
+        // Get completed/valid non-cancelled transactions (TUNAI or KREDIT)
         $transactions = Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
-            ->whereIn('jenis_transaksi', ['TUNAI', 'TRANSFER'])
-            ->where('status_pembayaran', 'LUNAS')
+            ->where('status_pembayaran', '!=', 'BATAL')
             ->orderBy('total', 'desc')
             ->get();
 
@@ -52,8 +51,8 @@ class CreditLimitService
             ];
         }
 
-        // Calculate store median transaction for anomaly check
-        $storeMedian = Transaksi::pluck('total')->median() ?? 0;
+        // Calculate store median transaction for anomaly check (excluding cancelled ones)
+        $storeMedian = Transaksi::where('status_pembayaran', '!=', 'BATAL')->pluck('total')->median() ?? 0;
 
         // Filter anomalies: Exclude largest transaction if it > 3 * store median
         $largestTransaction = $transactions->first()->total ?? 0;
@@ -72,8 +71,9 @@ class CreditLimitService
         $method2 = (int) ($avgTop3 * 0.5);
 
         // Method 3: 30% of total spending in last 6 months
-        $sixMonthsAgo = Carbon::now()->subMonths(6);
+        $sixMonthsAgo = Carbon::now()->subMonths(6)->startOfMonth();
         $totalLast6Months = Transaksi::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->where('status_pembayaran', '!=', 'BATAL')
             ->where('tanggal', '>=', $sixMonthsAgo)
             ->sum('total');
         $method3 = (int) ($totalLast6Months * 0.3);
@@ -93,10 +93,13 @@ class CreditLimitService
             $creditLimit = 100000;
         }
 
-        // Check for active arrears (tunggakan)
+        // Check for active arrears (tunggakan): not paid and due date is in the past
         $hasActiveLate = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
             $q->where('id_pelanggan', $pelanggan->id_pelanggan);
-        })->whereIn('status', ['DUE', 'LATE'])->exists();
+        })
+        ->where('status', '!=', 'PAID')
+        ->where('jatuh_tempo', '<', \Carbon\Carbon::today())
+        ->exists();
 
         // If there are active arrears, Credit Limit is 0
         if ($hasActiveLate) {

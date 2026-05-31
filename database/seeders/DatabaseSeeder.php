@@ -20,5 +20,10 @@ class DatabaseSeeder extends Seeder
             ProdukDummys::class,
             TransaksiSeederRandom::class,
         ]);
+
+        // Automatically recalculate TS and CL for all customers after database seeding
+        $this->command->info('Recalculating Trust Scores and Credit Limits for seeded customers...');
+        \Illuminate\Support\Facades\Artisan::call('trust-score:recalculate', ['--all' => true]);
+        $this->command->info(\Illuminate\Support\Facades\Artisan::output());
     }
 }

@@ -9,7 +9,7 @@ it('increases trust score by +10 for accounts older than 30 days', function () {
     $date = Carbon::now()->subDays(31);
 
     $pelanggan = Pelanggan::create([
-        'id_pelanggan' => Pelanggan::generateNextId(),
+        'id_pelanggan' => 'P002',
         'nama' => 'Test Pelanggan',
         'trust_score' => 50,
     ]);
