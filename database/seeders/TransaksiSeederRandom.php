@@ -68,6 +68,7 @@ class TransaksiSeederRandom extends Seeder
 
         $creditPerPelanggan = ['P002' => 0, 'P003' => 0];
         $maxCreditPerPelanggan = 1;
+        $kontrakNum = 1;
 
         // Create transactions
         for ($i = 0; $i < $transactionCount; $i++) {
@@ -228,7 +229,9 @@ class TransaksiSeederRandom extends Seeder
                     $paidAt = null;
                     $kontrakStatus = 'AKTIF';
                 }
-                $nomorKontrak = 'KRD-'.$tanggal->year.str_pad($tanggal->month, 2, '0', STR_PAD_LEFT).'-'.str_pad($transactionNum, 4, '0', STR_PAD_LEFT);
+                $nomorKontrak = 'KRD-'.$tanggal->year.str_pad($tanggal->month, 2, '0', STR_PAD_LEFT).'-'.str_pad($kontrakNum, 4, '0', STR_PAD_LEFT);
+                $kontrakNum++;
+                
                 $kontrakData = [
                     'nomor_kontrak' => $nomorKontrak,
                     'id_pelanggan' => $pelangganId,
