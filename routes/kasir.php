@@ -71,6 +71,7 @@ Route::prefix('kasir')->middleware(['auth', 'role:kasir'])->name('kasir.')->grou
         Route::get('/{id}', [AngsuranController::class, 'show'])->name('show');
         Route::post('/{id}/pay', [AngsuranController::class, 'pay'])->name('pay');
         Route::post('/{id}/void', [AngsuranController::class, 'voidContract'])->name('void');
+        Route::post('/{id}/reactivate', [AngsuranController::class, 'reactivate'])->name('reactivate');
     });
 
     // ==========================================

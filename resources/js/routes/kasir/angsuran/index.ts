@@ -202,11 +202,61 @@ voidMethod.post = (args: { id: string | number } | [id: string | number ] | stri
         })
     
     voidMethod.form = voidMethodForm
+export const reactivate = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: reactivate.url(args, options),
+    method: 'post',
+})
+
+reactivate.definition = {
+    methods: ["post"],
+    url: '/kasir/angsuran/{id}/reactivate',
+} satisfies RouteDefinition<["post"]>
+
+reactivate.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { id: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    id: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        id: args.id,
+                }
+
+    return reactivate.definition.url
+            .replace('{id}', parsedArgs.id.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+reactivate.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: reactivate.url(args, options),
+    method: 'post',
+})
+
+        const reactivateForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: reactivate.url(args, options),
+        method: 'post',
+    })
+
+                    reactivateForm.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: reactivate.url(args, options),
+            method: 'post',
+        })
+    
+    reactivate.form = reactivateForm
 const angsuran = {
     index: Object.assign(index, index),
 show: Object.assign(show, show),
 pay: Object.assign(pay, pay),
 void: Object.assign(voidMethod, voidMethod),
+reactivate: Object.assign(reactivate, reactivate),
 }
 
 export default angsuran

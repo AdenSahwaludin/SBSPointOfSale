@@ -93,16 +93,29 @@ class CreditLimitService
             $creditLimit = 100000;
         }
 
-        // Check for active arrears (tunggakan): not paid and due date is in the past
+        // Check for active arrears: unpaid installments past due date OR any GAGAL/VOID contracts
         $hasActiveLate = \App\Models\JadwalAngsuran::whereHas('kontrakKredit', function ($q) use ($pelanggan) {
-            $q->where('id_pelanggan', $pelanggan->id_pelanggan);
+            $q->where('id_pelanggan', $pelanggan->id_pelanggan)
+              ->where('status', '!=', 'LUNAS'); // Exclude fully paid contracts
         })
-        ->where('status', '!=', 'PAID')
-        ->where('jatuh_tempo', '<', \Carbon\Carbon::today())
+        ->where(function ($q) {
+            $q->where('status', 'LATE')  // Explicitly late
+              ->orWhere('status', 'VOID')  // Voided due to contract failure
+              ->orWhere(function ($qq) {
+                  // Unpaid and past due date
+                  $qq->where('status', '!=', 'PAID')
+                     ->where('jatuh_tempo', '<', \Carbon\Carbon::today());
+              });
+        })
         ->exists();
 
-        // If there are active arrears, Credit Limit is 0
-        if ($hasActiveLate) {
+        // Also check if customer has any GAGAL contract (contract was cancelled due to default)
+        $hasGagalContract = \App\Models\KontrakKredit::where('id_pelanggan', $pelanggan->id_pelanggan)
+            ->where('status', 'GAGAL')
+            ->exists();
+
+        // If there are active arrears or a GAGAL contract, Credit Limit is 0
+        if ($hasActiveLate || $hasGagalContract) {
             $creditLimit = 0;
         }
 

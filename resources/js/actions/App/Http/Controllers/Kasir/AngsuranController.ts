@@ -202,6 +202,55 @@ voidContract.post = (args: { id: string | number } | [id: string | number ] | st
         })
     
     voidContract.form = voidContractForm
-const AngsuranController = { index, show, pay, voidContract }
+export const reactivate = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: reactivate.url(args, options),
+    method: 'post',
+})
+
+reactivate.definition = {
+    methods: ["post"],
+    url: '/kasir/angsuran/{id}/reactivate',
+} satisfies RouteDefinition<["post"]>
+
+reactivate.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { id: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    id: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        id: args.id,
+                }
+
+    return reactivate.definition.url
+            .replace('{id}', parsedArgs.id.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+reactivate.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: reactivate.url(args, options),
+    method: 'post',
+})
+
+        const reactivateForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: reactivate.url(args, options),
+        method: 'post',
+    })
+
+                    reactivateForm.post = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: reactivate.url(args, options),
+            method: 'post',
+        })
+    
+    reactivate.form = reactivateForm
+const AngsuranController = { index, show, pay, voidContract, reactivate }
 
 export default AngsuranController

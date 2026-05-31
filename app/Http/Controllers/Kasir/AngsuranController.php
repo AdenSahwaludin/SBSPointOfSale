@@ -202,6 +202,7 @@ class AngsuranController extends Controller
                 $remaining -= $bayar;
             }
 
+
             // Jika semua angsuran lunas, update kontrak dan transaksi
             $unpaid = $kontrak->jadwalAngsuran()->where('status', '!=', 'PAID')->count();
             if ($unpaid === 0) {
@@ -284,6 +285,57 @@ class AngsuranController extends Controller
             DB::rollBack();
 
             return back()->with('error', 'Gagal membatalkan kontrak: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Reactivate a GAGAL contract back to AKTIF.
+     */
+    public function reactivate(int $id)
+    {
+        $kontrak = KontrakKredit::with(['jadwalAngsuran', 'pelanggan', 'transaksi'])->findOrFail($id);
+
+        if ($kontrak->status !== 'GAGAL') {
+            return back()->with('error', 'Hanya kontrak berstatus GAGAL yang dapat diaktifkan kembali.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Kembalikan jadwal yang VOID ke status semula berdasarkan tanggal jatuh tempo
+            foreach ($kontrak->jadwalAngsuran as $angsuran) {
+                if ($angsuran->status === 'VOID') {
+                    $angsuran->status = $angsuran->jatuh_tempo < now() ? 'LATE' : 'DUE';
+                    $angsuran->save();
+                }
+            }
+
+            // Aktifkan kembali kontrak
+            $kontrak->status = 'AKTIF';
+            $kontrak->save();
+
+            // Kembalikan status transaksi
+            $trx = $kontrak->transaksi;
+            if ($trx) {
+                $trx->status_pembayaran = Transaksi::STATUS_MENUNGGU;
+                $trx->ar_status = 'AKTIF';
+                $trx->save();
+            }
+
+            // Hitung ulang trust score & credit limit
+            $pelanggan = $kontrak->pelanggan;
+            if ($pelanggan) {
+                \App\Services\TrustScoreService::updateTrustScore($pelanggan);
+                $pelanggan->refresh();
+                \App\Services\CreditLimitService::updateCreditLimit($pelanggan);
+            }
+
+            DB::commit();
+
+            return back()->with('success', 'Kontrak berhasil diaktifkan kembali.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->with('error', 'Gagal mengaktifkan kontrak: ' . $e->getMessage());
         }
     }
 }

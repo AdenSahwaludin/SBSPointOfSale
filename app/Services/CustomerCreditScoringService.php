@@ -57,6 +57,17 @@ class CustomerCreditScoringService
         $calculation = CreditLimitService::calculateCreditLimit($pelanggan);
         $newCalculatedLimit = $calculation['credit_limit'];
 
+        // If the base calculated limit is 0 (due to GAGAL contract or arrears penalty), 
+        // they should not receive any activity bonus.
+        if ($newCalculatedLimit === 0) {
+            return [
+                'limit_increased' => false,
+                'new_limit' => 0,
+                'increase_amount' => 0,
+                'reason' => 'Calculated limit is 0 (active arrears or GAGAL contract). Bonus not applied.',
+            ];
+        }
+
         // Determine increase amount based on transaction frequency
         $increaseAmount = self::calculateCreditIncreaseAmount(
             $transactionCount,

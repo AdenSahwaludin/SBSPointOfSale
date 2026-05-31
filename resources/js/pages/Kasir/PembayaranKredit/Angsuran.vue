@@ -126,7 +126,13 @@ function submitPayment() {
             metode: payMethod.value,
             keterangan: note.value,
         },
-        { preserveScroll: true },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                payAmount.value = 0;
+                note.value = '';
+            },
+        },
     );
 }
 
@@ -142,6 +148,17 @@ function confirmVoidContract() {
     );
     if (isConfirmed) {
         router.post(`/kasir/angsuran/${props.selected.id_kontrak}/void`, {}, { preserveScroll: true });
+    }
+}
+
+function reactivateContract() {
+    if (!props.selected) return;
+    const isConfirmed = window.confirm(
+        'Aktifkan kembali kontrak ini?\n\n' +
+        'Semua cicilan VOID akan dikembalikan ke status aktif (DUE/LATE) dan Trust Score pelanggan akan dihitung ulang.'
+    );
+    if (isConfirmed) {
+        router.post(`/kasir/angsuran/${props.selected.id_kontrak}/reactivate`, {}, { preserveScroll: true });
     }
 }
 </script>
@@ -316,16 +333,47 @@ function confirmVoidContract() {
 
                 <!-- Detail + payment - Enhanced Card -->
                 <div class="rounded-2xl border border-gray-200 bg-white shadow-xl lg:col-span-2">
-                    <div class="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white p-5">
+                    <div :class="['border-b border-gray-100 p-5', selected?.status === 'GAGAL' ? 'bg-gradient-to-r from-red-50 to-white' : 'bg-gradient-to-r from-gray-50 to-white']">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div>
-                                    <div class="text-lg font-bold text-gray-900">Detail Kontrak</div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-lg font-bold text-gray-900">Detail Kontrak</div>
+                                        <span
+                                            v-if="selected"
+                                            :class="[
+                                                'rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm',
+                                                selected.status === 'GAGAL' ? 'bg-red-600 text-white' : 
+                                                selected.status === 'LUNAS' ? 'bg-blue-600 text-white' : 
+                                                'bg-emerald-600 text-white'
+                                            ]"
+                                        >{{ selected.status }}</span>
+                                    </div>
                                     <div v-if="selected" class="text-sm text-gray-600">
                                         {{ selected?.nomor_kontrak }} • {{ selected?.nomor_transaksi }} • {{ selected?.pelanggan?.nama }}
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div v-if="selected?.status === 'GAGAL'" class="m-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                <div>
+                                    <h3 class="text-sm font-bold text-red-800">Kontrak Telah Gagal/Dibatalkan</h3>
+                                    <p class="mt-1 text-xs text-red-700">Kontrak ini sebelumnya dibatalkan karena gagal bayar. Aktifkan kembali untuk melanjutkan pembayaran angsuran.</p>
+                                </div>
+                            </div>
+                            <button
+                                @click="reactivateContract"
+                                class="shrink-0 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-emerald-700 hover:shadow-md"
+                            >
+                                ✓ Aktifkan Kembali
+                            </button>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 gap-4 p-6 md:grid-cols-3" v-if="selected">
