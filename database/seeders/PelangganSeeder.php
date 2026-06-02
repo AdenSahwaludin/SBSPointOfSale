@@ -58,6 +58,21 @@ class PelangganSeeder extends Seeder
                 'created_at' => now()->subMonths(6),
                 'updated_at' => now()->subMonths(6),
             ],
+            [
+                'id_pelanggan' => 'P004',
+                'nama' => 'Test',
+                'email' => 'test@email.com',
+                'telepon' => '081234567892',
+                'kota' => 'Cimahi',
+                'alamat' => 'Jl. Jendral Sudirman No. 1, Cimahi',
+                'aktif' => true,
+                'trust_score' => 50,
+                'credit_limit' => 0,
+                'status_kredit' => 'aktif',
+                'saldo_kredit' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ];
 
         foreach ($customers as $customer) {

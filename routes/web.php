@@ -25,9 +25,9 @@ Route::get('/', function () {
 // PUBLIC ROUTES
 // ==========================================
 // Add any public routes here if needed
-// Route::get('/about', function () {
-//     return inertia('About');
-// });
+Route::get('/simulasi', function () {
+    return view('simulasi');
+});
 
 // ==========================================
 // INCLUDE SEPARATE ROUTE FILES

@@ -20,7 +20,7 @@ const props = defineProps<{
         last_page: number;
         total: number;
     };
-    filters?: { search?: string; due_this_month?: string; unpaid_only?: string };
+    filters?: { search?: string; due_this_month?: string; unpaid_only?: string; show_failed?: string };
     selected?: any;
     summary?: any;
 }>();
