@@ -1,5 +1,5 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
-export const add = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const add = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: add.url(args, options),
     method: 'post',
 })
@@ -9,7 +9,7 @@ add.definition = {
     url: '/kasir/goods-in/{goodsIn}/items',
 } satisfies RouteDefinition<["post"]>
 
-add.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions) => {
+add.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { goodsIn: args }
     }
@@ -37,23 +37,23 @@ add.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsI
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-add.post = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+add.post = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: add.url(args, options),
     method: 'post',
 })
 
-        const addForm = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const addForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: add.url(args, options),
         method: 'post',
     })
 
-                    addForm.post = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    addForm.post = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: add.url(args, options),
             method: 'post',
         })
     
     add.form = addForm
-export const update = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const update = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
@@ -63,7 +63,7 @@ update.definition = {
     url: '/kasir/goods-in/{goodsIn}/items/{id_detail}',
 } satisfies RouteDefinition<["patch"]>
 
-update.url = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions) => {
+update.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     goodsIn: args[0],
@@ -86,12 +86,12 @@ update.url = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_deta
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-update.patch = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+update.patch = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
 
-        const updateForm = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const updateForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PATCH',
@@ -101,7 +101,7 @@ update.patch = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_de
         method: 'post',
     })
 
-                    updateForm.patch = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    updateForm.patch = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',
@@ -112,7 +112,7 @@ update.patch = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_de
         })
     
     update.form = updateForm
-export const remove = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const remove = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: remove.url(args, options),
     method: 'delete',
 })
@@ -122,7 +122,7 @@ remove.definition = {
     url: '/kasir/goods-in/{goodsIn}/items/{id_detail}',
 } satisfies RouteDefinition<["delete"]>
 
-remove.url = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions) => {
+remove.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     goodsIn: args[0],
@@ -145,12 +145,12 @@ remove.url = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_deta
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-remove.delete = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+remove.delete = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: remove.url(args, options),
     method: 'delete',
 })
 
-        const removeForm = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const removeForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: remove.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -160,7 +160,7 @@ remove.delete = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_d
         method: 'post',
     })
 
-                    removeForm.delete = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    removeForm.delete = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: remove.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',

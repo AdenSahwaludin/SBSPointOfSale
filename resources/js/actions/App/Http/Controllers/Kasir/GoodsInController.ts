@@ -177,7 +177,7 @@ show.head = (args: { goods_in: string | number } | [goods_in: string | number ] 
         })
     
     show.form = showForm
-export const addItem = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const addItem = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: addItem.url(args, options),
     method: 'post',
 })
@@ -187,7 +187,7 @@ addItem.definition = {
     url: '/kasir/goods-in/{goodsIn}/items',
 } satisfies RouteDefinition<["post"]>
 
-addItem.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions) => {
+addItem.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { goodsIn: args }
     }
@@ -215,23 +215,23 @@ addItem.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [go
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-addItem.post = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+addItem.post = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: addItem.url(args, options),
     method: 'post',
 })
 
-        const addItemForm = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const addItemForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: addItem.url(args, options),
         method: 'post',
     })
 
-                    addItemForm.post = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    addItemForm.post = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: addItem.url(args, options),
             method: 'post',
         })
     
     addItem.form = addItemForm
-export const updateItem = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const updateItem = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: updateItem.url(args, options),
     method: 'patch',
 })
@@ -241,7 +241,7 @@ updateItem.definition = {
     url: '/kasir/goods-in/{goodsIn}/items/{id_detail}',
 } satisfies RouteDefinition<["patch"]>
 
-updateItem.url = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions) => {
+updateItem.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     goodsIn: args[0],
@@ -264,12 +264,12 @@ updateItem.url = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-updateItem.patch = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+updateItem.patch = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: updateItem.url(args, options),
     method: 'patch',
 })
 
-        const updateItemForm = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const updateItemForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: updateItem.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PATCH',
@@ -279,7 +279,7 @@ updateItem.patch = (args: { goodsIn: number | { id_pemesanan_barang: number }, i
         method: 'post',
     })
 
-                    updateItemForm.patch = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    updateItemForm.patch = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: updateItem.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',
@@ -290,7 +290,7 @@ updateItem.patch = (args: { goodsIn: number | { id_pemesanan_barang: number }, i
         })
     
     updateItem.form = updateItemForm
-export const removeItem = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const removeItem = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: removeItem.url(args, options),
     method: 'delete',
 })
@@ -300,7 +300,7 @@ removeItem.definition = {
     url: '/kasir/goods-in/{goodsIn}/items/{id_detail}',
 } satisfies RouteDefinition<["delete"]>
 
-removeItem.url = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions) => {
+removeItem.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     goodsIn: args[0],
@@ -323,12 +323,12 @@ removeItem.url = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-removeItem.delete = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+removeItem.delete = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: removeItem.url(args, options),
     method: 'delete',
 })
 
-        const removeItemForm = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const removeItemForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: removeItem.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -338,7 +338,7 @@ removeItem.delete = (args: { goodsIn: number | { id_pemesanan_barang: number }, 
         method: 'post',
     })
 
-                    removeItemForm.delete = (args: { goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number } | [goodsIn: number | { id_pemesanan_barang: number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    removeItemForm.delete = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number } | [goodsIn: string | number | { id_pemesanan_barang: string | number }, id_detail: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: removeItem.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',
@@ -349,7 +349,7 @@ removeItem.delete = (args: { goodsIn: number | { id_pemesanan_barang: number }, 
         })
     
     removeItem.form = removeItemForm
-export const submit = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const submit = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: submit.url(args, options),
     method: 'post',
 })
@@ -359,7 +359,7 @@ submit.definition = {
     url: '/kasir/goods-in/{goodsIn}/submit',
 } satisfies RouteDefinition<["post"]>
 
-submit.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions) => {
+submit.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { goodsIn: args }
     }
@@ -387,23 +387,23 @@ submit.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goo
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-submit.post = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+submit.post = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: submit.url(args, options),
     method: 'post',
 })
 
-        const submitForm = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const submitForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: submit.url(args, options),
         method: 'post',
     })
 
-                    submitForm.post = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    submitForm.post = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: submit.url(args, options),
             method: 'post',
         })
     
     submit.form = submitForm
-export const destroy = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -413,7 +413,7 @@ destroy.definition = {
     url: '/kasir/goods-in/{goodsIn}',
 } satisfies RouteDefinition<["delete"]>
 
-destroy.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions) => {
+destroy.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { goodsIn: args }
     }
@@ -441,12 +441,12 @@ destroy.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [go
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-destroy.delete = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
 
-        const destroyForm = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const destroyForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -456,7 +456,7 @@ destroy.delete = (args: { goodsIn: number | { id_pemesanan_barang: number } } | 
         method: 'post',
     })
 
-                    destroyForm.delete = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    destroyForm.delete = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',
@@ -510,7 +510,7 @@ receivingIndex.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => 
         })
     
     receivingIndex.form = receivingIndexForm
-export const receivingShow = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const receivingShow = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: receivingShow.url(args, options),
     method: 'get',
 })
@@ -520,7 +520,7 @@ receivingShow.definition = {
     url: '/kasir/goods-in/{goodsIn}/receiving',
 } satisfies RouteDefinition<["get","head"]>
 
-receivingShow.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions) => {
+receivingShow.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { goodsIn: args }
     }
@@ -548,25 +548,25 @@ receivingShow.url = (args: { goodsIn: number | { id_pemesanan_barang: number } }
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-receivingShow.get = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+receivingShow.get = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: receivingShow.url(args, options),
     method: 'get',
 })
-receivingShow.head = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+receivingShow.head = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: receivingShow.url(args, options),
     method: 'head',
 })
 
-        const receivingShowForm = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        const receivingShowForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: receivingShow.url(args, options),
         method: 'get',
     })
 
-                    receivingShowForm.get = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+                    receivingShowForm.get = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: receivingShow.url(args, options),
             method: 'get',
         })
-                    receivingShowForm.head = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+                    receivingShowForm.head = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: receivingShow.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -577,7 +577,7 @@ receivingShow.head = (args: { goodsIn: number | { id_pemesanan_barang: number } 
         })
     
     receivingShow.form = receivingShowForm
-export const recordReceived = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const recordReceived = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: recordReceived.url(args, options),
     method: 'post',
 })
@@ -587,7 +587,7 @@ recordReceived.definition = {
     url: '/kasir/goods-in/{goodsIn}/record-received',
 } satisfies RouteDefinition<["post"]>
 
-recordReceived.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions) => {
+recordReceived.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { goodsIn: args }
     }
@@ -615,17 +615,17 @@ recordReceived.url = (args: { goodsIn: number | { id_pemesanan_barang: number } 
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-recordReceived.post = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+recordReceived.post = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: recordReceived.url(args, options),
     method: 'post',
 })
 
-        const recordReceivedForm = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        const recordReceivedForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: recordReceived.url(args, options),
         method: 'post',
     })
 
-                    recordReceivedForm.post = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+                    recordReceivedForm.post = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: recordReceived.url(args, options),
             method: 'post',
         })
@@ -674,7 +674,7 @@ history.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
     
     history.form = historyForm
-export const historyShow = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const historyShow = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: historyShow.url(args, options),
     method: 'get',
 })
@@ -684,7 +684,7 @@ historyShow.definition = {
     url: '/kasir/goods-in-history/{goodsIn}',
 } satisfies RouteDefinition<["get","head"]>
 
-historyShow.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions) => {
+historyShow.url = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { goodsIn: args }
     }
@@ -712,25 +712,25 @@ historyShow.url = (args: { goodsIn: number | { id_pemesanan_barang: number } } |
             .replace(/\/+$/, '') + queryParams(options)
 }
 
-historyShow.get = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+historyShow.get = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: historyShow.url(args, options),
     method: 'get',
 })
-historyShow.head = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+historyShow.head = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: historyShow.url(args, options),
     method: 'head',
 })
 
-        const historyShowForm = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        const historyShowForm = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: historyShow.url(args, options),
         method: 'get',
     })
 
-                    historyShowForm.get = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+                    historyShowForm.get = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: historyShow.url(args, options),
             method: 'get',
         })
-                    historyShowForm.head = (args: { goodsIn: number | { id_pemesanan_barang: number } } | [goodsIn: number | { id_pemesanan_barang: number } ] | number | { id_pemesanan_barang: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+                    historyShowForm.head = (args: { goodsIn: string | number | { id_pemesanan_barang: string | number } } | [goodsIn: string | number | { id_pemesanan_barang: string | number } ] | string | number | { id_pemesanan_barang: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: historyShow.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
