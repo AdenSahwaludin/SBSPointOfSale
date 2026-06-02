@@ -62,30 +62,30 @@
                     <span class="text-xs uppercase font-semibold text-slate-400 tracking-wider">Hasil Kalkulasi Plafon</span>
                     
                     <!-- Virtual Glass Credit Card -->
-                    <div id="credit-card" class="relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-white border border-white/10 transition-all duration-500 shadow-2xl mt-6 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900">
-                        <div class="absolute top-0 right-0 w-36 h-36 bg-white/5 rounded-full -mr-8 -mt-8 pointer-events-none"></div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full -ml-8 -mb-8 pointer-events-none"></div>
+                    <div id="credit-card" class="relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-slate-800 border border-slate-200/80 transition-all duration-500 shadow-lg mt-6 bg-gradient-to-br from-indigo-50 via-indigo-100/70 to-slate-100">
+                        <div class="absolute top-0 right-0 w-36 h-36 bg-white/40 rounded-full -mr-8 -mt-8 pointer-events-none"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/5 rounded-full -ml-8 -mb-8 pointer-events-none"></div>
                         
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[9px] uppercase font-bold tracking-widest text-white/70">SBS PAYLATER ENGINE</p>
-                                <h3 class="text-sm font-extrabold font-outfit text-white/90">CREDIT LIMIT PLATINUM</h3>
+                                <p class="text-[9px] uppercase font-bold tracking-widest text-slate-500">SBS PAYLATER ENGINE</p>
+                                <h3 class="text-sm font-extrabold font-outfit text-slate-800">CREDIT LIMIT PLATINUM</h3>
                             </div>
                             <!-- NFC Icon or Chip visual -->
-                            <svg class="w-8 h-8 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a13.917 13.917 0 00-3.138-8.441l-.053-.09m1.782 14.54a14.05 14.05 0 002.327-2.316m-2.327-10.224A14.048 14.048 0 009 6.22M15 11c0 2.22-.544 4.312-1.503 6.157M15 11c0-2.22-.544-4.312-1.503-6.157M18 11A11.97 11.97 0 0012 1.644M18 11a11.97 11.97 0 00-6 9.356"></path></svg>
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a13.917 13.917 0 00-3.138-8.441l-.053-.09m1.782 14.54a14.05 14.05 0 002.327-2.316m-2.327-10.224A14.048 14.048 0 009 6.22M15 11c0 2.22-.544 4.312-1.503 6.157M15 11c0-2.22-.544-4.312-1.503-6.157M18 11A11.97 11.97 0 0012 1.644M18 11a11.97 11.97 0 00-6 9.356"></path></svg>
                         </div>
                         
                         <div class="my-auto">
-                            <div class="text-[9px] text-white/60 uppercase tracking-widest mb-1.5 font-semibold">Maksimum Limit Belanja</div>
-                            <div id="cl-display" class="text-3xl font-extrabold font-outfit tracking-wide text-white transition-all duration-300">Rp 5.400.000</div>
+                            <div class="text-[9px] text-slate-500 uppercase tracking-widest mb-1.5 font-semibold">Maksimum Limit Belanja</div>
+                            <div id="cl-display" class="text-3xl font-extrabold font-outfit tracking-wide text-slate-900 transition-all duration-300">Rp 5.400.000</div>
                         </div>
 
-                        <div class="flex justify-between items-center text-[10px] text-white/60">
+                        <div class="flex justify-between items-center text-[10px] text-slate-500">
                             <div>
                                 <span>Status: </span>
-                                <span id="cl-status-txt" class="font-extrabold text-white uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded">AKTIF</span>
+                                <span id="cl-status-txt" class="font-extrabold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">AKTIF</span>
                             </div>
-                            <span class="font-bold">v2.0 SECURE</span>
+                            <span class="font-bold text-slate-400">v2.0 SECURE</span>
                         </div>
                     </div>
                 </div>
@@ -274,7 +274,7 @@
                 checkDescArr.innerHTML = `<span class="text-rose-600 font-semibold">Terdeteksi Tunggakan Aktif! Plafon langsung diblokir (Limit = Rp0)</span>`;
 
                 // Set CC styling to Blocked
-                cc.className = "relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-white border border-rose-500/20 transition-all duration-500 shadow-2xl mt-6 bg-gradient-to-br from-rose-700 via-slate-800 to-slate-900";
+                cc.className = "relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-slate-800 border border-rose-200 transition-all duration-500 shadow-lg mt-6 bg-gradient-to-br from-rose-50 via-rose-100/70 to-slate-100";
                 clStatusTxt.textContent = "BLOCKED";
                 clStatusTxt.className = "font-extrabold text-rose-500 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded border border-rose-200";
                 
@@ -286,17 +286,17 @@
 
                 // Set CC styling to normal/active
                 if (tsFactor === 0) {
-                    cc.className = "relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-white border border-rose-200 transition-all duration-500 shadow-2xl mt-6 bg-gradient-to-br from-rose-700 via-slate-800 to-slate-900";
+                    cc.className = "relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-slate-800 border border-rose-200 transition-all duration-500 shadow-lg mt-6 bg-gradient-to-br from-rose-50 via-rose-100/70 to-slate-100";
                     clStatusTxt.textContent = "DITOLAK";
                     clStatusTxt.className = "font-extrabold text-rose-600 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded border border-rose-200";
                     outerGlow.className = "lg:col-span-5 flex flex-col justify-between glass-card rounded-3xl p-8 glow-red relative overflow-hidden";
                 } else if (tsFactor === 0.5) {
-                    cc.className = "relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-white border border-amber-200 transition-all duration-500 shadow-2xl mt-6 bg-gradient-to-br from-amber-700 via-slate-800 to-slate-900";
+                    cc.className = "relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-slate-800 border border-amber-200 transition-all duration-500 shadow-lg mt-6 bg-gradient-to-br from-amber-50 via-amber-100/70 to-slate-100";
                     clStatusTxt.textContent = "TERBATAS";
                     clStatusTxt.className = "font-extrabold text-amber-600 uppercase tracking-wider bg-amber-50 px-2 py-0.5 rounded border border-amber-200";
                     outerGlow.className = "lg:col-span-5 flex flex-col justify-between glass-card rounded-3xl p-8 glow-yellow relative overflow-hidden";
                 } else {
-                    cc.className = "relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-white border border-white/10 transition-all duration-500 shadow-2xl mt-6 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900";
+                    cc.className = "relative overflow-hidden w-full h-48 rounded-2xl p-6 flex flex-col justify-between text-slate-800 border border-indigo-250 transition-all duration-500 shadow-lg mt-6 bg-gradient-to-br from-indigo-50 via-indigo-100/70 to-slate-100";
                     clStatusTxt.textContent = "AKTIF";
                     clStatusTxt.className = "font-extrabold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200";
                     outerGlow.className = "lg:col-span-5 flex flex-col justify-between glass-card rounded-3xl p-8 glow-indigo relative overflow-hidden";

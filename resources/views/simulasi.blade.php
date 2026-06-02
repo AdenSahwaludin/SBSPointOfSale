@@ -175,32 +175,32 @@
                             <span class="text-xs uppercase font-semibold text-slate-450 tracking-wider">Plafon Kredit Tersedia</span>
                             
                             <!-- Virtual Credit Card Glass -->
-                            <div id="credit-card-ui" class="relative overflow-hidden w-full h-44 rounded-2xl p-5 flex flex-col justify-between text-white transition-all duration-500 shadow-xl border border-white/10">
+                            <div id="credit-card-ui" class="relative overflow-hidden w-full h-44 rounded-2xl p-5 flex flex-col justify-between text-slate-800 transition-all duration-500 shadow-lg border border-slate-200/80 bg-gradient-to-br from-indigo-50 via-indigo-100/70 to-slate-100">
                                 <!-- Background card decorations -->
-                                <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-8 -mt-8 pointer-events-none"></div>
-                                <div class="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full -ml-8 -mb-8 pointer-events-none"></div>
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full -mr-8 -mt-8 pointer-events-none"></div>
+                                <div class="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/5 rounded-full -ml-8 -mb-8 pointer-events-none"></div>
                                 
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-200/80">SBS Credit Limit</p>
-                                        <h3 class="text-md font-bold font-outfit text-white/90">PAYLATER ENGINE</h3>
+                                        <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500">SBS Credit Limit</p>
+                                        <h3 class="text-md font-bold font-outfit text-slate-800">PAYLATER ENGINE</h3>
                                     </div>
-                                    <svg class="w-8 h-8 text-white/40" viewBox="0 0 24 24" fill="currentColor">
+                                    <svg class="w-8 h-8 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/>
                                     </svg>
                                 </div>
                                 
                                 <div class="my-auto">
-                                    <div class="text-[10px] text-white/60 uppercase tracking-widest mb-1">Maksimum Limit Cicilan</div>
-                                    <div id="cl-value-display" class="text-2xl md:text-3xl font-extrabold font-outfit tracking-wide text-white transition-all duration-300">Rp 0</div>
+                                    <div class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Maksimum Limit Belanja</div>
+                                    <div id="cl-value-display" class="text-2xl md:text-3xl font-extrabold font-outfit tracking-wide text-slate-900 transition-all duration-300">Rp 0</div>
                                 </div>
 
-                                <div class="flex justify-between items-center text-[10px] text-white/60">
+                                <div class="flex justify-between items-center text-[10px] text-slate-500">
                                     <div>
                                         <span>Faktor Multiplier: </span>
-                                        <span id="cl-multiplier-display" class="font-bold text-white">1.0x</span>
+                                        <span id="cl-multiplier-display" class="font-bold text-slate-850">1.0x</span>
                                     </div>
-                                    <span class="uppercase tracking-widest font-semibold px-2 py-0.5 bg-white/10 rounded">ACTIVE</span>
+                                    <span id="cl-status-badge-inside" class="uppercase tracking-widest font-semibold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded border border-emerald-200">ACTIVE</span>
                                 </div>
                             </div>
 
@@ -798,13 +798,13 @@
             if (trustScore < 55) {
                 statusText = "Ditolak (Rejected)";
                 statusBadgeClass = "bg-rose-50 text-rose-600 border border-rose-200";
-                cardBgClass = "from-rose-700 via-slate-800 to-slate-900 glow-red border-rose-200";
+                cardBgClass = "from-rose-50 via-rose-100/75 to-slate-100 glow-red border-rose-200";
                 gaugeColorClass = "text-rose-500";
                 multiplier = 0.0;
             } else if (trustScore >= 55 && trustScore <= 69) {
                 statusText = "Dipertimbangkan (Considered)";
                 statusBadgeClass = "bg-amber-50 text-amber-600 border border-amber-200";
-                cardBgClass = "from-amber-700 via-slate-800 to-slate-900 glow-yellow border-amber-200";
+                cardBgClass = "from-amber-50 via-amber-100/75 to-slate-100 glow-yellow border-amber-200";
                 gaugeColorClass = "text-amber-500";
                 
                 // Multiplier ranges
@@ -813,7 +813,7 @@
             } else { // TS >= 70
                 statusText = "Layak (Eligible)";
                 statusBadgeClass = "bg-emerald-50 text-emerald-600 border border-emerald-200";
-                cardBgClass = "from-indigo-600 via-indigo-700 to-indigo-900 glow-indigo border-indigo-200";
+                cardBgClass = "from-indigo-50 via-indigo-100/75 to-slate-100 glow-indigo border-indigo-200";
                 gaugeColorClass = "text-emerald-500";
                 
                 // Multiplier ranges
@@ -951,6 +951,21 @@
             document.getElementById('cl-value-display').textContent = formatRupiah(finalCreditLimit);
             document.getElementById('cl-multiplier-display').textContent = `${multiplier.toFixed(1)}x`;
 
+            const clBadgeInside = document.getElementById('cl-status-badge-inside');
+            if (state.hasArrears) {
+                clBadgeInside.textContent = "BLOCKED";
+                clBadgeInside.className = "uppercase tracking-widest font-semibold px-2 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200";
+            } else if (trustScore < 55) {
+                clBadgeInside.textContent = "DITOLAK";
+                clBadgeInside.className = "uppercase tracking-widest font-semibold px-2 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200";
+            } else if (trustScore >= 55 && trustScore <= 69) {
+                clBadgeInside.textContent = "TERBATAS";
+                clBadgeInside.className = "uppercase tracking-widest font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200";
+            } else {
+                clBadgeInside.textContent = "ACTIVE";
+                clBadgeInside.className = "uppercase tracking-widest font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200";
+            }
+
             // Change Credit Card appearance based on eligibility
             const cc = document.getElementById('credit-card-ui');
             
@@ -959,7 +974,12 @@
             cc.className = cc.className.replace(/glow-\S+/, "");
             cc.className = cc.className.replace(/border-\S+/, "");
             
-            cc.className += ` bg-gradient-to-br ${cardBgClass}`;
+            // Handle if there's arrears override background
+            if (state.hasArrears) {
+                cc.className += ` bg-gradient-to-br from-rose-50 via-rose-100/75 to-slate-100 border border-rose-200 glow-red`;
+            } else {
+                cc.className += ` bg-gradient-to-br ${cardBgClass}`;
+            }
 
             // Sync calculation breakdown formula text
             const formulaTextEl = document.getElementById('final-calc-formula');
