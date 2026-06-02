@@ -28,6 +28,15 @@ Route::get('/', function () {
 Route::get('/simulasi', function () {
     return view('simulasi');
 });
+Route::get('/simulasi/trust-score', function () {
+    return view('simulasi_ts');
+});
+Route::get('/simulasi/credit-limit', function () {
+    return view('simulasi_cl');
+});
+Route::get('/simulasi/plafon-kredit', function () {
+    return view('simulasi_plafon');
+});
 
 // ==========================================
 // INCLUDE SEPARATE ROUTE FILES
