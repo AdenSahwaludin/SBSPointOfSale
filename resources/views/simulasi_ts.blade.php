@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,12 +23,11 @@
         }
     </script>
     <style>
-        .glow-indigo { box-shadow: 0 0 35px -10px rgba(99, 102, 241, 0.4); }
+        .glow-indigo { box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.12); }
         .glass-card {
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
         }
         .progress-ring__circle {
             transition: stroke-dashoffset 0.35s ease-out;
@@ -37,23 +36,23 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+<body class="bg-white text-slate-800 font-sans min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
     
     <!-- Decorative background elements -->
-    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-50 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-50/50 rounded-full blur-[120px] pointer-events-none"></div>
 
     <div class="max-w-6xl w-full relative z-10">
         
         <!-- Header -->
         <div class="text-center mb-8">
-            <span class="px-3 py-1 text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full uppercase tracking-widest">
+            <span class="px-3 py-1 text-xs font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-full uppercase tracking-widest">
                 Slide 1 — Smart Credit Scoring
             </span>
-            <h1 class="text-3xl font-extrabold font-outfit mt-3 bg-gradient-to-r from-white via-slate-100 to-indigo-300 bg-clip-text text-transparent">
+            <h1 class="text-3xl font-extrabold font-outfit mt-3 text-slate-900">
                 Sistem Penilaian Kelayakan: Trust Score (TS)
             </h1>
-            <p class="text-slate-400 text-sm mt-1">Mengukur tingkat kepercayaan pelanggan berdasarkan histori dan perilaku transaksi</p>
+            <p class="text-slate-500 text-sm mt-1">Mengukur tingkat kepercayaan pelanggan berdasarkan histori dan perilaku transaksi</p>
         </div>
 
         <!-- MAIN LAYOUT -->
@@ -61,7 +60,6 @@
             
             <!-- LEFT COLUMN: Trust Score Visual Dashboard (Col 5) -->
             <div class="lg:col-span-5 flex flex-col justify-between glass-card rounded-3xl p-8 glow-indigo relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-indigo-500/10 to-transparent rounded-bl-full pointer-events-none"></div>
                 
                 <div class="text-center py-6">
                     <span class="text-xs uppercase font-semibold text-slate-400 tracking-wider">Hasil Pengukuran</span>
@@ -69,14 +67,14 @@
                     <div class="relative flex items-center justify-center my-6">
                         <svg class="w-56 h-56">
                             <!-- Background Circle -->
-                            <circle class="text-slate-800" stroke-width="12" stroke="currentColor" fill="transparent" r="95" cx="112" cy="112"/>
+                            <circle class="text-slate-100" stroke-width="12" stroke="currentColor" fill="transparent" r="95" cx="112" cy="112"/>
                             <!-- Foreground circle -->
                             <circle id="ts-gauge" class="progress-ring__circle transition-all duration-300" stroke-width="14" stroke-linecap="round" stroke="currentColor" fill="transparent" r="95" cx="112" cy="112" stroke-dasharray="596.9" stroke-dashoffset="596.9"/>
                         </svg>
                         
                         <div class="absolute flex flex-col items-center">
-                            <span id="ts-value" class="text-6xl font-extrabold font-outfit text-white">50</span>
-                            <span class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Trust Score</span>
+                            <span id="ts-value" class="text-6xl font-extrabold font-outfit text-slate-900">50</span>
+                            <span class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Trust Score</span>
                         </div>
                     </div>
 
@@ -88,20 +86,20 @@
                 </div>
 
                 <!-- Classification Matrix Reference -->
-                <div class="bg-slate-950/60 rounded-2xl p-4 border border-slate-900 mt-4 text-xs space-y-2.5">
-                    <div class="flex justify-between items-center text-slate-400">
-                        <span class="font-medium">TS &ge; 70</span>
-                        <span class="font-bold text-emerald-400 uppercase">Layak / Disetujui</span>
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mt-4 text-xs space-y-2.5">
+                    <div class="flex justify-between items-center text-slate-650">
+                        <span class="font-medium text-slate-600">TS &ge; 70</span>
+                        <span class="font-bold text-emerald-600 uppercase">Layak / Disetujui</span>
                     </div>
-                    <div class="h-[1px] bg-slate-900"></div>
-                    <div class="flex justify-between items-center text-slate-400">
-                        <span class="font-medium">TS 55 - 69</span>
-                        <span class="font-bold text-amber-500 uppercase">Dipertimbangkan</span>
+                    <div class="h-[1px] bg-slate-200/60"></div>
+                    <div class="flex justify-between items-center text-slate-650">
+                        <span class="font-medium text-slate-600">TS 55 - 69</span>
+                        <span class="font-bold text-amber-600 uppercase">Dipertimbangkan</span>
                     </div>
-                    <div class="h-[1px] bg-slate-900"></div>
-                    <div class="flex justify-between items-center text-slate-400">
-                        <span class="font-medium">TS &lt; 55</span>
-                        <span class="font-bold text-rose-500 uppercase">Ditolak / Gagal Layak</span>
+                    <div class="h-[1px] bg-slate-200/60"></div>
+                    <div class="flex justify-between items-center text-slate-650">
+                        <span class="font-medium text-slate-600">TS &lt; 55</span>
+                        <span class="font-bold text-rose-600 uppercase">Ditolak / Gagal Layak</span>
                     </div>
                 </div>
             </div>
@@ -109,8 +107,8 @@
             <!-- RIGHT COLUMN: Interactive Controllers (Col 7) -->
             <div class="lg:col-span-7 glass-card rounded-3xl p-8 flex flex-col justify-between">
                 <div>
-                    <h2 class="text-md font-bold font-outfit text-slate-200 uppercase tracking-wider mb-6 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    <h2 class="text-sm font-bold font-outfit text-slate-700 uppercase tracking-wider mb-6 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                         Simulator Parameter Nilai Poin
                     </h2>
 
@@ -118,15 +116,15 @@
                         
                         <!-- P_umur: Account Age -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-2">Umur Akun Pelanggan (P<sub>umur</sub>)</label>
+                            <label class="block text-xs font-semibold text-slate-500 mb-2">Umur Akun Pelanggan (P<sub>umur</sub>)</label>
                             <div class="grid grid-cols-3 gap-2">
-                                <button type="button" onclick="setAge('<30')" id="age-low" class="py-2 text-xs font-medium rounded-xl border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200">
+                                <button type="button" onclick="setAge('<30')" id="age-low" class="py-2 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100">
                                     &lt; 30 Hari (+0)
                                 </button>
-                                <button type="button" onclick="setAge('30-179')" id="age-mid" class="py-2 text-xs font-medium rounded-xl border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200">
+                                <button type="button" onclick="setAge('30-179')" id="age-mid" class="py-2 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100">
                                     30-179 Hari (+10)
                                 </button>
-                                <button type="button" onclick="setAge('>=180')" id="age-high" class="py-2 text-xs font-medium rounded-xl border border-indigo-500/20 bg-indigo-950/30 text-indigo-300">
+                                <button type="button" onclick="setAge('>=180')" id="age-high" class="py-2 text-xs font-medium rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700">
                                     &ge; 180 Hari (+20)
                                 </button>
                             </div>
@@ -135,44 +133,44 @@
                         <!-- Sliders -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- On-Time Payments -->
-                            <div class="bg-slate-950/40 p-4 rounded-xl border border-slate-900">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                 <div class="flex justify-between text-xs mb-2">
-                                    <span class="text-slate-400 font-medium">Bayar Tepat Waktu (P<sub>tepat</sub>)</span>
-                                    <span class="font-mono text-emerald-400 font-bold" id="lbl-on-time">10x (+20)</span>
+                                    <span class="text-slate-600 font-medium">Bayar Tepat Waktu (P<sub>tepat</sub>)</span>
+                                    <span class="font-mono text-emerald-600 font-bold" id="lbl-on-time">10x (+20)</span>
                                 </div>
-                                <input type="range" id="val-on-time" min="0" max="15" value="10" class="w-full accent-indigo-500" oninput="calculateScore()">
-                                <span class="text-[9px] text-slate-600 block mt-1">+2 Poin per transaksi (Maks. +20)</span>
+                                <input type="range" id="val-on-time" min="0" max="15" value="10" class="w-full accent-indigo-600 bg-slate-200 rounded-lg appearance-none h-1.5 cursor-pointer" oninput="calculateScore()">
+                                <span class="text-[9px] text-slate-400 block mt-1">+2 Poin per transaksi (Maks. +20)</span>
                             </div>
 
                             <!-- Late Payments -->
-                            <div class="bg-slate-950/40 p-4 rounded-xl border border-slate-900">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                 <div class="flex justify-between text-xs mb-2">
-                                    <span class="text-rose-400 font-medium font-semibold">Bayar Terlambat (P<sub>telat</sub>)</span>
-                                    <span class="font-mono text-rose-400 font-bold" id="lbl-late">0x (-0)</span>
+                                    <span class="text-rose-600 font-semibold">Bayar Terlambat (P<sub>telat</sub>)</span>
+                                    <span class="font-mono text-rose-600 font-bold" id="lbl-late">0x (-0)</span>
                                 </div>
-                                <input type="range" id="val-late" min="0" max="10" value="0" class="w-full accent-rose-500" oninput="calculateScore()">
-                                <span class="text-[9px] text-slate-600 block mt-1">-5 Poin per transaksi terlambat</span>
+                                <input type="range" id="val-late" min="0" max="10" value="0" class="w-full accent-rose-600 bg-slate-200 rounded-lg appearance-none h-1.5 cursor-pointer" oninput="calculateScore()">
+                                <span class="text-[9px] text-slate-400 block mt-1">-5 Poin per transaksi terlambat</span>
                             </div>
 
                             <!-- Failed Payments -->
-                            <div class="bg-slate-950/40 p-4 rounded-xl border border-slate-900">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                 <div class="flex justify-between text-xs mb-2">
-                                    <span class="text-rose-400 font-medium">Gagal Bayar (P<sub>gagal</sub>)</span>
-                                    <span class="font-mono text-rose-400 font-bold" id="lbl-failed">0x (-0)</span>
+                                    <span class="text-rose-600 font-semibold">Gagal Bayar (P<sub>gagal</sub>)</span>
+                                    <span class="font-mono text-rose-600 font-bold" id="lbl-failed">0x (-0)</span>
                                 </div>
-                                <input type="range" id="val-failed" min="0" max="4" value="0" class="w-full accent-rose-600" oninput="calculateScore()">
-                                <span class="text-[9px] text-slate-600 block mt-1">-25 Poin per default/gagal bayar</span>
+                                <input type="range" id="val-failed" min="0" max="4" value="0" class="w-full accent-rose-600 bg-slate-200 rounded-lg appearance-none h-1.5 cursor-pointer" oninput="calculateScore()">
+                                <span class="text-[9px] text-slate-400 block mt-1">-25 Poin per default/gagal bayar</span>
                             </div>
 
                             <!-- Active Arrears (Tunggakan) -->
-                            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950/40 border border-slate-900">
+                            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
                                 <div>
-                                    <span class="block text-xs font-semibold text-rose-400">Tunggakan Aktif (P<sub>tunggakan</sub>)</span>
-                                    <span class="text-[9px] text-slate-500">Status Due/Late aktif (-10)</span>
+                                    <span class="block text-xs font-semibold text-rose-600">Tunggakan Aktif (P<sub>tunggakan</sub>)</span>
+                                    <span class="text-[9px] text-slate-400">Status Due/Late aktif (-10)</span>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="val-arrears" class="sr-only peer" onchange="calculateScore()">
-                                    <div class="w-10 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-350 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600/35 peer-checked:after:bg-rose-500"></div>
+                                    <div class="w-10 h-6 bg-slate-250 rounded-full peer peer-focus:outline-none dark:bg-slate-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
                                 </label>
                             </div>
                         </div>
@@ -180,26 +178,26 @@
                         <!-- Toggles -->
                         <div class="grid grid-cols-2 gap-4">
                             <!-- Freq Toggle -->
-                            <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/40 border border-slate-900">
+                            <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
                                 <div>
-                                    <span class="block text-xs font-semibold text-slate-350">Frekuensi Belanja (P<sub>freq</sub>)</span>
-                                    <span class="text-[9px] text-slate-500">&ge;3 Trans/Bln dlm 3 Bln (+5)</span>
+                                    <span class="block text-xs font-semibold text-slate-700">Frekuensi Belanja (P<sub>freq</sub>)</span>
+                                    <span class="text-[9px] text-slate-400">&ge;3 Trans/Bln dlm 3 Bln (+5)</span>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="val-freq" checked class="sr-only peer" onchange="calculateScore()">
-                                    <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600/35 peer-checked:after:bg-indigo-400"></div>
+                                    <div class="w-9 h-5 bg-slate-350 rounded-full peer peer-focus:outline-none dark:bg-slate-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
                                 </label>
                             </div>
 
                             <!-- Value Above Shop Median Toggle -->
-                            <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/40 border border-slate-900">
+                            <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
                                 <div>
-                                    <span class="block text-xs font-semibold text-slate-350">Nilai Rata-Rata (P<sub>nilai</sub>)</span>
-                                    <span class="text-[9px] text-slate-500">Rata-rata &gt; Median Toko (+5)</span>
+                                    <span class="block text-xs font-semibold text-slate-700">Nilai Rata-Rata (P<sub>nilai</sub>)</span>
+                                    <span class="text-[9px] text-slate-400">Rata-rata &gt; Median Toko (+5)</span>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="val-value" checked class="sr-only peer" onchange="calculateScore()">
-                                    <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600/35 peer-checked:after:bg-indigo-400"></div>
+                                    <div class="w-9 h-5 bg-slate-350 rounded-full peer peer-focus:outline-none dark:bg-slate-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
                                 </label>
                             </div>
                         </div>
@@ -208,26 +206,26 @@
                 </div>
 
                 <!-- Live Mathematical Calculation Breakdown -->
-                <div class="mt-6 pt-5 border-t border-slate-900 text-xs font-mono text-slate-450 bg-slate-950/30 p-3.5 rounded-xl border border-slate-900/60">
-                    <span class="text-slate-500 block mb-1">Rincian Evaluasi Formula:</span>
+                <div class="mt-6 pt-5 border-t border-slate-200 text-xs font-mono text-slate-500 bg-slate-50 p-3.5 rounded-xl border border-slate-150">
+                    <span class="text-slate-400 block mb-1 font-semibold">Rincian Evaluasi Formula:</span>
                     <div class="flex flex-wrap items-center gap-1.5 text-[11px] leading-relaxed">
-                        <span class="text-indigo-400 font-bold">50</span>
+                        <span class="text-indigo-600 font-bold">50</span>
                         <span>+</span>
-                        <span id="math-umur" class="text-emerald-400 font-semibold">20 (P<sub>umur</sub>)</span>
+                        <span id="math-umur" class="text-emerald-600 font-semibold">20 (P<sub>umur</sub>)</span>
                         <span>+</span>
-                        <span id="math-tepat" class="text-emerald-400 font-semibold">20 (P<sub>tepat</sub>)</span>
+                        <span id="math-tepat" class="text-emerald-600 font-semibold">20 (P<sub>tepat</sub>)</span>
                         <span>+</span>
-                        <span id="math-freq" class="text-emerald-400 font-semibold">5 (P<sub>freq</sub>)</span>
+                        <span id="math-freq" class="text-emerald-600 font-semibold">5 (P<sub>freq</sub>)</span>
                         <span>+</span>
-                        <span id="math-nilai" class="text-emerald-400 font-semibold">5 (P<sub>nilai</sub>)</span>
+                        <span id="math-nilai" class="text-emerald-600 font-semibold">5 (P<sub>nilai</sub>)</span>
                         <span>-</span>
-                        <span id="math-telat" class="text-slate-500">0 (P<sub>telat</sub>)</span>
+                        <span id="math-telat" class="text-slate-400 font-medium">0 (P<sub>telat</sub>)</span>
                         <span>-</span>
-                        <span id="math-gagal" class="text-slate-500">0 (P<sub>gagal</sub>)</span>
+                        <span id="math-gagal" class="text-slate-400 font-medium">0 (P<sub>gagal</sub>)</span>
                         <span>-</span>
-                        <span id="math-tunggakan" class="text-slate-500">0 (P<sub>tung</sub>)</span>
+                        <span id="math-tunggakan" class="text-slate-400 font-medium">0 (P<sub>tung</sub>)</span>
                         <span>=</span>
-                        <span id="math-total" class="font-extrabold text-white bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">100 Poin</span>
+                        <span id="math-total" class="font-extrabold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">100 Poin</span>
                     </div>
                 </div>
             </div>
@@ -248,15 +246,15 @@
             const high = document.getElementById('age-high');
             
             [low, mid, high].forEach(b => {
-                b.className = "py-2 text-xs font-medium rounded-xl border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200";
+                b.className = "py-2 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100";
             });
 
             if(ageValue === '<30') {
-                low.className = "py-2 text-xs font-medium rounded-xl border border-indigo-500/20 bg-indigo-950/30 text-indigo-300";
+                low.className = "py-2 text-xs font-medium rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700";
             } else if(ageValue === '30-179') {
-                mid.className = "py-2 text-xs font-medium rounded-xl border border-indigo-500/20 bg-indigo-950/30 text-indigo-300";
+                mid.className = "py-2 text-xs font-medium rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700";
             } else if(ageValue === '>=180') {
-                high.className = "py-2 text-xs font-medium rounded-xl border border-indigo-500/20 bg-indigo-950/30 text-indigo-300";
+                high.className = "py-2 text-xs font-medium rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700";
             }
             calculateScore();
         }
@@ -295,25 +293,25 @@
 
             // Formula detail syncing
             document.getElementById('math-umur').textContent = `${P_umur} (Pumur)`;
-            document.getElementById('math-umur').className = P_umur > 0 ? "text-emerald-400 font-semibold" : "text-slate-500";
+            document.getElementById('math-umur').className = P_umur > 0 ? "text-emerald-600 font-semibold" : "text-slate-400";
             
             document.getElementById('math-tepat').textContent = `${P_tepat} (Ptepat)`;
-            document.getElementById('math-tepat').className = P_tepat > 0 ? "text-emerald-400 font-semibold" : "text-slate-500";
+            document.getElementById('math-tepat').className = P_tepat > 0 ? "text-emerald-600 font-semibold" : "text-slate-400";
             
             document.getElementById('math-freq').textContent = `${P_freq} (Pfreq)`;
-            document.getElementById('math-freq').className = P_freq > 0 ? "text-emerald-400 font-semibold" : "text-slate-500";
+            document.getElementById('math-freq').className = P_freq > 0 ? "text-emerald-600 font-semibold" : "text-slate-400";
             
             document.getElementById('math-nilai').textContent = `${P_nilai} (Pnilai)`;
-            document.getElementById('math-nilai').className = P_nilai > 0 ? "text-emerald-400 font-semibold" : "text-slate-500";
+            document.getElementById('math-nilai').className = P_nilai > 0 ? "text-emerald-600 font-semibold" : "text-slate-400";
 
             document.getElementById('math-telat').textContent = `${P_telat} (Ptelat)`;
-            document.getElementById('math-telat').className = P_telat > 0 ? "text-rose-450 font-semibold" : "text-slate-500";
+            document.getElementById('math-telat').className = P_telat > 0 ? "text-rose-600 font-semibold" : "text-slate-400";
             
             document.getElementById('math-gagal').textContent = `${P_gagal} (Pgagal)`;
-            document.getElementById('math-gagal').className = P_gagal > 0 ? "text-rose-450 font-semibold" : "text-slate-500";
+            document.getElementById('math-gagal').className = P_gagal > 0 ? "text-rose-600 font-semibold" : "text-slate-400";
             
             document.getElementById('math-tunggakan').textContent = `${P_tunggakan} (Ptung)`;
-            document.getElementById('math-tunggakan').className = P_tunggakan > 0 ? "text-rose-450 font-semibold" : "text-slate-500";
+            document.getElementById('math-tunggakan').className = P_tunggakan > 0 ? "text-rose-600 font-semibold" : "text-slate-400";
 
             document.getElementById('math-total').textContent = `${total} Poin`;
 
@@ -332,15 +330,15 @@
             if (total < 55) {
                 statusStr = "DITOLAK (REJECTED)";
                 colorClass = "text-rose-500";
-                badgeBgClass = "bg-rose-500/10 text-rose-400 border border-rose-500/25";
+                badgeBgClass = "bg-rose-50 text-rose-600 border border-rose-200";
             } else if (total >= 55 && total <= 69) {
                 statusStr = "DIPERTIMBANGKAN";
                 colorClass = "text-amber-500";
-                badgeBgClass = "bg-amber-500/10 text-amber-400 border border-amber-500/25";
+                badgeBgClass = "bg-amber-50 text-amber-600 border border-amber-200";
             } else {
                 statusStr = "DISETUJUI / LAYAK";
-                colorClass = "text-emerald-400";
-                badgeBgClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/25";
+                colorClass = "text-emerald-500";
+                badgeBgClass = "bg-emerald-50 text-emerald-600 border border-emerald-200";
             }
 
             statusText.textContent = statusStr;
