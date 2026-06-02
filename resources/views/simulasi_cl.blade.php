@@ -276,12 +276,12 @@
             const cardL3 = document.getElementById('card-l3');
             const winnerBadge = document.getElementById('lb-winner-badge');
 
-            [cardL1, cardL2, cardL3].forEach(c => {
-                if(c.className.includes("border-indigo-500") || c.className.includes("border-indigo-200")) {
-                    c.className = c.className.replace(" border-indigo-500/50 bg-indigo-950/10 glow-indigo", " border-slate-200 bg-slate-50");
-                    c.className = c.className.replace(" border-indigo-200 bg-indigo-50", " border-slate-200 bg-slate-50");
-                }
-            });
+            // Reset classes to default
+            cardL1.className = isAnomaly 
+                ? "bg-rose-50 p-4 rounded-2xl border border-rose-200 opacity-60 transition-all duration-300"
+                : "bg-slate-50 p-4 rounded-2xl border border-slate-200 transition-all duration-300";
+            cardL2.className = "bg-slate-50 p-4 rounded-2xl border border-slate-200 transition-all duration-300";
+            cardL3.className = "bg-slate-50 p-4 rounded-2xl border border-slate-200 transition-all duration-300";
 
             if(limitBase === L1 && !isAnomaly) {
                 cardL1.className = "bg-indigo-50 p-4 rounded-2xl border border-indigo-200 glow-indigo transition-all duration-300";

@@ -185,8 +185,8 @@
                                         <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500">SBS Credit Limit</p>
                                         <h3 class="text-md font-bold font-outfit text-slate-800">PAYLATER ENGINE</h3>
                                     </div>
-                                    <svg class="w-8 h-8 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/>
+                                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a13.917 13.917 0 00-3.138-8.441l-.053-.09m1.782 14.54a14.05 14.05 0 002.327-2.316m-2.327-10.224A14.048 14.048 0 009 6.22M15 11c0 2.22-.544 4.312-1.503 6.157M15 11c0-2.22-.544-4.312-1.503-6.157M18 11A11.97 11.97 0 0012 1.644M18 11a11.97 11.97 0 00-6 9.356" />
                                     </svg>
                                 </div>
                                 
@@ -556,9 +556,9 @@
                 <h4 class="font-bold text-slate-700 mb-2 font-outfit uppercase tracking-wider text-[10px]">Ketentuan Perhitungan Limit Base &amp; Pembulatan</h4>
                 <ul class="list-disc pl-4 space-y-1.5 text-slate-500">
                     <li><strong class="text-slate-600">Deteksi Anomali L1:</strong> Jika Transaksi Terbesar &gt; 3&times; Median Toko, maka transaksi tersebut dianggap anomali dan L1 dikesampingkan (dihitung Rp0).</li>
-                    <li><strong class="text-slate-300">Plafon Minimum:</strong> Jika perhitungan menghasilkan plafon &gt; Rp0 tetapi di bawah Rp100.000, maka akan dibulatkan ke atas menjadi Rp100.000.</li>
-                    <li><strong class="text-slate-350">Arrears Override:</strong> Keberadaan tunggakan aktif otomatis memaksa plafon kredit menjadi Rp0 dan mengurangi poin Trust Score secara signifikan.</li>
-                    <li><strong class="text-slate-350">Pembulatan Ribuan:</strong> Semua plafon akhir dibulatkan ke ribuan terdekat (e.g. Rp1.234.500 &rarr; Rp1.235.000) demi kebersihan transaksi.</li>
+                    <li><strong class="text-slate-600">Plafon Minimum:</strong> Jika perhitungan menghasilkan plafon &gt; Rp0 tetapi di bawah Rp100.000, maka akan dibulatkan ke atas menjadi Rp100.000.</li>
+                    <li><strong class="text-slate-600">Arrears Override:</strong> Keberadaan tunggakan aktif otomatis memaksa plafon kredit menjadi Rp0 dan mengurangi poin Trust Score secara signifikan.</li>
+                    <li><strong class="text-slate-600">Pembulatan Ribuan:</strong> Semua plafon akhir dibulatkan ke ribuan terdekat (e.g. Rp1.234.500 &rarr; Rp1.235.000) demi kebersihan transaksi.</li>
                 </ul>
             </div>
         </footer>
@@ -897,11 +897,12 @@
             const cardL2 = document.getElementById('card-l2');
             const cardL3 = document.getElementById('card-l3');
             
-            [cardL1, cardL2, cardL3].forEach(c => {
-                if (c.className.includes("border-indigo-200")) {
-                    c.className = c.className.replace(" border-indigo-200 bg-indigo-50 shadow-sm", " border-slate-200/80 bg-slate-50");
-                }
-            });
+            // Reset classes to default
+            cardL1.className = isAnomaly 
+                ? "bg-rose-50 p-3 rounded-lg border border-rose-150 transition-all duration-300 opacity-60" 
+                : "bg-slate-50 p-3 rounded-lg border border-slate-200/80 transition-all duration-300";
+            cardL2.className = "bg-slate-50 p-3 rounded-lg border border-slate-200/80 transition-all duration-300";
+            cardL3.className = "bg-slate-50 p-3 rounded-lg border border-slate-200/80 transition-all duration-300";
 
             if (limitBase === L1 && !isAnomaly) {
                 cardL1.className = "bg-indigo-50 p-3 rounded-lg border border-indigo-200 shadow-sm transition-all duration-300";
